@@ -1,0 +1,100 @@
+FC EDINET — v0.6
+NEWS SYSTEM
+
+IMPORTANT
+- Keep your existing .env.local from v0.5.
+- Do not delete the players data.
+- Run only the NEW migration database/003_news.sql.
+
+STEP 1 — DATABASE
+Supabase -> SQL Editor -> New query.
+Open database/003_news.sql in VS Code, copy everything, paste into SQL Editor, press Run.
+
+After Run you should have:
+- news_categories table
+- news table
+- Storage bucket: news
+- 6 categories
+- 3 demo published articles
+
+STEP 2 — CHECK DATA
+Supabase -> Table Editor -> news_categories.
+Expected categories:
+Матчи, Команда, Интервью, Клуб, Трансферы, Академия.
+
+Supabase -> Table Editor -> news.
+Expected 3 demo rows with status = published.
+
+STATUS VALUES:
+draft      = draft, invisible to visitors
+review     = waiting for editorial review, invisible to visitors
+published  = visible on the public site, but only when published_at is not in the future
+
+STEP 3 — RUN SITE
+Open v0.6 in VS Code.
+Copy .env.local from v0.5 into v0.6 if needed.
+Run:
+npm install
+npm run dev
+
+Open:
+http://localhost:3000
+http://localhost:3000/news
+
+STEP 4 — CATEGORY FILTERS
+On /news click:
+Все / Матчи / Команда / Интервью / Клуб / Трансферы / Академия
+The URL will become, for example:
+/news?category=matches
+
+STEP 5 — OPEN ARTICLE
+Click a demo article.
+Example URL:
+/news/fc-edinet-zapuskaet-obnovlennyi-sait
+
+STEP 6 — ADD COVER IMAGE
+Supabase -> Storage -> news -> Upload file.
+Recommended file names:
+2026-08-23-training.webp
+2026-08-23-match-edinet.webp
+Use JPG/PNG/WEBP, max 8 MB.
+Copy the public URL and paste it into news.cover_image_url.
+
+STEP 7 — CREATE A REAL NEWS ARTICLE
+Supabase -> Table Editor -> news -> Insert row.
+Fill:
+category_id      choose the numeric id of the category
+title            visible title
+slug             latin lowercase URL text, words separated with -
+excerpt          short preview text
+content          full article; separate paragraphs with an empty line
+cover_image_url  public URL from Storage, optional
+author_name      author/display name
+status           draft / review / published
+published_at     publication date/time; required for public visibility
+is_featured      true if this should be prioritized on the homepage
+views            leave 0 for now
+
+EXAMPLE SLUG:
+fc-edinet-pobeda-v-domashnem-matche
+
+STEP 8 — IMPORTANT SECURITY TEST
+Create one article with status = draft.
+Refresh /news.
+It must NOT appear.
+Then change it to published and set published_at to the current/past time.
+Refresh /news.
+It should appear.
+
+RESULT OF v0.6
+- news are stored in PostgreSQL/Supabase
+- public sees only published articles
+- categories come from database
+- category filters work
+- homepage gets latest articles from database
+- each article has /news/[slug]
+- related news works
+- cover images use Supabase Storage
+- drafts/review items are hidden by database RLS
+
+NEXT: v0.7 Auth + profiles + roles (fan / author / editor / admin), then our own /admin news editor.

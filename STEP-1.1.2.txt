@@ -1,0 +1,30 @@
+FC EDINET — v1.1.2
+HOME STADIUM PER TEAM
+
+NEW
+- teams.home_stadium
+- stadium field in new team form
+- stadium field in team edit form
+- match editor automatically fills stadium from selected home team
+- stadium can still be changed manually per match
+
+INSTALL
+1. Copy .env.local from v1.1.1 to v1.1.2.
+2. Supabase SQL Editor:
+   run database/010_team_home_stadium.sql
+3. npm install
+4. npm run build
+5. npm run dev
+
+CHECK
+/admin/matches/teams
+- edit FC Edineț
+- verify home stadium = Stadionul Edineț
+- edit/add opponent and enter its home stadium
+
+/admin/matches/new
+- select FC Edineț as home team
+- stadium should become Stadionul Edineț
+- select another home team
+- stadium should switch to that club's home stadium
+- you may overwrite the field manually for a neutral venue

@@ -1,0 +1,41 @@
+FC EDINET — v1.1.3
+TYPESCRIPT BUILD FIX
+
+ERROR FIXED:
+app/admin/matches/actions.ts
+TS2322 at lines around:
+- logoUrl = uploadResult.publicUrl
+- newUploadedPath = uploadResult.path
+
+CAUSE:
+TypeScript inferred publicUrl/path as possibly undefined because
+uploadTeamLogo() returned different object shapes without an explicit
+discriminated union type.
+
+FIX:
+TeamLogoUploadResult now has two strict variants:
+
+SUCCESS:
+{
+  ok: true,
+  error: null,
+  path: string,
+  publicUrl: string
+}
+
+ERROR:
+{
+  ok: false,
+  error: string,
+  path: null,
+  publicUrl: null
+}
+
+No database changes are required.
+
+HOW TO USE:
+1. Copy .env.local from v1.1.2 into v1.1.3.
+2. DO NOT run a new SQL migration for this fix.
+3. npm install
+4. npm run build
+5. npm run dev

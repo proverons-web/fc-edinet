@@ -1,0 +1,61 @@
+FC EDINET — v0.9
+PLAYERS ADMIN
+
+1. Copy .env.local from v0.8 into v0.9.
+
+2. Supabase SQL Editor:
+   run database/006_players_admin.sql
+
+3. Open project in VS Code.
+
+4. Run:
+   npm install
+   npm run build
+   npm run dev
+
+5. Log in as editor or admin.
+
+6. Open:
+   http://localhost:3000/admin/players
+
+7. Test creation:
+   - click + Добавить игрока
+   - fill name/surname
+   - position
+   - number
+   - profile data
+   - upload photo
+   - keep "В текущем составе" checked
+   - save
+
+8. Expected:
+   - player appears in /admin/players
+   - player appears in /team
+   - player profile works at /team/<slug>
+   - photo is uploaded automatically to Storage players/<user-id>/...
+
+9. Test archive:
+   - edit player
+   - disable "В текущем составе"
+   - save
+   - player disappears from /team
+   - player remains in /admin/players?status=inactive
+
+10. Permissions:
+   fan    -> no /admin
+   author -> /admin news only, no players module
+   editor -> create/edit/archive players
+   admin  -> create/edit/archive + permanent delete
+
+11. Important:
+   Prefer archive instead of delete for a player who left the club.
+   This preserves historical data for future seasons.
+
+NEXT:
+v0.10 = Matches admin:
+- teams
+- competitions
+- fixtures/results
+- next match on homepage
+- last match on homepage
+- /admin/matches

@@ -1,0 +1,66 @@
+FC EDINET — v1.4
+MEDIA CENTER / PHOTO ALBUMS / SOCIAL SHARING
+
+NEW
+- database/013_media.sql
+- Storage bucket: media
+- /admin/media
+- album creation
+- multi-photo upload (up to 30 per batch)
+- browser-side photo optimization:
+  full WEBP max 2400px
+  thumbnail WEBP max 900px
+- album cover selection
+- caption / photographer / order / visibility per photo
+- public /media
+- public /media/[slug]
+- masonry gallery
+- fullscreen lightbox
+- keyboard arrows + Escape
+- /media/photo/[id] shareable page
+- native Web Share button
+- Telegram / WhatsApp / Facebook fallbacks
+- copy link
+- Open Graph image for each individual photo
+- YouTube video section
+
+INSTALL
+1. Copy .env.local from v1.3 into v1.4.
+2. Supabase SQL Editor:
+   run database/013_media.sql
+3. Check Storage -> media exists.
+4. npm install
+5. npm run build
+6. npm run dev
+
+ADMIN
+http://localhost:3000/admin/media
+
+PHOTO WORKFLOW
+1. Create album.
+2. Open album editor.
+3. Select up to 30 JPG/PNG/WEBP images.
+4. Browser optimizes and uploads directly to Supabase Storage.
+5. First uploaded photo becomes cover automatically.
+6. Set captions / photographer / order if desired.
+7. Choose another cover if needed.
+8. Publish album.
+
+PUBLIC
+/media
+/media/album-slug
+
+SHARING
+Open any photo in lightbox -> "Поделиться".
+On supported phones, native device sharing opens.
+Fallback menu:
+- Telegram
+- WhatsApp
+- Facebook
+- Copy link
+
+Each photo also has:
+ /media/photo/PHOTO_ID
+
+That page contains Open Graph metadata using the actual image,
+so a shared link can show the photo preview on platforms that read OG tags.

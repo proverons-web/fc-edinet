@@ -1,0 +1,30 @@
+FC EDINET v0.9.1 — FIX
+
+WHAT WAS WRONG
+v0.9 assumed players.id was numeric:
+  Number(id)
+
+If the existing Supabase players table uses UUID/string IDs,
+Number("uuid-value") becomes NaN and the edit page calls notFound(),
+therefore /admin/players/<id>/edit showed 404.
+
+WHAT WAS FIXED
+Player admin now keeps IDs as strings end-to-end:
+- edit route
+- save/update action
+- redirect after save
+- delete action
+
+DATABASE
+NO SQL migration is required for this fix.
+Do NOT rerun 006_players_admin.sql just because of v0.9.1.
+
+HOW TO USE
+1. Copy .env.local from your current v0.9 project into v0.9.1.
+2. npm install
+3. npm run build
+4. npm run dev
+5. Open /admin/players
+6. Click "Редактировать"
+
+Existing Supabase data is reused unchanged.

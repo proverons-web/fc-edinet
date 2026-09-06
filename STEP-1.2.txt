@@ -1,0 +1,43 @@
+FC EDINET — v1.2
+TOURNAMENT STANDINGS
+
+NEW
+- database/011_standings.sql
+- /admin/standings
+- /standings
+- full standings at bottom of /matches
+- compact standings on homepage
+- FC Edineț row highlighted
+- if FC Edineț is outside homepage top 5, it is still shown
+- points calculated automatically:
+  3 * wins + draws + points_adjustment
+- played calculated automatically:
+  wins + draws + losses
+- goal difference calculated automatically:
+  goals_for - goals_against
+
+INSTALL
+1. Copy .env.local from v1.1.4.
+2. Supabase SQL Editor:
+   run database/011_standings.sql
+3. npm install
+4. npm run build
+5. npm run dev
+
+ADMIN
+Open:
+http://localhost:3000/admin/standings
+
+For Liga 2:
+- check "Участник" only for league teams
+- enter W / D / L / GF / GA
+- points and played are automatic
+- use ± points only for a deduction/bonus
+- Save standings
+
+PUBLIC
+- /
+- /matches
+- /standings
+
+All three surfaces update from the same standings table.

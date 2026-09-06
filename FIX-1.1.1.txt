@@ -1,0 +1,43 @@
+FC EDINET — v1.1.1
+TEAM LOGO FIX
+
+1. Copy .env.local from v1.1 into v1.1.1.
+
+2. IMPORTANT: Supabase SQL Editor
+   Run:
+   database/009_team_logos_fix.sql
+
+   At the bottom of the SQL result you MUST see one row:
+   id = teams
+   name = teams
+   public = true
+
+3. Also check Supabase Dashboard:
+   Storage -> teams
+   The bucket must exist.
+
+4. Run:
+   npm install
+   npm run build
+   npm run dev
+
+NEW LOGO WORKFLOW
+/admin/matches/teams
+- Choose logo
+- A square logo editor opens
+- Scale from 50% to 220%
+- Move horizontally and vertically
+- Dashed safe area shows recommended margins
+- Output is transparent PNG 800x800
+- Vertical logos fit correctly
+
+MATCH BLOCK FIX
+On homepage:
+- team names are dark navy on the white match strip
+- bold font
+- centered names
+- centered logos
+- centered score / VS
+
+In hero:
+- team names remain white and centered.

@@ -1,0 +1,50 @@
+FC EDINET — v1.3
+CLUB / STADIUM / LEADERSHIP / ACHIEVEMENTS
+
+NEW
+- database/012_club_profile.sql
+- /admin/club
+- dynamic /club
+- club profile
+- contacts
+- club history
+- stadium details + photo
+- leadership
+- achievements
+- Storage bucket: club
+
+INSTALL
+1. Copy .env.local from v1.2 into v1.3.
+2. Supabase SQL Editor:
+   run database/012_club_profile.sql
+3. npm install
+4. npm run build
+5. npm run dev
+
+ADMIN
+Open:
+http://localhost:3000/admin/club
+
+Fill:
+- club name
+- city
+- founded year (only if confirmed)
+- colors
+- motto
+- about
+- history
+- email / phone / address
+- stadium name / capacity / address / description
+- club hero image
+- stadium image
+
+Then add:
+- leadership
+- achievements
+
+PUBLIC
+Open:
+http://localhost:3000/club
+
+The old placeholder cards are gone.
+All sections read from Supabase.

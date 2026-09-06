@@ -1,0 +1,32 @@
+FC EDINET — v1.1.4
+
+FIXES
+1. "Домашний стадион" is now visible in:
+   - /admin/matches/teams -> Add opponent
+   - /admin/matches/teams/[id]/edit
+
+2. home_stadium is saved by addTeam/saveTeam.
+
+3. Homepage:
+   - Last match shows stadium name
+   - Next match shows stadium name
+
+4. Match logos increased to ~150%:
+   - home match strip
+   - hero next-match block
+   - /matches cards
+
+5. Alignment tightened:
+   - logo centered
+   - team name centered
+   - score/VS centered
+
+DATABASE
+No new SQL is required if database/010_team_home_stadium.sql was already run.
+If you have NOT run it yet, run it once.
+
+USE
+1. Copy .env.local from v1.1.3.
+2. npm install
+3. npm run build
+4. npm run dev

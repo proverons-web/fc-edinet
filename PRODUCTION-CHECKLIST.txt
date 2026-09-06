@@ -1,0 +1,65 @@
+FC EDINET v1.5 — PRODUCTION CHECKLIST
+
+LOCAL
+[ ] .env.local copied
+[ ] NEXT_PUBLIC_SUPABASE_URL
+[ ] NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+[ ] NEXT_PUBLIC_SITE_URL=http://localhost:3000
+[ ] npm install
+[ ] npm run build
+[ ] npm run dev
+[ ] /api/health => status ok
+
+GITHUB
+[ ] git init
+[ ] git add .
+[ ] git commit
+[ ] repository created
+[ ] git push main
+[ ] .env.local is NOT visible in GitHub
+
+VERCEL
+[ ] repository imported
+[ ] Framework = Next.js
+[ ] NEXT_PUBLIC_SUPABASE_URL added
+[ ] NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY added
+[ ] first Deploy successful
+[ ] production URL opened
+[ ] NEXT_PUBLIC_SITE_URL set to production URL
+[ ] redeployed
+
+SUPABASE AUTH
+[ ] Authentication -> URL Configuration
+[ ] Site URL = production URL
+[ ] production /** added to Redirect URLs
+[ ] localhost:3000/** retained for local development
+
+PUBLIC TEST
+[ ] /
+[ ] /news
+[ ] /team
+[ ] /matches
+[ ] /standings
+[ ] /club
+[ ] /media
+[ ] photo sharing page
+[ ] /robots.txt
+[ ] /sitemap.xml
+
+AUTH / ADMIN TEST
+[ ] login
+[ ] registration / confirmation if enabled
+[ ] /admin
+[ ] news editor
+[ ] players editor
+[ ] matches editor
+[ ] standings editor
+[ ] club editor
+[ ] media editor
+[ ] homepage editor
+
+AFTER SUCCESS
+[ ] custom domain (later)
+[ ] change NEXT_PUBLIC_SITE_URL to custom domain
+[ ] update Supabase Site URL / Redirect URLs
+[ ] redeploy

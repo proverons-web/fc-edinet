@@ -1,0 +1,16 @@
+FC EDINET v1.6
+FIRST PRODUCTION RELEASE
+
+New:
+- npm run deploy:check
+- deployment environment validation
+- /api/version
+- health endpoint reports v1.6.0
+- improved Vercel URL detection
+- .vercelignore
+- DEPLOY-V1.6.md
+
+No new SQL migration.
+
+Main goal:
+GitHub -> Vercel -> public website -> Supabase

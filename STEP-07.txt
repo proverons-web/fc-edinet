@@ -1,0 +1,74 @@
+FC EDINET — v0.7
+AUTH + PROFILES + ROLES + FIRST ADMIN DASHBOARD
+
+1) Copy .env.local from v0.6 into v0.7.
+
+2) Supabase SQL Editor:
+   run database/004_auth_profiles.sql
+
+3) Supabase Dashboard -> Authentication -> URL Configuration
+   Site URL:
+   http://localhost:3000
+
+   Redirect URLs:
+   http://localhost:3000/**
+
+4) Supabase Dashboard -> Authentication -> Email Templates
+   Confirm signup template:
+   use a server-side confirmation URL containing:
+
+   {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email
+
+   Example button:
+   <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email">
+     Confirm email
+   </a>
+
+5) Run:
+   npm install
+   npm run dev
+
+6) Test registration:
+   http://localhost:3000/register
+
+7) Confirm email, then:
+   http://localhost:3000/account
+
+8) Check Supabase:
+   Table Editor -> profiles
+   New user must have role = fan.
+
+9) To make YOUR test account admin, run this separately in SQL Editor:
+   update public.profiles
+   set role = 'admin'
+   where email = 'YOUR_REAL_TEST_EMAIL';
+
+   Replace YOUR_REAL_TEST_EMAIL with the email you registered.
+   Never expose an admin role selector in the public registration form.
+
+10) Refresh:
+    http://localhost:3000/account
+
+    Then:
+    http://localhost:3000/admin
+
+Expected:
+- registration works
+- confirmation endpoint creates cookie session
+- login works
+- logout works
+- profile is auto-created
+- default role is fan
+- user cannot edit their own role through Data API
+- admin/author/editor can open /admin
+- fan sees Access Denied on /admin
+- staff can read draft/review news, but cannot edit them yet
+
+NEXT:
+v0.8 = real editorial admin:
+- /admin/news
+- create news
+- edit draft
+- send to review
+- editor publish
+- upload cover image

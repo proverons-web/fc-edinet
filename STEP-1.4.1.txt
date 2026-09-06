@@ -1,0 +1,45 @@
+FC EDINET — v1.4.1
+HOMEPAGE HERO ADMIN
+
+NEW
+- database/014_homepage_hero.sql
+- /admin/home
+- dynamic homepage hero
+- hero background image
+- overlay opacity 0–95%
+- background position:
+  center / top / bottom / left / right
+- eyebrow text
+- title line 1
+- title line 2
+- description
+- primary button text + URL + visibility
+- secondary button text + URL + visibility
+- live preview in admin
+
+INSTALL
+1. Copy .env.local from v1.4 into v1.4.1.
+2. Supabase SQL Editor:
+   run database/014_homepage_hero.sql
+3. Check Storage -> homepage exists.
+4. npm install
+5. npm run build
+6. npm run dev
+
+ADMIN
+http://localhost:3000/admin/home
+
+BACKGROUND
+Recommended:
+1920x1080 or wider.
+JPG / PNG / WEBP.
+Max 8 MB.
+
+OVERLAY
+0%  = almost no dark overlay
+50% = medium darkening
+72% = default
+95% = almost fully dark
+
+The next-match card remains on the right side of the hero.
+Only the left content and hero background are editable in this version.

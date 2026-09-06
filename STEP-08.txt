@@ -1,0 +1,60 @@
+FC EDINET — v0.8
+EDITORIAL NEWS ADMIN
+
+1. Copy .env.local from v0.7 into v0.8.
+
+2. Supabase SQL Editor:
+   run database/005_editorial_news.sql
+
+3. Open project in VS Code.
+
+4. Run:
+   npm install
+   npm run build
+   npm run dev
+
+5. Log in with a staff account:
+   author / editor / admin
+
+6. Open:
+   http://localhost:3000/admin/news
+
+7. Test AUTHOR workflow:
+   - role = author
+   - create news
+   - save draft
+   - edit own draft
+   - send to review
+   - after review status, author must become read-only
+
+8. Test EDITOR workflow:
+   Change a second account to editor, or temporarily change your account:
+   update public.profiles
+   set role = 'editor'
+   where email = 'YOUR_EMAIL';
+
+   - open /admin/news?status=review
+   - open article
+   - add editor note
+   - Return to draft OR Publish
+   - published item appears on /news and homepage
+
+9. Cover images:
+   - upload JPG/PNG/WEBP directly in editor form
+   - max 8 MB
+   - file goes to Storage bucket news/<user-id>/...
+   - public URL is saved automatically into cover_image_url
+
+10. Security expected:
+   - fan cannot open /admin
+   - author cannot publish
+   - author cannot edit another author's draft
+   - author cannot edit after sending to review
+   - editor/admin can review and publish all editorial materials
+   - public website only reads published news
+
+NEXT:
+v0.9 = Comments + moderation
+or
+v0.9 = Players admin module
+(depending project order)
