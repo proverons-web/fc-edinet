@@ -47,14 +47,20 @@ export async function saveHomepageHero(
   const titleMain = text(formData.get("title_main")) || "ВМЕСТЕ";
   const titleAccent = text(formData.get("title_accent")) || "ЗА ЕДИНЕЦ";
   const description = text(formData.get("description"));
+  const eyebrowRo = text(formData.get("eyebrow_ro"));
+  const titleMainRo = text(formData.get("title_main_ro"));
+  const titleAccentRo = text(formData.get("title_accent_ro"));
+  const descriptionRo = text(formData.get("description_ro"));
 
   const primaryButtonText =
     text(formData.get("primary_button_text")) || "Смотреть матчи";
+  const primaryButtonTextRo = text(formData.get("primary_button_text_ro"));
   const primaryButtonHref =
     safeHref(text(formData.get("primary_button_href"))) || "/matches";
 
   const secondaryButtonText =
     text(formData.get("secondary_button_text")) || "Последние новости";
+  const secondaryButtonTextRo = text(formData.get("secondary_button_text_ro"));
   const secondaryButtonHref =
     safeHref(text(formData.get("secondary_button_href"))) || "/news";
 
@@ -125,12 +131,18 @@ export async function saveHomepageHero(
       {
         id: 1,
         eyebrow,
+        eyebrow_ro: eyebrowRo || null,
         title_main: titleMain,
+        title_main_ro: titleMainRo || null,
         title_accent: titleAccent,
+        title_accent_ro: titleAccentRo || null,
         description,
+        description_ro: descriptionRo || null,
         primary_button_text: primaryButtonText,
+        primary_button_text_ro: primaryButtonTextRo || null,
         primary_button_href: primaryButtonHref,
         secondary_button_text: secondaryButtonText,
+        secondary_button_text_ro: secondaryButtonTextRo || null,
         secondary_button_href: secondaryButtonHref,
         background_image_url: backgroundImageUrl,
         overlay_opacity: overlayOpacity,
@@ -239,7 +251,11 @@ export async function saveHomepageLayout(
   const bannerEyebrow = text(formData.get("banner_eyebrow")) || "FC EDINEȚ";
   const bannerTitle = text(formData.get("banner_title")) || "Вместе с клубом";
   const bannerText = text(formData.get("banner_text"));
+  const bannerEyebrowRo = text(formData.get("banner_eyebrow_ro"));
+  const bannerTitleRo = text(formData.get("banner_title_ro"));
+  const bannerTextRo = text(formData.get("banner_text_ro"));
   const bannerButtonText = text(formData.get("banner_button_text")) || "Подробнее";
+  const bannerButtonTextRo = text(formData.get("banner_button_text_ro"));
   const bannerButtonHref = safeHref(text(formData.get("banner_button_href"))) || "/club";
 
   const bannerOverlayRaw = Number(text(formData.get("banner_overlay_opacity")));
@@ -302,9 +318,13 @@ export async function saveHomepageLayout(
         pinned_news_id: pinnedNewsId,
         banner_enabled: bannerEnabled,
         banner_eyebrow: bannerEyebrow,
+        banner_eyebrow_ro: bannerEyebrowRo || null,
         banner_title: bannerTitle,
+        banner_title_ro: bannerTitleRo || null,
         banner_text: bannerText,
+        banner_text_ro: bannerTextRo || null,
         banner_button_text: bannerButtonText,
+        banner_button_text_ro: bannerButtonTextRo || null,
         banner_button_href: bannerButtonHref,
         banner_image_url: bannerImageUrl,
         banner_overlay_opacity: bannerOverlayOpacity,

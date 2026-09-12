@@ -51,6 +51,12 @@ export default function ClubAchievementAdmin() {
         />
       </div>
 
+
+      <fieldset className="i18nFieldset">
+        <legend>Română / RO</legend>
+        <div className="fieldGroup"><label htmlFor="achievement_title_ro">Titlu</label><input id="achievement_title_ro" name="title_ro" /></div>
+        <div className="fieldGroup"><label htmlFor="achievement_description_ro">Descriere</label><textarea id="achievement_description_ro" name="description_ro" rows={3} /></div>
+      </fieldset>
       <div className="fieldGroup">
         <label htmlFor="achievement_order">Порядок</label>
         <input

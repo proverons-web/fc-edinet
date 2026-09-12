@@ -167,6 +167,23 @@ export default function NewsEditorForm({
             </small>
           </div>
 
+          <fieldset className="i18nFieldset">
+            <legend>Română / RO</legend>
+            <div className="fieldGroup">
+              <label htmlFor="title_ro">Titlu</label>
+              <input id="title_ro" name="title_ro" defaultValue={article?.title_ro ?? ""} maxLength={180} placeholder="Titlul știrii în limba română" />
+            </div>
+            <div className="fieldGroup">
+              <label htmlFor="excerpt_ro">Descriere scurtă</label>
+              <textarea id="excerpt_ro" name="excerpt_ro" rows={3} maxLength={420} defaultValue={article?.excerpt_ro ?? ""} />
+            </div>
+            <div className="fieldGroup">
+              <label htmlFor="content_ro">Text complet</label>
+              <textarea id="content_ro" name="content_ro" rows={14} defaultValue={article?.content_ro ?? ""} />
+              <small className="i18nHint">Если перевод не заполнен, в версии RO автоматически показывается русский текст.</small>
+            </div>
+          </fieldset>
+
           {article?.editor_note && !editor && (
             <div className="editorNoteBox">
               <strong>Комментарий редактора</strong>

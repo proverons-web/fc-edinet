@@ -1,23 +1,26 @@
 import Link from "next/link";
 import HeaderNavClient from "@/app/components/HeaderNavClient";
+import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 import { createClient } from "@/lib/supabase/server";
 import type { Profile } from "@/lib/types";
 import { staffRoles } from "@/lib/types";
+import { getLocale } from "@/lib/locale";
+import { publicText } from "@/lib/i18n";
 
 export default async function SiteHeader() {
+  const locale = await getLocale();
+  const text = publicText[locale];
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
   const userId = claimsData?.claims?.sub;
 
   let profile: Profile | null = null;
-
   if (userId) {
     const { data } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", userId)
       .maybeSingle();
-
     profile = data as Profile | null;
   }
 
@@ -28,9 +31,9 @@ export default async function SiteHeader() {
     <>
       <div className="topbar">
         <div className="container topbarInner">
-          <span>Официальный сайт FC Edineț</span>
+          <span>{text.officialSite}</span>
           <div className="topbarLinks">
-            <a href="#">RU</a><span>/</span><a href="#">RO</a>
+            <LanguageSwitcher locale={locale} />
           </div>
         </div>
       </div>
@@ -48,6 +51,7 @@ export default async function SiteHeader() {
           <HeaderNavClient
             isAuthenticated={isAuthenticated}
             isStaff={isStaff}
+            locale={locale}
           />
         </div>
       </header>

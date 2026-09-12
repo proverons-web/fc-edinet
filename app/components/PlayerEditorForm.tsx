@@ -281,6 +281,21 @@ export default function PlayerEditorForm({
                 placeholder="Короткая официальная биография игрока..."
               />
             </div>
+
+            <fieldset className="i18nFieldset">
+              <legend>Română</legend>
+              <div className="fieldGroup">
+                <label htmlFor="bio_ro">Biografie</label>
+                <textarea
+                  id="bio_ro"
+                  name="bio_ro"
+                  rows={7}
+                  defaultValue={player?.bio_ro ?? ""}
+                  placeholder="Biografia oficială scurtă a jucătorului..."
+                />
+                <small className="i18nHint">Dacă rămâne gol, pe versiunea RO va fi afișat textul în rusă.</small>
+              </div>
+            </fieldset>
           </section>
 
           <aside className="playerEditorSidebar">

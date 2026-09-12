@@ -48,6 +48,7 @@ export async function savePlayer(
   const previousClub = nullableString(formData.get("previous_club"));
   const joinedAt = nullableString(formData.get("joined_at"));
   const bio = nullableString(formData.get("bio"));
+  const bioRo = nullableString(formData.get("bio_ro"));
   const displayOrderRaw = String(formData.get("display_order") ?? "").trim();
   const isActive = formData.get("is_active") === "on";
   const clearPhoto = formData.get("clear_photo") === "on";
@@ -166,6 +167,7 @@ export async function savePlayer(
     height_cm: heightCm,
     photo_url: photoUrl,
     bio,
+    bio_ro: bioRo,
     is_active: isActive,
     display_order: displayOrder,
     preferred_foot: preferredFoot || null,

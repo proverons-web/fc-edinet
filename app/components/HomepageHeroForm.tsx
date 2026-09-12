@@ -175,6 +175,21 @@ export default function HomepageHeroForm({
           </div>
         </section>
 
+        <fieldset className="i18nFieldset">
+          <legend>Română / RO</legend>
+          <div className="fieldGroup"><label htmlFor="hero_eyebrow_ro">Text superior</label><input id="hero_eyebrow_ro" name="eyebrow_ro" defaultValue={initial.eyebrow_ro ?? ""} /></div>
+          <div className="twoFields">
+            <div className="fieldGroup"><label htmlFor="hero_title_main_ro">Titlu — rândul 1</label><input id="hero_title_main_ro" name="title_main_ro" defaultValue={initial.title_main_ro ?? ""} /></div>
+            <div className="fieldGroup"><label htmlFor="hero_title_accent_ro">Titlu — rândul 2</label><input id="hero_title_accent_ro" name="title_accent_ro" defaultValue={initial.title_accent_ro ?? ""} /></div>
+          </div>
+          <div className="fieldGroup"><label htmlFor="hero_description_ro">Descriere</label><textarea id="hero_description_ro" name="description_ro" rows={4} defaultValue={initial.description_ro ?? ""} /></div>
+          <div className="twoFields">
+            <div className="fieldGroup"><label htmlFor="hero_primary_text_ro">Buton principal</label><input id="hero_primary_text_ro" name="primary_button_text_ro" defaultValue={initial.primary_button_text_ro ?? ""} /></div>
+            <div className="fieldGroup"><label htmlFor="hero_secondary_text_ro">Buton secundar</label><input id="hero_secondary_text_ro" name="secondary_button_text_ro" defaultValue={initial.secondary_button_text_ro ?? ""} /></div>
+          </div>
+          <small className="i18nHint">Пустые поля RO автоматически используют русский текст.</small>
+        </fieldset>
+
         <section className="clubAdminSection">
           <div className="formSectionTitle">
             <p className="eyebrow blue">ФОН</p>

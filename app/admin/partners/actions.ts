@@ -28,6 +28,7 @@ export async function createPartner(formData: FormData) {
   const slug = slugify(String(formData.get("slug") ?? name));
   const websiteUrl = normalizeWebsite(formData.get("website_url"));
   const description = nullableString(formData.get("description"));
+  const descriptionRo = nullableString(formData.get("description_ro"));
   const partnerLevel = String(
     formData.get("partner_level") ?? "official"
   ) as PartnerLevel;
@@ -69,6 +70,7 @@ export async function createPartner(formData: FormData) {
     slug,
     website_url: websiteUrl,
     description,
+    description_ro: descriptionRo,
     logo_url: upload.publicUrl,
     logo_storage_path: upload.path,
     partner_level: partnerLevel,
@@ -100,6 +102,7 @@ export async function updatePartner(formData: FormData) {
   const slug = slugify(String(formData.get("slug") ?? name));
   const websiteUrl = normalizeWebsite(formData.get("website_url"));
   const description = nullableString(formData.get("description"));
+  const descriptionRo = nullableString(formData.get("description_ro"));
   const partnerLevel = String(
     formData.get("partner_level") ?? "official"
   ) as PartnerLevel;
@@ -158,6 +161,7 @@ export async function updatePartner(formData: FormData) {
       slug,
       website_url: websiteUrl,
       description,
+      description_ro: descriptionRo,
       logo_url: logoUrl,
       logo_storage_path: logoStoragePath,
       partner_level: partnerLevel,

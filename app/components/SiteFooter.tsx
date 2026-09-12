@@ -1,44 +1,42 @@
 import Link from "next/link";
+import { getLocale } from "@/lib/locale";
+import { publicText } from "@/lib/i18n";
 
-export default function SiteFooter() {
+export default async function SiteFooter() {
+  const locale = await getLocale();
+  const text = publicText[locale].footer;
+
   return (
     <footer className="footer">
       <div className="container footerGrid">
         <div>
           <Link className="brand" href="/">
             <span className="crest">FCE</span>
-            <span className="brandText">
-              <strong>FC EDINEȚ</strong>
-              <small>MOLDOVA</small>
-            </span>
+            <span className="brandText"><strong>FC EDINEȚ</strong><small>MOLDOVA</small></span>
           </Link>
-          <p>Официальный сайт футбольного клуба FC Edineț.</p>
+          <p>{text.about}</p>
         </div>
-
         <div>
-          <strong>Клуб</strong>
-          <Link href="/club">История</Link>
-          <Link href="/club">Стадион</Link>
-          <Link href="/partners">Партнёры</Link>
+          <strong>{text.club}</strong>
+          <Link href="/club">{text.history}</Link>
+          <Link href="/club">{text.stadium}</Link>
+          <Link href="/partners">{text.partners}</Link>
         </div>
-
         <div>
-          <strong>Команда</strong>
-          <Link href="/team">Игроки</Link>
-          <Link href="/matches">Матчи</Link>
+          <strong>{text.team}</strong>
+          <Link href="/team">{text.players}</Link>
+          <Link href="/matches">{text.matches}</Link>
         </div>
-
         <div>
-          <strong>Медиа</strong>
-          <Link href="/news">Новости</Link>
-          <Link href="/media">Фото</Link>
-          <Link href="/media">Видео</Link>
+          <strong>{text.media}</strong>
+          <Link href="/news">{text.news}</Link>
+          <Link href="/media">{text.photos}</Link>
+          <Link href="/media">{text.videos}</Link>
         </div>
       </div>
-
       <div className="container footerBottom">
         <span>© 2026 FC Edineț</span>
-        <span>Версия 1.8</span>
+        <span>{text.version}</span>
       </div>
     </footer>
   );

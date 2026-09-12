@@ -24,16 +24,24 @@ export async function saveClubProfile(
 
   const clubName = text(formData.get("club_name")) || "FC Edineț";
   const city = text(formData.get("city")) || "Edineț";
+  const clubNameRo = nullableText(formData.get("club_name_ro"));
+  const cityRo = nullableText(formData.get("city_ro"));
   const foundedRaw = text(formData.get("founded_year"));
   const foundedYear = foundedRaw ? Number(foundedRaw) : null;
   const clubColors = nullableText(formData.get("club_colors"));
+  const clubColorsRo = nullableText(formData.get("club_colors_ro"));
   const motto = nullableText(formData.get("motto"));
+  const mottoRo = nullableText(formData.get("motto_ro"));
   const aboutText = nullableText(formData.get("about_text"));
+  const aboutTextRo = nullableText(formData.get("about_text_ro"));
   const historyText = nullableText(formData.get("history_text"));
+  const historyTextRo = nullableText(formData.get("history_text_ro"));
   const email = nullableText(formData.get("email"));
   const phone = nullableText(formData.get("phone"));
   const address = nullableText(formData.get("address"));
+  const addressRo = nullableText(formData.get("address_ro"));
   const stadiumName = nullableText(formData.get("stadium_name"));
+  const stadiumNameRo = nullableText(formData.get("stadium_name_ro"));
   const stadiumCapacityRaw = text(formData.get("stadium_capacity"));
   const stadiumCapacity = stadiumCapacityRaw
     ? Number(stadiumCapacityRaw)
@@ -44,6 +52,8 @@ export async function saveClubProfile(
   const stadiumDescription = nullableText(
     formData.get("stadium_description")
   );
+  const stadiumAddressRo = nullableText(formData.get("stadium_address_ro"));
+  const stadiumDescriptionRo = nullableText(formData.get("stadium_description_ro"));
 
   if (
     foundedYear !== null &&
@@ -108,19 +118,29 @@ export async function saveClubProfile(
       {
         id: 1,
         club_name: clubName,
+        club_name_ro: clubNameRo,
         city,
+        city_ro: cityRo,
         founded_year: foundedYear,
         club_colors: clubColors,
+        club_colors_ro: clubColorsRo,
         motto,
+        motto_ro: mottoRo,
         about_text: aboutText,
+        about_text_ro: aboutTextRo,
         history_text: historyText,
+        history_text_ro: historyTextRo,
         email,
         phone,
         address,
+        address_ro: addressRo,
         stadium_name: stadiumName,
+        stadium_name_ro: stadiumNameRo,
         stadium_capacity: stadiumCapacity,
         stadium_address: stadiumAddress,
+        stadium_address_ro: stadiumAddressRo,
         stadium_description: stadiumDescription,
+        stadium_description_ro: stadiumDescriptionRo,
         hero_image_url: heroImageUrl,
         stadium_image_url: stadiumImageUrl,
       },
@@ -146,7 +166,9 @@ export async function addLeader(
 
   const name = text(formData.get("name"));
   const role = text(formData.get("role"));
+  const roleRo = nullableText(formData.get("role_ro"));
   const bio = nullableText(formData.get("bio"));
+  const bioRo = nullableText(formData.get("bio_ro"));
   const displayOrder = integer(formData.get("display_order"), 100);
   const isActive = formData.get("is_active") === "on";
 
@@ -171,7 +193,9 @@ export async function addLeader(
   const { error } = await supabase.from("club_leadership").insert({
     name,
     role,
+    role_ro: roleRo,
     bio,
+    bio_ro: bioRo,
     photo_url: photoUrl,
     display_order: displayOrder,
     is_active: isActive,
@@ -193,12 +217,20 @@ export async function updateLeader(formData: FormData) {
   const id = text(formData.get("leader_id"));
   if (!id) return;
 
+  const role = text(formData.get("role"));
+  const roleRo = nullableText(formData.get("role_ro"));
+  const bio = nullableText(formData.get("bio"));
+  const bioRo = nullableText(formData.get("bio_ro"));
   const displayOrder = integer(formData.get("display_order"), 100);
   const isActive = formData.get("is_active") === "on";
 
   await supabase
     .from("club_leadership")
     .update({
+      role,
+      role_ro: roleRo,
+      bio,
+      bio_ro: bioRo,
       display_order: displayOrder,
       is_active: isActive,
     })
@@ -229,7 +261,9 @@ export async function addAchievement(
 
   const year = nullableText(formData.get("year"));
   const title = text(formData.get("title"));
+  const titleRo = nullableText(formData.get("title_ro"));
   const description = nullableText(formData.get("description"));
+  const descriptionRo = nullableText(formData.get("description_ro"));
   const displayOrder = integer(formData.get("display_order"), 100);
   const isActive = formData.get("is_active") === "on";
 
@@ -240,7 +274,9 @@ export async function addAchievement(
   const { error } = await supabase.from("club_achievements").insert({
     year,
     title,
+    title_ro: titleRo,
     description,
+    description_ro: descriptionRo,
     display_order: displayOrder,
     is_active: isActive,
   });
@@ -263,12 +299,20 @@ export async function updateAchievement(formData: FormData) {
   const id = text(formData.get("achievement_id"));
   if (!id) return;
 
+  const title = text(formData.get("title"));
+  const titleRo = nullableText(formData.get("title_ro"));
+  const description = nullableText(formData.get("description"));
+  const descriptionRo = nullableText(formData.get("description_ro"));
   const displayOrder = integer(formData.get("display_order"), 100);
   const isActive = formData.get("is_active") === "on";
 
   await supabase
     .from("club_achievements")
     .update({
+      title,
+      title_ro: titleRo,
+      description,
+      description_ro: descriptionRo,
       display_order: displayOrder,
       is_active: isActive,
     })

@@ -4,14 +4,18 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import PhotoShareButton from "@/app/components/PhotoShareButton";
 import type { MediaPhoto } from "@/lib/types";
+import { publicText, type Locale } from "@/lib/i18n";
 
 export default function MediaGallery({
   photos,
   albumTitle,
+  locale,
 }: {
   photos: MediaPhoto[];
   albumTitle: string;
+  locale: Locale;
 }) {
+  const text = publicText[locale].media;
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const active =
@@ -70,7 +74,7 @@ export default function MediaGallery({
             className="mediaPhotoTile"
             key={photo.id}
             onClick={() => setActiveIndex(index)}
-            aria-label={`Открыть фото ${index + 1}`}
+            aria-label={`${text.openPhoto} ${index + 1}`}
           >
             <img
               src={photo.thumb_url}
@@ -78,7 +82,7 @@ export default function MediaGallery({
               loading="lazy"
             />
             <span className="mediaPhotoHover">
-              <b>Открыть</b>
+              <b>{text.open}</b>
               <small>{index + 1} / {photos.length}</small>
             </span>
           </button>
@@ -91,7 +95,7 @@ export default function MediaGallery({
             type="button"
             className="mediaLightboxClose"
             onClick={() => setActiveIndex(null)}
-            aria-label="Закрыть"
+            aria-label={text.close}
           >
             ✕
           </button>
@@ -102,7 +106,7 @@ export default function MediaGallery({
                 type="button"
                 className="mediaLightboxArrow previous"
                 onClick={previous}
-                aria-label="Предыдущее фото"
+                aria-label={text.previousPhoto}
               >
                 ‹
               </button>
@@ -110,7 +114,7 @@ export default function MediaGallery({
                 type="button"
                 className="mediaLightboxArrow next"
                 onClick={next}
-                aria-label="Следующее фото"
+                aria-label={text.nextPhoto}
               >
                 ›
               </button>
@@ -132,7 +136,7 @@ export default function MediaGallery({
                 </span>
                 <h3>{active.caption || albumTitle}</h3>
                 {active.photographer && (
-                  <p>Фото: {active.photographer}</p>
+                  <p>{text.photoBy}: {active.photographer}</p>
                 )}
               </div>
 
@@ -140,9 +144,10 @@ export default function MediaGallery({
                 <PhotoShareButton
                   photoId={active.id}
                   title={active.caption || albumTitle}
+                  locale={locale}
                 />
                 <Link href={`/media/photo/${active.id}`}>
-                  Открыть отдельную страницу →
+                  {text.separatePage}
                 </Link>
               </div>
             </aside>

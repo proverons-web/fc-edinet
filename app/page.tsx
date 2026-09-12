@@ -3,6 +3,8 @@ import PlayerCard from "@/app/components/PlayerCard";
 import NewsCard from "@/app/components/NewsCard";
 import StandingsTable from "@/app/components/StandingsTable";
 import { createClient } from "@/lib/supabase/server";
+import { getLocale } from "@/lib/locale";
+import { dateLocale, localized, publicText, type Locale } from "@/lib/i18n";
 import type {
   ClubMatch,
   Competition,
@@ -30,6 +32,8 @@ const defaultSectionOrder: HomepageSection[] = [
 ];
 
 export default async function Home() {
+  const locale = await getLocale();
+  const text = publicText[locale].home;
   const supabase = await createClient();
   const now = new Date().toISOString();
 
@@ -79,9 +83,9 @@ export default async function Home() {
     supabase
       .from("news")
       .select(`
-        id,title,slug,excerpt,content,cover_image_url,author_name,status,
+        id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,cover_image_url,author_name,status,
         published_at,views,is_featured,category_id,
-        category:news_categories(id,name,slug)
+        category:news_categories(id,name,name_ro,slug)
       `)
       .eq("status", "published")
       .lte("published_at", now)
@@ -136,9 +140,9 @@ export default async function Home() {
       ? supabase
           .from("news")
           .select(`
-            id,title,slug,excerpt,content,cover_image_url,author_name,status,
+            id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,cover_image_url,author_name,status,
             published_at,views,is_featured,category_id,
-            category:news_categories(id,name,slug)
+            category:news_categories(id,name,name_ro,slug)
           `)
           .eq("id", settings.pinned_news_id)
           .eq("status", "published")
@@ -165,12 +169,10 @@ export default async function Home() {
   const albums = (albumsResult.data ?? []) as MediaAlbum[];
   const videos = (videosResult.data ?? []) as MediaVideo[];
 
-  const heroEyebrow = hero?.eyebrow || "ЕДИНЕЦ • МОЛДОВА";
-  const heroTitleMain = hero?.title_main || "ВМЕСТЕ";
-  const heroTitleAccent = hero?.title_accent || "ЗА ЕДИНЕЦ";
-  const heroDescription =
-    hero?.description ||
-    "Новости клуба, матчи, состав, история и медиаконтент — в одном официальном пространстве.";
+  const heroEyebrow = localized(hero?.eyebrow, hero?.eyebrow_ro, locale) || text.heroEyebrow;
+  const heroTitleMain = localized(hero?.title_main, hero?.title_main_ro, locale) || text.heroMain;
+  const heroTitleAccent = localized(hero?.title_accent, hero?.title_accent_ro, locale) || text.heroAccent;
+  const heroDescription = localized(hero?.description, hero?.description_ro, locale) || text.heroDescription;
   const heroOverlay = Math.max(
     0,
     Math.min(95, hero?.overlay_opacity ?? 72)
@@ -203,49 +205,49 @@ export default async function Home() {
           <section className="matchStrip" key={key}>
             <div className="container matchGrid">
               <article>
-                <span className="sectionLabel">ПОСЛЕДНИЙ МАТЧ</span>
+                <span className="sectionLabel">{text.lastMatch}</span>
                 {lastMatch ? (
                   <>
                     <HomeStripMatch match={lastMatch} type="finished" />
-                    <p>{formatMatchDate(lastMatch.kickoff)}</p>
+                    <p>{formatMatchDate(lastMatch.kickoff, locale)}</p>
                     <p className="homeMatchStadium">
-                      {lastMatch.stadium || "Стадион не указан"}
+                      {lastMatch.stadium || text.stadiumUnknown}
                     </p>
                   </>
                 ) : (
                   <>
-                    <h3>Результатов пока нет</h3>
-                    <p>После завершённого матча он появится здесь.</p>
+                    <h3>{text.noResults}</h3>
+                    <p>{text.noResultsHint}</p>
                   </>
                 )}
               </article>
 
               <article>
-                <span className="sectionLabel">СЛЕДУЮЩИЙ МАТЧ</span>
+                <span className="sectionLabel">{text.nextMatch}</span>
                 {nextMatch ? (
                   <>
                     <HomeStripMatch match={nextMatch} type="next" />
-                    <p>{formatMatchDate(nextMatch.kickoff)}</p>
+                    <p>{formatMatchDate(nextMatch.kickoff, locale)}</p>
                     <p className="homeMatchStadium">
-                      {nextMatch.stadium || "Стадион не указан"}
+                      {nextMatch.stadium || text.stadiumUnknown}
                     </p>
                   </>
                 ) : (
                   <>
-                    <h3>Матч не назначен</h3>
-                    <p>Добавь его в /admin/matches.</p>
+                    <h3>{text.noNextMatch}</h3>
+                    <p>{text.noNextMatchHint}</p>
                   </>
                 )}
               </article>
 
               <article>
-                <span className="sectionLabel">ТУРНИР</span>
+                <span className="sectionLabel">{text.tournament}</span>
                 <h3>
                   {nextMatch?.competition?.name ||
                     lastMatch?.competition?.name ||
                     "Liga 2"}
                 </h3>
-                <Link href="/matches">Календарь и результаты →</Link>
+                <Link href="/matches">{text.calendarResults}</Link>
               </article>
             </div>
           </section>
@@ -257,18 +259,16 @@ export default async function Home() {
             <div className="container">
               <div className="sectionHeading">
                 <div>
-                  <p className="eyebrow blue">LIGA 2</p>
-                  <h2>Турнирная таблица</h2>
+                  <p className="eyebrow blue">{text.standingsEyebrow}</p>
+                  <h2>{text.standingsTitle}</h2>
                 </div>
-                <Link href="/standings">Полная таблица →</Link>
+                <Link href="/standings">{text.fullStandings}</Link>
               </div>
 
               {standings.length > 0 ? (
-                <StandingsTable entries={standings} compact limit={5} />
+                <StandingsTable entries={standings} compact limit={5} locale={locale} />
               ) : (
-                <div className="adminEmpty">
-                  Турнирная таблица пока не заполнена.
-                </div>
+                <div className="adminEmpty">{text.standingsEmpty}</div>
               )}
             </div>
           </section>
@@ -280,10 +280,10 @@ export default async function Home() {
             <div className="container">
               <div className="sectionHeading">
                 <div>
-                  <p className="eyebrow blue">ГЛАВНОЕ</p>
-                  <h2>Последние новости</h2>
+                  <p className="eyebrow blue">{text.newsEyebrow}</p>
+                  <h2>{text.newsTitle}</h2>
                 </div>
-                <Link href="/news">Все новости →</Link>
+                <Link href="/news">{text.allNews}</Link>
               </div>
 
               {pinnedNews && (
@@ -299,10 +299,12 @@ export default async function Home() {
                     )}
                   </div>
                   <div className="homePinnedNewsBody">
-                    <span className="moduleBadge">ЗАКРЕПЛЕНО</span>
-                    <h3>{pinnedNews.title}</h3>
-                    {pinnedNews.excerpt && <p>{pinnedNews.excerpt}</p>}
-                    <b>Читать новость →</b>
+                    <span className="moduleBadge">{text.pinned}</span>
+                    <h3>{localized(pinnedNews.title, pinnedNews.title_ro, locale)}</h3>
+                    {localized(pinnedNews.excerpt, pinnedNews.excerpt_ro, locale) && (
+                      <p>{localized(pinnedNews.excerpt, pinnedNews.excerpt_ro, locale)}</p>
+                    )}
+                    <b>{text.read}</b>
                   </div>
                 </Link>
               )}
@@ -310,12 +312,12 @@ export default async function Home() {
               {news.length > 0 ? (
                 <div className="homeNewsDbGrid">
                   {news.map((article) => (
-                    <NewsCard key={article.id} article={article} />
+                    <NewsCard key={article.id} article={article} locale={locale} />
                   ))}
                 </div>
               ) : pinnedNews ? null : (
                 <div className="homeNewsPlaceholder">
-                  <div>Опубликуй первую новость — она появится здесь.</div>
+                  <div>{locale === "ro" ? "Publică prima știre și va apărea aici." : "Опубликуй первую новость — она появится здесь."}</div>
                 </div>
               )}
             </div>
@@ -328,20 +330,20 @@ export default async function Home() {
             <div className="container">
               <div className="sectionHeading light">
                 <div>
-                  <p className="eyebrow">ПЕРВАЯ КОМАНДА</p>
-                  <h2>Игроки FC Edineț</h2>
+                  <p className="eyebrow">{text.teamEyebrow}</p>
+                  <h2>{text.teamTitle}</h2>
                 </div>
-                <Link href="/team">Весь состав →</Link>
+                <Link href="/team">{text.allPlayers}</Link>
               </div>
 
               {players.length > 0 ? (
                 <div className="players">
                   {players.map((player) => (
-                    <PlayerCard key={player.id} player={player} />
+                    <PlayerCard key={player.id} player={player} locale={locale} />
                   ))}
                 </div>
               ) : (
-                <div className="emptyBox">Добавь игроков — они появятся здесь.</div>
+                <div className="emptyBox">{locale === "ro" ? "Adaugă jucători și vor apărea aici." : "Добавь игроков — они появятся здесь."}</div>
               )}
             </div>
           </section>
@@ -353,10 +355,10 @@ export default async function Home() {
             <div className="container">
               <div className="sectionHeading">
                 <div>
-                  <p className="eyebrow blue">МЕДИАЦЕНТР</p>
-                  <h2>Фото и видео</h2>
+                  <p className="eyebrow blue">{text.mediaEyebrow}</p>
+                  <h2>{text.mediaTitle}</h2>
                 </div>
-                <Link href="/media">Весь медиараздел →</Link>
+                <Link href="/media">{text.allMedia}</Link>
               </div>
 
               {albums.length > 0 || videos.length > 0 ? (
@@ -371,11 +373,11 @@ export default async function Home() {
                         {album.cover_image_url ? (
                           <img src={album.cover_image_url} alt="" />
                         ) : (
-                          <div className="homeMediaFallback">ФОТО</div>
+                          <div className="homeMediaFallback">{text.album}</div>
                         )}
                       </div>
                       <div>
-                        <span>ФОТОАЛЬБОМ</span>
+                        <span>{text.album.toUpperCase()}</span>
                         <h3>{album.title}</h3>
                       </div>
                     </Link>
@@ -397,7 +399,7 @@ export default async function Home() {
                         <span className="homeMediaPlay">▶</span>
                       </div>
                       <div>
-                        <span>ВИДЕО</span>
+                        <span>{text.video.toUpperCase()}</span>
                         <h3>{video.title}</h3>
                       </div>
                     </a>
@@ -405,7 +407,7 @@ export default async function Home() {
                 </div>
               ) : (
                 <div className="adminEmpty">
-                  Опубликуй фотоальбом или видео — они появятся здесь.
+                  {locale === "ro" ? "Publică un album foto sau un video și va apărea aici." : "Опубликуй фотоальбом или видео — они появятся здесь."}
                 </div>
               )}
             </div>
@@ -420,10 +422,10 @@ export default async function Home() {
             <div className="container">
               <div className="sectionHeading">
                 <div>
-                  <p className="eyebrow blue">ВМЕСТЕ С КЛУБОМ</p>
-                  <h2>Наши партнёры</h2>
+                  <p className="eyebrow blue">{text.partnersEyebrow}</p>
+                  <h2>{text.partnersTitle}</h2>
                 </div>
-                <Link href="/partners">Все партнёры →</Link>
+                <Link href="/partners">{text.allPartners}</Link>
               </div>
 
               <div className="homePartnersGrid">
@@ -491,7 +493,7 @@ export default async function Home() {
                   className="primaryButton"
                   href={hero?.primary_button_href || "/matches"}
                 >
-                  {hero?.primary_button_text || "Смотреть матчи"}
+                  {localized(hero?.primary_button_text, hero?.primary_button_text_ro, locale) || (locale === "ro" ? "Vezi meciurile" : "Смотреть матчи")}
                 </Link>
               )}
 
@@ -500,14 +502,14 @@ export default async function Home() {
                   className="secondaryButton"
                   href={hero?.secondary_button_href || "/news"}
                 >
-                  {hero?.secondary_button_text || "Последние новости"}
+                  {localized(hero?.secondary_button_text, hero?.secondary_button_text_ro, locale) || (locale === "ro" ? "Ultimele știri" : "Последние новости")}
                 </Link>
               )}
             </div>
           </div>
 
           <aside className="heroMatchCard">
-            <span className="matchTag">СЛЕДУЮЩИЙ МАТЧ</span>
+            <span className="matchTag">{text.nextMatch}</span>
             {nextMatch ? (
               <>
                 <p className="competition">
@@ -522,16 +524,16 @@ export default async function Home() {
                 </div>
 
                 <div className="matchMeta">
-                  <span>{formatMatchDate(nextMatch.kickoff)}</span>
-                  <span>{nextMatch.stadium || "Стадион уточняется"}</span>
+                  <span>{formatMatchDate(nextMatch.kickoff, locale)}</span>
+                  <span>{nextMatch.stadium || text.stadiumUnknown}</span>
                 </div>
               </>
             ) : (
               <div className="noNextMatch">
-                Следующий матч пока не добавлен в админке.
+                {locale === "ro" ? "Următorul meci nu a fost încă adăugat." : "Следующий матч пока не добавлен в админке."}
               </div>
             )}
-            <Link href="/matches">Все матчи →</Link>
+            <Link href="/matches">{publicText[locale].matches.title} →</Link>
           </aside>
         </div>
       </section>
@@ -550,12 +552,12 @@ export default async function Home() {
         >
           <div className="container homeSpecialBannerInner">
             <div>
-              <p className="eyebrow">{settings.banner_eyebrow}</p>
-              <h2>{settings.banner_title}</h2>
-              {settings.banner_text && <p>{settings.banner_text}</p>}
+              <p className="eyebrow">{localized(settings.banner_eyebrow, settings.banner_eyebrow_ro, locale)}</p>
+              <h2>{localized(settings.banner_title, settings.banner_title_ro, locale)}</h2>
+              {localized(settings.banner_text, settings.banner_text_ro, locale) && <p>{localized(settings.banner_text, settings.banner_text_ro, locale)}</p>}
             </div>
             <Link className="primaryButton" href={settings.banner_button_href || "/club"}>
-              {settings.banner_button_text || "Подробнее"}
+              {localized(settings.banner_button_text, settings.banner_button_text_ro, locale) || text.more}
             </Link>
           </div>
         </section>
@@ -568,13 +570,7 @@ export default async function Home() {
   );
 }
 
-function HomeStripMatch({
-  match,
-  type,
-}: {
-  match: ClubMatch;
-  type: "finished" | "next";
-}) {
+function HomeStripMatch({ match, type }: { match: ClubMatch; type: "finished" | "next" }) {
   return (
     <div className="homeStripMatch">
       <StripTeam team={match.home} />
@@ -620,14 +616,14 @@ function HeroTeam({ team }: { team: ClubMatch["home"] }) {
   );
 }
 
-function formatMatchDate(value: string) {
+function formatMatchDate(value: string, locale: Locale) {
   const date = new Date(value);
-  const day = new Intl.DateTimeFormat("ru-RU", {
+  const day = new Intl.DateTimeFormat(dateLocale(locale), {
     day: "2-digit",
     month: "long",
     timeZone: "Europe/Chisinau",
   }).format(date);
-  const time = new Intl.DateTimeFormat("ru-RU", {
+  const time = new Intl.DateTimeFormat(dateLocale(locale), {
     hour: "2-digit",
     minute: "2-digit",
     timeZone: "Europe/Chisinau",

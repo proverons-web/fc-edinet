@@ -315,6 +315,13 @@ export default function HomepageLayoutForm({
                 />
               </div>
             </div>
+            <fieldset className="i18nFieldset">
+              <legend>Română / RO</legend>
+              <div className="fieldGroup"><label htmlFor="banner_eyebrow_ro">Text superior</label><input id="banner_eyebrow_ro" name="banner_eyebrow_ro" defaultValue={initial.banner_eyebrow_ro ?? ""} /></div>
+              <div className="fieldGroup"><label htmlFor="banner_title_ro">Titlu</label><input id="banner_title_ro" name="banner_title_ro" defaultValue={initial.banner_title_ro ?? ""} /></div>
+              <div className="fieldGroup"><label htmlFor="banner_text_ro">Descriere</label><textarea id="banner_text_ro" name="banner_text_ro" rows={3} defaultValue={initial.banner_text_ro ?? ""} /></div>
+              <div className="fieldGroup"><label htmlFor="banner_button_text_ro">Text buton</label><input id="banner_button_text_ro" name="banner_button_text_ro" defaultValue={initial.banner_button_text_ro ?? ""} /></div>
+            </fieldset>
           </div>
 
           <div>

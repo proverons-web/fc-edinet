@@ -31,16 +31,16 @@ export default async function EditNewsPage({
       supabase
         .from("news")
         .select(`
-          id,title,slug,excerpt,content,cover_image_url,author_name,status,
+          id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,cover_image_url,author_name,status,
           published_at,views,is_featured,category_id,created_by,submitted_at,
           published_by,editor_note,created_at,updated_at,
-          category:news_categories(id,name,slug)
+          category:news_categories(id,name,name_ro,slug)
         `)
         .eq("id", articleId)
         .maybeSingle(),
       supabase
         .from("news_categories")
-        .select("id,name,slug,display_order,is_active")
+        .select("id,name,name_ro,slug,display_order,is_active")
         .eq("is_active", true)
         .order("display_order", { ascending: true }),
     ]);

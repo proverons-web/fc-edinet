@@ -37,6 +37,9 @@ export async function saveNews(
   const slug = normalizeSlug(String(formData.get("slug") ?? ""));
   const excerpt = String(formData.get("excerpt") ?? "").trim();
   const content = String(formData.get("content") ?? "").trim();
+  const titleRo = String(formData.get("title_ro") ?? "").trim();
+  const excerptRo = String(formData.get("excerpt_ro") ?? "").trim();
+  const contentRo = String(formData.get("content_ro") ?? "").trim();
   const categoryRaw = String(formData.get("category_id") ?? "").trim();
   const categoryId = categoryRaw ? Number(categoryRaw) : null;
   const intent = String(formData.get("intent") ?? "save") as Intent;
@@ -84,7 +87,7 @@ export async function saveNews(
     const { data, error } = await supabase
       .from("news")
       .select(`
-        id,title,slug,excerpt,content,cover_image_url,author_name,status,
+        id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,cover_image_url,author_name,status,
         published_at,views,is_featured,category_id,created_by,submitted_at,
         published_by,editor_note,created_at,updated_at,
         category:news_categories(id,name,slug)
@@ -214,9 +217,12 @@ export async function saveNews(
   const payload = {
     category_id: categoryId,
     title,
+    title_ro: titleRo || null,
     slug,
     excerpt: excerpt || null,
+    excerpt_ro: excerptRo || null,
     content,
+    content_ro: contentRo || null,
     cover_image_url: coverImageUrl,
     author_name: authorName,
     status,

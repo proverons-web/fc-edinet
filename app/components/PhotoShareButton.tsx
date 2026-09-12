@@ -1,16 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { publicText, type Locale } from "@/lib/i18n";
 
 export default function PhotoShareButton({
   photoId,
   title,
   compact = false,
+  locale,
 }: {
   photoId: string | number;
   title: string;
   compact?: boolean;
+  locale: Locale;
 }) {
+  const text = publicText[locale].media;
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -78,7 +82,7 @@ export default function PhotoShareButton({
           void nativeShare();
         }}
       >
-        ↗ <span>Поделиться</span>
+        ↗ <span>{text.share}</span>
       </button>
 
       {open && (
@@ -98,14 +102,14 @@ export default function PhotoShareButton({
               void copyLink();
             }}
           >
-            {copied ? "Ссылка скопирована ✓" : "Копировать ссылку"}
+            {copied ? text.copied : text.copyLink}
           </button>
           <button
             type="button"
             className="photoShareClose"
             onClick={() => setOpen(false)}
           >
-            Закрыть
+            {text.close}
           </button>
         </div>
       )}

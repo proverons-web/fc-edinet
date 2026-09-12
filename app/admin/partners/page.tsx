@@ -148,6 +148,11 @@ export default async function AdminPartnersPage({ searchParams }: PageProps) {
               </label>
 
               <label className="partnerWideField">
+                <span>Описание RO</span>
+                <textarea name="description_ro" rows={3} placeholder="Descriere scurtă în limba română" />
+              </label>
+
+              <label className="partnerWideField">
                 <span>Логотип *</span>
                 <input
                   name="logo_file"
@@ -254,6 +259,11 @@ export default async function AdminPartnersPage({ searchParams }: PageProps) {
                           rows={2}
                           defaultValue={partner.description ?? ""}
                         />
+                      </label>
+
+                      <label className="partnerEditWide">
+                        <span>Описание RO</span>
+                        <textarea name="description_ro" rows={2} defaultValue={partner.description_ro ?? ""} />
                       </label>
 
                       <label className="partnerEditWide">

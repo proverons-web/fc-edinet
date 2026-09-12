@@ -112,6 +112,27 @@ export default function ClubProfileForm({
         </div>
       </div>
 
+      <fieldset className="i18nFieldset">
+        <legend>Română / RO</legend>
+        <div className="twoFields">
+          <div className="fieldGroup"><label htmlFor="club_name_ro">Denumirea clubului</label><input id="club_name_ro" name="club_name_ro" defaultValue={profile?.club_name_ro ?? ""} /></div>
+          <div className="fieldGroup"><label htmlFor="city_ro">Oraș</label><input id="city_ro" name="city_ro" defaultValue={profile?.city_ro ?? ""} /></div>
+        </div>
+        <div className="twoFields">
+          <div className="fieldGroup"><label htmlFor="club_colors_ro">Culorile clubului</label><input id="club_colors_ro" name="club_colors_ro" defaultValue={profile?.club_colors_ro ?? ""} /></div>
+          <div className="fieldGroup"><label htmlFor="motto_ro">Motto</label><input id="motto_ro" name="motto_ro" defaultValue={profile?.motto_ro ?? ""} /></div>
+        </div>
+        <div className="fieldGroup"><label htmlFor="about_text_ro">Despre club</label><textarea id="about_text_ro" name="about_text_ro" rows={6} defaultValue={profile?.about_text_ro ?? ""} /></div>
+        <div className="fieldGroup"><label htmlFor="history_text_ro">Istorie</label><textarea id="history_text_ro" name="history_text_ro" rows={8} defaultValue={profile?.history_text_ro ?? ""} /></div>
+        <div className="fieldGroup"><label htmlFor="address_ro">Adresa clubului</label><input id="address_ro" name="address_ro" defaultValue={profile?.address_ro ?? ""} /></div>
+        <div className="threeFields">
+          <div className="fieldGroup"><label htmlFor="stadium_name_ro">Denumirea stadionului</label><input id="stadium_name_ro" name="stadium_name_ro" defaultValue={profile?.stadium_name_ro ?? ""} /></div>
+          <div className="fieldGroup"><label htmlFor="stadium_address_ro">Adresa stadionului</label><input id="stadium_address_ro" name="stadium_address_ro" defaultValue={profile?.stadium_address_ro ?? ""} /></div>
+        </div>
+        <div className="fieldGroup"><label htmlFor="stadium_description_ro">Descrierea stadionului</label><textarea id="stadium_description_ro" name="stadium_description_ro" rows={5} defaultValue={profile?.stadium_description_ro ?? ""} /></div>
+        <small className="i18nHint">Незаполненные поля RO автоматически используют русскую версию.</small>
+      </fieldset>
+
       <div className="clubAdminSection">
         <div className="formSectionTitle">
           <p className="eyebrow blue">КОНТАКТЫ</p>

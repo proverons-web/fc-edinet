@@ -10,6 +10,7 @@ export type Player = {
   height_cm: number | null;
   photo_url: string | null;
   bio: string | null;
+  bio_ro?: string | null;
   is_active: boolean;
   display_order: number | null;
   preferred_foot: string | null;
@@ -21,6 +22,7 @@ export type Player = {
 export type NewsCategory = {
   id: string | number;
   name: string;
+  name_ro?: string | null;
   slug: string;
   display_order?: number | null;
   is_active?: boolean;
@@ -29,9 +31,12 @@ export type NewsCategory = {
 export type NewsArticle = {
   id: string | number;
   title: string;
+  title_ro?: string | null;
   slug: string;
   excerpt: string | null;
+  excerpt_ro?: string | null;
   content: string;
+  content_ro?: string | null;
   cover_image_url: string | null;
   author_name: string | null;
   status: 'draft' | 'review' | 'published';
@@ -195,19 +200,29 @@ export type StandingEntry = {
 export type ClubProfile = {
   id: number;
   club_name: string;
+  club_name_ro?: string | null;
   city: string;
+  city_ro?: string | null;
   founded_year: number | null;
   club_colors: string | null;
+  club_colors_ro?: string | null;
   motto: string | null;
+  motto_ro?: string | null;
   about_text: string | null;
+  about_text_ro?: string | null;
   history_text: string | null;
+  history_text_ro?: string | null;
   email: string | null;
   phone: string | null;
   address: string | null;
+  address_ro?: string | null;
   stadium_name: string | null;
+  stadium_name_ro?: string | null;
   stadium_capacity: number | null;
   stadium_address: string | null;
+  stadium_address_ro?: string | null;
   stadium_description: string | null;
+  stadium_description_ro?: string | null;
   hero_image_url: string | null;
   stadium_image_url: string | null;
   updated_at: string;
@@ -217,7 +232,9 @@ export type ClubLeader = {
   id: string | number;
   name: string;
   role: string;
+  role_ro?: string | null;
   bio: string | null;
+  bio_ro?: string | null;
   photo_url: string | null;
   display_order: number;
   is_active: boolean;
@@ -229,7 +246,9 @@ export type ClubAchievement = {
   id: string | number;
   year: string | null;
   title: string;
+  title_ro?: string | null;
   description: string | null;
+  description_ro?: string | null;
   display_order: number;
   is_active: boolean;
   created_at?: string;
@@ -284,12 +303,18 @@ export type MediaVideo = {
 export type HomepageHero = {
   id: number;
   eyebrow: string;
+  eyebrow_ro?: string | null;
   title_main: string;
+  title_main_ro?: string | null;
   title_accent: string;
+  title_accent_ro?: string | null;
   description: string;
+  description_ro?: string | null;
   primary_button_text: string;
+  primary_button_text_ro?: string | null;
   primary_button_href: string;
   secondary_button_text: string;
+  secondary_button_text_ro?: string | null;
   secondary_button_href: string;
   background_image_url: string | null;
   overlay_opacity: number;
@@ -321,9 +346,13 @@ export type HomepageSettings = {
   pinned_news_id: string | number | null;
   banner_enabled: boolean;
   banner_eyebrow: string;
+  banner_eyebrow_ro?: string | null;
   banner_title: string;
+  banner_title_ro?: string | null;
   banner_text: string;
+  banner_text_ro?: string | null;
   banner_button_text: string;
+  banner_button_text_ro?: string | null;
   banner_button_href: string;
   banner_image_url: string | null;
   banner_overlay_opacity: number;
@@ -349,6 +378,7 @@ export type Partner = {
   slug: string;
   website_url: string | null;
   description: string | null;
+  description_ro?: string | null;
   logo_url: string;
   logo_storage_path: string | null;
   partner_level: PartnerLevel;
