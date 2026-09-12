@@ -2,13 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import NewsCard, { formatNewsDate } from "@/app/components/NewsCard";
+import NewsComments from "@/app/components/NewsComments";
 import { createClient } from "@/lib/supabase/server";
-import type { NewsArticle } from "@/lib/types";
+import type { CommentBlock, NewsArticle, NewsComment } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { localized, publicText } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
-type PageProps = { params: Promise<{ slug: string }> };
+type PageProps = {
+  params: Promise<{ slug: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
 
 async function getArticle(slug: string): Promise<NewsArticle | null> {
   const supabase = await createClient();
@@ -30,19 +34,55 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return { title, description: excerpt || `${title} — FC Edineț` };
 }
 
-export default async function NewsArticlePage({ params }: PageProps) {
+export default async function NewsArticlePage({ params, searchParams }: PageProps) {
   const locale = await getLocale();
   const text = publicText[locale].news;
   const { slug } = await params;
+  const query = searchParams ? await searchParams : {};
+  const commentNotice = firstParam(query.comment);
   const article = await getArticle(slug);
-  if (!article) notFound();
+  if (!article) {
+    notFound();
+    throw new Error("News article not found");
+  }
+
   const supabase = await createClient();
-  const { data: relatedData } = article.category_id ? await supabase.from("news").select(`
-      id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,cover_image_url,author_name,status,
-      published_at,views,is_featured,category_id,category:news_categories(id,name,name_ro,slug)
-    `).eq("category_id", article.category_id).eq("status", "published").neq("id", article.id)
-    .lte("published_at", new Date().toISOString()).order("published_at", { ascending: false }).limit(3) : { data: [] };
-  const related = (relatedData ?? []) as unknown as NewsArticle[];
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const currentUserId = claimsData?.claims?.sub ?? null;
+
+  const commentFields = currentUserId
+    ? "id,news_id,user_id,body,status,author_display_name,author_avatar_url,created_at,updated_at"
+    : "id,news_id,body,status,author_display_name,author_avatar_url,created_at,updated_at";
+
+  const relatedPromise = article.category_id
+    ? supabase.from("news").select(`
+        id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,cover_image_url,author_name,status,
+        published_at,views,is_featured,category_id,category:news_categories(id,name,name_ro,slug)
+      `).eq("category_id", article.category_id).eq("status", "published").neq("id", article.id)
+      .lte("published_at", new Date().toISOString()).order("published_at", { ascending: false }).limit(3)
+    : Promise.resolve({ data: [] as unknown[] });
+
+  const commentsPromise = supabase
+    .from("comments")
+    .select(commentFields, { count: "exact" })
+    .eq("news_id", article.id)
+    .eq("status", "visible")
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  const blockPromise = currentUserId
+    ? supabase.from("comment_blocks").select("user_id,reason,blocked_until,blocked_by,created_at,updated_at").eq("user_id", currentUserId).maybeSingle()
+    : Promise.resolve({ data: null });
+
+  const [relatedResult, commentsResult, blockResult] = await Promise.all([
+    relatedPromise,
+    commentsPromise,
+    blockPromise,
+  ]);
+
+  const related = (relatedResult.data ?? []) as unknown as NewsArticle[];
+  const comments = (commentsResult.data ?? []) as unknown as NewsComment[];
+  const activeBlock = (blockResult.data ?? null) as CommentBlock | null;
   const title = localized(article.title, article.title_ro, locale);
   const excerpt = localized(article.excerpt, article.excerpt_ro, locale);
   const content = localized(article.content, article.content_ro, locale);
@@ -63,6 +103,22 @@ export default async function NewsArticlePage({ params }: PageProps) {
       <small>{text.category}</small><strong>{category}</strong><small>{text.published}</small><strong>{formatNewsDate(article.published_at, locale)}</strong><small>{text.author.toUpperCase()}</small><strong>{article.author_name || "FC Edineț"}</strong>
     </div></aside></div>
   </article>
+
+  <NewsComments
+    articleId={article.id}
+    slug={article.slug}
+    locale={locale}
+    comments={comments}
+    totalCount={commentsResult.count ?? comments.length}
+    currentUserId={currentUserId}
+    activeBlock={activeBlock}
+    notice={commentNotice}
+  />
+
   {related.length > 0 && <section className="section relatedNewsSection"><div className="container"><div className="sectionHeading"><div><p className="eyebrow blue">{text.relatedEyebrow}</p><h2>{text.related}</h2></div><Link href="/news">{text.back.replace("← ", "")} →</Link></div><div className="newsDbGrid relatedGrid">{related.map((item) => <NewsCard key={item.id} article={item} locale={locale} />)}</div></div></section>}
   </main>;
+}
+
+function firstParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
 }

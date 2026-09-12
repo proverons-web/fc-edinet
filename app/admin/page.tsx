@@ -202,6 +202,20 @@ export default async function AdminPage() {
               }
             />
             <AdminModule
+              title="Комментарии"
+              text="Обсуждения новостей, жалобы, скрытие комментариев и блокировки."
+              badge={
+                profile.role === "editor" || profile.role === "admin"
+                  ? "Работает"
+                  : "Editor/Admin"
+              }
+              href={
+                profile.role === "editor" || profile.role === "admin"
+                  ? "/admin/comments"
+                  : undefined
+              }
+            />
+            <AdminModule
               title="Автоперевод RU → RO"
               text="Автоматический перевод нового и существующего контента на румынский."
               badge={

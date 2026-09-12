@@ -438,3 +438,57 @@ export const partnerLevelLabels: Record<PartnerLevel, string> = {
   technical: "Технический партнёр",
   supporter: "Партнёр клуба",
 };
+
+export type NewsComment = {
+  id: string | number;
+  news_id: string | number;
+  user_id?: string;
+  body: string;
+  status: "visible" | "hidden";
+  author_display_name: string;
+  author_avatar_url: string | null;
+  moderated_by?: string | null;
+  moderated_at?: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CommentReportReason = "spam" | "offensive" | "harassment" | "other";
+export type CommentReportStatus = "pending" | "resolved" | "dismissed";
+
+export type CommentReport = {
+  id: string | number;
+  comment_id: string | number;
+  reporter_id: string;
+  reason: CommentReportReason;
+  details: string | null;
+  status: CommentReportStatus;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+};
+
+export type CommentBlock = {
+  user_id: string;
+  reason: string | null;
+  blocked_until: string | null;
+  blocked_by: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TranslationDiagnostic = {
+  id: string | number;
+  actor_user_id: string | null;
+  content_type: string;
+  content_id: string | null;
+  content_label: string | null;
+  status: "success" | "error";
+  model: string;
+  http_status: number | null;
+  error_type: string | null;
+  error_code: string | null;
+  error_message: string | null;
+  request_id: string | null;
+  created_at: string;
+};

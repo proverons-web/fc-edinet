@@ -38,6 +38,7 @@ const entityLabels: Record<string, string> = {
   homepage_sections: "Блоки главной",
   homepage_settings: "Настройки главной",
   partners: "Партнёры",
+  comment_blocks: "Блокировки комментариев",
 };
 
 const fieldLabels: Record<string, string> = {
@@ -86,6 +87,10 @@ const fieldLabels: Record<string, string> = {
   banner_image_url: "Фон баннера",
   banner_overlay_opacity: "Затемнение баннера",
   banner_background_position: "Положение фона баннера",
+  user_id: "Пользователь",
+  blocked_until: "Блокировка до",
+  blocked_by: "Кто заблокировал",
+  reason: "Причина",
 };
 
 const entityOptions = Object.entries(entityLabels);

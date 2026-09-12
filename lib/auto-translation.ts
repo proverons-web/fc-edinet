@@ -2,11 +2,21 @@ import { createHash } from "node:crypto";
 
 export type TranslationFields = Record<string, string | null | undefined>;
 
+export type TranslationDiagnosticDetails = {
+  model: string;
+  httpStatus: number | null;
+  errorType: string | null;
+  errorCode: string | null;
+  message: string;
+  requestId: string | null;
+};
+
 export type AutoTranslationResult = {
   values: Record<string, string | null>;
   sourceHash: string | null;
   translatedAt: string | null;
   warning?: string;
+  diagnostic?: TranslationDiagnosticDetails;
   translated: boolean;
 };
 
@@ -74,6 +84,7 @@ export async function resolveRomanianTranslation(options: {
       translatedAt: null,
       translated: false,
       warning: translated.error,
+      diagnostic: translated.diagnostic,
     };
   }
 
@@ -90,15 +101,18 @@ export async function translateRuToRo(
   context: string
 ): Promise<
   | { ok: true; values: Record<string, string | null> }
-  | { ok: false; error: string }
+  | { ok: false; error: string; diagnostic: TranslationDiagnosticDetails }
 > {
+  const model = translationModel();
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) {
-    return {
-      ok: false,
-      error:
-        "Автоперевод не выполнен: OPENAI_API_KEY не настроен на сервере. Русская версия сохранена, RO использует существующий перевод или fallback.",
-    };
+    const diagnostic = makeDiagnostic({
+      model,
+      errorType: "configuration_error",
+      errorCode: "missing_api_key",
+      message: "OPENAI_API_KEY не настроен на сервере.",
+    });
+    return { ok: false, error: diagnostic.message, diagnostic };
   }
 
   const normalized = normalizeFields(fields);
@@ -148,7 +162,7 @@ export async function translateRuToRo(
       },
       signal: controller.signal,
       body: JSON.stringify({
-        model: translationModel(),
+        model,
         store: false,
         reasoning: { effort: "none" },
         max_output_tokens: maxOutputTokens,
@@ -173,32 +187,66 @@ export async function translateRuToRo(
       }),
     });
 
-    const body = (await response.json()) as any;
+    const requestId = response.headers.get("x-request-id");
+    const rawBody = await response.text();
+    const body = parseJson(rawBody);
 
     if (!response.ok) {
-      const message = body?.error?.message || `HTTP ${response.status}`;
+      const apiError = body?.error ?? {};
+      const message = String(apiError?.message || rawBody || `HTTP ${response.status}`).slice(0, 2000);
+      const diagnostic = makeDiagnostic({
+        model,
+        httpStatus: response.status,
+        errorType: stringOrNull(apiError?.type),
+        errorCode: stringOrNull(apiError?.code),
+        message,
+        requestId,
+      });
       return {
         ok: false,
-        error: `Автоперевод временно недоступен: ${message}`,
+        error: `OpenAI API: ${message}`,
+        diagnostic,
       };
+    }
+
+    if (!body) {
+      const diagnostic = makeDiagnostic({
+        model,
+        httpStatus: response.status,
+        errorType: "invalid_response",
+        errorCode: "response_not_json",
+        message: "OpenAI вернул ответ, который не удалось прочитать как JSON.",
+        requestId,
+      });
+      return { ok: false, error: diagnostic.message, diagnostic };
     }
 
     const outputText = extractOutputText(body);
     if (!outputText) {
-      return {
-        ok: false,
-        error: "Автоперевод не вернул текст. Русская версия сохранена без изменений.",
-      };
+      const diagnostic = makeDiagnostic({
+        model,
+        httpStatus: response.status,
+        errorType: "invalid_response",
+        errorCode: "empty_output",
+        message: "OpenAI не вернул текст перевода.",
+        requestId,
+      });
+      return { ok: false, error: diagnostic.message, diagnostic };
     }
 
     let parsed: Record<string, unknown>;
     try {
       parsed = JSON.parse(outputText) as Record<string, unknown>;
     } catch {
-      return {
-        ok: false,
-        error: "Автоперевод вернул некорректный формат. Русская версия сохранена без изменений.",
-      };
+      const diagnostic = makeDiagnostic({
+        model,
+        httpStatus: response.status,
+        errorType: "invalid_response",
+        errorCode: "invalid_translation_json",
+        message: "OpenAI вернул перевод в некорректном JSON-формате.",
+        requestId,
+      });
+      return { ok: false, error: diagnostic.message, diagnostic };
     }
 
     const values: Record<string, string | null> = {};
@@ -210,31 +258,48 @@ export async function translateRuToRo(
 
       const value = parsed[key];
       if (typeof value !== "string" || !value.trim()) {
-        return {
-          ok: false,
-          error: `Автоперевод не вернул поле ${key}. Русская версия сохранена без изменений.`,
-        };
+        const diagnostic = makeDiagnostic({
+          model,
+          httpStatus: response.status,
+          errorType: "invalid_response",
+          errorCode: "missing_translation_field",
+          message: `OpenAI не вернул обязательное поле перевода: ${key}.`,
+          requestId,
+        });
+        return { ok: false, error: diagnostic.message, diagnostic };
       }
-
       values[key] = value.trim();
     }
 
     return { ok: true, values };
   } catch (error) {
-    const message =
-      error instanceof Error && error.name === "AbortError"
-        ? "превышено время ожидания"
-        : error instanceof Error
-          ? error.message
-          : "неизвестная ошибка";
-
-    return {
-      ok: false,
-      error: `Автоперевод временно недоступен: ${message}. Русская версия сохранена без изменений.`,
-    };
+    const aborted = error instanceof Error && error.name === "AbortError";
+    const message = aborted
+      ? "Превышено время ожидания OpenAI API (45 секунд)."
+      : error instanceof Error
+        ? error.message
+        : "Неизвестная ошибка соединения с OpenAI API.";
+    const diagnostic = makeDiagnostic({
+      model,
+      errorType: aborted ? "timeout_error" : "network_error",
+      errorCode: aborted ? "request_timeout" : "request_failed",
+      message,
+    });
+    return { ok: false, error: message, diagnostic };
   } finally {
     clearTimeout(timeout);
   }
+}
+
+function makeDiagnostic(input: Partial<TranslationDiagnosticDetails> & { model: string; message: string }): TranslationDiagnosticDetails {
+  return {
+    model: input.model,
+    httpStatus: input.httpStatus ?? null,
+    errorType: input.errorType ?? null,
+    errorCode: input.errorCode ?? null,
+    message: input.message,
+    requestId: input.requestId ?? null,
+  };
 }
 
 function normalizeFields(fields: TranslationFields) {
@@ -245,6 +310,18 @@ function normalizeFields(fields: TranslationFields) {
 
 function normalizeSource(value: string | null | undefined) {
   return String(value ?? "").replace(/\r\n/g, "\n").trim();
+}
+
+function parseJson(raw: string) {
+  try {
+    return JSON.parse(raw) as any;
+  } catch {
+    return null;
+  }
+}
+
+function stringOrNull(value: unknown) {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
 function extractOutputText(body: any) {

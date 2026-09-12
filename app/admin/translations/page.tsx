@@ -5,7 +5,8 @@ import {
   translationConfigured,
   translationModel,
 } from "@/lib/auto-translation";
-import { translateExistingContent } from "./actions";
+import type { TranslationDiagnostic } from "@/lib/types";
+import { testTranslationConnection, translateExistingContent } from "./actions";
 
 export const metadata = { title: "Автоперевод RU → RO — Админ" };
 export const dynamic = "force-dynamic";
@@ -29,6 +30,7 @@ export default async function AdminTranslationsPage({
     clubResult,
     heroResult,
     settingsResult,
+    diagnosticsResult,
   ] = await Promise.all([
     supabase.from("news").select("id,title,excerpt,content,ro_translation_locked,ro_translation_source_hash"),
     supabase.from("players").select("id,first_name,last_name,bio,ro_translation_locked,ro_translation_source_hash"),
@@ -38,6 +40,7 @@ export default async function AdminTranslationsPage({
     supabase.from("club_profile").select("*").eq("id", 1).maybeSingle(),
     supabase.from("homepage_hero").select("*").eq("id", 1).maybeSingle(),
     supabase.from("homepage_settings").select("*").eq("id", 1).maybeSingle(),
+    supabase.from("translation_diagnostics").select("id,actor_user_id,content_type,content_id,content_label,status,model,http_status,error_type,error_code,error_message,request_id,created_at").order("created_at", { ascending: false }).limit(30),
   ]);
 
   const groups = [
@@ -80,6 +83,8 @@ export default async function AdminTranslationsPage({
   const failed = numberParam(params.failed);
   const more = numberParam(params.more);
   const missingKey = params.error === "missing_key";
+  const test = firstParam(params.test);
+  const diagnostics = (diagnosticsResult.data ?? []) as TranslationDiagnostic[];
 
   return (
     <main className="adminPage">
@@ -98,16 +103,19 @@ export default async function AdminTranslationsPage({
         <div className="container translationAdminGrid">
           <section className="translationStatusCard">
             <p className="eyebrow blue">СЕРВИС</p>
-            <h2>{configured ? "Автоперевод готов" : "Нужен API-ключ"}</h2>
+            <h2>{configured ? "Ключ настроен" : "Нужен API-ключ"}</h2>
             <div className={`translationProviderStatus ${configured ? "ready" : "missing"}`}>
-              <strong>{configured ? "✓ OPENAI_API_KEY настроен" : "! OPENAI_API_KEY не настроен"}</strong>
+              <strong>{configured ? "✓ OPENAI_API_KEY найден" : "! OPENAI_API_KEY не настроен"}</strong>
               <span>Модель: {translationModel()}</span>
             </div>
             <p>
-              Ключ хранится только на сервере. Если перевод временно не сработает,
-              русская запись всё равно сохраняется, а публичная RO-версия использует
-              существующий перевод или русский fallback.
+              Наличие ключа ещё не гарантирует успешный запрос: может закончиться API-баланс,
+              модель может быть недоступна проекту или OpenAI может вернуть другую ошибку.
+              В v2.1 точная причина записывается ниже в диагностике.
             </p>
+            <form action={testTranslationConnection} className="translationTestForm">
+              <button className="secondaryButton" type="submit" disabled={!configured}>Проверить OpenAI API</button>
+            </form>
           </section>
 
           <section className="translationStatusCard">
@@ -126,10 +134,12 @@ export default async function AdminTranslationsPage({
           </section>
 
           {(processed > 0 || failed > 0 || more > 0) && (
-            <div className="formSuccess translationWideNotice">
-              Обработано: {processed}. Ошибок: {failed}.{more > 0 ? ` В очереди этого запуска осталось ещё ${more}; нажми кнопку ещё раз.` : ""}
+            <div className={failed > 0 ? "formError translationWideNotice" : "formSuccess translationWideNotice"}>
+              Обработано: {processed}. Ошибок: {failed}.{failed > 0 ? " Точная причина показана в журнале диагностики ниже." : ""}{more > 0 ? ` В очереди этого запуска осталось ещё ${more}; нажми кнопку ещё раз.` : ""}
             </div>
           )}
+          {test === "success" && <div className="formSuccess translationWideNotice">Тестовый запрос к OpenAI успешно выполнен. API и выбранная модель работают.</div>}
+          {test === "error" && <div className="formError translationWideNotice">Тест OpenAI завершился ошибкой. Открой первую строку журнала диагностики ниже — там есть HTTP-код, тип, код ошибки и Request ID.</div>}
           {missingKey && (
             <div className="formError translationWideNotice">
               Добавь OPENAI_API_KEY в .env.local и Vercel Environment Variables. Без ключа сайт продолжит работать, но автоматический перевод не запускается.
@@ -141,7 +151,7 @@ export default async function AdminTranslationsPage({
             <h2>Перевести существующий контент</h2>
             <p>
               За один запуск обрабатывается до 12 материалов, чтобы не упираться в лимит времени Vercel.
-              Заблокированные вручную RO-переводы пропускаются.
+              Заблокированные вручную RO-переводы пропускаются. Каждый успех и каждая ошибка теперь фиксируются отдельно.
             </p>
             <form action={translateExistingContent} className="translationBulkForm">
               <label className="checkRow compact">
@@ -154,6 +164,32 @@ export default async function AdminTranslationsPage({
             </form>
           </section>
 
+          <section className="translationStatusCard translationWideCard translationDiagnosticsCard">
+            <div className="sectionHeading compactSectionHeading">
+              <div><p className="eyebrow blue">ДИАГНОСТИКА</p><h2>Последние запросы перевода</h2></div>
+              <span className="moderationCount">{diagnostics.length}</span>
+            </div>
+            {diagnostics.length === 0 ? <div className="moderationEmpty">Запросов ещё не было. Нажми «Проверить OpenAI API» или запусти перевод партии.</div> : (
+              <div className="translationDiagnosticList">
+                {diagnostics.map((item) => <article className={`translationDiagnosticRow ${item.status === "error" ? "hasError" : "isSuccess"}`} key={String(item.id)}>
+                  <div className="translationDiagnosticHead">
+                    <strong>{item.status === "error" ? "Ошибка" : "Успешно"}</strong>
+                    <span>{item.content_label || item.content_type}</span>
+                    <time>{formatDate(item.created_at)}</time>
+                  </div>
+                  <div className="translationDiagnosticMeta">
+                    <span>Model: <b>{item.model}</b></span>
+                    <span>HTTP: <b>{item.http_status ?? "—"}</b></span>
+                    <span>Type: <b>{item.error_type || "—"}</b></span>
+                    <span>Code: <b>{item.error_code || "—"}</b></span>
+                  </div>
+                  {item.error_message && <pre>{item.error_message}</pre>}
+                  {item.request_id && <small>Request ID: {item.request_id}</small>}
+                </article>)}
+              </div>
+            )}
+          </section>
+
           <section className="translationStatusCard translationWideCard">
             <p className="eyebrow blue">КАК ЭТО РАБОТАЕТ</p>
             <h2>Обычная работа редактора не меняется</h2>
@@ -162,6 +198,7 @@ export default async function AdminTranslationsPage({
               <li>Нажимаешь «Сохранить» или «Опубликовать».</li>
               <li>Сервер создаёт RO-перевод и сохраняет его в Supabase.</li>
               <li>Посетитель переключает RU → RO и сразу видит сохранённую румынскую версию.</li>
+              <li>Если OpenAI вернул ошибку, русский материал всё равно сохраняется, а причина доступна в диагностике.</li>
               <li>Если вручную исправил RO и не хочешь его перезаписывать — включи «Зафиксировать ручной RO».</li>
             </ol>
           </section>
@@ -226,4 +263,14 @@ function numberParam(value: string | string[] | undefined) {
   const raw = Array.isArray(value) ? value[0] : value;
   const number = Number(raw ?? 0);
   return Number.isFinite(number) ? number : 0;
+}
+
+function firstParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function formatDate(value: string) {
+  try {
+    return new Intl.DateTimeFormat("ru-RU", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(value));
+  } catch { return value; }
 }
