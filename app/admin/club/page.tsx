@@ -52,6 +52,7 @@ export default async function AdminClubPage() {
                   <input name="role_ro" defaultValue={leader.role_ro ?? ""} placeholder="Funcție RO" />
                   <textarea name="bio" rows={2} defaultValue={leader.bio ?? ""} placeholder="Краткая информация" />
                   <textarea name="bio_ro" rows={2} defaultValue={leader.bio_ro ?? ""} placeholder="Informație RO" />
+                  <label><input type="checkbox" name="ro_translation_locked" defaultChecked={leader.ro_translation_locked ?? false} />RO вручную</label>
                   <input name="display_order" type="number" min={0} defaultValue={leader.display_order} />
                   <label><input type="checkbox" name="is_active" defaultChecked={leader.is_active} />На сайте</label>
                   <button type="submit">Сохранить</button>
@@ -75,6 +76,7 @@ export default async function AdminClubPage() {
                   <input name="title_ro" defaultValue={item.title_ro ?? ""} placeholder="Titlu RO" />
                   <textarea name="description" rows={2} defaultValue={item.description ?? ""} placeholder="Описание" />
                   <textarea name="description_ro" rows={2} defaultValue={item.description_ro ?? ""} placeholder="Descriere RO" />
+                  <label><input type="checkbox" name="ro_translation_locked" defaultChecked={item.ro_translation_locked ?? false} />RO вручную</label>
                   <input name="display_order" type="number" min={0} defaultValue={item.display_order} />
                   <label><input type="checkbox" name="is_active" defaultChecked={item.is_active} />На сайте</label>
                   <button type="submit">Сохранить</button>

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireEditor } from "@/lib/editorial";
 import type { HomepageSectionKey } from "@/lib/types";
+import { resolveRomanianTranslation } from "@/lib/auto-translation";
 
 export type HomepageHeroState = {
   error?: string;
@@ -86,6 +87,29 @@ export async function saveHomepageHero(
     .eq("id", 1)
     .maybeSingle();
 
+  const translationLocked = formData.get("ro_translation_locked") === "on";
+  const translation = await resolveRomanianTranslation({
+    source: {
+      eyebrow,
+      title_main: titleMain,
+      title_accent: titleAccent,
+      description,
+      primary_button_text: primaryButtonText,
+      secondary_button_text: secondaryButtonText,
+    },
+    manual: {
+      eyebrow: eyebrowRo,
+      title_main: titleMainRo,
+      title_accent: titleAccentRo,
+      description: descriptionRo,
+      primary_button_text: primaryButtonTextRo,
+      secondary_button_text: secondaryButtonTextRo,
+    },
+    context: "FC Edinet homepage hero",
+    locked: translationLocked,
+    previousHash: current?.ro_translation_source_hash ?? null,
+  });
+
   let backgroundImageUrl = current?.background_image_url ?? null;
   let newStoragePath: string | null = null;
 
@@ -131,18 +155,22 @@ export async function saveHomepageHero(
       {
         id: 1,
         eyebrow,
-        eyebrow_ro: eyebrowRo || null,
+        eyebrow_ro: translation.values.eyebrow || null,
         title_main: titleMain,
-        title_main_ro: titleMainRo || null,
+        title_main_ro: translation.values.title_main || null,
         title_accent: titleAccent,
-        title_accent_ro: titleAccentRo || null,
+        title_accent_ro: translation.values.title_accent || null,
         description,
-        description_ro: descriptionRo || null,
+        description_ro: translation.values.description || null,
         primary_button_text: primaryButtonText,
-        primary_button_text_ro: primaryButtonTextRo || null,
+        primary_button_text_ro: translation.values.primary_button_text || null,
         primary_button_href: primaryButtonHref,
         secondary_button_text: secondaryButtonText,
-        secondary_button_text_ro: secondaryButtonTextRo || null,
+        secondary_button_text_ro: translation.values.secondary_button_text || null,
+        ro_translation_locked: translationLocked,
+        ro_translation_source_hash: translation.sourceHash,
+        ro_translation_updated_at:
+          translation.translatedAt ?? current?.ro_translation_updated_at ?? null,
         secondary_button_href: secondaryButtonHref,
         background_image_url: backgroundImageUrl,
         overlay_opacity: overlayOpacity,
@@ -277,6 +305,26 @@ export async function saveHomepageLayout(
     .eq("id", 1)
     .maybeSingle();
 
+  const bannerTranslationLocked =
+    formData.get("banner_ro_translation_locked") === "on";
+  const bannerTranslation = await resolveRomanianTranslation({
+    source: {
+      banner_eyebrow: bannerEyebrow,
+      banner_title: bannerTitle,
+      banner_text: bannerText,
+      banner_button_text: bannerButtonText,
+    },
+    manual: {
+      banner_eyebrow: bannerEyebrowRo,
+      banner_title: bannerTitleRo,
+      banner_text: bannerTextRo,
+      banner_button_text: bannerButtonTextRo,
+    },
+    context: "FC Edinet homepage announcement banner",
+    locked: bannerTranslationLocked,
+    previousHash: currentSettings?.ro_translation_source_hash ?? null,
+  });
+
   let bannerImageUrl = currentSettings?.banner_image_url ?? null;
   let newBannerPath: string | null = null;
   const bannerImage = formData.get("banner_image");
@@ -318,13 +366,17 @@ export async function saveHomepageLayout(
         pinned_news_id: pinnedNewsId,
         banner_enabled: bannerEnabled,
         banner_eyebrow: bannerEyebrow,
-        banner_eyebrow_ro: bannerEyebrowRo || null,
+        banner_eyebrow_ro: bannerTranslation.values.banner_eyebrow || null,
         banner_title: bannerTitle,
-        banner_title_ro: bannerTitleRo || null,
+        banner_title_ro: bannerTranslation.values.banner_title || null,
         banner_text: bannerText,
-        banner_text_ro: bannerTextRo || null,
+        banner_text_ro: bannerTranslation.values.banner_text || null,
         banner_button_text: bannerButtonText,
-        banner_button_text_ro: bannerButtonTextRo || null,
+        banner_button_text_ro: bannerTranslation.values.banner_button_text || null,
+        ro_translation_locked: bannerTranslationLocked,
+        ro_translation_source_hash: bannerTranslation.sourceHash,
+        ro_translation_updated_at:
+          bannerTranslation.translatedAt ?? currentSettings?.ro_translation_updated_at ?? null,
         banner_button_href: bannerButtonHref,
         banner_image_url: bannerImageUrl,
         banner_overlay_opacity: bannerOverlayOpacity,

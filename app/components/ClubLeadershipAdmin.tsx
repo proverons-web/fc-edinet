@@ -48,6 +48,10 @@ export default function ClubLeadershipAdmin() {
         <legend>Română / RO</legend>
         <div className="fieldGroup"><label htmlFor="leader_role_ro">Funcție</label><input id="leader_role_ro" name="role_ro" /></div>
         <div className="fieldGroup"><label htmlFor="leader_bio_ro">Informație scurtă</label><textarea id="leader_bio_ro" name="bio_ro" rows={3} /></div>
+        <label className="checkRow compact autoTranslationLock">
+          <input type="checkbox" name="ro_translation_locked" />
+          <span><strong>Зафиксировать ручной RO</strong><small>Иначе должность и описание переводятся автоматически.</small></span>
+        </label>
       </fieldset>
       <div className="twoFields">
         <div className="fieldGroup">

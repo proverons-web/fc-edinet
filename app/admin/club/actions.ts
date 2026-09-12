@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireEditor } from "@/lib/editorial";
+import { resolveRomanianTranslation } from "@/lib/auto-translation";
 
 export type ClubFormState = {
   error?: string;
@@ -77,6 +78,37 @@ export async function saveClubProfile(
     .eq("id", 1)
     .maybeSingle();
 
+  const translationLocked = formData.get("ro_translation_locked") === "on";
+  const translation = await resolveRomanianTranslation({
+    source: {
+      club_name: clubName,
+      city,
+      club_colors: clubColors,
+      motto,
+      about_text: aboutText,
+      history_text: historyText,
+      address,
+      stadium_name: stadiumName,
+      stadium_address: stadiumAddress,
+      stadium_description: stadiumDescription,
+    },
+    manual: {
+      club_name: clubNameRo,
+      city: cityRo,
+      club_colors: clubColorsRo,
+      motto: mottoRo,
+      about_text: aboutTextRo,
+      history_text: historyTextRo,
+      address: addressRo,
+      stadium_name: stadiumNameRo,
+      stadium_address: stadiumAddressRo,
+      stadium_description: stadiumDescriptionRo,
+    },
+    context: "FC Edinet club profile, history, contacts and stadium",
+    locked: translationLocked,
+    previousHash: current?.ro_translation_source_hash ?? null,
+  });
+
   let heroImageUrl = current?.hero_image_url ?? null;
   let stadiumImageUrl = current?.stadium_image_url ?? null;
 
@@ -118,29 +150,33 @@ export async function saveClubProfile(
       {
         id: 1,
         club_name: clubName,
-        club_name_ro: clubNameRo,
+        club_name_ro: translation.values.club_name || null,
         city,
-        city_ro: cityRo,
+        city_ro: translation.values.city || null,
         founded_year: foundedYear,
         club_colors: clubColors,
-        club_colors_ro: clubColorsRo,
+        club_colors_ro: translation.values.club_colors || null,
         motto,
-        motto_ro: mottoRo,
+        motto_ro: translation.values.motto || null,
         about_text: aboutText,
-        about_text_ro: aboutTextRo,
+        about_text_ro: translation.values.about_text || null,
         history_text: historyText,
-        history_text_ro: historyTextRo,
+        history_text_ro: translation.values.history_text || null,
         email,
         phone,
         address,
-        address_ro: addressRo,
+        address_ro: translation.values.address || null,
         stadium_name: stadiumName,
-        stadium_name_ro: stadiumNameRo,
+        stadium_name_ro: translation.values.stadium_name || null,
         stadium_capacity: stadiumCapacity,
         stadium_address: stadiumAddress,
-        stadium_address_ro: stadiumAddressRo,
+        stadium_address_ro: translation.values.stadium_address || null,
         stadium_description: stadiumDescription,
-        stadium_description_ro: stadiumDescriptionRo,
+        stadium_description_ro: translation.values.stadium_description || null,
+        ro_translation_locked: translationLocked,
+        ro_translation_source_hash: translation.sourceHash,
+        ro_translation_updated_at:
+          translation.translatedAt ?? current?.ro_translation_updated_at ?? null,
         hero_image_url: heroImageUrl,
         stadium_image_url: stadiumImageUrl,
       },
@@ -155,7 +191,7 @@ export async function saveClubProfile(
   revalidatePath("/admin/club");
   revalidatePath("/");
 
-  return { success: "Данные клуба сохранены." };
+  return { success: translation.warning ? `Данные клуба сохранены. ${translation.warning}` : "Данные клуба сохранены." };
 }
 
 export async function addLeader(
@@ -190,12 +226,23 @@ export async function addLeader(
     photoUrl = uploaded.publicUrl;
   }
 
+  const translationLocked = formData.get("ro_translation_locked") === "on";
+  const translation = await resolveRomanianTranslation({
+    source: { role, bio },
+    manual: { role: roleRo, bio: bioRo },
+    context: `FC Edinet leadership profile: ${name}`,
+    locked: translationLocked,
+  });
+
   const { error } = await supabase.from("club_leadership").insert({
     name,
     role,
-    role_ro: roleRo,
+    role_ro: translation.values.role || null,
     bio,
-    bio_ro: bioRo,
+    bio_ro: translation.values.bio || null,
+    ro_translation_locked: translationLocked,
+    ro_translation_source_hash: translation.sourceHash,
+    ro_translation_updated_at: translation.translatedAt,
     photo_url: photoUrl,
     display_order: displayOrder,
     is_active: isActive,
@@ -208,7 +255,7 @@ export async function addLeader(
   revalidatePath("/club");
   revalidatePath("/admin/club");
 
-  return { success: "Сотрудник добавлен." };
+  return { success: translation.warning ? `Сотрудник добавлен. ${translation.warning}` : "Сотрудник добавлен." };
 }
 
 export async function updateLeader(formData: FormData) {
@@ -224,13 +271,32 @@ export async function updateLeader(formData: FormData) {
   const displayOrder = integer(formData.get("display_order"), 100);
   const isActive = formData.get("is_active") === "on";
 
+  const { data: existing } = await supabase
+    .from("club_leadership")
+    .select("ro_translation_source_hash,ro_translation_updated_at")
+    .eq("id", id)
+    .maybeSingle();
+
+  const translationLocked = formData.get("ro_translation_locked") === "on";
+  const translation = await resolveRomanianTranslation({
+    source: { role, bio },
+    manual: { role: roleRo, bio: bioRo },
+    context: "FC Edinet leadership role and biography",
+    locked: translationLocked,
+    previousHash: existing?.ro_translation_source_hash ?? null,
+  });
+
   await supabase
     .from("club_leadership")
     .update({
       role,
-      role_ro: roleRo,
+      role_ro: translation.values.role || null,
       bio,
-      bio_ro: bioRo,
+      bio_ro: translation.values.bio || null,
+      ro_translation_locked: translationLocked,
+      ro_translation_source_hash: translation.sourceHash,
+      ro_translation_updated_at:
+        translation.translatedAt ?? existing?.ro_translation_updated_at ?? null,
       display_order: displayOrder,
       is_active: isActive,
     })
@@ -271,12 +337,23 @@ export async function addAchievement(
     return { error: "Укажи название достижения." };
   }
 
+  const translationLocked = formData.get("ro_translation_locked") === "on";
+  const translation = await resolveRomanianTranslation({
+    source: { title, description },
+    manual: { title: titleRo, description: descriptionRo },
+    context: "FC Edinet club achievement",
+    locked: translationLocked,
+  });
+
   const { error } = await supabase.from("club_achievements").insert({
     year,
     title,
-    title_ro: titleRo,
+    title_ro: translation.values.title || null,
     description,
-    description_ro: descriptionRo,
+    description_ro: translation.values.description || null,
+    ro_translation_locked: translationLocked,
+    ro_translation_source_hash: translation.sourceHash,
+    ro_translation_updated_at: translation.translatedAt,
     display_order: displayOrder,
     is_active: isActive,
   });
@@ -290,7 +367,7 @@ export async function addAchievement(
   revalidatePath("/club");
   revalidatePath("/admin/club");
 
-  return { success: "Достижение добавлено." };
+  return { success: translation.warning ? `Достижение добавлено. ${translation.warning}` : "Достижение добавлено." };
 }
 
 export async function updateAchievement(formData: FormData) {
@@ -306,13 +383,32 @@ export async function updateAchievement(formData: FormData) {
   const displayOrder = integer(formData.get("display_order"), 100);
   const isActive = formData.get("is_active") === "on";
 
+  const { data: existing } = await supabase
+    .from("club_achievements")
+    .select("ro_translation_source_hash,ro_translation_updated_at")
+    .eq("id", id)
+    .maybeSingle();
+
+  const translationLocked = formData.get("ro_translation_locked") === "on";
+  const translation = await resolveRomanianTranslation({
+    source: { title, description },
+    manual: { title: titleRo, description: descriptionRo },
+    context: "FC Edinet club achievement",
+    locked: translationLocked,
+    previousHash: existing?.ro_translation_source_hash ?? null,
+  });
+
   await supabase
     .from("club_achievements")
     .update({
       title,
-      title_ro: titleRo,
+      title_ro: translation.values.title || null,
       description,
-      description_ro: descriptionRo,
+      description_ro: translation.values.description || null,
+      ro_translation_locked: translationLocked,
+      ro_translation_source_hash: translation.sourceHash,
+      ro_translation_updated_at:
+        translation.translatedAt ?? existing?.ro_translation_updated_at ?? null,
       display_order: displayOrder,
       is_active: isActive,
     })

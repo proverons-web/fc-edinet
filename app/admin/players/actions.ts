@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireEditor } from "@/lib/editorial";
 import type { Player } from "@/lib/types";
+import { resolveRomanianTranslation } from "@/lib/auto-translation";
 
 export type PlayerFormState = {
   error?: string;
@@ -156,6 +157,15 @@ export async function savePlayer(
     photoUrl = publicData.publicUrl;
   }
 
+  const translationLocked = formData.get("ro_translation_locked") === "on";
+  const translation = await resolveRomanianTranslation({
+    source: { bio },
+    manual: { bio: bioRo },
+    context: `FC Edinet player biography: ${firstName} ${lastName}`,
+    locked: translationLocked,
+    previousHash: existing?.ro_translation_source_hash ?? null,
+  });
+
   const payload = {
     first_name: firstName,
     last_name: lastName,
@@ -167,7 +177,11 @@ export async function savePlayer(
     height_cm: heightCm,
     photo_url: photoUrl,
     bio,
-    bio_ro: bioRo,
+    bio_ro: translation.values.bio || null,
+    ro_translation_locked: translationLocked,
+    ro_translation_source_hash: translation.sourceHash,
+    ro_translation_updated_at:
+      translation.translatedAt ?? existing?.ro_translation_updated_at ?? null,
     is_active: isActive,
     display_order: displayOrder,
     preferred_foot: preferredFoot || null,

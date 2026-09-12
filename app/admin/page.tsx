@@ -202,6 +202,20 @@ export default async function AdminPage() {
               }
             />
             <AdminModule
+              title="Автоперевод RU → RO"
+              text="Автоматический перевод нового и существующего контента на румынский."
+              badge={
+                profile.role === "editor" || profile.role === "admin"
+                  ? "Работает"
+                  : "Editor/Admin"
+              }
+              href={
+                profile.role === "editor" || profile.role === "admin"
+                  ? "/admin/translations"
+                  : undefined
+              }
+            />
+            <AdminModule
               title="Пользователи"
               text="Аккаунты, роли сотрудников и управление доступом."
               badge={profile.role === "admin" ? "Работает" : "Только admin"}

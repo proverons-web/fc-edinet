@@ -321,6 +321,17 @@ export default function HomepageLayoutForm({
               <div className="fieldGroup"><label htmlFor="banner_title_ro">Titlu</label><input id="banner_title_ro" name="banner_title_ro" defaultValue={initial.banner_title_ro ?? ""} /></div>
               <div className="fieldGroup"><label htmlFor="banner_text_ro">Descriere</label><textarea id="banner_text_ro" name="banner_text_ro" rows={3} defaultValue={initial.banner_text_ro ?? ""} /></div>
               <div className="fieldGroup"><label htmlFor="banner_button_text_ro">Text buton</label><input id="banner_button_text_ro" name="banner_button_text_ro" defaultValue={initial.banner_button_text_ro ?? ""} /></div>
+              <label className="checkRow compact autoTranslationLock">
+                <input
+                  type="checkbox"
+                  name="banner_ro_translation_locked"
+                  defaultChecked={initial.ro_translation_locked ?? false}
+                />
+                <span>
+                  <strong>Зафиксировать ручной RO</strong>
+                  <small>Иначе баннер автоматически переводится после изменения русского текста.</small>
+                </span>
+              </label>
             </fieldset>
           </div>
 

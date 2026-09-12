@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireEditor } from "@/lib/editorial";
 import type { PartnerLevel } from "@/lib/types";
+import { resolveRomanianTranslation } from "@/lib/auto-translation";
 
 const validLevels = new Set<PartnerLevel>([
   "main",
@@ -65,12 +66,23 @@ export async function createPartner(formData: FormData) {
     redirect(`/admin/partners?error=${upload.code}`);
   }
 
+  const translationLocked = formData.get("ro_translation_locked") === "on";
+  const translation = await resolveRomanianTranslation({
+    source: { description },
+    manual: { description: descriptionRo },
+    context: `FC Edinet partner description: ${name}`,
+    locked: translationLocked,
+  });
+
   const { error } = await supabase.from("partners").insert({
     name,
     slug,
     website_url: websiteUrl,
     description,
-    description_ro: descriptionRo,
+    description_ro: translation.values.description || null,
+    ro_translation_locked: translationLocked,
+    ro_translation_source_hash: translation.sourceHash,
+    ro_translation_updated_at: translation.translatedAt,
     logo_url: upload.publicUrl,
     logo_storage_path: upload.path,
     partner_level: partnerLevel,
@@ -124,7 +136,7 @@ export async function updatePartner(formData: FormData) {
 
   const { data: existing, error: existingError } = await supabase
     .from("partners")
-    .select("id,logo_url,logo_storage_path")
+    .select("id,logo_url,logo_storage_path,ro_translation_source_hash,ro_translation_updated_at")
     .eq("id", partnerId)
     .single();
 
@@ -154,6 +166,15 @@ export async function updatePartner(formData: FormData) {
     newUploadedPath = upload.path;
   }
 
+  const translationLocked = formData.get("ro_translation_locked") === "on";
+  const translation = await resolveRomanianTranslation({
+    source: { description },
+    manual: { description: descriptionRo },
+    context: `FC Edinet partner description: ${name}`,
+    locked: translationLocked,
+    previousHash: existing.ro_translation_source_hash ?? null,
+  });
+
   const { error } = await supabase
     .from("partners")
     .update({
@@ -161,7 +182,11 @@ export async function updatePartner(formData: FormData) {
       slug,
       website_url: websiteUrl,
       description,
-      description_ro: descriptionRo,
+      description_ro: translation.values.description || null,
+      ro_translation_locked: translationLocked,
+      ro_translation_source_hash: translation.sourceHash,
+      ro_translation_updated_at:
+        translation.translatedAt ?? existing.ro_translation_updated_at ?? null,
       logo_url: logoUrl,
       logo_storage_path: logoStoragePath,
       partner_level: partnerLevel,

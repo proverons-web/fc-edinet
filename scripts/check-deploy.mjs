@@ -80,6 +80,12 @@ if (!publishableKey) {
   );
 }
 
+if (!openaiKey) {
+  warnings.push(
+    "OPENAI_API_KEY is not set. Site will work, but automatic RU -> RO translation will be disabled."
+  );
+}
+
 if (!siteUrl) {
   warnings.push(
     "NEXT_PUBLIC_SITE_URL is not set. Vercel URL fallback will be used."
@@ -125,6 +131,9 @@ console.log(
 );
 console.log(
   `Site URL: ${siteUrl || "automatic Vercel fallback"}`
+);
+console.log(
+  `RU -> RO translation: ${openaiKey ? `configured (${translationModel})` : "disabled"}`
 );
 
 if (warnings.length > 0) {

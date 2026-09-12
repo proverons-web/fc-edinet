@@ -149,7 +149,12 @@ export default async function AdminPartnersPage({ searchParams }: PageProps) {
 
               <label className="partnerWideField">
                 <span>Описание RO</span>
-                <textarea name="description_ro" rows={3} placeholder="Descriere scurtă în limba română" />
+                <textarea name="description_ro" rows={3} placeholder="Создастся автоматически после сохранения" />
+              </label>
+
+              <label className="checkRow compact partnerWideField autoTranslationLock">
+                <input type="checkbox" name="ro_translation_locked" />
+                <span><strong>Зафиксировать ручной RO</strong><small>Если выключено, описание переводится автоматически.</small></span>
               </label>
 
               <label className="partnerWideField">
@@ -264,6 +269,11 @@ export default async function AdminPartnersPage({ searchParams }: PageProps) {
                       <label className="partnerEditWide">
                         <span>Описание RO</span>
                         <textarea name="description_ro" rows={2} defaultValue={partner.description_ro ?? ""} />
+                      </label>
+
+                      <label className="checkRow compact partnerEditWide autoTranslationLock">
+                        <input type="checkbox" name="ro_translation_locked" defaultChecked={partner.ro_translation_locked ?? false} />
+                        <span><strong>Зафиксировать ручной RO</strong><small>Иначе описание обновляется автоматически после изменения RU.</small></span>
                       </label>
 
                       <label className="partnerEditWide">

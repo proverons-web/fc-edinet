@@ -293,7 +293,18 @@ export default function PlayerEditorForm({
                   defaultValue={player?.bio_ro ?? ""}
                   placeholder="Biografia oficială scurtă a jucătorului..."
                 />
-                <small className="i18nHint">Dacă rămâne gol, pe versiunea RO va fi afișat textul în rusă.</small>
+                <label className="checkRow compact autoTranslationLock">
+                  <input
+                    type="checkbox"
+                    name="ro_translation_locked"
+                    defaultChecked={player?.ro_translation_locked ?? false}
+                  />
+                  <span>
+                    <strong>Зафиксировать ручной RO</strong>
+                    <small>Иначе биография автоматически переводится после изменения русского текста.</small>
+                  </span>
+                </label>
+                <small className="i18nHint">Если автоперевод недоступен, используется существующий RO или русский fallback.</small>
               </div>
             </fieldset>
           </section>

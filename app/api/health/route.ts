@@ -7,14 +7,18 @@ export async function GET() {
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   );
+  const translationConfigured = Boolean(process.env.OPENAI_API_KEY);
 
   return NextResponse.json(
     {
       status: supabaseConfigured ? "ok" : "configuration_error",
       app: "fc-edinet",
-      version: "1.9.0",
+      version: "1.9.1",
       environment: process.env.VERCEL_ENV || process.env.NODE_ENV,
       supabaseConfigured,
+      translationConfigured,
+      translationModel:
+        process.env.OPENAI_TRANSLATION_MODEL || "gpt-5.6-luna",
       authProxy: "bypassed",
       time: new Date().toISOString(),
     },

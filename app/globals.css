@@ -1293,3 +1293,27 @@ a.homePartnerCard:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(1
 
 /* v1.9 language switch */
 .languageSwitch{display:flex;align-items:center;gap:7px}.languageSwitch button{appearance:none;border:0;background:transparent;color:#9eb0c9;font:inherit;font-weight:800;cursor:pointer;padding:2px 0}.languageSwitch button.active,.languageSwitch button:hover{color:#fff}.i18nFieldset{border:1px solid #dce5f0;border-radius:14px;padding:18px;margin:0 0 18px;background:#f8fbff}.i18nFieldset legend{font-weight:900;color:#0a397c;padding:0 8px}.i18nHint{font-size:12px;color:#70839c;margin-top:5px}
+
+/* v1.9.1 automatic RU -> RO translation */
+.autoTranslationLock{margin-top:12px;padding:12px 14px;border:1px solid #cfe0f5;border-radius:12px;background:#f7fbff}
+.autoTranslationLock span{display:flex;flex-direction:column;gap:2px}
+.autoTranslationLock small{color:#637a96;font-weight:400}
+.translationAdminGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.translationStatusCard{background:#fff;border:1px solid #dce7f3;border-radius:18px;padding:22px;box-shadow:0 10px 32px rgba(13,43,76,.06)}
+.translationStatusCard h2{margin:4px 0 14px;color:#102b4a}
+.translationStatusCard p{color:#62758a;line-height:1.6}
+.translationWideCard,.translationWideNotice{grid-column:1/-1}
+.translationProviderStatus{display:flex;flex-direction:column;gap:4px;border-radius:12px;padding:14px;margin:10px 0 14px}
+.translationProviderStatus.ready{background:#effaf4;border:1px solid #bee8ce;color:#17633a}
+.translationProviderStatus.missing{background:#fff5ec;border:1px solid #f3d0ab;color:#8d4d10}
+.translationProviderStatus span{font-size:13px;opacity:.8}
+.translationStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.translationStats>div{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;padding:12px;border:1px solid #e4ebf3;border-radius:12px;background:#f8fafc}
+.translationStats span{font-size:13px;color:#526981}
+.translationStats strong{font-size:22px;color:#0b5db5}
+.translationStats small{grid-column:1/-1;color:#8a9bae}
+.translationBulkForm{display:flex;gap:18px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:18px}
+.translationBulkForm .checkRow{flex:1;min-width:280px}
+.translationSteps{margin:14px 0 0;padding-left:22px;color:#526981;line-height:1.75}
+@media(max-width:800px){.translationAdminGrid{grid-template-columns:1fr}.translationStats{grid-template-columns:1fr 1fr}.translationWideCard,.translationWideNotice{grid-column:auto}}
+@media(max-width:520px){.translationStats{grid-template-columns:1fr}}

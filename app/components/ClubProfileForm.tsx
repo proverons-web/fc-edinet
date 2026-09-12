@@ -130,7 +130,18 @@ export default function ClubProfileForm({
           <div className="fieldGroup"><label htmlFor="stadium_address_ro">Adresa stadionului</label><input id="stadium_address_ro" name="stadium_address_ro" defaultValue={profile?.stadium_address_ro ?? ""} /></div>
         </div>
         <div className="fieldGroup"><label htmlFor="stadium_description_ro">Descrierea stadionului</label><textarea id="stadium_description_ro" name="stadium_description_ro" rows={5} defaultValue={profile?.stadium_description_ro ?? ""} /></div>
-        <small className="i18nHint">Незаполненные поля RO автоматически используют русскую версию.</small>
+        <label className="checkRow compact autoTranslationLock">
+          <input
+            type="checkbox"
+            name="ro_translation_locked"
+            defaultChecked={profile?.ro_translation_locked ?? false}
+          />
+          <span>
+            <strong>Зафиксировать ручной RO</strong>
+            <small>Если выключено, изменение русского текста автоматически обновляет румынскую версию.</small>
+          </span>
+        </label>
+        <small className="i18nHint">Незаполненные поля RO при ошибке перевода используют русскую версию.</small>
       </fieldset>
 
       <div className="clubAdminSection">

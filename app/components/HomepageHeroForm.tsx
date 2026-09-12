@@ -187,7 +187,18 @@ export default function HomepageHeroForm({
             <div className="fieldGroup"><label htmlFor="hero_primary_text_ro">Buton principal</label><input id="hero_primary_text_ro" name="primary_button_text_ro" defaultValue={initial.primary_button_text_ro ?? ""} /></div>
             <div className="fieldGroup"><label htmlFor="hero_secondary_text_ro">Buton secundar</label><input id="hero_secondary_text_ro" name="secondary_button_text_ro" defaultValue={initial.secondary_button_text_ro ?? ""} /></div>
           </div>
-          <small className="i18nHint">Пустые поля RO автоматически используют русский текст.</small>
+          <label className="checkRow compact autoTranslationLock">
+            <input
+              type="checkbox"
+              name="ro_translation_locked"
+              defaultChecked={initial.ro_translation_locked ?? false}
+            />
+            <span>
+              <strong>Зафиксировать ручной RO</strong>
+              <small>Иначе тексты Hero автоматически переводятся после изменения RU.</small>
+            </span>
+          </label>
+          <small className="i18nHint">При недоступности автоперевода используется существующий RO или русский fallback.</small>
         </fieldset>
 
         <section className="clubAdminSection">

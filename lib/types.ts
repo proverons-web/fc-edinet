@@ -11,6 +11,9 @@ export type Player = {
   photo_url: string | null;
   bio: string | null;
   bio_ro?: string | null;
+  ro_translation_locked?: boolean;
+  ro_translation_source_hash?: string | null;
+  ro_translation_updated_at?: string | null;
   is_active: boolean;
   display_order: number | null;
   preferred_foot: string | null;
@@ -37,6 +40,9 @@ export type NewsArticle = {
   excerpt_ro?: string | null;
   content: string;
   content_ro?: string | null;
+  ro_translation_locked?: boolean;
+  ro_translation_source_hash?: string | null;
+  ro_translation_updated_at?: string | null;
   cover_image_url: string | null;
   author_name: string | null;
   status: 'draft' | 'review' | 'published';
@@ -223,6 +229,9 @@ export type ClubProfile = {
   stadium_address_ro?: string | null;
   stadium_description: string | null;
   stadium_description_ro?: string | null;
+  ro_translation_locked?: boolean;
+  ro_translation_source_hash?: string | null;
+  ro_translation_updated_at?: string | null;
   hero_image_url: string | null;
   stadium_image_url: string | null;
   updated_at: string;
@@ -235,6 +244,9 @@ export type ClubLeader = {
   role_ro?: string | null;
   bio: string | null;
   bio_ro?: string | null;
+  ro_translation_locked?: boolean;
+  ro_translation_source_hash?: string | null;
+  ro_translation_updated_at?: string | null;
   photo_url: string | null;
   display_order: number;
   is_active: boolean;
@@ -249,6 +261,9 @@ export type ClubAchievement = {
   title_ro?: string | null;
   description: string | null;
   description_ro?: string | null;
+  ro_translation_locked?: boolean;
+  ro_translation_source_hash?: string | null;
+  ro_translation_updated_at?: string | null;
   display_order: number;
   is_active: boolean;
   created_at?: string;
@@ -315,6 +330,9 @@ export type HomepageHero = {
   primary_button_href: string;
   secondary_button_text: string;
   secondary_button_text_ro?: string | null;
+  ro_translation_locked?: boolean;
+  ro_translation_source_hash?: string | null;
+  ro_translation_updated_at?: string | null;
   secondary_button_href: string;
   background_image_url: string | null;
   overlay_opacity: number;
@@ -353,6 +371,9 @@ export type HomepageSettings = {
   banner_text_ro?: string | null;
   banner_button_text: string;
   banner_button_text_ro?: string | null;
+  ro_translation_locked?: boolean;
+  ro_translation_source_hash?: string | null;
+  ro_translation_updated_at?: string | null;
   banner_button_href: string;
   banner_image_url: string | null;
   banner_overlay_opacity: number;
@@ -379,6 +400,9 @@ export type Partner = {
   website_url: string | null;
   description: string | null;
   description_ro?: string | null;
+  ro_translation_locked?: boolean;
+  ro_translation_source_hash?: string | null;
+  ro_translation_updated_at?: string | null;
   logo_url: string;
   logo_storage_path: string | null;
   partner_level: PartnerLevel;

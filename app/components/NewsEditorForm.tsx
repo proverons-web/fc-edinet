@@ -180,7 +180,18 @@ export default function NewsEditorForm({
             <div className="fieldGroup">
               <label htmlFor="content_ro">Text complet</label>
               <textarea id="content_ro" name="content_ro" rows={14} defaultValue={article?.content_ro ?? ""} />
-              <small className="i18nHint">Если перевод не заполнен, в версии RO автоматически показывается русский текст.</small>
+              <label className="checkRow compact autoTranslationLock">
+                <input
+                  type="checkbox"
+                  name="ro_translation_locked"
+                  defaultChecked={article?.ro_translation_locked ?? false}
+                />
+                <span>
+                  <strong>Зафиксировать ручной RO</strong>
+                  <small>Если выключено, при изменении русского текста RO будет обновляться автоматически.</small>
+                </span>
+              </label>
+              <small className="i18nHint">Автоперевод выполняется на сервере. Если сервис недоступен, сайт использует существующий RO или русский fallback.</small>
             </div>
           </fieldset>
 

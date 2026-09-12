@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireStaff, isEditor } from "@/lib/editorial";
 import type { NewsArticle } from "@/lib/types";
+import { resolveRomanianTranslation } from "@/lib/auto-translation";
 
 export type NewsFormState = {
   error?: string;
@@ -87,7 +88,9 @@ export async function saveNews(
     const { data, error } = await supabase
       .from("news")
       .select(`
-        id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,cover_image_url,author_name,status,
+        id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,
+        ro_translation_locked,ro_translation_source_hash,ro_translation_updated_at,
+        cover_image_url,author_name,status,
         published_at,views,is_featured,category_id,created_by,submitted_at,
         published_by,editor_note,created_at,updated_at,
         category:news_categories(id,name,slug)
@@ -214,15 +217,28 @@ export async function saveNews(
     profile.email ||
     "FC Edineț";
 
+  const translationLocked = formData.get("ro_translation_locked") === "on";
+  const translation = await resolveRomanianTranslation({
+    source: { title, excerpt, content },
+    manual: { title: titleRo, excerpt: excerptRo, content: contentRo },
+    context: `FC Edinet news article: ${title}`,
+    locked: translationLocked,
+    previousHash: existing?.ro_translation_source_hash ?? null,
+  });
+
   const payload = {
     category_id: categoryId,
     title,
-    title_ro: titleRo || null,
+    title_ro: translation.values.title || null,
     slug,
     excerpt: excerpt || null,
-    excerpt_ro: excerptRo || null,
+    excerpt_ro: translation.values.excerpt || null,
     content,
-    content_ro: contentRo || null,
+    content_ro: translation.values.content || null,
+    ro_translation_locked: translationLocked,
+    ro_translation_source_hash: translation.sourceHash,
+    ro_translation_updated_at:
+      translation.translatedAt ?? existing?.ro_translation_updated_at ?? null,
     cover_image_url: coverImageUrl,
     author_name: authorName,
     status,
