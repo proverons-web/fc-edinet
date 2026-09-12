@@ -95,7 +95,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
             />
             <PermissionCard
               role="editor"
-              text="Публикует новости и управляет игроками, матчами, таблицей, клубом, медиа и главной страницей."
+              text="Публикует новости и управляет игроками, матчами, таблицей, клубом, медиа, партнёрами и главной страницей."
             />
             <PermissionCard
               role="admin"

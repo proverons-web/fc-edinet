@@ -1149,3 +1149,74 @@ background-position:0 0,0 12px,12px -12px,-12px 0}
   .auditSnapshot{grid-template-columns:1fr}
 }
 .auditRowWrap{display:contents}
+
+
+/* v1.7 — partners & sponsors */
+.partnerCreateSection,.partnerAdminListSection{margin-bottom:34px}
+.partnerCreateForm{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;padding:20px;background:#fff;border:1px solid var(--line);border-radius:18px}
+.partnerCreateForm label,.partnerEditForm label{display:grid;gap:7px;min-width:0}
+.partnerCreateForm label>span,.partnerEditForm label>span{font-size:10px;font-weight:950;letter-spacing:.06em;text-transform:uppercase;color:#708098}
+.partnerCreateForm input,.partnerCreateForm select,.partnerCreateForm textarea,.partnerEditForm input,.partnerEditForm select,.partnerEditForm textarea{width:100%;min-height:44px;border:1px solid #cbd6e4;border-radius:11px;background:#fff;padding:10px 12px;color:#14233a;font:inherit;outline:none}
+.partnerCreateForm textarea,.partnerEditForm textarea{resize:vertical;min-height:82px}
+.partnerCreateForm input:focus,.partnerCreateForm select:focus,.partnerCreateForm textarea:focus,.partnerEditForm input:focus,.partnerEditForm select:focus,.partnerEditForm textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(36,108,255,.10)}
+.partnerCreateForm small{color:#7a889b;font-size:10px;line-height:1.45}
+.partnerWideField{grid-column:span 2}
+.partnerCheckboxes{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.partnerCheckboxes label{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:#344861}
+.partnerCheckboxes input[type="checkbox"]{width:18px;height:18px;min-height:0;padding:0}
+.partnerSaveButton{border:0;cursor:pointer;justify-self:start}
+.partnerCount{display:grid;place-items:center;min-width:42px;height:42px;border-radius:999px;background:#e8f2ff;color:#145da0;font-weight:950}
+.partnerAdminList{display:grid;gap:14px}
+.partnerAdminCard{display:grid;grid-template-columns:160px minmax(0,1fr) auto;gap:18px;align-items:start;padding:18px;background:#fff;border:1px solid var(--line);border-radius:18px}
+.partnerAdminLogo{height:132px;border:1px solid #e1e7ef;border-radius:14px;background:linear-gradient(145deg,#f8fafc,#eef3f8);display:grid;place-items:center;padding:18px;overflow:hidden}
+.partnerAdminLogo img{max-width:100%;max-height:100%;object-fit:contain}
+.partnerEditForm{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.partnerEditWide{grid-column:span 2}
+.partnerAdminMeta{display:flex;flex-direction:column;align-items:flex-end;gap:8px;min-width:130px;color:#718096;font-size:10px}
+.partnerAdminMeta a{color:var(--blue);font-weight:900}
+.partnerLevelPill{display:inline-flex;padding:6px 9px;border-radius:999px;background:#eef2f7;color:#42546d;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.partnerLevelPill.level-main{background:#fff1c7;color:#7a5200}
+.partnerLevelPill.level-official{background:#e8f2ff;color:#145da0}
+.partnerLevelPill.level-technical{background:#e9f7ef;color:#227044}
+.partnerLevelPill.level-supporter{background:#f0edf9;color:#644e95}
+.partnerDeleteForm{grid-column:3;justify-self:end}
+.partnersHero{background:linear-gradient(120deg,#041226,#0b3267 70%,#0f63ff)}
+.partnersPublicGroups{display:grid;gap:44px}
+.partnerPublicGroup{display:grid;gap:4px}
+.partnerPublicGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.partnerPublicCard{display:flex;flex-direction:column;min-height:220px;border:1px solid var(--line);border-radius:18px;background:#fff;overflow:hidden;color:inherit;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+a.partnerPublicCard:hover{transform:translateY(-3px);box-shadow:0 14px 36px rgba(15,37,64,.10);border-color:#b7c7d9}
+.partnerPublicLogo{height:130px;display:grid;place-items:center;padding:22px;background:#f7f9fc;border-bottom:1px solid var(--line)}
+.partnerPublicLogo img{max-width:100%;max-height:100%;object-fit:contain}
+.partnerPublicText{padding:16px}
+.partnerPublicText strong{display:block;font-size:17px;color:#10243e}
+.partnerPublicText p{margin:8px 0 0;color:#66778e;font-size:12px;line-height:1.55}
+.partnerPublicText span{display:block;margin-top:10px;color:var(--blue);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+.partnersContactBox{margin-top:54px;padding:28px;border-radius:20px;background:#071a36;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.partnersContactBox h2{margin:0 0 8px}
+.partnersContactBox p:last-child{margin:0;color:#b8c6d8}
+.homePartnersSection{background:#f7f9fc}
+.homePartnersGrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.homePartnerCard{height:110px;display:grid;place-items:center;padding:16px;border-radius:14px;background:#fff;border:1px solid var(--line);transition:transform .18s ease,box-shadow .18s ease}
+a.homePartnerCard:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(15,37,64,.08)}
+.homePartnerLogo{width:100%;height:100%;display:grid;place-items:center}
+.homePartnerLogo img{max-width:100%;max-height:100%;object-fit:contain}
+
+@media(max-width:1000px){
+  .partnerCreateForm,.partnerEditForm{grid-template-columns:1fr 1fr}
+  .partnerAdminCard{grid-template-columns:130px minmax(0,1fr)}
+  .partnerAdminMeta,.partnerDeleteForm{grid-column:2;justify-self:start;align-items:flex-start}
+  .partnerPublicGrid{grid-template-columns:1fr 1fr}
+  .homePartnersGrid{grid-template-columns:repeat(3,1fr)}
+}
+
+@media(max-width:640px){
+  .partnerCreateForm,.partnerEditForm{grid-template-columns:1fr}
+  .partnerWideField,.partnerEditWide{grid-column:auto}
+  .partnerAdminCard{grid-template-columns:1fr}
+  .partnerAdminLogo{height:150px}
+  .partnerAdminMeta,.partnerDeleteForm{grid-column:auto}
+  .partnerPublicGrid{grid-template-columns:1fr}
+  .partnersContactBox{align-items:flex-start;flex-direction:column}
+  .homePartnersGrid{grid-template-columns:1fr 1fr}
+}

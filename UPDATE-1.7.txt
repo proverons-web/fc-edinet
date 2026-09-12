@@ -1,0 +1,17 @@
+FC EDINET v1.7 UPDATE
+
+1. Apply database/017_partners.sql.
+2. Copy/update project files.
+3. npm install
+4. npm run deploy:check
+5. git add .
+6. git commit -m "FC Edinet v1.7 partners and sponsors"
+7. git push
+
+After deploy:
+- /api/version -> 1.7.0
+- /admin/partners
+- /partners
+- add a partner and verify the homepage strip
+
+The logo is stored as-is. PNG/WebP/SVG with transparent background is recommended.

@@ -1,0 +1,20 @@
+FC EDINET v1.7
+PARTNERS & SPONSORS
+
+New:
+- /admin/partners
+- /partners
+- partner categories: main / official / technical / supporter
+- partner logo upload to Supabase Storage bucket partners
+- active / hidden state
+- show on homepage toggle
+- partner ordering
+- optional external website link
+- homepage partner strip
+- audit log integration
+- sitemap includes /partners
+
+Database:
+- migration 017_partners.sql
+
+Visual redesign is intentionally postponed.

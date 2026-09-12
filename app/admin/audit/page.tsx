@@ -35,6 +35,7 @@ const entityLabels: Record<string, string> = {
   media_photos: "Фотографии",
   media_videos: "Видео",
   homepage_hero: "Главная страница",
+  partners: "Партнёры",
 };
 
 const fieldLabels: Record<string, string> = {
@@ -67,6 +68,9 @@ const fieldLabels: Record<string, string> = {
   eyebrow: "Надзаголовок",
   title_main: "Главный заголовок",
   title_accent: "Акцентный заголовок",
+  partner_level: "Категория партнёра",
+  website_url: "Сайт партнёра",
+  show_on_homepage: "Показывать на главной",
 };
 
 const entityOptions = Object.entries(entityLabels);

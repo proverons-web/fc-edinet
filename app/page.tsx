@@ -3,7 +3,7 @@ import PlayerCard from "@/app/components/PlayerCard";
 import NewsCard from "@/app/components/NewsCard";
 import StandingsTable from "@/app/components/StandingsTable";
 import { createClient } from "@/lib/supabase/server";
-import type { ClubMatch, Competition, HomepageHero, NewsArticle, Player, StandingEntry } from "@/lib/types";
+import type { ClubMatch, Competition, HomepageHero, NewsArticle, Partner, Player, StandingEntry } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +18,7 @@ export default async function Home() {
     lastMatchResult,
     competitionResult,
     heroResult,
+    partnersResult,
   ] = await Promise.all([
     supabase
       .from("players")
@@ -64,6 +65,14 @@ export default async function Home() {
       .select("*")
       .eq("id", 1)
       .maybeSingle(),
+    supabase
+      .from("partners")
+      .select("*")
+      .eq("is_active", true)
+      .eq("show_on_homepage", true)
+      .order("display_order")
+      .order("name")
+      .limit(12),
   ]);
 
   const players = (playersResult.data ?? []) as Player[];
@@ -76,6 +85,7 @@ export default async function Home() {
       competitionResult.data) as Competition | null;
 
   const hero = heroResult.data as HomepageHero | null;
+  const partners = (partnersResult.data ?? []) as Partner[];
 
   const heroEyebrow = hero?.eyebrow || "ЕДИНЕЦ • МОЛДОВА";
   const heroTitleMain = hero?.title_main || "ВМЕСТЕ";
@@ -293,6 +303,47 @@ export default async function Home() {
           )}
         </div>
       </section>
+
+      {partners.length > 0 && (
+        <section className="section homePartnersSection">
+          <div className="container">
+            <div className="sectionHeading">
+              <div>
+                <p className="eyebrow blue">ВМЕСТЕ С КЛУБОМ</p>
+                <h2>Наши партнёры</h2>
+              </div>
+              <Link href="/partners">Все партнёры →</Link>
+            </div>
+
+            <div className="homePartnersGrid">
+              {partners.map((partner) => {
+                const logo = (
+                  <div className="homePartnerLogo">
+                    <img src={partner.logo_url} alt={partner.name} />
+                  </div>
+                );
+
+                return partner.website_url ? (
+                  <a
+                    className="homePartnerCard"
+                    href={partner.website_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    key={partner.id}
+                    title={partner.name}
+                  >
+                    {logo}
+                  </a>
+                ) : (
+                  <div className="homePartnerCard" key={partner.id} title={partner.name}>
+                    {logo}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
     </main>
   );
 }

@@ -298,3 +298,29 @@ export type HomepageHero = {
   show_secondary_button: boolean;
   updated_at: string;
 };
+
+
+export type PartnerLevel = "main" | "official" | "technical" | "supporter";
+
+export type Partner = {
+  id: string | number;
+  name: string;
+  slug: string;
+  website_url: string | null;
+  description: string | null;
+  logo_url: string;
+  logo_storage_path: string | null;
+  partner_level: PartnerLevel;
+  display_order: number;
+  is_active: boolean;
+  show_on_homepage: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export const partnerLevelLabels: Record<PartnerLevel, string> = {
+  main: "Главный партнёр",
+  official: "Официальный партнёр",
+  technical: "Технический партнёр",
+  supporter: "Партнёр клуба",
+};

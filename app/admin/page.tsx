@@ -188,6 +188,20 @@ export default async function AdminPage() {
               }
             />
             <AdminModule
+              title="Партнёры"
+              text="Спонсоры, логотипы, категории, ссылки и показ на главной."
+              badge={
+                profile.role === "editor" || profile.role === "admin"
+                  ? "Работает"
+                  : "Editor/Admin"
+              }
+              href={
+                profile.role === "editor" || profile.role === "admin"
+                  ? "/admin/partners"
+                  : undefined
+              }
+            />
+            <AdminModule
               title="Пользователи"
               text="Аккаунты, роли сотрудников и управление доступом."
               badge={profile.role === "admin" ? "Работает" : "Только admin"}
