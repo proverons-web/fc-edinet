@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { toggleFavoritePlayer } from "@/app/account/actions";
 import { createClient } from "@/lib/supabase/server";
 import type { Player } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
+import { accountText } from "@/lib/account-i18n";
 import { dateLocale, footLabelsI18n, localized, positionLabelsI18n, publicText } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +22,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return { title: fullName, description: `${fullName} — ${positionLabelsI18n[locale][player.position] ?? player.position}, FC Edineț.` };
 }
 export default async function PlayerPage({ params }: PageProps) {
-  const locale = await getLocale(); const text = publicText[locale].team; const { slug } = await params; const player = await getPlayer(slug); if (!player) notFound();
+  const locale = await getLocale(); const text = publicText[locale].team; const account = accountText[locale]; const { slug } = await params; const player = await getPlayer(slug); if (!player) notFound();
+  const supabase = await createClient();
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const userId = claimsData?.claims?.sub;
+  let isFavorite = false;
+  if (userId) {
+    const { data } = await supabase.from("favorite_players").select("player_id").eq("user_id", userId).eq("player_id", player.id).maybeSingle();
+    isFavorite = Boolean(data);
+  }
   const fullName = `${player.first_name} ${player.last_name}`.trim();
   const pos = positionLabelsI18n[locale][player.position] ?? player.position;
   const foot = player.preferred_foot ? footLabelsI18n[locale][player.preferred_foot] : null;
@@ -29,6 +39,7 @@ export default async function PlayerPage({ params }: PageProps) {
       <div className="profilePhotoWrap">{player.photo_url ? <img className="profilePhoto" src={player.photo_url} alt={fullName} /> : <div className="profilePhoto profilePhotoPlaceholder">{text.photo}</div>}<span className="profileNumber">{player.shirt_number ?? "—"}</span></div>
       <div className="profileIntro"><Link className="backLink" href="/team">{text.back}</Link><p className="eyebrow">{pos}</p><h1>{player.first_name}<span>{player.last_name}</span></h1>
         <div className="profileFacts"><Fact label={text.number} value={player.shirt_number?.toString()} /><Fact label={text.nationality} value={player.nationality} /><Fact label={text.height} value={player.height_cm ? `${player.height_cm} cm` : null} /><Fact label={text.foot} value={foot} /></div>
+        <div className="playerFavoriteAction">{userId ? <form action={toggleFavoritePlayer.bind(null, String(player.id), `/team/${slug}`)}><button className={isFavorite ? "favoriteActiveButton" : "favoriteButton"} type="submit">{isFavorite ? account.removePlayer : account.addPlayer}</button></form> : <Link className="favoriteButton" href="/login">{account.loginToFavorite}</Link>}</div>
       </div>
     </div></section>
     <section className="section profileSection"><div className="container profileContentGrid"><article className="bioCard"><p className="eyebrow blue">{text.aboutEyebrow}</p><h2>{text.profile}</h2><p className="bioText">{localized(player.bio, player.bio_ro, locale) || text.bioEmpty}</p></article>

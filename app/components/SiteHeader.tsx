@@ -52,6 +52,7 @@ export default async function SiteHeader() {
             isAuthenticated={isAuthenticated}
             isStaff={isStaff}
             locale={locale}
+            accountName={profile?.display_name || profile?.full_name || null}
           />
         </div>
       </header>

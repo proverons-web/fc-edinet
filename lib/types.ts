@@ -86,10 +86,29 @@ export type Profile = {
   id: string;
   email: string | null;
   full_name: string | null;
+  display_name: string | null;
   avatar_url: string | null;
+  city: string | null;
+  preferred_language: "ru" | "ro";
+  notifications_enabled: boolean;
   role: UserRole;
   created_at: string;
   updated_at: string;
+};
+
+
+export type FavoritePlayer = {
+  user_id: string;
+  player_id: string;
+  created_at: string;
+  player?: Player | null;
+};
+
+export type FavoriteMatch = {
+  user_id: string;
+  match_id: string | number;
+  created_at: string;
+  match?: ClubMatch | null;
 };
 
 export type AdminUser = {
