@@ -12,7 +12,7 @@ export async function GET() {
     {
       status: supabaseConfigured ? "ok" : "configuration_error",
       app: "fc-edinet",
-      version: "1.6.0",
+      version: "1.6.1",
       environment: process.env.VERCEL_ENV || process.env.NODE_ENV,
       supabaseConfigured,
       authProxy: "bypassed",

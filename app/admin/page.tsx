@@ -189,8 +189,9 @@ export default async function AdminPage() {
             />
             <AdminModule
               title="Пользователи"
-              text="Роли, сотрудники и управление доступом."
-              badge={profile.role === "admin" ? "Admin" : "Только admin"}
+              text="Аккаунты, роли сотрудников и управление доступом."
+              badge={profile.role === "admin" ? "Работает" : "Только admin"}
+              href={profile.role === "admin" ? "/admin/users" : undefined}
             />
           </div>
 

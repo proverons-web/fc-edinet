@@ -1,0 +1,43 @@
+FC EDINET v1.6.1 — ОБНОВЛЕНИЕ С v1.6
+
+Что добавлено:
+- Админка -> Пользователи
+- список зарегистрированных аккаунтов
+- поиск по имени/email
+- фильтр по роли
+- дата регистрации
+- подтверждение email
+- последний вход
+- назначение ролей fan / author / editor / admin
+- только admin может управлять ролями
+- editor управляет новостями, игроками, матчами, таблицей, клубом, медиа и главной
+- защита собственного admin-аккаунта от случайного понижения
+
+Supabase:
+- migration database/015_admin_users.sql
+- для текущего рабочего проекта fc-edinet эта миграция уже применена
+- для другого Supabase проекта её нужно выполнить отдельно
+
+КАК ОБНОВИТЬ ТЕКУЩУЮ GIT-ПАПКУ
+
+1. Распакуй fc-edinet-v1.6.1-update.zip во временную папку.
+2. Скопируй содержимое папки обновления поверх:
+   E:\Projects\fc-edinet-v1.6
+3. .git и .env.local не удаляй.
+4. В PowerShell:
+
+cd E:\Projects\fc-edinet-v1.6
+npm install
+npm run deploy:check
+git status
+git add .
+git commit -m "FC Edinet v1.6.1 users and roles"
+git push
+
+Vercel автоматически создаст новый production deployment.
+
+После deploy:
+https://fc-edinet.vercel.app/admin/users
+https://fc-edinet.vercel.app/api/version
+
+/api/version должен показать 1.6.1.

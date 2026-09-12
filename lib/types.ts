@@ -81,6 +81,16 @@ export type Profile = {
   updated_at: string;
 };
 
+export type AdminUser = {
+  id: string;
+  email: string | null;
+  full_name: string | null;
+  role: UserRole;
+  created_at: string;
+  email_confirmed_at: string | null;
+  last_sign_in_at: string | null;
+};
+
 export const roleLabels: Record<UserRole, string> = {
   fan: "Болельщик",
   author: "Автор",

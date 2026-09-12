@@ -38,7 +38,7 @@ export default function SiteFooter() {
 
       <div className="container footerBottom">
         <span>© 2026 FC Edineț</span>
-        <span>Версия 1.6</span>
+        <span>Версия 1.6.1</span>
       </div>
     </footer>
   );
