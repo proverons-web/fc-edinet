@@ -47,6 +47,8 @@ const publishableKey = readValue(
   "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
 );
 const siteUrl = readValue("NEXT_PUBLIC_SITE_URL");
+const openaiKey = readValue("OPENAI_API_KEY");
+const translationModel = readValue("OPENAI_TRANSLATION_MODEL") || "gpt-5.6-luna";
 
 if (!supabaseUrl) {
   errors.push("NEXT_PUBLIC_SUPABASE_URL is missing.");

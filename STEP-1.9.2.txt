@@ -1,0 +1,8 @@
+FC EDINET v1.9.2 — deploy-check fix
+
+Исправлено:
+- scripts/check-deploy.mjs теперь корректно читает OPENAI_API_KEY.
+- OPENAI_TRANSLATION_MODEL корректно получает значение или использует gpt-5.6-luna.
+- npm run deploy:check больше не падает с ReferenceError: openaiKey is not defined.
+
+Новых SQL-миграций нет. База v1.9.1 полностью совместима.
