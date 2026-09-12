@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import PlayerCard from "@/app/components/PlayerCard";
 import NewsCard from "@/app/components/NewsCard";
@@ -173,10 +174,30 @@ export default async function Home() {
   const heroTitleMain = localized(hero?.title_main, hero?.title_main_ro, locale) || text.heroMain;
   const heroTitleAccent = localized(hero?.title_accent, hero?.title_accent_ro, locale) || text.heroAccent;
   const heroDescription = localized(hero?.description, hero?.description_ro, locale) || text.heroDescription;
-  const heroOverlay = Math.max(
-    0,
-    Math.min(95, hero?.overlay_opacity ?? 72)
-  ) / 100;
+  const heroOverlay = Math.max(0, Math.min(95, hero?.overlay_opacity ?? 72)) / 100;
+  const legacyHeroPosition = legacyHeroCoordinates(hero?.background_position);
+  const heroDesktopX = hero?.desktop_position_x ?? legacyHeroPosition.x;
+  const heroDesktopY = hero?.desktop_position_y ?? legacyHeroPosition.y;
+  const heroDesktopZoom = (hero?.desktop_zoom_percent ?? 100) / 100;
+  const heroMobileX = hero?.mobile_position_x ?? heroDesktopX;
+  const heroMobileY = hero?.mobile_position_y ?? heroDesktopY;
+  const heroMobileZoom = (hero?.mobile_zoom_percent ?? hero?.desktop_zoom_percent ?? 100) / 100;
+  const heroHeightDesktop = hero?.hero_height_desktop ?? 650;
+  const heroHeightMobile = hero?.hero_height_mobile ?? 520;
+  const heroTextAlignment = hero?.text_alignment ?? "left";
+  const showHeroMatchCard = hero?.show_match_card ?? true;
+  const heroBaseImage = hero?.background_image_url || hero?.mobile_background_image_url || null;
+  const heroStyle = {
+    "--hero-desktop-x": `${heroDesktopX}%`,
+    "--hero-desktop-y": `${heroDesktopY}%`,
+    "--hero-desktop-zoom": heroDesktopZoom,
+    "--hero-mobile-x": `${heroMobileX}%`,
+    "--hero-mobile-y": `${heroMobileY}%`,
+    "--hero-mobile-zoom": heroMobileZoom,
+    "--hero-height-desktop": `${heroHeightDesktop}px`,
+    "--hero-height-mobile": `${heroHeightMobile}px`,
+    "--hero-overlay": heroOverlay,
+  } as CSSProperties;
 
   let standings: StandingEntry[] = [];
 
@@ -467,19 +488,23 @@ export default async function Home() {
   return (
     <main>
       <section
-        className={`hero ${hero?.background_image_url ? "withBackgroundImage" : ""}`}
-        style={
-          hero?.background_image_url
-            ? {
-                backgroundImage:
-                  `linear-gradient(rgba(4,18,40,${heroOverlay}),rgba(4,18,40,${heroOverlay})),url("${hero.background_image_url}")`,
-                backgroundPosition: hero.background_position || "center",
-              }
-            : undefined
-        }
+        className={`hero visualHero heroTextAlign-${heroTextAlignment} ${showHeroMatchCard ? "" : "heroWithoutMatch"}`}
+        style={heroStyle}
       >
-        <div className="container heroContent">
-          <div>
+        {heroBaseImage && (
+          <div className="heroVisualMedia" aria-hidden="true">
+            <picture>
+              {hero?.mobile_background_image_url && (
+                <source media="(max-width: 680px)" srcSet={hero.mobile_background_image_url} />
+              )}
+              <img src={heroBaseImage} alt="" />
+            </picture>
+            <span className="heroVisualOverlay" />
+          </div>
+        )}
+
+        <div className={`container heroContent ${showHeroMatchCard ? "" : "heroContentSingle"}`}>
+          <div className="heroIntro">
             <p className="eyebrow">{heroEyebrow}</p>
             <h1>
               {heroTitleMain}
@@ -489,52 +514,48 @@ export default async function Home() {
 
             <div className="heroActions">
               {(hero?.show_primary_button ?? true) && (
-                <Link
-                  className="primaryButton"
-                  href={hero?.primary_button_href || "/matches"}
-                >
+                <Link className="primaryButton" href={hero?.primary_button_href || "/matches"}>
                   {localized(hero?.primary_button_text, hero?.primary_button_text_ro, locale) || (locale === "ro" ? "Vezi meciurile" : "Смотреть матчи")}
                 </Link>
               )}
 
               {(hero?.show_secondary_button ?? true) && (
-                <Link
-                  className="secondaryButton"
-                  href={hero?.secondary_button_href || "/news"}
-                >
+                <Link className="secondaryButton" href={hero?.secondary_button_href || "/news"}>
                   {localized(hero?.secondary_button_text, hero?.secondary_button_text_ro, locale) || (locale === "ro" ? "Ultimele știri" : "Последние новости")}
                 </Link>
               )}
             </div>
           </div>
 
-          <aside className="heroMatchCard">
-            <span className="matchTag">{text.nextMatch}</span>
-            {nextMatch ? (
-              <>
-                <p className="competition">
-                  {nextMatch.competition?.name ?? "Матч"}
-                  {nextMatch.round ? ` • ${nextMatch.round}` : ""}
-                </p>
+          {showHeroMatchCard && (
+            <aside className="heroMatchCard">
+              <span className="matchTag">{text.nextMatch}</span>
+              {nextMatch ? (
+                <>
+                  <p className="competition">
+                    {nextMatch.competition?.name ?? "Матч"}
+                    {nextMatch.round ? ` • ${nextMatch.round}` : ""}
+                  </p>
 
-                <div className="heroTeams">
-                  <HeroTeam team={nextMatch.home} />
-                  <b>VS</b>
-                  <HeroTeam team={nextMatch.away} />
-                </div>
+                  <div className="heroTeams">
+                    <HeroTeam team={nextMatch.home} />
+                    <b>VS</b>
+                    <HeroTeam team={nextMatch.away} />
+                  </div>
 
-                <div className="matchMeta">
-                  <span>{formatMatchDate(nextMatch.kickoff, locale)}</span>
-                  <span>{nextMatch.stadium || text.stadiumUnknown}</span>
+                  <div className="matchMeta">
+                    <span>{formatMatchDate(nextMatch.kickoff, locale)}</span>
+                    <span>{nextMatch.stadium || text.stadiumUnknown}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="noNextMatch">
+                  {locale === "ro" ? "Următorul meci nu a fost încă adăugat." : "Следующий матч пока не добавлен в админке."}
                 </div>
-              </>
-            ) : (
-              <div className="noNextMatch">
-                {locale === "ro" ? "Următorul meci nu a fost încă adăugat." : "Следующий матч пока не добавлен в админке."}
-              </div>
-            )}
-            <Link href="/matches">{publicText[locale].matches.title} →</Link>
-          </aside>
+              )}
+              <Link href="/matches">{publicText[locale].matches.title} →</Link>
+            </aside>
+          )}
         </div>
       </section>
 
@@ -629,6 +650,14 @@ function formatMatchDate(value: string, locale: Locale) {
     timeZone: "Europe/Chisinau",
   }).format(date);
   return `${day} • ${time}`;
+}
+
+function legacyHeroCoordinates(position?: HomepageHero["background_position"] | null) {
+  if (position === "top") return { x: 50, y: 0 };
+  if (position === "bottom") return { x: 50, y: 100 };
+  if (position === "left") return { x: 0, y: 50 };
+  if (position === "right") return { x: 100, y: 50 };
+  return { x: 50, y: 50 };
 }
 
 function matchSelect() {

@@ -207,6 +207,7 @@ export async function saveHomepageHero(
 
   revalidatePath("/");
   revalidatePath("/admin/home");
+  revalidatePath("/admin/design");
 
   return { success: "Главный экран сохранён." };
 }
@@ -411,6 +412,7 @@ export async function saveHomepageLayout(
 
   revalidatePath("/");
   revalidatePath("/admin/home");
+  revalidatePath("/admin/design");
 
   return { success: "Порядок блоков и настройки главной сохранены." };
 }

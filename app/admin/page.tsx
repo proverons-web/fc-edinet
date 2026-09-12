@@ -188,6 +188,20 @@ export default async function AdminPage() {
               }
             />
             <AdminModule
+              title="Visual Editor"
+              text="Кадрирование Hero, desktop/mobile preview, высота, затемнение, порядок блоков и история дизайна."
+              badge={
+                profile.role === "editor" || profile.role === "admin"
+                  ? "Работает"
+                  : "Editor/Admin"
+              }
+              href={
+                profile.role === "editor" || profile.role === "admin"
+                  ? "/admin/design"
+                  : undefined
+              }
+            />
+            <AdminModule
               title="Партнёры"
               text="Спонсоры, логотипы, категории, ссылки и показ на главной."
               badge={

@@ -1,0 +1,22 @@
+FC EDINEȚ v2.1.1 — Visual Page Editor
+
+NEW
+- /admin/design — visual editor for the homepage Hero.
+- Desktop/mobile preview modes.
+- Separate photo positioning and zoom for desktop/mobile.
+- Optional dedicated mobile Hero image.
+- Hero height, overlay, text alignment and next-match card visibility.
+- Drag & drop ordering of homepage sections + visibility toggles.
+- Save as draft without changing the public homepage.
+- Publish design to the public homepage.
+- Publication history with restore-to-draft.
+
+DATABASE
+- 023_visual_page_editor.sql
+- Adds visual columns to homepage_hero.
+- Adds homepage_design_draft and homepage_design_versions.
+
+IMPORTANT
+The existing /admin/home remains the content editor for Hero text/buttons,
+pinned news and announcement banner. Precise visual framing is now handled by
+/admin/design.

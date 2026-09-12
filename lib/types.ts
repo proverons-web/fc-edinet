@@ -356,6 +356,17 @@ export type HomepageHero = {
   background_image_url: string | null;
   overlay_opacity: number;
   background_position: "center" | "top" | "bottom" | "left" | "right";
+  desktop_position_x?: number | null;
+  desktop_position_y?: number | null;
+  desktop_zoom_percent?: number | null;
+  mobile_background_image_url?: string | null;
+  mobile_position_x?: number | null;
+  mobile_position_y?: number | null;
+  mobile_zoom_percent?: number | null;
+  hero_height_desktop?: number | null;
+  hero_height_mobile?: number | null;
+  text_alignment?: "left" | "center" | "right" | null;
+  show_match_card?: boolean | null;
   show_primary_button: boolean;
   show_secondary_button: boolean;
   updated_at: string;
@@ -398,6 +409,39 @@ export type HomepageSettings = {
   banner_overlay_opacity: number;
   banner_background_position: "center" | "top" | "bottom" | "left" | "right";
   updated_at: string;
+};
+
+
+
+export type HomepageDesignDraft = {
+  id: number;
+  background_image_url: string | null;
+  mobile_background_image_url: string | null;
+  desktop_position_x: number;
+  desktop_position_y: number;
+  desktop_zoom_percent: number;
+  mobile_position_x: number;
+  mobile_position_y: number;
+  mobile_zoom_percent: number;
+  hero_height_desktop: number;
+  hero_height_mobile: number;
+  overlay_opacity: number;
+  text_alignment: "left" | "center" | "right";
+  show_match_card: boolean;
+  section_order: HomepageSectionKey[];
+  section_visibility: Record<HomepageSectionKey, boolean>;
+  updated_by: string | null;
+  updated_at: string;
+};
+
+export type HomepageDesignSnapshot = Omit<HomepageDesignDraft, "id" | "updated_by" | "updated_at">;
+
+export type HomepageDesignVersion = {
+  id: string | number;
+  label: string | null;
+  snapshot: HomepageDesignSnapshot;
+  published_by: string | null;
+  created_at: string;
 };
 
 export const homepageSectionLabels: Record<HomepageSectionKey, string> = {
