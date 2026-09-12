@@ -1089,3 +1089,63 @@ background-position:0 0,0 12px,12px -12px,-12px 0}
   .userRoleForm,.selfRoleLock{grid-column:1/-1}
   .userRoleForm{grid-template-columns:1fr}
 }
+
+/* v1.6.2 — security & audit log */
+.auditStats{margin-bottom:18px}
+.auditSecurityNote{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 18px;padding:14px 16px;border:1px solid #b9d5ee;border-radius:15px;background:#eef7ff;color:#234261;font-size:12px}
+.auditSecurityNote strong{color:#0b4d86}
+.auditFilters{display:grid;grid-template-columns:minmax(240px,1fr) 220px 180px auto auto;gap:10px;align-items:end;margin:0 0 22px;padding:18px;background:#fff;border:1px solid var(--line);border-radius:17px}
+.auditFilters label{display:grid;gap:7px}
+.auditFilters label>span{font-size:10px;font-weight:950;letter-spacing:.06em;text-transform:uppercase;color:#708098}
+.auditFilters input,.auditFilters select{width:100%;min-height:44px;border:1px solid #cbd6e4;border-radius:11px;background:#fff;padding:10px 12px;color:#14233a;font:inherit;outline:none}
+.auditFilters input:focus,.auditFilters select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(36,108,255,.10)}
+.auditFilterButton,.auditResetButton{min-height:44px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+.auditList{display:grid;gap:12px}
+.auditRow{display:grid;grid-template-columns:48px minmax(0,1fr);gap:14px;background:#fff;border:1px solid var(--line);border-radius:17px;padding:17px}
+.auditActionIcon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:22px;font-weight:950}
+.auditActionIcon.audit-insert{background:#eaf8ef;color:#17713a}
+.auditActionIcon.audit-update{background:#e8f2ff;color:#1763ad}
+.auditActionIcon.audit-delete{background:#fff0f0;color:#a32a2a}
+.auditTopline{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:7px}
+.auditTopline time{margin-left:auto;color:#8190a3;font-size:10px;font-weight:750}
+.auditActionBadge,.auditEntityBadge{display:inline-flex;align-items:center;padding:5px 8px;border-radius:999px;font-size:9px;font-weight:950;letter-spacing:.04em;text-transform:uppercase}
+.auditActionBadge.audit-insert{background:#eaf8ef;color:#17713a}
+.auditActionBadge.audit-update{background:#e8f2ff;color:#1763ad}
+.auditActionBadge.audit-delete{background:#fff0f0;color:#a32a2a}
+.auditEntityBadge{background:#f0f3f7;color:#52627a}
+.auditMain h2{font-size:19px;margin:0 0 4px;word-break:break-word}
+.auditActor{margin:0;color:#687990;font-size:11px}
+.auditActor strong{color:#263b56}
+.auditChangedFields{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.auditChangedFields span{padding:5px 7px;border-radius:8px;background:#f6f8fb;border:1px solid #e0e7f0;color:#51627a;font-size:9px;font-weight:800}
+.auditDetails{margin-top:12px;border-top:1px solid #edf1f5;padding-top:10px}
+.auditDetails summary{cursor:pointer;color:#0f5b9e;font-size:11px;font-weight:900;user-select:none}
+.auditDiffList{display:grid;gap:7px;margin-top:10px}
+.auditDiffRow{display:grid;grid-template-columns:150px minmax(0,1fr) 24px minmax(0,1fr);gap:8px;align-items:center;padding:9px 10px;border-radius:10px;background:#f8fafc;font-size:10px}
+.auditDiffRow strong{color:#334861}
+.auditBefore,.auditAfter{min-width:0;word-break:break-word;padding:6px 8px;border-radius:8px}
+.auditBefore{background:#fff1f1;color:#7f3030}
+.auditAfter{background:#eef8f1;color:#21653a}
+.auditArrow{text-align:center;color:#7b899a;font-weight:950}
+.auditSnapshot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:10px}
+.auditSnapshot>div{display:grid;gap:4px;padding:9px 10px;border-radius:10px;background:#f8fafc;min-width:0}
+.auditSnapshot strong{font-size:9px;color:#697a90;text-transform:uppercase;letter-spacing:.04em}
+.auditSnapshot span{font-size:10px;color:#263b56;word-break:break-word}
+.auditNoData{font-size:11px;color:#77879c}
+.auditLimitHint{margin-bottom:0}
+
+@media (max-width:1000px){
+  .auditFilters{grid-template-columns:1fr 1fr}
+  .auditDiffRow{grid-template-columns:120px 1fr 20px 1fr}
+}
+
+@media (max-width:640px){
+  .auditFilters{grid-template-columns:1fr}
+  .auditRow{grid-template-columns:40px minmax(0,1fr);padding:13px}
+  .auditActionIcon{width:40px;height:40px;border-radius:11px;font-size:18px}
+  .auditTopline time{width:100%;margin-left:0}
+  .auditDiffRow{grid-template-columns:1fr;gap:5px}
+  .auditArrow{text-align:left}
+  .auditSnapshot{grid-template-columns:1fr}
+}
+.auditRowWrap{display:contents}

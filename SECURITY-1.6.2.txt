@@ -1,0 +1,18 @@
+FC EDINET v1.6.2 — SECURITY CHECK
+
+Проверено в рабочем Supabase:
+- RLS включён на основных public-таблицах.
+- Создан audit_log с RLS.
+- audit_log доступен только admin.
+- 15 таблиц подключены к audit trigger.
+- homepage_hero и bucket homepage восстановлены.
+- предупреждение Function Search Path Mutable устранено.
+- anon-доступ к SECURITY DEFINER helper-функциям устранён.
+- unindexed foreign keys из Advisor устранены добавлением индексов.
+
+Оставшиеся предупреждения:
+1. admin_list_users/admin_set_user_role — SECURITY DEFINER доступны роли authenticated.
+   Это намеренно: функции нужны приложению и внутри сами проверяют роль admin.
+2. Leaked Password Protection — включается отдельно в Supabase Authentication.
+3. Multiple permissive policies — предупреждение производительности, не дыра безопасности.
+   Оптимизацию политик можно сделать отдельной технической версией позже.

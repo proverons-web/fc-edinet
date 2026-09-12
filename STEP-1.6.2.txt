@@ -1,0 +1,25 @@
+FC EDINET v1.6.2
+SECURITY + AUDIT LOG
+
+Что добавлено:
+- /admin/audit — журнал административных действий
+- автоматический audit-log на уровне PostgreSQL trigger
+- журналирует создание / изменение / удаление ключевых CMS-объектов
+- фиксирует смену ролей пользователей
+- журнал видит только admin
+- editor/author/fan не имеют доступа к журналу
+- подтверждение перед опасными удалениями и сменой роли
+- исправлены замечания Supabase Advisor по search_path / лишнему anon EXECUTE
+- helper-функции ролей переведены на SECURITY INVOKER
+- добавлены индексы по внешним ключам matches/news/standings
+- восстановлена отсутствовавшая production-таблица homepage_hero
+- восстановлен storage bucket homepage
+
+База:
+- migration database/016_audit_security.sql
+- migration УЖЕ применена к рабочему Supabase fc-edinet
+
+После первого реального изменения через админку запись появится:
+/admin/audit
+
+Версия сайта: 1.6.2

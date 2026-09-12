@@ -101,6 +101,22 @@ export const roleLabels: Record<UserRole, string> = {
 export const staffRoles: UserRole[] = ["author", "editor", "admin"];
 
 
+export type AuditLogEntry = {
+  id: string | number;
+  actor_user_id: string | null;
+  actor_email: string | null;
+  actor_role: UserRole | null;
+  action: "insert" | "update" | "delete";
+  entity_type: string;
+  entity_id: string | null;
+  entity_label: string | null;
+  changed_fields: string[];
+  old_data: Record<string, unknown> | null;
+  new_data: Record<string, unknown> | null;
+  created_at: string;
+};
+
+
 export type ClubTeam = {
   id: string | number;
   name: string;

@@ -193,6 +193,12 @@ export default async function AdminPage() {
               badge={profile.role === "admin" ? "Работает" : "Только admin"}
               href={profile.role === "admin" ? "/admin/users" : undefined}
             />
+            <AdminModule
+              title="Журнал действий"
+              text="История изменений, удалений и смены прав пользователей."
+              badge={profile.role === "admin" ? "Работает" : "Только admin"}
+              href={profile.role === "admin" ? "/admin/audit" : undefined}
+            />
           </div>
 
           <section className="roleMatrix">

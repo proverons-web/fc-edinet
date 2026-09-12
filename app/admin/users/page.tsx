@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ConfirmSubmitButton from "@/app/components/ConfirmSubmitButton";
 import { updateUserRole } from "@/app/admin/users/actions";
 import { requireAdmin } from "@/lib/editorial";
 import type { AdminUser, UserRole } from "@/lib/types";
@@ -210,9 +211,12 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                             ))}
                           </select>
                         </label>
-                        <button type="submit" className="rowAction primaryRowAction">
+                        <ConfirmSubmitButton
+                          className="rowAction primaryRowAction"
+                          confirmMessage={`Изменить права пользователя ${user.email || user.full_name || user.id}?`}
+                        >
                           Сохранить
-                        </button>
+                        </ConfirmSubmitButton>
                       </form>
                     )}
                   </article>

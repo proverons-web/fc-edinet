@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ConfirmSubmitButton from "@/app/components/ConfirmSubmitButton";
 import { notFound } from "next/navigation";
 import MatchEditorForm from "@/app/components/MatchEditorForm";
 import { deleteMatch } from "@/app/admin/matches/actions";
@@ -87,7 +88,7 @@ export default async function EditMatchPage({
                   Завершённые матчи лучше сохранять для истории.
                 </p>
               </div>
-              <button type="submit">Удалить матч</button>
+              <ConfirmSubmitButton confirmMessage="Удалить матч? Это действие нельзя отменить.">Удалить матч</ConfirmSubmitButton>
             </form>
           )}
         </div>

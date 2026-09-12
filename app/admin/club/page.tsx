@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ConfirmSubmitButton from "@/app/components/ConfirmSubmitButton";
 import ClubProfileForm from "@/app/components/ClubProfileForm";
 import ClubLeadershipAdmin from "@/app/components/ClubLeadershipAdmin";
 import ClubAchievementAdmin from "@/app/components/ClubAchievementAdmin";
@@ -134,9 +135,9 @@ export default async function AdminClubPage() {
                           name="leader_id"
                           value={String(leader.id)}
                         />
-                        <button className="clubDeleteButton" type="submit">
+                        <ConfirmSubmitButton className="clubDeleteButton" confirmMessage="Удалить эту запись?">
                           Удалить
-                        </button>
+                        </ConfirmSubmitButton>
                       </form>
                     )}
                   </article>
@@ -206,9 +207,9 @@ export default async function AdminClubPage() {
                           name="achievement_id"
                           value={String(item.id)}
                         />
-                        <button className="clubDeleteButton" type="submit">
+                        <ConfirmSubmitButton className="clubDeleteButton" confirmMessage="Удалить эту запись?">
                           Удалить
-                        </button>
+                        </ConfirmSubmitButton>
                       </form>
                     )}
                   </article>

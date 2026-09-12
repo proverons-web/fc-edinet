@@ -1,0 +1,33 @@
+FC EDINET — обновление v1.6.1 -> v1.6.2
+
+РЕКОМЕНДУЕМЫЙ СПОСОБ:
+распаковать fc-edinet-v1.6.2-update.zip поверх текущей Git-папки проекта.
+
+После копирования:
+
+PowerShell:
+cd "E:\Projects\FC Edinet\fc-edinet-v1.6.1"
+
+npm install
+npm run deploy:check
+
+git status
+git add .
+git commit -m "FC Edinet v1.6.2 security and audit log"
+git push
+
+Vercel автоматически запустит новый deployment.
+
+Проверить после deploy:
+https://fc-edinet.vercel.app/api/version
+Ожидается version = 1.6.2
+
+Затем войти под admin:
+https://fc-edinet.vercel.app/admin/audit
+
+SQL запускать НЕ НУЖНО: 016_audit_security.sql уже применён к рабочей базе.
+
+ВАЖНО:
+Supabase Advisor всё ещё рекомендует включить Leaked Password Protection
+в настройках Authentication. Это отдельная настройка Supabase Auth и не
+требует изменения кода сайта.

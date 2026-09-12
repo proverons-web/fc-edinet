@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ConfirmSubmitButton from "@/app/components/ConfirmSubmitButton";
 import { notFound } from "next/navigation";
 import PlayerEditorForm from "@/app/components/PlayerEditorForm";
 import { deletePlayer } from "@/app/admin/players/actions";
@@ -87,9 +88,9 @@ export default async function EditPlayerPage({
                 </p>
               </div>
 
-              <button type="submit">
+              <ConfirmSubmitButton confirmMessage="Окончательно удалить игрока? Это действие нельзя отменить.">
                 Удалить игрока
-              </button>
+              </ConfirmSubmitButton>
             </form>
           )}
         </div>

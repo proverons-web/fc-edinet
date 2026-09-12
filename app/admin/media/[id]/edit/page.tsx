@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ConfirmSubmitButton from "@/app/components/ConfirmSubmitButton";
 import { notFound } from "next/navigation";
 import AlbumPhotoUploader from "@/app/components/AlbumPhotoUploader";
 import MediaAlbumEditorForm from "@/app/components/MediaAlbumEditorForm";
@@ -198,9 +199,9 @@ export default async function AdminAlbumEditPage({
                             name="photo_id"
                             value={String(photo.id)}
                           />
-                          <button className="danger" type="submit">
+                          <ConfirmSubmitButton className="danger" confirmMessage="Удалить эту фотографию из альбома?">
                             Удалить
-                          </button>
+                          </ConfirmSubmitButton>
                         </form>
                       )}
                     </div>
@@ -227,7 +228,7 @@ export default async function AdminAlbumEditPage({
                   Будут удалены записи альбома и все его файлы из Storage.
                 </p>
               </div>
-              <button type="submit">Удалить альбом</button>
+              <ConfirmSubmitButton confirmMessage="Удалить весь альбом вместе с фотографиями? Это действие нельзя отменить.">Удалить альбом</ConfirmSubmitButton>
             </form>
           )}
         </div>

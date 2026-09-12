@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ConfirmSubmitButton from "@/app/components/ConfirmSubmitButton";
 import { notFound } from "next/navigation";
 import NewsEditorForm from "@/app/components/NewsEditorForm";
 import { deleteDraft } from "@/app/admin/news/actions";
@@ -111,7 +112,7 @@ export default async function EditNewsPage({
                   Редактор и администратор — любой материал.
                 </p>
               </div>
-              <button type="submit">Удалить</button>
+              <ConfirmSubmitButton confirmMessage="Удалить этот материал? Это действие нельзя отменить.">Удалить</ConfirmSubmitButton>
             </form>
           )}
         </div>

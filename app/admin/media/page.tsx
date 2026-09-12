@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ConfirmSubmitButton from "@/app/components/ConfirmSubmitButton";
 import MediaAlbumCreateForm from "@/app/components/MediaAlbumCreateForm";
 import MediaVideoForm from "@/app/components/MediaVideoForm";
 import {
@@ -146,9 +147,9 @@ export default async function AdminMediaPage() {
                           name="video_id"
                           value={String(video.id)}
                         />
-                        <button className="clubDeleteButton" type="submit">
+                        <ConfirmSubmitButton className="clubDeleteButton" confirmMessage="Удалить видео из медиатеки?">
                           Удалить
-                        </button>
+                        </ConfirmSubmitButton>
                       </form>
                     )}
                   </article>
