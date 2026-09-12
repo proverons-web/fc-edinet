@@ -1,7 +1,9 @@
+import PageHeroShell from "@/app/components/PageHeroShell";
 import { createClient } from "@/lib/supabase/server";
 import type { ClubAchievement, ClubLeader, ClubProfile } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { localized, publicText } from "@/lib/i18n";
+import { getPublishedSitePageDesign } from "@/lib/page-design";
 
 export const dynamic = "force-dynamic";
 
@@ -9,10 +11,11 @@ export default async function ClubPage() {
   const locale = await getLocale();
   const text = publicText[locale].club;
   const supabase = await createClient();
-  const [{ data: profileData }, { data: leadershipData }, { data: achievementsData }] = await Promise.all([
+  const [{ data: profileData }, { data: leadershipData }, { data: achievementsData }, design] = await Promise.all([
     supabase.from("club_profile").select("*").eq("id", 1).maybeSingle(),
     supabase.from("club_leadership").select("*").eq("is_active", true).order("display_order").order("name"),
     supabase.from("club_achievements").select("*").eq("is_active", true).order("display_order").order("year", { ascending: false }),
+    getPublishedSitePageDesign(supabase, "club"),
   ]);
   const profile = profileData as ClubProfile | null;
   const leaders = (leadershipData ?? []) as ClubLeader[];
@@ -27,9 +30,9 @@ export default async function ClubPage() {
   const stadiumDescription = localized(profile?.stadium_description, profile?.stadium_description_ro, locale) || text.stadiumDescriptionEmpty;
 
   return <main>
-    <section className={`clubHero ${profile?.hero_image_url ? "withImage" : ""}`} style={profile?.hero_image_url ? { backgroundImage: `linear-gradient(90deg,rgba(2,13,31,.94),rgba(2,13,31,.56)),url("${profile.hero_image_url}")` } : undefined}>
-      <div className="container clubHeroInner"><p className="eyebrow">{city.toUpperCase()} • MOLDOVA</p><h1>{clubName}</h1><p className="clubHeroMotto">{motto}</p><div className="clubHeroFacts"><Fact label={text.founded} value={profile?.founded_year ? String(profile.founded_year) : "—"}/><Fact label={text.city} value={city}/><Fact label={text.colors} value={colors}/></div></div>
-    </section>
+    <PageHeroShell design={design} className="clubHero" contentClassName="container clubHeroInner" contentImageUrl={profile?.hero_image_url}>
+      <>{design.show_eyebrow && <p className="eyebrow">{city.toUpperCase()} • MOLDOVA</p>}<h1>{clubName}</h1>{design.show_description && <p className="clubHeroMotto">{motto}</p>}<div className="clubHeroFacts"><Fact label={text.founded} value={profile?.founded_year ? String(profile.founded_year) : "—"}/><Fact label={text.city} value={city}/><Fact label={text.colors} value={colors}/></div></>
+    </PageHeroShell>
     <section className="section clubAboutSection"><div className="container clubStoryGrid"><div><p className="eyebrow blue">{text.about}</p><h2>{clubName}</h2><RichText value={localized(profile?.about_text, profile?.about_text_ro, locale) || text.aboutEmpty}/></div><aside className="clubContactCard"><p className="eyebrow blue">{text.contacts}</p><h3>{text.contactTitle}</h3><Contact label="Email" value={profile?.email}/><Contact label={text.phone} value={profile?.phone}/><Contact label={text.address} value={address}/></aside></div></section>
     <section className="section clubHistorySection"><div className="container"><div className="clubNarrowText"><p className="eyebrow blue">{text.historyEyebrow}</p><h2>{text.history}</h2><RichText value={localized(profile?.history_text, profile?.history_text_ro, locale) || text.historyEmpty}/></div></div></section>
     <section className="section clubStadiumSection"><div className="container"><div className="sectionHeading"><div><p className="eyebrow">{text.arena}</p><h2>{stadiumName}</h2></div></div><div className="clubStadiumGrid"><div className="clubStadiumImage">{profile?.stadium_image_url ? <img src={profile.stadium_image_url} alt={stadiumName}/> : <span>{text.stadiumPhoto}</span>}</div><div className="clubStadiumInfo"><div className="clubStadiumFacts"><Fact label={text.capacity} value={profile?.stadium_capacity ? profile.stadium_capacity.toLocaleString(locale === "ro" ? "ro-RO" : "ru-RU") : "—"}/><Fact label={text.address} value={stadiumAddress || "—"}/></div><RichText value={stadiumDescription}/></div></div></div></section>
@@ -37,6 +40,6 @@ export default async function ClubPage() {
     <section className="section clubAchievementsSection"><div className="container"><div className="sectionHeading"><div><p className="eyebrow">{text.resultsHistory}</p><h2>{text.achievements}</h2></div></div>{achievements.length ? <div className="clubTimeline">{achievements.map((item) => <article key={item.id}><div className="clubTimelineYear">{item.year || "—"}</div><div><h3>{localized(item.title, item.title_ro, locale)}</h3>{localized(item.description, item.description_ro, locale) && <p>{localized(item.description, item.description_ro, locale)}</p>}</div></article>)}</div> : <div className="clubDarkEmpty">{text.achievementsEmpty}</div>}</div></section>
   </main>;
 }
-function Fact({label,value}:{label:string;value:string}){return <div className="clubFact"><span>{label}</span><strong>{value}</strong></div>}
-function Contact({label,value}:{label:string;value:string|null|undefined}){return <div className="clubContactRow"><span>{label}</span><strong>{value||"—"}</strong></div>}
-function RichText({value}:{value:string}){const paragraphs=value.split(/\n\s*\n/g).map(i=>i.trim()).filter(Boolean);return <div className="clubRichText">{paragraphs.map((p,i)=><p key={`${i}-${p.slice(0,20)}`}>{p}</p>)}</div>}
+function Fact({ label, value }: { label: string; value: string }) { return <div className="clubFact"><span>{label}</span><strong>{value}</strong></div>; }
+function Contact({ label, value }: { label: string; value: string | null | undefined }) { return <div className="clubContactRow"><span>{label}</span><strong>{value || "—"}</strong></div>; }
+function RichText({ value }: { value: string }) { const paragraphs = value.split(/\n\s*\n/g).map((item) => item.trim()).filter(Boolean); return <div className="clubRichText">{paragraphs.map((p, i) => <p key={`${i}-${p.slice(0, 20)}`}>{p}</p>)}</div>; }

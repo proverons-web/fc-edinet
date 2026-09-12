@@ -1,24 +1,28 @@
 import Link from "next/link";
 import StandingsTable from "@/app/components/StandingsTable";
+import PageHeroShell from "@/app/components/PageHeroShell";
 import { toggleFavoriteMatch } from "@/app/account/actions";
 import { createClient } from "@/lib/supabase/server";
 import type { ClubMatch, Competition, StandingEntry } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { accountText } from "@/lib/account-i18n";
 import { dateLocale, matchStatusLabelsI18n, publicText, type Locale } from "@/lib/i18n";
+import { getPublishedSitePageDesign, resolvePageHeroText } from "@/lib/page-design";
 export const dynamic="force-dynamic";
 export default async function MatchesPage(){
  const locale=await getLocale();const text=publicText[locale].matches;const account=accountText[locale];const supabase=await createClient();const now=new Date().toISOString();
  const {data:claimsData}=await supabase.auth.getClaims();const userId=claimsData?.claims?.sub;
- const [upcomingResult,finishedResult,competitionResult]=await Promise.all([
+ const [upcomingResult,finishedResult,competitionResult,design]=await Promise.all([
   supabase.from("matches").select(matchSelect()).in("status",["scheduled","live","postponed"]).gte("kickoff",now).order("kickoff",{ascending:true}),
   supabase.from("matches").select(matchSelect()).eq("status","finished").order("kickoff",{ascending:false}).limit(20),
-  supabase.from("competitions").select("*").eq("is_active",true).order("name").limit(1).maybeSingle()]);
+  supabase.from("competitions").select("*").eq("is_active",true).order("name").limit(1).maybeSingle(),
+  getPublishedSitePageDesign(supabase,"matches")]);
  const upcoming=(upcomingResult.data??[]) as unknown as ClubMatch[];const finished=(finishedResult.data??[]) as unknown as ClubMatch[];const competition=competitionResult.data as Competition|null;let standings:StandingEntry[]=[];
  let favoriteRows:{match_id:number|string}[]=[];if(userId){const {data}=await supabase.from("favorite_matches").select("match_id").eq("user_id",userId);favoriteRows=(data??[]) as {match_id:number|string}[]}
  const favoriteIds=new Set(favoriteRows.map(row=>String(row.match_id)));
  if(competition){const {data}=await supabase.from("standings").select(standingsSelect()).eq("competition_id",competition.id).order("points",{ascending:false}).order("goal_difference",{ascending:false}).order("goals_for",{ascending:false});standings=(data??[]) as unknown as StandingEntry[]}
- return <main><section className="pageHero"><div className="container"><p className="eyebrow">FC EDINEȚ</p><h1>{text.title}</h1><p>{text.description}</p></div></section><section className="section matchPublicSection"><div className="container">
+ const hero=resolvePageHeroText(design,locale,{eyebrow:"FC EDINEȚ",title:text.title,description:text.description});
+ return <main><PageHeroShell design={design} className="pageHero"><>{design.show_eyebrow&&<p className="eyebrow">{hero.eyebrow}</p>}<h1>{hero.title}</h1>{design.show_description&&<p>{hero.description}</p>}</></PageHeroShell><section className="section matchPublicSection"><div className="container">
   <div className="sectionHeading"><div><p className="eyebrow blue">{text.calendar}</p><h2>{text.upcoming}</h2></div></div>{upcoming.length?<div className="publicMatchList">{upcoming.map(m=><PublicMatchCard key={m.id} match={m} locale={locale} isAuthenticated={Boolean(userId)} isFavorite={favoriteIds.has(String(m.id))}/>)}</div>:<div className="adminEmpty">{text.upcomingEmpty}</div>}
   <div className="sectionHeading matchResultsHeading"><div><p className="eyebrow blue">{text.results}</p><h2>{text.latest}</h2></div></div>{finished.length?<div className="publicMatchList">{finished.map(m=><PublicMatchCard key={m.id} match={m} locale={locale} isAuthenticated={Boolean(userId)} isFavorite={favoriteIds.has(String(m.id))}/>)}</div>:<div className="adminEmpty">{text.resultsEmpty}</div>}
   <div className="sectionHeading matchResultsHeading"><div><p className="eyebrow blue">{text.table}</p><h2>{competition?.name??text.championship}{competition?.season?` · ${competition.season}`:""}</h2></div><Link href="/standings">{text.fullTable}</Link></div>{standings.length?<StandingsTable entries={standings} locale={locale}/>:<div className="adminEmpty">{text.tableEmpty}</div>}

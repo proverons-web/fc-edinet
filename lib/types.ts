@@ -444,6 +444,64 @@ export type HomepageDesignVersion = {
   created_at: string;
 };
 
+export type SitePageDesignKey =
+  | "news"
+  | "team"
+  | "matches"
+  | "standings"
+  | "club"
+  | "media"
+  | "partners"
+  | "template_news"
+  | "template_player"
+  | "template_album";
+
+export type PageHeroBackgroundMode = "default" | "custom" | "content";
+export type PageHeroOverlayStyle = "solid" | "gradient-left" | "gradient-right";
+
+export type SitePageDesignSnapshot = {
+  background_mode: PageHeroBackgroundMode;
+  desktop_image_url: string | null;
+  mobile_image_url: string | null;
+  desktop_position_x: number;
+  desktop_position_y: number;
+  desktop_zoom_percent: number;
+  mobile_position_x: number;
+  mobile_position_y: number;
+  mobile_zoom_percent: number;
+  hero_height_desktop: number;
+  hero_height_mobile: number;
+  overlay_opacity: number;
+  overlay_style: PageHeroOverlayStyle;
+  text_alignment: "left" | "center" | "right";
+  content_width: number;
+  show_eyebrow: boolean;
+  show_description: boolean;
+  eyebrow_ru: string | null;
+  eyebrow_ro: string | null;
+  title_ru: string | null;
+  title_ro: string | null;
+  description_ru: string | null;
+  description_ro: string | null;
+};
+
+export type SitePageDesign = SitePageDesignSnapshot & {
+  page_key: SitePageDesignKey;
+  updated_by: string | null;
+  updated_at: string;
+};
+
+export type SitePageDesignDraft = SitePageDesign & {};
+
+export type SitePageDesignVersion = {
+  id: string | number;
+  page_key: SitePageDesignKey;
+  label: string | null;
+  snapshot: SitePageDesignSnapshot;
+  published_by: string | null;
+  created_at: string;
+};
+
 export const homepageSectionLabels: Record<HomepageSectionKey, string> = {
   matches: "Матчи",
   standings: "Турнирная таблица",

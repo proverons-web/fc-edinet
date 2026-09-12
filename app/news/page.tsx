@@ -1,9 +1,11 @@
 import Link from "next/link";
 import NewsCard from "@/app/components/NewsCard";
+import PageHeroShell from "@/app/components/PageHeroShell";
 import { createClient } from "@/lib/supabase/server";
-import type { NewsArticle, NewsCategory } from "@/lib/types";
+import type { NewsArticle, NewsCategory, SitePageDesignSnapshot } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { localized, publicText } from "@/lib/i18n";
+import { getPublishedSitePageDesign, resolvePageHeroText } from "@/lib/page-design";
 
 export const dynamic = "force-dynamic";
 type PageProps = { searchParams: Promise<{ category?: string | string[] }> };
@@ -15,9 +17,10 @@ export default async function NewsPage({ searchParams }: PageProps) {
   const selectedSlug = Array.isArray(params.category) ? params.category[0] : params.category;
   const supabase = await createClient();
 
-  const { data: categoryData } = await supabase.from("news_categories")
-    .select("id,name,name_ro,slug,display_order,is_active").eq("is_active", true)
-    .order("display_order", { ascending: true });
+  const [{ data: categoryData }, design] = await Promise.all([
+    supabase.from("news_categories").select("id,name,name_ro,slug,display_order,is_active").eq("is_active", true).order("display_order", { ascending: true }),
+    getPublishedSitePageDesign(supabase, "news"),
+  ]);
   const categories = (categoryData ?? []) as NewsCategory[];
   const selectedCategory = categories.find((item) => item.slug === selectedSlug);
 
@@ -28,13 +31,14 @@ export default async function NewsPage({ searchParams }: PageProps) {
     `).eq("status", "published").lte("published_at", new Date().toISOString())
     .order("is_featured", { ascending: false }).order("published_at", { ascending: false });
 
-  if (selectedSlug && !selectedCategory) return renderInvalid(categories, selectedSlug, locale);
+  if (selectedSlug && !selectedCategory) return renderInvalid(categories, selectedSlug, locale, design);
   if (selectedCategory) query = query.eq("category_id", selectedCategory.id);
   const { data, error } = await query;
   const articles = (data ?? []) as unknown as NewsArticle[];
+  const hero = resolvePageHeroText(design, locale, { eyebrow: "FC EDINEȚ", title: text.title, description: text.description });
 
   return <main>
-    <section className="pageHero newsPageHero"><div className="container"><p className="eyebrow">FC EDINEȚ</p><h1>{text.title}</h1><p>{text.description}</p></div></section>
+    <PageHeroShell design={design} className="pageHero newsPageHero"><>{design.show_eyebrow && <p className="eyebrow">{hero.eyebrow}</p>}<h1>{hero.title}</h1>{design.show_description && <p>{hero.description}</p>}</></PageHeroShell>
     <section className="section newsArchiveSection"><div className="container">
       <CategoryFilters categories={categories} selectedSlug={selectedSlug} locale={locale} />
       {error ? <div className="archiveMessage">{text.loadError}: {error.message}</div>
@@ -46,16 +50,10 @@ export default async function NewsPage({ searchParams }: PageProps) {
 
 function CategoryFilters({ categories, selectedSlug, locale }: { categories: NewsCategory[]; selectedSlug?: string; locale: "ru" | "ro" }) {
   const text = publicText[locale].news;
-  return <nav className="newsFilters" aria-label={text.categoriesAria}>
-    <Link className={!selectedSlug ? "active" : ""} href="/news">{text.all}</Link>
-    {categories.map((category) => <Link key={category.id} className={selectedSlug === category.slug ? "active" : ""} href={`/news?category=${category.slug}`}>
-      {localized(category.name, category.name_ro, locale)}
-    </Link>)}
-  </nav>;
+  return <nav className="newsFilters" aria-label={text.categoriesAria}><Link className={!selectedSlug ? "active" : ""} href="/news">{text.all}</Link>{categories.map((category) => <Link key={category.id} className={selectedSlug === category.slug ? "active" : ""} href={`/news?category=${category.slug}`}>{localized(category.name, category.name_ro, locale)}</Link>)}</nav>;
 }
-
-function renderInvalid(categories: NewsCategory[], selectedSlug: string, locale: "ru" | "ro") {
+function renderInvalid(categories: NewsCategory[], selectedSlug: string, locale: "ru" | "ro", design: SitePageDesignSnapshot) {
   const text = publicText[locale].news;
-  return <main><section className="pageHero newsPageHero"><div className="container"><p className="eyebrow">FC EDINEȚ</p><h1>{text.title}</h1><p>{text.description}</p></div></section>
-    <section className="section"><div className="container"><CategoryFilters categories={categories} selectedSlug={selectedSlug} locale={locale}/><div className="archiveMessage">{text.invalidCategory}</div></div></section></main>;
+  const hero = resolvePageHeroText(design, locale, { eyebrow: "FC EDINEȚ", title: text.title, description: text.description });
+  return <main><PageHeroShell design={design} className="pageHero newsPageHero"><>{design.show_eyebrow && <p className="eyebrow">{hero.eyebrow}</p>}<h1>{hero.title}</h1>{design.show_description && <p>{hero.description}</p>}</></PageHeroShell><section className="section"><div className="container"><CategoryFilters categories={categories} selectedSlug={selectedSlug} locale={locale}/><div className="archiveMessage">{text.invalidCategory}</div></div></section></main>;
 }

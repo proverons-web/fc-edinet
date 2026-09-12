@@ -8,7 +8,10 @@ import type {
   HomepageHero,
   HomepageSection,
   HomepageSectionKey,
+  SitePageDesignKey,
+  SitePageDesignSnapshot,
 } from "@/lib/types";
+import { defaultSitePageDesign, normalizeSitePageDesign, sitePageDesignCatalog } from "@/lib/page-design";
 
 export type VisualEditorState = {
   error?: string;
@@ -370,4 +373,185 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function text(value: FormDataEntryValue | null) {
   return typeof value === "string" ? value.trim() : "";
+}
+
+
+const sitePageKeys = new Set(sitePageDesignCatalog.map((item) => item.key));
+
+export async function saveSitePageVisualEditor(
+  _previousState: VisualEditorState,
+  formData: FormData
+): Promise<VisualEditorState> {
+  const { supabase, userId } = await requireEditor();
+  const pageKey = parseSitePageKey(text(formData.get("page_key")));
+  if (!pageKey) return { error: "Неизвестная страница Visual Editor." };
+  const item = sitePageDesignCatalog.find((entry) => entry.key === pageKey)!;
+  const intent = text(formData.get("intent")) === "publish" ? "publish" : "draft";
+
+  const [{ data: publishedData }, { data: draftData }] = await Promise.all([
+    supabase.from("site_page_designs").select("*").eq("page_key", pageKey).maybeSingle(),
+    supabase.from("site_page_design_drafts").select("*").eq("page_key", pageKey).maybeSingle(),
+  ]);
+
+  const fallback = defaultSitePageDesign(pageKey);
+  const published = publishedData ? normalizeSitePageDesign(publishedData as Record<string, unknown>, fallback) : fallback;
+  const current = draftData ? normalizeSitePageDesign(draftData as Record<string, unknown>, published) : published;
+
+  let desktopImageUrl = current.desktop_image_url;
+  let mobileImageUrl = current.mobile_image_url;
+
+  const desktopFile = formData.get("desktop_image");
+  if (desktopFile instanceof File && desktopFile.size > 0) {
+    const validation = validateImage(desktopFile);
+    if (validation) return { error: validation };
+    const uploaded = await uploadSitePageImage(desktopFile, pageKey, "desktop", userId, supabase);
+    if ("error" in uploaded) return { error: uploaded.error };
+    desktopImageUrl = uploaded.url;
+  }
+  const mobileFile = formData.get("mobile_image");
+  if (mobileFile instanceof File && mobileFile.size > 0) {
+    const validation = validateImage(mobileFile);
+    if (validation) return { error: validation };
+    const uploaded = await uploadSitePageImage(mobileFile, pageKey, "mobile", userId, supabase);
+    if ("error" in uploaded) return { error: uploaded.error };
+    mobileImageUrl = uploaded.url;
+  }
+  if (formData.get("clear_desktop_image") === "on") desktopImageUrl = null;
+  if (formData.get("clear_mobile_image") === "on") mobileImageUrl = null;
+
+  const requestedMode = text(formData.get("background_mode"));
+  const backgroundMode = requestedMode === "custom" || requestedMode === "default" || (requestedMode === "content" && item.supportsContentImage)
+    ? requestedMode as SitePageDesignSnapshot["background_mode"]
+    : current.background_mode;
+
+  const snapshot: SitePageDesignSnapshot = {
+    background_mode: backgroundMode,
+    desktop_image_url: desktopImageUrl,
+    mobile_image_url: mobileImageUrl,
+    desktop_position_x: intInRange(formData.get("desktop_position_x"), 0, 100, current.desktop_position_x),
+    desktop_position_y: intInRange(formData.get("desktop_position_y"), 0, 100, current.desktop_position_y),
+    desktop_zoom_percent: intInRange(formData.get("desktop_zoom_percent"), 100, 240, current.desktop_zoom_percent),
+    mobile_position_x: intInRange(formData.get("mobile_position_x"), 0, 100, current.mobile_position_x),
+    mobile_position_y: intInRange(formData.get("mobile_position_y"), 0, 100, current.mobile_position_y),
+    mobile_zoom_percent: intInRange(formData.get("mobile_zoom_percent"), 100, 300, current.mobile_zoom_percent),
+    hero_height_desktop: intInRange(formData.get("hero_height_desktop"), 200, 950, current.hero_height_desktop),
+    hero_height_mobile: intInRange(formData.get("hero_height_mobile"), 180, 900, current.hero_height_mobile),
+    overlay_opacity: intInRange(formData.get("overlay_opacity"), 0, 95, current.overlay_opacity),
+    overlay_style: parseOverlayStyle(text(formData.get("overlay_style")), current.overlay_style),
+    text_alignment: alignment(text(formData.get("text_alignment")), current.text_alignment),
+    content_width: intInRange(formData.get("content_width"), 420, 1200, current.content_width),
+    show_eyebrow: formData.get("show_eyebrow") === "on",
+    show_description: formData.get("show_description") === "on",
+    eyebrow_ru: item.editableText ? nullableFormText(formData.get("eyebrow_ru")) : current.eyebrow_ru,
+    eyebrow_ro: item.editableText ? nullableFormText(formData.get("eyebrow_ro")) : current.eyebrow_ro,
+    title_ru: item.editableText ? nullableFormText(formData.get("title_ru")) : current.title_ru,
+    title_ro: item.editableText ? nullableFormText(formData.get("title_ro")) : current.title_ro,
+    description_ru: item.editableText ? nullableFormText(formData.get("description_ru")) : current.description_ru,
+    description_ro: item.editableText ? nullableFormText(formData.get("description_ro")) : current.description_ro,
+  };
+
+  const { error: draftError } = await supabase.from("site_page_design_drafts").upsert({
+    page_key: pageKey,
+    ...snapshot,
+    updated_by: userId,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: "page_key" });
+  if (draftError) return { error: `Не удалось сохранить черновик ${item.label}: ${draftError.message}` };
+
+  if (intent === "draft") {
+    revalidatePath("/admin/design");
+    return { success: `Черновик «${item.label}» сохранён. Публичная страница не изменилась.` };
+  }
+
+  const { count } = await supabase.from("site_page_design_versions")
+    .select("id", { count: "exact", head: true }).eq("page_key", pageKey);
+  if ((count ?? 0) === 0) {
+    const { error } = await supabase.from("site_page_design_versions").insert({
+      page_key: pageKey,
+      label: `Исходный дизайн: ${item.label}`,
+      snapshot: published,
+      published_by: userId,
+    });
+    if (error) return { error: `Не удалось сохранить исходную версию: ${error.message}` };
+  }
+
+  const { error: publishError } = await supabase.from("site_page_designs").upsert({
+    page_key: pageKey,
+    ...snapshot,
+    updated_by: userId,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: "page_key" });
+  if (publishError) return { error: `Не удалось опубликовать дизайн: ${publishError.message}` };
+
+  const labelInput = text(formData.get("version_label"));
+  const label = labelInput || `${item.label} • ${new Intl.DateTimeFormat("ru-RU", { dateStyle: "short", timeStyle: "short", timeZone: "Europe/Chisinau" }).format(new Date())}`;
+  const { error: versionError } = await supabase.from("site_page_design_versions").insert({
+    page_key: pageKey,
+    label,
+    snapshot,
+    published_by: userId,
+  });
+  if (versionError) return { error: `Дизайн опубликован, но история версии не записалась: ${versionError.message}` };
+
+  await supabase.from("site_page_design_drafts").delete().eq("page_key", pageKey);
+  revalidatePath(item.route.includes("[") ? item.route.split("/[")[0] || "/" : item.route);
+  revalidatePath("/admin/design");
+  return { success: `Дизайн «${item.label}» опубликован.` };
+}
+
+export async function restoreSitePageVisualVersion(formData: FormData) {
+  const { supabase, userId } = await requireEditor();
+  const pageKey = parseSitePageKey(text(formData.get("page_key")));
+  const versionId = text(formData.get("version_id"));
+  if (!pageKey || !/^\d+$/.test(versionId)) { redirect("/admin/design"); throw new Error("redirect"); }
+
+  const { data } = await supabase.from("site_page_design_versions")
+    .select("snapshot").eq("id", versionId).eq("page_key", pageKey).maybeSingle();
+  if (!data?.snapshot) redirect(`/admin/design?page=${pageKey}&restore=error`);
+
+  const { data: publishedData } = await supabase.from("site_page_designs").select("*").eq("page_key", pageKey).maybeSingle();
+  const fallback = publishedData
+    ? normalizeSitePageDesign(publishedData as Record<string, unknown>, defaultSitePageDesign(pageKey))
+    : defaultSitePageDesign(pageKey);
+  const snapshot = normalizeSitePageDesign(data.snapshot as Record<string, unknown>, fallback);
+  const { error } = await supabase.from("site_page_design_drafts").upsert({
+    page_key: pageKey, ...snapshot, updated_by: userId, updated_at: new Date().toISOString(),
+  }, { onConflict: "page_key" });
+  if (error) redirect(`/admin/design?page=${pageKey}&restore=error`);
+  revalidatePath("/admin/design");
+  redirect(`/admin/design?page=${pageKey}&restore=ok`);
+}
+
+export async function resetSitePageVisualDraft(formData: FormData) {
+  const { supabase } = await requireEditor();
+  const pageKey = parseSitePageKey(text(formData.get("page_key")));
+  if (!pageKey) { redirect("/admin/design"); throw new Error("redirect"); }
+  await supabase.from("site_page_design_drafts").delete().eq("page_key", pageKey);
+  revalidatePath("/admin/design");
+  redirect(`/admin/design?page=${pageKey}&draft=reset`);
+}
+
+async function uploadSitePageImage(
+  file: File,
+  pageKey: SitePageDesignKey,
+  variant: "desktop" | "mobile",
+  userId: string,
+  supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"]
+) {
+  const ext = imageExtension(file.type);
+  const path = `${userId}/visual-editor/pages/${pageKey}/${Date.now()}-${variant}.${ext}`;
+  const { error } = await supabase.storage.from("homepage").upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
+  if (error) return { error: `Не удалось загрузить изображение: ${error.message}` } as const;
+  return { url: supabase.storage.from("homepage").getPublicUrl(path).data.publicUrl } as const;
+}
+
+function parseSitePageKey(value: string): SitePageDesignKey | null {
+  return sitePageKeys.has(value as SitePageDesignKey) ? value as SitePageDesignKey : null;
+}
+function parseOverlayStyle(value: string, fallback: SitePageDesignSnapshot["overlay_style"]): SitePageDesignSnapshot["overlay_style"] {
+  return value === "solid" || value === "gradient-left" || value === "gradient-right" ? value : fallback;
+}
+function nullableFormText(value: FormDataEntryValue | null) {
+  const result = text(value);
+  return result || null;
 }

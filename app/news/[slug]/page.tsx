@@ -3,10 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import NewsCard, { formatNewsDate } from "@/app/components/NewsCard";
 import NewsComments from "@/app/components/NewsComments";
+import PageHeroShell from "@/app/components/PageHeroShell";
 import { createClient } from "@/lib/supabase/server";
 import type { CommentBlock, NewsArticle, NewsComment } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { localized, publicText } from "@/lib/i18n";
+import { getPublishedSitePageDesign } from "@/lib/page-design";
 
 export const dynamic = "force-dynamic";
 type PageProps = {
@@ -47,7 +49,8 @@ export default async function NewsArticlePage({ params, searchParams }: PageProp
   }
 
   const supabase = await createClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
+  const [claimsResult, design] = await Promise.all([supabase.auth.getClaims(), getPublishedSitePageDesign(supabase, "template_news")]);
+  const { data: claimsData } = claimsResult;
   const currentUserId = claimsData?.claims?.sub ?? null;
 
   const commentFields = currentUserId
@@ -90,12 +93,14 @@ export default async function NewsArticlePage({ params, searchParams }: PageProp
   const paragraphs = content.split(/\n\s*\n/g).map((p) => p.trim()).filter(Boolean);
 
   return <main><article>
-    <header className="articleHeader"><div className="container articleHeaderInner">
-      <Link className="articleBack" href="/news">{text.back}</Link>
-      <div className="articleMeta"><span>{category}</span><time>{formatNewsDate(article.published_at, locale)}</time></div>
-      <h1>{title}</h1>{excerpt && <p className="articleLead">{excerpt}</p>}
-      <div className="articleAuthor">{text.author}: <strong>{article.author_name || "FC Edineț"}</strong></div>
-    </div></header>
+    <PageHeroShell design={design} className="articleHeader" contentClassName="container articleHeaderInner" contentImageUrl={article.cover_image_url}>
+      <>
+        <Link className="articleBack" href="/news">{text.back}</Link>
+        {design.show_eyebrow && <div className="articleMeta"><span>{category}</span><time>{formatNewsDate(article.published_at, locale)}</time></div>}
+        <h1>{title}</h1>{design.show_description && excerpt && <p className="articleLead">{excerpt}</p>}
+        <div className="articleAuthor">{text.author}: <strong>{article.author_name || "FC Edineț"}</strong></div>
+      </>
+    </PageHeroShell>
     <div className="container articleLayout"><div className="articleMain">
       {article.cover_image_url ? <img className="articleCover" src={article.cover_image_url} alt={title} /> : <div className="articleCoverFallback">FC EDINEȚ</div>}
       <div className="articleContent">{paragraphs.length ? paragraphs.map((p, i) => <p key={i}>{p}</p>) : <p>{text.emptyText}</p>}</div>

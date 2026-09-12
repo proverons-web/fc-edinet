@@ -2,13 +2,45 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import MediaGallery from "@/app/components/MediaGallery";
+import PageHeroShell from "@/app/components/PageHeroShell";
 import { createClient } from "@/lib/supabase/server";
 import type { MediaAlbum, MediaPhoto } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { dateLocale, publicText, type Locale } from "@/lib/i18n";
-export const dynamic="force-dynamic";
-type PageProps={params:Promise<{slug:string}>};
-export async function generateMetadata({params}:PageProps):Promise<Metadata>{const locale=await getLocale();const {slug}=await params;const supabase=await createClient();const {data}=await supabase.from("media_albums").select("title,description,cover_image_url").eq("slug",slug).eq("is_published",true).maybeSingle();if(!data)return{title:publicText[locale].media.defaultAlbum};return{title:data.title,description:data.description||`${data.title} — FC Edineț`,openGraph:{title:data.title,description:data.description||`${data.title} — FC Edineț`,type:"website",images:data.cover_image_url?[{url:data.cover_image_url}]:undefined}}}
-export default async function MediaAlbumPage({params}:PageProps){const locale=await getLocale();const text=publicText[locale].media;const {slug}=await params;const supabase=await createClient();const {data:albumData}=await supabase.from("media_albums").select("*").eq("slug",slug).eq("is_published",true).maybeSingle();if(!albumData)notFound();const {data:photosData}=await supabase.from("media_photos").select("*").eq("album_id",albumData.id).eq("is_published",true).order("display_order").order("id");const album=albumData as MediaAlbum;const photos=(photosData??[]) as MediaPhoto[];return <main><section className="mediaAlbumHero" style={album.cover_image_url?{backgroundImage:`linear-gradient(90deg,rgba(3,12,28,.95),rgba(3,12,28,.48)),url("${album.cover_image_url}")`}:undefined}><div className="container"><Link href="/media" className="mediaBackLink">{text.allAlbums}</Link><p className="eyebrow">{formatDate(album.event_date,locale)}{album.location?` • ${album.location}`:""}</p><h1>{album.title}</h1>{album.description&&<p>{album.description}</p>}<span className="mediaAlbumCount">{photos.length} {photoWord(photos.length,locale)}</span></div></section><section className="section mediaGallerySection"><div className="container">{photos.length?<MediaGallery photos={photos} albumTitle={album.title} locale={locale}/>:<div className="adminEmpty">{text.albumEmpty}</div>}</div></section></main>}
-function formatDate(value:string|null,locale:Locale){if(!value)return"FC EDINEȚ";return new Intl.DateTimeFormat(dateLocale(locale),{day:"2-digit",month:"long",year:"numeric",timeZone:"Europe/Chisinau"}).format(new Date(`${value}T12:00:00`))}
-function photoWord(value:number,locale:Locale){if(locale==="ro")return value===1?"fotografie":"fotografii";const mod10=value%10,mod100=value%100;if(mod10===1&&mod100!==11)return"фотография";if(mod10>=2&&mod10<=4&&!(mod100>=12&&mod100<=14))return"фотографии";return"фотографий"}
+import { getPublishedSitePageDesign } from "@/lib/page-design";
+
+export const dynamic = "force-dynamic";
+type PageProps = { params: Promise<{ slug: string }> };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const locale = await getLocale();
+  const { slug } = await params;
+  const supabase = await createClient();
+  const { data } = await supabase.from("media_albums").select("title,description,cover_image_url").eq("slug", slug).eq("is_published", true).maybeSingle();
+  if (!data) return { title: publicText[locale].media.defaultAlbum };
+  return { title: data.title, description: data.description || `${data.title} — FC Edineț`, openGraph: { title: data.title, description: data.description || `${data.title} — FC Edineț`, type: "website", images: data.cover_image_url ? [{ url: data.cover_image_url }] : undefined } };
+}
+
+export default async function MediaAlbumPage({ params }: PageProps) {
+  const locale = await getLocale();
+  const text = publicText[locale].media;
+  const { slug } = await params;
+  const supabase = await createClient();
+  const [{ data: albumData }, design] = await Promise.all([
+    supabase.from("media_albums").select("*").eq("slug", slug).eq("is_published", true).maybeSingle(),
+    getPublishedSitePageDesign(supabase, "template_album"),
+  ]);
+  if (!albumData) notFound();
+  const { data: photosData } = await supabase.from("media_photos").select("*").eq("album_id", albumData.id).eq("is_published", true).order("display_order").order("id");
+  const album = albumData as MediaAlbum;
+  const photos = (photosData ?? []) as MediaPhoto[];
+
+  return <main>
+    <PageHeroShell design={design} className="mediaAlbumHero" contentImageUrl={album.cover_image_url}>
+      <><Link href="/media" className="mediaBackLink">{text.allAlbums}</Link>{design.show_eyebrow && <p className="eyebrow">{formatDate(album.event_date, locale)}{album.location ? ` • ${album.location}` : ""}</p>}<h1>{album.title}</h1>{design.show_description && album.description && <p>{album.description}</p>}<span className="mediaAlbumCount">{photos.length} {photoWord(photos.length, locale)}</span></>
+    </PageHeroShell>
+    <section className="section mediaGallerySection"><div className="container">{photos.length ? <MediaGallery photos={photos} albumTitle={album.title} locale={locale}/> : <div className="adminEmpty">{text.albumEmpty}</div>}</div></section>
+  </main>;
+}
+function formatDate(value: string | null, locale: Locale) { if (!value) return "FC EDINEȚ"; return new Intl.DateTimeFormat(dateLocale(locale), { day: "2-digit", month: "long", year: "numeric", timeZone: "Europe/Chisinau" }).format(new Date(`${value}T12:00:00`)); }
+function photoWord(value: number, locale: Locale) { if (locale === "ro") return value === 1 ? "fotografie" : "fotografii"; const mod10 = value % 10, mod100 = value % 100; if (mod10 === 1 && mod100 !== 11) return "фотография"; if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return "фотографии"; return "фотографий"; }
