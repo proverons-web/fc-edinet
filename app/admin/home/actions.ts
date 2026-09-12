@@ -2,8 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { requireEditor } from "@/lib/editorial";
+import type { HomepageSectionKey } from "@/lib/types";
 
 export type HomepageHeroState = {
+  error?: string;
+  success?: string;
+};
+
+export type HomepageLayoutState = {
   error?: string;
   success?: string;
 };
@@ -21,6 +27,15 @@ const allowedPositions = new Set([
   "left",
   "right",
 ]);
+
+const sectionKeys: HomepageSectionKey[] = [
+  "matches",
+  "standings",
+  "news",
+  "players",
+  "media",
+  "partners",
+];
 
 export async function saveHomepageHero(
   _previousState: HomepageHeroState,
@@ -71,21 +86,10 @@ export async function saveHomepageHero(
   const image = formData.get("background_image");
 
   if (image instanceof File && image.size > 0) {
-    if (!allowedImageMime.has(image.type)) {
-      return { error: "Фоновое изображение должно быть JPG, PNG или WEBP." };
-    }
+    const validation = validateHomepageImage(image);
+    if (validation) return { error: validation };
 
-    if (image.size > 8 * 1024 * 1024) {
-      return { error: "Максимальный размер фонового изображения — 8 МБ." };
-    }
-
-    const ext =
-      image.type === "image/png"
-        ? "png"
-        : image.type === "image/webp"
-          ? "webp"
-          : "jpg";
-
+    const ext = imageExtension(image.type);
     const path = `${userId}/hero/${Date.now()}-hero.${ext}`;
 
     const { error: uploadError } = await supabase.storage
@@ -97,15 +101,8 @@ export async function saveHomepageHero(
       });
 
     if (uploadError) {
-      if (uploadError.message.toLowerCase().includes("bucket not found")) {
-        return {
-          error:
-            "Bucket homepage не найден. Выполни database/014_homepage_hero.sql в Supabase.",
-        };
-      }
-
       return {
-        error: `Не удалось загрузить фоновое изображение: ${uploadError.message}`,
+        error: homepageUploadError(uploadError.message),
       };
     }
 
@@ -172,6 +169,204 @@ export async function saveHomepageHero(
   revalidatePath("/admin/home");
 
   return { success: "Главный экран сохранён." };
+}
+
+export async function saveHomepageLayout(
+  _previousState: HomepageLayoutState,
+  formData: FormData
+): Promise<HomepageLayoutState> {
+  const { supabase, userId } = await requireEditor();
+
+  const rawOrder = text(formData.get("section_order"))
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean) as HomepageSectionKey[];
+
+  const validOrder = rawOrder.filter(
+    (key, index) => sectionKeys.includes(key) && rawOrder.indexOf(key) === index
+  );
+
+  const orderedKeys =
+    validOrder.length === sectionKeys.length
+      ? validOrder
+      : sectionKeys;
+
+  const sectionRows = orderedKeys.map((key, index) => ({
+    section_key: key,
+    is_enabled: formData.get(`section_${key}_enabled`) === "on",
+    display_order: (index + 1) * 10,
+  }));
+
+  const { error: sectionsError } = await supabase
+    .from("homepage_sections")
+    .upsert(sectionRows, { onConflict: "section_key" });
+
+  if (sectionsError) {
+    return {
+      error: `Не удалось сохранить порядок блоков: ${sectionsError.message}`,
+    };
+  }
+
+  const showPinnedNews = formData.get("show_pinned_news") === "on";
+  const pinnedRaw = text(formData.get("pinned_news_id"));
+  let pinnedNewsId: number | null = null;
+
+  if (pinnedRaw) {
+    const parsed = Number(pinnedRaw);
+    if (!Number.isInteger(parsed) || parsed <= 0) {
+      return { error: "Выбрана некорректная закреплённая новость." };
+    }
+
+    const now = new Date().toISOString();
+    const { data: article, error: articleError } = await supabase
+      .from("news")
+      .select("id")
+      .eq("id", parsed)
+      .eq("status", "published")
+      .lte("published_at", now)
+      .maybeSingle();
+
+    if (articleError || !article) {
+      return {
+        error: "Закреплять на главной можно только уже опубликованную новость.",
+      };
+    }
+
+    pinnedNewsId = parsed;
+  }
+
+  const bannerEnabled = formData.get("banner_enabled") === "on";
+  const bannerEyebrow = text(formData.get("banner_eyebrow")) || "FC EDINEȚ";
+  const bannerTitle = text(formData.get("banner_title")) || "Вместе с клубом";
+  const bannerText = text(formData.get("banner_text"));
+  const bannerButtonText = text(formData.get("banner_button_text")) || "Подробнее";
+  const bannerButtonHref = safeHref(text(formData.get("banner_button_href"))) || "/club";
+
+  const bannerOverlayRaw = Number(text(formData.get("banner_overlay_opacity")));
+  const bannerOverlayOpacity =
+    Number.isInteger(bannerOverlayRaw) &&
+    bannerOverlayRaw >= 0 &&
+    bannerOverlayRaw <= 95
+      ? bannerOverlayRaw
+      : 72;
+
+  const bannerPositionRaw = text(formData.get("banner_background_position"));
+  const bannerBackgroundPosition = allowedPositions.has(bannerPositionRaw)
+    ? bannerPositionRaw
+    : "center";
+
+  const { data: currentSettings } = await supabase
+    .from("homepage_settings")
+    .select("*")
+    .eq("id", 1)
+    .maybeSingle();
+
+  let bannerImageUrl = currentSettings?.banner_image_url ?? null;
+  let newBannerPath: string | null = null;
+  const bannerImage = formData.get("banner_image");
+
+  if (bannerImage instanceof File && bannerImage.size > 0) {
+    const validation = validateHomepageImage(bannerImage);
+    if (validation) return { error: validation };
+
+    const ext = imageExtension(bannerImage.type);
+    const path = `${userId}/banner/${Date.now()}-banner.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("homepage")
+      .upload(path, bannerImage, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: bannerImage.type,
+      });
+
+    if (uploadError) {
+      return { error: homepageUploadError(uploadError.message) };
+    }
+
+    bannerImageUrl = supabase.storage
+      .from("homepage")
+      .getPublicUrl(path).data.publicUrl;
+    newBannerPath = path;
+  }
+
+  const clearBannerImage = formData.get("clear_banner_image") === "on";
+  if (clearBannerImage) bannerImageUrl = null;
+
+  const { error: settingsError } = await supabase
+    .from("homepage_settings")
+    .upsert(
+      {
+        id: 1,
+        show_pinned_news: showPinnedNews,
+        pinned_news_id: pinnedNewsId,
+        banner_enabled: bannerEnabled,
+        banner_eyebrow: bannerEyebrow,
+        banner_title: bannerTitle,
+        banner_text: bannerText,
+        banner_button_text: bannerButtonText,
+        banner_button_href: bannerButtonHref,
+        banner_image_url: bannerImageUrl,
+        banner_overlay_opacity: bannerOverlayOpacity,
+        banner_background_position: bannerBackgroundPosition,
+      },
+      { onConflict: "id" }
+    );
+
+  if (settingsError) {
+    if (newBannerPath) {
+      await supabase.storage.from("homepage").remove([newBannerPath]);
+    }
+
+    return {
+      error: `Не удалось сохранить настройки главной: ${settingsError.message}`,
+    };
+  }
+
+  if (
+    currentSettings?.banner_image_url &&
+    (newBannerPath || clearBannerImage)
+  ) {
+    const oldPath = storagePathFromPublicUrl(
+      currentSettings.banner_image_url,
+      "homepage"
+    );
+
+    if (oldPath) {
+      await supabase.storage.from("homepage").remove([oldPath]);
+    }
+  }
+
+  revalidatePath("/");
+  revalidatePath("/admin/home");
+
+  return { success: "Порядок блоков и настройки главной сохранены." };
+}
+
+function validateHomepageImage(image: File) {
+  if (!allowedImageMime.has(image.type)) {
+    return "Изображение должно быть JPG, PNG или WEBP.";
+  }
+
+  if (image.size > 8 * 1024 * 1024) {
+    return "Максимальный размер изображения — 8 МБ.";
+  }
+
+  return null;
+}
+
+function imageExtension(mime: string) {
+  if (mime === "image/png") return "png";
+  if (mime === "image/webp") return "webp";
+  return "jpg";
+}
+
+function homepageUploadError(message: string) {
+  if (message.toLowerCase().includes("bucket not found")) {
+    return "Bucket homepage не найден. Выполни миграцию database/018_homepage_sections.sql.";
+  }
+
+  return `Не удалось загрузить изображение: ${message}`;
 }
 
 function text(value: FormDataEntryValue | null) {

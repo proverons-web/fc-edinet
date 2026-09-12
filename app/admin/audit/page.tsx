@@ -34,7 +34,9 @@ const entityLabels: Record<string, string> = {
   media_albums: "Фотоальбомы",
   media_photos: "Фотографии",
   media_videos: "Видео",
-  homepage_hero: "Главная страница",
+  homepage_hero: "Hero главной",
+  homepage_sections: "Блоки главной",
+  homepage_settings: "Настройки главной",
   partners: "Партнёры",
 };
 
@@ -71,6 +73,19 @@ const fieldLabels: Record<string, string> = {
   partner_level: "Категория партнёра",
   website_url: "Сайт партнёра",
   show_on_homepage: "Показывать на главной",
+  section_key: "Блок",
+  is_enabled: "Показывать блок",
+  show_pinned_news: "Закреплённая новость включена",
+  pinned_news_id: "Закреплённая новость",
+  banner_enabled: "Баннер включён",
+  banner_eyebrow: "Подпись баннера",
+  banner_title: "Заголовок баннера",
+  banner_text: "Текст баннера",
+  banner_button_text: "Кнопка баннера",
+  banner_button_href: "Ссылка баннера",
+  banner_image_url: "Фон баннера",
+  banner_overlay_opacity: "Затемнение баннера",
+  banner_background_position: "Положение фона баннера",
 };
 
 const entityOptions = Object.entries(entityLabels);

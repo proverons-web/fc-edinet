@@ -300,6 +300,47 @@ export type HomepageHero = {
 };
 
 
+export type HomepageSectionKey =
+  | "matches"
+  | "standings"
+  | "news"
+  | "players"
+  | "media"
+  | "partners";
+
+export type HomepageSection = {
+  section_key: HomepageSectionKey;
+  is_enabled: boolean;
+  display_order: number;
+  updated_at: string;
+};
+
+export type HomepageSettings = {
+  id: number;
+  show_pinned_news: boolean;
+  pinned_news_id: string | number | null;
+  banner_enabled: boolean;
+  banner_eyebrow: string;
+  banner_title: string;
+  banner_text: string;
+  banner_button_text: string;
+  banner_button_href: string;
+  banner_image_url: string | null;
+  banner_overlay_opacity: number;
+  banner_background_position: "center" | "top" | "bottom" | "left" | "right";
+  updated_at: string;
+};
+
+export const homepageSectionLabels: Record<HomepageSectionKey, string> = {
+  matches: "Матчи",
+  standings: "Турнирная таблица",
+  news: "Новости",
+  players: "Команда",
+  media: "Фото и видео",
+  partners: "Партнёры",
+};
+
+
 export type PartnerLevel = "main" | "official" | "technical" | "supporter";
 
 export type Partner = {

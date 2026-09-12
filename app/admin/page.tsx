@@ -175,7 +175,7 @@ export default async function AdminPage() {
             />
             <AdminModule
               title="Главная"
-              text="Фон, заголовок, описание и кнопки первого экрана."
+              text="Hero, порядок блоков, закреплённая новость и специальный баннер."
               badge={
                 profile.role === "editor" || profile.role === "admin"
                   ? "Работает"

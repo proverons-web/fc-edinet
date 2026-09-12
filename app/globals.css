@@ -1220,3 +1220,73 @@ a.homePartnerCard:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(1
   .partnersContactBox{align-items:flex-start;flex-direction:column}
   .homePartnersGrid{grid-template-columns:1fr 1fr}
 }
+
+/* v1.8 — homepage sections, pinned news, banner and media preview */
+.homepageAdminStack{display:grid;gap:42px}
+.homepageAdminDivider{display:flex;align-items:center;gap:16px;color:#8391a4;font-size:10px;font-weight:950;letter-spacing:.1em}
+.homepageAdminDivider:before,.homepageAdminDivider:after{content:"";height:1px;flex:1;background:#dce4ed}
+.homepageLayoutAdmin{display:grid;gap:24px}
+.homepageControlSection{display:grid;gap:18px}
+.homepageSectionList{display:grid;gap:10px}
+.homepageSectionRow{display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#f9fbfd}
+.homepageSectionOrder{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#e9f2ff;color:#145da0;font-weight:950}
+.homepageSectionToggle{display:flex;align-items:center;gap:12px;cursor:pointer;min-width:0}
+.homepageSectionToggle input{width:19px;height:19px;flex:0 0 auto}
+.homepageSectionToggle span{display:grid;gap:3px;min-width:0}
+.homepageSectionToggle strong{font-size:14px;color:#17304c}
+.homepageSectionToggle small{font-size:10px;line-height:1.4;color:#77879b}
+.homepageSectionMove{display:flex;gap:6px}
+.homepageSectionMove button{width:36px;height:36px;border:1px solid #cbd7e4;border-radius:10px;background:#fff;color:#24415f;font-size:17px;font-weight:900;cursor:pointer}
+.homepageSectionMove button:hover:not(:disabled){border-color:var(--blue);color:var(--blue)}
+.homepageSectionMove button:disabled{opacity:.35;cursor:not-allowed}
+.homepageBannerPreview{min-height:210px;border-radius:18px;padding:28px;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(125deg,#071a36,#0d4e9a);color:#fff;background-size:cover;background-repeat:no-repeat;overflow:hidden}
+.homepageBannerPreview p{margin:0 0 6px;font-size:10px;font-weight:950;letter-spacing:.1em;color:#9dc4ff}
+.homepageBannerPreview h3{margin:0;font-size:30px;line-height:1.05}
+.homepageBannerPreview span{margin-top:10px;max-width:760px;color:#d8e4f3;font-size:12px;line-height:1.6}
+.homepageBannerPreview b{margin-top:16px;color:#ffd236;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.homePinnedNews{display:grid;grid-template-columns:minmax(240px,42%) minmax(0,1fr);min-height:280px;margin-bottom:22px;border:1px solid var(--line);border-radius:20px;overflow:hidden;background:#fff;color:inherit;transition:transform .18s ease,box-shadow .18s ease}
+.homePinnedNews:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(15,37,64,.09)}
+.homePinnedNewsImage{min-height:280px;background:#0b2d58;overflow:hidden}
+.homePinnedNewsImage img{width:100%;height:100%;object-fit:cover}
+.homePinnedNewsFallback{width:100%;height:100%;min-height:280px;display:grid;place-items:center;color:#fff;font-size:30px;font-weight:950;letter-spacing:.08em;background:linear-gradient(135deg,#071a36,#0f63ff)}
+.homePinnedNewsBody{padding:30px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+.homePinnedNewsBody h3{font-size:30px;line-height:1.1;margin:12px 0 12px;color:#112943}
+.homePinnedNewsBody p{margin:0;color:#64758c;line-height:1.65;font-size:13px}
+.homePinnedNewsBody b{margin-top:18px;color:var(--blue);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.homeMediaSection{background:#fff}
+.homeMediaGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.homeMediaCard{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden;color:inherit;transition:transform .18s ease,box-shadow .18s ease}
+.homeMediaCard:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(15,37,64,.08)}
+.homeMediaImage{height:150px;position:relative;overflow:hidden;background:#edf2f7}
+.homeMediaImage img{width:100%;height:100%;object-fit:cover}
+.homeMediaFallback{height:100%;display:grid;place-items:center;background:linear-gradient(135deg,#0b2d58,#0f63ff);color:#fff;font-size:20px;font-weight:950}
+.homeMediaPlay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.92);color:#0b2d58;font-size:16px;padding-left:2px}
+.homeMediaCard>div:last-child{padding:14px}
+.homeMediaCard>div:last-child span{display:block;color:#77879b;font-size:9px;font-weight:950;letter-spacing:.06em;margin-bottom:6px}
+.homeMediaCard h3{font-size:15px;line-height:1.35;margin:0;color:#17304c}
+.homeSpecialBanner{background:linear-gradient(115deg,#071a36,#0f63ff);background-size:cover;background-repeat:no-repeat;color:#fff}
+.homeSpecialBannerInner{min-height:220px;padding-top:42px;padding-bottom:42px;display:flex;align-items:center;justify-content:space-between;gap:32px}
+.homeSpecialBannerInner h2{font-size:36px;margin:4px 0 10px;line-height:1.05}
+.homeSpecialBannerInner p:not(.eyebrow){margin:0;max-width:760px;color:#d8e4f3;line-height:1.65}
+.homeSpecialBannerInner .primaryButton{flex:0 0 auto}
+
+@media(max-width:1100px){
+  .homeMediaGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+@media(max-width:760px){
+  .homepageSectionRow{grid-template-columns:36px minmax(0,1fr)}
+  .homepageSectionMove{grid-column:2}
+  .homePinnedNews{grid-template-columns:1fr}
+  .homePinnedNewsImage{min-height:210px}
+  .homePinnedNewsFallback{min-height:210px}
+  .homePinnedNewsBody{padding:22px}
+  .homePinnedNewsBody h3{font-size:24px}
+  .homeMediaGrid{grid-template-columns:1fr 1fr}
+  .homeSpecialBannerInner{align-items:flex-start;flex-direction:column}
+  .homeSpecialBannerInner h2{font-size:30px}
+}
+
+@media(max-width:520px){
+  .homeMediaGrid{grid-template-columns:1fr}
+}

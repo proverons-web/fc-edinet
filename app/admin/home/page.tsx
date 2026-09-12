@@ -1,7 +1,12 @@
 import Link from "next/link";
 import HomepageHeroForm from "@/app/components/HomepageHeroForm";
+import HomepageLayoutForm from "@/app/components/HomepageLayoutForm";
 import { requireEditor } from "@/lib/editorial";
-import type { HomepageHero } from "@/lib/types";
+import type {
+  HomepageHero,
+  HomepageSection,
+  HomepageSettings,
+} from "@/lib/types";
 
 export const metadata = {
   title: "Главная страница — Админ",
@@ -11,12 +16,32 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminHomePage() {
   const { supabase } = await requireEditor();
+  const now = new Date().toISOString();
 
-  const { data } = await supabase
-    .from("homepage_hero")
-    .select("*")
-    .eq("id", 1)
-    .maybeSingle();
+  const [heroResult, sectionsResult, settingsResult, newsResult] =
+    await Promise.all([
+      supabase
+        .from("homepage_hero")
+        .select("*")
+        .eq("id", 1)
+        .maybeSingle(),
+      supabase
+        .from("homepage_sections")
+        .select("*")
+        .order("display_order", { ascending: true }),
+      supabase
+        .from("homepage_settings")
+        .select("*")
+        .eq("id", 1)
+        .maybeSingle(),
+      supabase
+        .from("news")
+        .select("id,title,published_at")
+        .eq("status", "published")
+        .lte("published_at", now)
+        .order("published_at", { ascending: false })
+        .limit(100),
+    ]);
 
   return (
     <main className="adminPage">
@@ -26,7 +51,8 @@ export default async function AdminHomePage() {
             <p className="eyebrow">FC EDINEȚ • ГЛАВНАЯ</p>
             <h1>Главная страница</h1>
             <p>
-              Фоновое фото, заголовок, описание и кнопки первого экрана.
+              Первый экран, порядок блоков, закреплённая новость и специальный
+              информационный баннер.
             </p>
           </div>
 
@@ -42,8 +68,20 @@ export default async function AdminHomePage() {
       </section>
 
       <section className="section adminSurface">
-        <div className="container">
-          <HomepageHeroForm settings={data as HomepageHero | null} />
+        <div className="container homepageAdminStack">
+          <HomepageHeroForm
+            settings={heroResult.data as HomepageHero | null}
+          />
+
+          <div className="homepageAdminDivider">
+            <span>СТРУКТУРА ГЛАВНОЙ</span>
+          </div>
+
+          <HomepageLayoutForm
+            sections={(sectionsResult.data ?? []) as HomepageSection[]}
+            settings={settingsResult.data as HomepageSettings | null}
+            publishedNews={newsResult.data ?? []}
+          />
         </div>
       </section>
     </main>
