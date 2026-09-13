@@ -1,0 +1,8 @@
+FC EDINEȚ v2.1.8 — GLOBAL HEADER + FOOTER BUILDER
+
+1. Visual Editor получил два глобальных раздела: Header и Footer.
+2. Header: topbar, sticky, solid/glass/transparent, высота desktop/mobile, логотип, бренд, RU/RO, поиск, аккаунт, admin link, порядок и видимость меню.
+3. Footer: фон, логотип/бренд, описание RU/RO, до 6 колонок ссылок, соцсети, copyright, version, отступы.
+4. Есть черновик, публикация, независимая история Header/Footer и восстановление версии в черновик.
+5. Публичный сайт читает только опубликованную config. draft_config посетителям не применяется.
+6. Миграция: database/030_global_header_footer.sql.
