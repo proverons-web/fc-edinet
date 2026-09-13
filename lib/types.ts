@@ -164,7 +164,9 @@ export type Competition = {
   name: string;
   slug: string;
   season: string | null;
+  season_id?: string | number | null;
   is_active: boolean;
+  season_ref?: Season | null;
 };
 
 export type MatchStatus =
@@ -741,4 +743,79 @@ export type TranslationDiagnostic = {
   error_message: string | null;
   request_id: string | null;
   created_at: string;
+};
+
+
+export type Season = {
+  id: string | number;
+  name: string;
+  slug: string;
+  starts_on: string | null;
+  ends_on: string | null;
+  is_current: boolean;
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type PlayerMatchAppearance = "starter" | "substitute";
+
+export type PlayerMatchStat = {
+  id: string | number;
+  match_id: string | number;
+  player_id: string | number;
+  competition_id: string | number | null;
+  season_id: string | number | null;
+  team_id: string | number | null;
+  appearance: PlayerMatchAppearance;
+  position: string | null;
+  is_captain: boolean;
+  minutes_played: number;
+  goals: number;
+  assists: number;
+  own_goals: number;
+  penalties_scored: number;
+  penalties_missed: number;
+  yellow_cards: number;
+  red_cards: number;
+  goals_conceded: number;
+  saves: number;
+  clean_sheet: boolean;
+  notes: string | null;
+  created_by?: string | null;
+  updated_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type MatchStatisticsStatus = "draft" | "complete";
+
+export type MatchStatisticsState = {
+  match_id: string | number;
+  status: MatchStatisticsStatus;
+  completed_at: string | null;
+  completed_by: string | null;
+  updated_by: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type PlayerSeasonStatistics = {
+  player_id: string | number;
+  season_id: string | number | null;
+  competition_id: string | number | null;
+  appearances: number;
+  starts: number;
+  substitute_appearances: number;
+  minutes_played: number;
+  goals: number;
+  assists: number;
+  own_goals: number;
+  penalties_scored: number;
+  penalties_missed: number;
+  yellow_cards: number;
+  red_cards: number;
+  goals_conceded: number;
+  saves: number;
+  clean_sheets: number;
 };

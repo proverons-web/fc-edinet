@@ -6,7 +6,7 @@ export async function GET() {
   return NextResponse.json(
     {
       app: "fc-edinet",
-      version: "2.1.13",
+      version: "2.2.0",
       environment: process.env.VERCEL_ENV || process.env.NODE_ENV,
       deployment:
         process.env.VERCEL_PROJECT_PRODUCTION_URL ||

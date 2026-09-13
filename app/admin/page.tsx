@@ -118,6 +118,20 @@ export default async function AdminPage() {
               }
             />
             <AdminModule
+              title="Статистика игроков"
+              text="Сезоны, турниры, матчевые показатели и автоматические итоги игроков."
+              badge={
+                profile.role === "editor" || profile.role === "admin"
+                  ? "v2.2"
+                  : "Editor/Admin"
+              }
+              href={
+                profile.role === "editor" || profile.role === "admin"
+                  ? "/admin/statistics"
+                  : undefined
+              }
+            />
+            <AdminModule
               title="Матчи"
               text="Календарь, соперники, результаты и блоки на главной."
               badge={
