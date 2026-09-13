@@ -8,6 +8,7 @@ import type {
   HomepageHero,
   HomepageSection,
   HomepageSectionKey,
+  HomepagePublishedBlock,
   SitePageDesignKey,
   SitePageDesignSnapshot,
 } from "@/lib/types";
@@ -15,6 +16,7 @@ import { defaultSitePageDesign, normalizeSitePageDesign, sitePageDesignCatalog }
 import { defaultHomepageCanvas, normalizeHomepageCanvas } from "@/lib/homepage-canvas";
 import { defaultHeroLayerConfig, homeHeroLayerDefinitions, normalizeHeroLayerConfig, siteHeroLayerDefinitions } from "@/lib/hero-builder";
 import { defaultHomepageSectionDesignMap, normalizeHomepageSectionDesignMap } from "@/lib/section-builder";
+import { normalizeHomepageBlock, normalizeHomepageBlocks, normalizeHomepageLayoutOrder } from "@/lib/block-library";
 
 export type VisualEditorState = {
   error?: string;
@@ -40,13 +42,14 @@ export async function saveVisualEditor(
   const { supabase, userId } = await requireEditor();
   const intent = text(formData.get("intent")) === "publish" ? "publish" : "draft";
 
-  const [{ data: heroData }, { data: sectionsData }, { data: draftData }] =
+  const [{ data: heroData }, { data: sectionsData }, { data: blocksData }, { data: draftData }] =
     await Promise.all([
       supabase.from("homepage_hero").select("*").eq("id", 1).maybeSingle(),
       supabase
         .from("homepage_sections")
         .select("*")
         .order("display_order", { ascending: true }),
+      supabase.from("homepage_blocks").select("*").order("display_order", { ascending: true }),
       supabase
         .from("homepage_design_draft")
         .select("*")
@@ -56,7 +59,8 @@ export async function saveVisualEditor(
 
   const currentPublished = publishedSnapshot(
     heroData as HomepageHero | null,
-    (sectionsData ?? []) as HomepageSection[]
+    (sectionsData ?? []) as HomepageSection[],
+    publishedBlocks(blocksData ?? [])
   );
   const currentDraft = draftData
     ? normalizeSnapshot(draftData as Record<string, unknown>, currentPublished)
@@ -106,6 +110,8 @@ export async function saveVisualEditor(
     sectionKeys.map((key) => [key, formData.get(`section_${key}_enabled`) === "on"])
   ) as Record<HomepageSectionKey, boolean>;
   const sectionConfig = parseSectionConfig(formData.get("section_config"), currentDraft.section_config);
+  const customBlocks = parseCustomBlocks(formData.get("custom_blocks"), currentDraft.custom_blocks);
+  const layoutOrder = parseLayoutOrder(formData.get("layout_order"), sectionOrder, customBlocks, currentDraft.layout_order);
 
   const snapshot: HomepageDesignSnapshot = {
     background_image_url: desktopImageUrl,
@@ -127,6 +133,8 @@ export async function saveVisualEditor(
     section_order: sectionOrder,
     section_visibility: sectionVisibility,
     section_config: sectionConfig,
+    custom_blocks: customBlocks,
+    layout_order: layoutOrder,
   };
 
   const { error: draftError } = await supabase
@@ -194,10 +202,11 @@ export async function saveVisualEditor(
     return { error: `Не удалось опубликовать Hero: ${heroError.message}` };
   }
 
-  const sectionRows = snapshot.section_order.map((key, index) => ({
+  const displayOrder = new Map(snapshot.layout_order.map((item, index) => [item, (index + 1) * 10]));
+  const sectionRows = snapshot.section_order.map((key) => ({
     section_key: key,
     is_enabled: snapshot.section_visibility[key],
-    display_order: (index + 1) * 10,
+    display_order: displayOrder.get(`section:${key}`) ?? 9990,
     design_config: snapshot.section_config[key],
   }));
 
@@ -206,7 +215,30 @@ export async function saveVisualEditor(
     .upsert(sectionRows, { onConflict: "section_key" });
 
   if (sectionsError) {
-    return { error: `Hero опубликован, но порядок блоков сохранить не удалось: ${sectionsError.message}` };
+    return { error: `Hero опубликован, но порядок секций сохранить не удалось: ${sectionsError.message}` };
+  }
+
+  const existingIds = new Set<string>((blocksData ?? []).map((row: { id?: string }) => String(row.id ?? "")).filter(Boolean));
+  const existingCreatedBy = new Map<string, string | null>((blocksData ?? []).map((row: { id?: string; created_by?: string | null }) => [String(row.id ?? ""), row.created_by ?? null]));
+  const nextIds = new Set(snapshot.custom_blocks.map((block) => block.id));
+  const blockRows = snapshot.custom_blocks.map((block) => ({
+    id: block.id,
+    block_type: block.type,
+    content: block.content,
+    design_config: block.design,
+    is_enabled: block.enabled,
+    display_order: displayOrder.get(`block:${block.id}`) ?? 9990,
+    created_by: existingCreatedBy.get(block.id) ?? userId,
+    updated_by: userId,
+  }));
+  if (blockRows.length) {
+    const { error: blocksError } = await supabase.from("homepage_blocks").upsert(blockRows, { onConflict: "id" });
+    if (blocksError) return { error: `Секции опубликованы, но пользовательские блоки сохранить не удалось: ${blocksError.message}` };
+  }
+  const removedIds = [...existingIds].filter((id) => !nextIds.has(id));
+  if (removedIds.length) {
+    const { error: deleteError } = await supabase.from("homepage_blocks").delete().in("id", removedIds);
+    if (deleteError) return { error: `Не удалось удалить убранные блоки: ${deleteError.message}` };
   }
 
   const labelInput = text(formData.get("version_label"));
@@ -270,14 +302,15 @@ export async function resetVisualDraft() {
 }
 
 async function getPublishedSnapshot(supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"]) {
-  const [{ data: hero }, { data: sections }] = await Promise.all([
+  const [{ data: hero }, { data: sections }, { data: blocks }] = await Promise.all([
     supabase.from("homepage_hero").select("*").eq("id", 1).maybeSingle(),
     supabase.from("homepage_sections").select("*").order("display_order"),
+    supabase.from("homepage_blocks").select("*").order("display_order"),
   ]);
-  return publishedSnapshot(hero as HomepageHero | null, (sections ?? []) as HomepageSection[]);
+  return publishedSnapshot(hero as HomepageHero | null, (sections ?? []) as HomepageSection[], publishedBlocks(blocks ?? []));
 }
 
-function publishedSnapshot(hero: HomepageHero | null, sections: HomepageSection[]): HomepageDesignSnapshot {
+function publishedSnapshot(hero: HomepageHero | null, sections: HomepageSection[], blocks: HomepagePublishedBlock[]): HomepageDesignSnapshot {
   const legacy = legacyPosition(hero?.background_position);
   const order = normalizeSectionOrder(sections.map((section) => section.section_key));
   const visible = Object.fromEntries(
@@ -318,6 +351,14 @@ function publishedSnapshot(hero: HomepageHero | null, sections: HomepageSection[
       Object.fromEntries(sections.map((section) => [section.section_key, section.design_config ?? {}])),
       defaultHomepageSectionDesignMap()
     ),
+    custom_blocks: blocks,
+    layout_order: normalizeHomepageLayoutOrder(
+      [...sections, ...blocks]
+        .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
+        .map((item) => "section_key" in item ? `section:${item.section_key}` : `block:${item.id}`),
+      order,
+      blocks
+    ),
   };
 }
 
@@ -345,7 +386,26 @@ function normalizeSnapshot(raw: Record<string, unknown>, fallback: HomepageDesig
       sectionKeys.map((key) => [key, typeof rawVisibility[key] === "boolean" ? rawVisibility[key] : fallback.section_visibility[key]])
     ) as Record<HomepageSectionKey, boolean>,
     section_config: normalizeHomepageSectionDesignMap(raw.section_config, fallback.section_config),
+    custom_blocks: normalizeHomepageBlocks(raw.custom_blocks, fallback.custom_blocks),
+    layout_order: normalizeHomepageLayoutOrder(raw.layout_order, normalizeSectionOrder(Array.isArray(raw.section_order) ? raw.section_order.map(String) : fallback.section_order), normalizeHomepageBlocks(raw.custom_blocks, fallback.custom_blocks)),
   };
+}
+
+function parseCustomBlocks(value: FormDataEntryValue | null, fallback: HomepageDesignSnapshot["custom_blocks"]) {
+  if (typeof value !== "string" || !value.trim()) return fallback;
+  try { return normalizeHomepageBlocks(JSON.parse(value), fallback); } catch { return fallback; }
+}
+
+function parseLayoutOrder(value: FormDataEntryValue | null, sections: HomepageSectionKey[], blocks: HomepageDesignSnapshot["custom_blocks"], fallback: HomepageDesignSnapshot["layout_order"]) {
+  if (typeof value !== "string" || !value.trim()) return normalizeHomepageLayoutOrder(fallback, sections, blocks);
+  try { return normalizeHomepageLayoutOrder(JSON.parse(value), sections, blocks); } catch { return normalizeHomepageLayoutOrder(fallback, sections, blocks); }
+}
+
+function publishedBlocks(rows: Array<Record<string, unknown>>): HomepagePublishedBlock[] {
+  return rows.map((row) => {
+    const block = normalizeHomepageBlock({ id: row.id, type: row.block_type, enabled: row.is_enabled, content: row.content, design: row.design_config });
+    return block ? { ...block, display_order: Number(row.display_order ?? 100) } as HomepagePublishedBlock : null;
+  }).filter((block): block is HomepagePublishedBlock => Boolean(block));
 }
 
 function parseCanvasConfig(value: FormDataEntryValue | null, fallback: HomepageDesignSnapshot["canvas_config"]) {

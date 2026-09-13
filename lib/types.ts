@@ -436,6 +436,63 @@ export type HomepageSectionDesign = {
 
 export type HomepageSectionDesignMap = Record<HomepageSectionKey, HomepageSectionDesign>;
 
+
+export type HomepageBlockType =
+  | "text"
+  | "image"
+  | "text_image"
+  | "cta"
+  | "news"
+  | "players"
+  | "media"
+  | "partners"
+  | "next_match"
+  | "standings";
+
+export type HomepageBlockContent = {
+  eyebrow_ru: string;
+  eyebrow_ro: string;
+  title_ru: string;
+  title_ro: string;
+  text_ru: string;
+  text_ro: string;
+  image_url: string | null;
+  image_alt_ru: string;
+  image_alt_ro: string;
+  button_text_ru: string;
+  button_text_ro: string;
+  button_href: string;
+};
+
+export type HomepageBlockDesign = {
+  width: HomepageSectionWidth;
+  background: HomepageSectionBackground;
+  padding_top: number;
+  padding_bottom: number;
+  item_limit: number;
+  columns_desktop: number;
+  columns_tablet: number;
+  columns_mobile: number;
+  text_align: "left" | "center" | "right";
+  image_position: "left" | "right";
+};
+
+export type HomepageCustomBlock = {
+  id: string;
+  type: HomepageBlockType;
+  enabled: boolean;
+  content: HomepageBlockContent;
+  design: HomepageBlockDesign;
+};
+
+export type HomepagePublishedBlock = HomepageCustomBlock & {
+  display_order: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type HomepageLayoutItem = `section:${HomepageSectionKey}` | `block:${string}`;
+
 export type HomepageSection = {
   section_key: HomepageSectionKey;
   is_enabled: boolean;
@@ -490,6 +547,8 @@ export type HomepageDesignDraft = {
   section_order: HomepageSectionKey[];
   section_visibility: Record<HomepageSectionKey, boolean>;
   section_config: HomepageSectionDesignMap;
+  custom_blocks: HomepageCustomBlock[];
+  layout_order: HomepageLayoutItem[];
   updated_by: string | null;
   updated_at: string;
 };

@@ -189,7 +189,7 @@ export default async function AdminPage() {
             />
             <AdminModule
               title="Visual Editor"
-              text="Конструктор Hero всех публичных страниц и шаблонов: desktop/mobile, фото, crop, тексты, черновики и история."
+              text="Конструктор Hero и главной страницы: Canvas, секции, Block Library, медиатека, адаптивные режимы, черновики и история."
               badge={
                 profile.role === "editor" || profile.role === "admin"
                   ? "Работает"

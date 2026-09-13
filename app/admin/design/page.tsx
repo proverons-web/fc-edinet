@@ -10,6 +10,7 @@ import {
 import { defaultHomepageCanvas, normalizeHomepageCanvas } from "@/lib/homepage-canvas";
 import { defaultHeroLayerConfig, homeHeroLayerDefinitions, normalizeHeroLayerConfig } from "@/lib/hero-builder";
 import { defaultHomepageSectionDesignMap, normalizeHomepageSectionDesignMap } from "@/lib/section-builder";
+import { normalizeHomepageBlock, normalizeHomepageBlocks, normalizeHomepageLayoutOrder } from "@/lib/block-library";
 import type {
   HomepageDesignDraft,
   HomepageDesignSnapshot,
@@ -18,6 +19,7 @@ import type {
   DesignMediaAsset,
   HomepageSection,
   HomepageSectionKey,
+  HomepagePublishedBlock,
   SitePageDesignKey,
   SitePageDesignVersion,
 } from "@/lib/types";
@@ -47,7 +49,7 @@ export default async function AdminDesignPage({ searchParams }: PageProps) {
           <div>
             <p className="eyebrow">FC EDINEȚ • SITE-WIDE VISUAL EDITOR</p>
             <h1>Визуальный редактор</h1>
-            <p>Section Builder добавляет к Hero Builder полноценное управление секциями главной: порядок, видимость, ширина, фон, отступы, количество карточек и адаптивные сетки. Hero, Image Editor и Canvas продолжают работать в той же системе черновиков и версий.</p>
+            <p>Block Library превращает главную в управляемую композицию: стандартные секции можно смешивать с дополнительными блоками текста, изображения, CTA, новостей, игроков, медиа, партнёров, матча и таблицы. Всё сохраняется через черновик и историю версий.</p>
           </div>
           <div className="adminHeroActions">
             <Link href="/admin" className="adminBack">← Админка</Link>
@@ -69,16 +71,19 @@ export default async function AdminDesignPage({ searchParams }: PageProps) {
 
 async function HomeEditor() {
   const { supabase } = await requireEditor();
-  const [heroResult, sectionsResult, draftResult, versionsResult, assetsResult] = await Promise.all([
+  const [heroResult, sectionsResult, blocksResult, draftResult, versionsResult, assetsResult] = await Promise.all([
     supabase.from("homepage_hero").select("*").eq("id", 1).maybeSingle(),
     supabase.from("homepage_sections").select("*").order("display_order"),
+    supabase.from("homepage_blocks").select("*").order("display_order"),
     supabase.from("homepage_design_draft").select("*").eq("id", 1).maybeSingle(),
     supabase.from("homepage_design_versions").select("*").order("created_at", { ascending: false }).limit(20),
     supabase.from("design_media_assets").select("*").eq("is_active", true).order("created_at", { ascending: false }).limit(60),
   ]);
   const hero = heroResult.data as HomepageHero | null;
   const sections = (sectionsResult.data ?? []) as HomepageSection[];
-  const published = buildPublished(hero, sections);
+  const blocks: HomepagePublishedBlock[] = [];
+  for (const raw of (blocksResult.data ?? []) as Record<string, unknown>[]) { const normalized = normalizeHomepageBlock({ id: raw.id, type: raw.block_type, enabled: raw.is_enabled, content: raw.content, design: raw.design_config }); if (normalized) blocks.push({ ...normalized, display_order: Number(raw.display_order ?? 100) }); }
+  const published = buildPublished(hero, sections, blocks);
   const draft = draftResult.data as HomepageDesignDraft | null;
   const initial = draft ? buildDraft(draft, published) : published;
   const versions = (versionsResult.data ?? []) as HomepageDesignVersion[];
@@ -132,17 +137,19 @@ function SitePageHistory({ pageKey, versions }: { pageKey: SitePageDesignKey; ve
   return <section className="visualHistory"><div className="sectionHeading"><div><p className="eyebrow blue">ИСТОРИЯ</p><h2>Версии выбранной страницы</h2><p>Каждая страница и шаблон имеют независимую историю.</p></div></div>{versions.length ? <div className="visualHistoryList">{versions.map((version) => <article className="visualHistoryRow" key={version.id}><div><strong>{version.label || `Версия #${version.id}`}</strong><span>{formatDate(version.created_at)}</span></div><div className="visualHistoryMeta"><span>{version.snapshot?.hero_height_desktop ?? "—"}px</span><span>{version.snapshot?.background_mode ?? "default"}</span></div><form action={restoreSitePageVisualVersion}><input type="hidden" name="page_key" value={pageKey}/><input type="hidden" name="version_id" value={String(version.id)}/><button className="rowAction" type="submit">Восстановить в черновик</button></form></article>)}</div> : <div className="adminEmpty">История появится после первой публикации этой страницы.</div>}</section>;
 }
 
-function buildPublished(hero: HomepageHero | null, sections: HomepageSection[]): HomepageDesignSnapshot {
+function buildPublished(hero: HomepageHero | null, sections: HomepageSection[], blocks: HomepagePublishedBlock[]): HomepageDesignSnapshot {
   const position = legacyPosition(hero?.background_position);
   const order = normalizeOrder(sections.map((item) => item.section_key));
   const visibility = Object.fromEntries(keys.map((key) => [key, sections.find((item) => item.section_key === key)?.is_enabled ?? true])) as Record<HomepageSectionKey, boolean>;
   const canvasFallback = defaultHomepageCanvas({ desktop_position_x: hero?.desktop_position_x ?? position.x, desktop_position_y: hero?.desktop_position_y ?? position.y, desktop_zoom_percent: hero?.desktop_zoom_percent, mobile_position_x: hero?.mobile_position_x ?? position.x, mobile_position_y: hero?.mobile_position_y ?? position.y, mobile_zoom_percent: hero?.mobile_zoom_percent, hero_height_desktop: hero?.hero_height_desktop, hero_height_mobile: hero?.hero_height_mobile, text_alignment: hero?.text_alignment, show_match_card: hero?.show_match_card });
-  return { background_image_url: hero?.background_image_url ?? null, tablet_background_image_url: hero?.tablet_background_image_url ?? null, mobile_background_image_url: hero?.mobile_background_image_url ?? null, desktop_position_x: hero?.desktop_position_x ?? position.x, desktop_position_y: hero?.desktop_position_y ?? position.y, desktop_zoom_percent: hero?.desktop_zoom_percent ?? 100, mobile_position_x: hero?.mobile_position_x ?? position.x, mobile_position_y: hero?.mobile_position_y ?? position.y, mobile_zoom_percent: hero?.mobile_zoom_percent ?? 100, hero_height_desktop: hero?.hero_height_desktop ?? 650, hero_height_mobile: hero?.hero_height_mobile ?? 520, overlay_opacity: hero?.overlay_opacity ?? 72, text_alignment: hero?.text_alignment ?? "left", show_match_card: hero?.show_match_card ?? true, canvas_config: normalizeHomepageCanvas(hero?.canvas_config, canvasFallback), hero_layer_config: normalizeHeroLayerConfig(hero?.hero_layer_config, homeHeroLayerDefinitions, defaultHeroLayerConfig(homeHeroLayerDefinitions)), section_order: order, section_visibility: visibility, section_config: normalizeHomepageSectionDesignMap(Object.fromEntries(sections.map((section) => [section.section_key, section.design_config ?? {}])), defaultHomepageSectionDesignMap()) };
+  return { background_image_url: hero?.background_image_url ?? null, tablet_background_image_url: hero?.tablet_background_image_url ?? null, mobile_background_image_url: hero?.mobile_background_image_url ?? null, desktop_position_x: hero?.desktop_position_x ?? position.x, desktop_position_y: hero?.desktop_position_y ?? position.y, desktop_zoom_percent: hero?.desktop_zoom_percent ?? 100, mobile_position_x: hero?.mobile_position_x ?? position.x, mobile_position_y: hero?.mobile_position_y ?? position.y, mobile_zoom_percent: hero?.mobile_zoom_percent ?? 100, hero_height_desktop: hero?.hero_height_desktop ?? 650, hero_height_mobile: hero?.hero_height_mobile ?? 520, overlay_opacity: hero?.overlay_opacity ?? 72, text_alignment: hero?.text_alignment ?? "left", show_match_card: hero?.show_match_card ?? true, canvas_config: normalizeHomepageCanvas(hero?.canvas_config, canvasFallback), hero_layer_config: normalizeHeroLayerConfig(hero?.hero_layer_config, homeHeroLayerDefinitions, defaultHeroLayerConfig(homeHeroLayerDefinitions)), section_order: order, section_visibility: visibility, section_config: normalizeHomepageSectionDesignMap(Object.fromEntries(sections.map((section) => [section.section_key, section.design_config ?? {}])), defaultHomepageSectionDesignMap()), custom_blocks: blocks, layout_order: normalizeHomepageLayoutOrder([...sections, ...blocks].sort((a,b)=>(a.display_order??0)-(b.display_order??0)).map((item) => "section_key" in item ? `section:${item.section_key}` : `block:${item.id}`), order, blocks) };
 }
 function buildDraft(draft: HomepageDesignDraft, fallback: HomepageDesignSnapshot): HomepageDesignSnapshot {
   const rawOrder = Array.isArray(draft.section_order) ? draft.section_order : fallback.section_order;
   const rawVisibility = draft.section_visibility && typeof draft.section_visibility === "object" ? draft.section_visibility : fallback.section_visibility;
-  return { background_image_url: draft.background_image_url ?? null, tablet_background_image_url: draft.tablet_background_image_url ?? fallback.tablet_background_image_url, mobile_background_image_url: draft.mobile_background_image_url ?? null, desktop_position_x: draft.desktop_position_x ?? fallback.desktop_position_x, desktop_position_y: draft.desktop_position_y ?? fallback.desktop_position_y, desktop_zoom_percent: draft.desktop_zoom_percent ?? fallback.desktop_zoom_percent, mobile_position_x: draft.mobile_position_x ?? fallback.mobile_position_x, mobile_position_y: draft.mobile_position_y ?? fallback.mobile_position_y, mobile_zoom_percent: draft.mobile_zoom_percent ?? fallback.mobile_zoom_percent, hero_height_desktop: draft.hero_height_desktop ?? fallback.hero_height_desktop, hero_height_mobile: draft.hero_height_mobile ?? fallback.hero_height_mobile, overlay_opacity: draft.overlay_opacity ?? fallback.overlay_opacity, text_alignment: draft.text_alignment ?? fallback.text_alignment, show_match_card: draft.show_match_card ?? fallback.show_match_card, canvas_config: normalizeHomepageCanvas(draft.canvas_config, fallback.canvas_config), hero_layer_config: normalizeHeroLayerConfig(draft.hero_layer_config, homeHeroLayerDefinitions, fallback.hero_layer_config), section_order: normalizeOrder(rawOrder.map(String)), section_visibility: Object.fromEntries(keys.map((key) => [key, typeof rawVisibility[key] === "boolean" ? rawVisibility[key] : fallback.section_visibility[key]])) as Record<HomepageSectionKey, boolean>, section_config: normalizeHomepageSectionDesignMap(draft.section_config, fallback.section_config) };
+  const blockDraft = normalizeHomepageBlocks(draft.custom_blocks, fallback.custom_blocks);
+  const sectionOrder = normalizeOrder(rawOrder.map(String));
+  return { background_image_url: draft.background_image_url ?? null, tablet_background_image_url: draft.tablet_background_image_url ?? fallback.tablet_background_image_url, mobile_background_image_url: draft.mobile_background_image_url ?? null, desktop_position_x: draft.desktop_position_x ?? fallback.desktop_position_x, desktop_position_y: draft.desktop_position_y ?? fallback.desktop_position_y, desktop_zoom_percent: draft.desktop_zoom_percent ?? fallback.desktop_zoom_percent, mobile_position_x: draft.mobile_position_x ?? fallback.mobile_position_x, mobile_position_y: draft.mobile_position_y ?? fallback.mobile_position_y, mobile_zoom_percent: draft.mobile_zoom_percent ?? fallback.mobile_zoom_percent, hero_height_desktop: draft.hero_height_desktop ?? fallback.hero_height_desktop, hero_height_mobile: draft.hero_height_mobile ?? fallback.hero_height_mobile, overlay_opacity: draft.overlay_opacity ?? fallback.overlay_opacity, text_alignment: draft.text_alignment ?? fallback.text_alignment, show_match_card: draft.show_match_card ?? fallback.show_match_card, canvas_config: normalizeHomepageCanvas(draft.canvas_config, fallback.canvas_config), hero_layer_config: normalizeHeroLayerConfig(draft.hero_layer_config, homeHeroLayerDefinitions, fallback.hero_layer_config), section_order: sectionOrder, section_visibility: Object.fromEntries(keys.map((key) => [key, typeof rawVisibility[key] === "boolean" ? rawVisibility[key] : fallback.section_visibility[key]])) as Record<HomepageSectionKey, boolean>, section_config: normalizeHomepageSectionDesignMap(draft.section_config, fallback.section_config), custom_blocks: blockDraft, layout_order: normalizeHomepageLayoutOrder(draft.layout_order, sectionOrder, blockDraft) };
 }
 function normalizeOrder(order: string[]): HomepageSectionKey[] { const valid = order.filter((key, index): key is HomepageSectionKey => keys.includes(key as HomepageSectionKey) && order.indexOf(key) === index); return valid.length === keys.length ? valid : [...keys]; }
 function legacyPosition(position?: HomepageHero["background_position"] | null) { if (position === "top") return { x: 50, y: 0 }; if (position === "bottom") return { x: 50, y: 100 }; if (position === "left") return { x: 0, y: 50 }; if (position === "right") return { x: 100, y: 50 }; return { x: 50, y: 50 }; }

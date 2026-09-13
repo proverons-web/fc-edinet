@@ -9,6 +9,7 @@ import { dateLocale, localized, publicText, type Locale } from "@/lib/i18n";
 import { defaultHomepageCanvas, normalizeHomepageCanvas } from "@/lib/homepage-canvas";
 import { defaultHeroLayerConfig, heroLayerState, heroLayerVisible, homeHeroLayerDefinitions, normalizeHeroLayerConfig } from "@/lib/hero-builder";
 import { defaultHomepageSectionDesignMap, normalizeHomepageSectionDesignMap } from "@/lib/section-builder";
+import { normalizeHomepageBlock } from "@/lib/block-library";
 import type {
   ClubMatch,
   Competition,
@@ -16,6 +17,7 @@ import type {
   HomepageSection,
   HomepageSectionKey,
   HomepageSettings,
+  HomepagePublishedBlock,
   MediaAlbum,
   MediaVideo,
   NewsArticle,
@@ -41,7 +43,7 @@ export default async function Home() {
   const supabase = await createClient();
   const now = new Date().toISOString();
 
-  const [heroResult, settingsResult, sectionsResult] = await Promise.all([
+  const [heroResult, settingsResult, sectionsResult, blocksResult] = await Promise.all([
     supabase
       .from("homepage_hero")
       .select("*")
@@ -55,6 +57,11 @@ export default async function Home() {
     supabase
       .from("homepage_sections")
       .select("*")
+      .order("display_order", { ascending: true }),
+    supabase
+      .from("homepage_blocks")
+      .select("*")
+      .eq("is_enabled", true)
       .order("display_order", { ascending: true }),
   ]);
 
@@ -70,6 +77,10 @@ export default async function Home() {
     Object.fromEntries(sections.map((section) => [section.section_key, section.design_config ?? {}])),
     defaultHomepageSectionDesignMap()
   );
+  const customBlocks = (blocksResult.data ?? []).map((row: Record<string, unknown>) => {
+    const block = normalizeHomepageBlock({ id: row.id, type: row.block_type, enabled: row.is_enabled, content: row.content, design: row.design_config });
+    return block ? { ...block, display_order: Number(row.display_order ?? 100) } as HomepagePublishedBlock : null;
+  }).filter((block): block is HomepagePublishedBlock => Boolean(block));
 
   const [
     playersResult,
@@ -518,6 +529,47 @@ export default async function Home() {
     }
   };
 
+  const renderCustomBlock = (block: HomepagePublishedBlock) => {
+    const design = block.design;
+    const content = block.content;
+    const outerStyle = {
+      "--section-pad-top": `${design.padding_top}px`,
+      "--section-pad-bottom": `${design.padding_bottom}px`,
+      "--section-cols-desktop": design.columns_desktop,
+      "--section-cols-tablet": design.columns_tablet,
+      "--section-cols-mobile": design.columns_mobile,
+    } as CSSProperties;
+    const innerClass = design.width === "container" ? "container" : design.width === "wide" ? "sectionBuilderWide" : "sectionBuilderFull";
+    const dark = design.background === "dark" || design.background === "brand";
+    const title = localized(content.title_ru, content.title_ro, locale);
+    const eyebrowText = localized(content.eyebrow_ru, content.eyebrow_ro, locale);
+    const body = localized(content.text_ru, content.text_ro, locale);
+    const buttonText = localized(content.button_text_ru, content.button_text_ro, locale);
+    const blockClass = `section customHomeBlock customBlock-${block.type} sectionBuilderPublic sectionBg-${design.background} textAlign-${design.text_align}`;
+    const heading = (title || eyebrowText) ? <div className={`sectionHeading ${dark ? "light" : ""}`}><div>{eyebrowText && <p className="eyebrow blue">{eyebrowText}</p>}{title && <h2>{title}</h2>}</div></div> : null;
+
+    if (block.type === "text") return <section className={blockClass} style={outerStyle} key={`block-${block.id}`}><div className={innerClass}>{heading}{body && <div className="customBlockRichText"><p>{body}</p></div>}</div></section>;
+    if (block.type === "image") return <section className={blockClass} style={outerStyle} key={`block-${block.id}`}><div className={innerClass}>{heading}{content.image_url ? <img className="customBlockImage" src={content.image_url} alt={localized(content.image_alt_ru, content.image_alt_ro, locale)} /> : <div className="adminEmpty">{locale === "ro" ? "Selectează o imagine în Visual Editor." : "Выбери изображение в Visual Editor."}</div>}</div></section>;
+    if (block.type === "text_image") return <section className={blockClass} style={outerStyle} key={`block-${block.id}`}><div className={`${innerClass} customTextImage ${design.image_position === "left" ? "imageLeft" : "imageRight"}`}><div className="customTextImageCopy">{heading}{body && <p>{body}</p>}{buttonText && content.button_href && <Link className="primaryButton" href={content.button_href}>{buttonText}</Link>}</div><div className="customTextImageMedia">{content.image_url ? <img src={content.image_url} alt={localized(content.image_alt_ru, content.image_alt_ro, locale)} /> : <span>FC EDINEȚ</span>}</div></div></section>;
+    if (block.type === "cta") return <section className={blockClass} style={{...outerStyle, ...(content.image_url ? { backgroundImage:`linear-gradient(rgba(4,18,40,.72),rgba(4,18,40,.72)),url("${content.image_url}")` } : {})}} key={`block-${block.id}`}><div className={`${innerClass} customCtaInner`}><div>{eyebrowText && <p className="eyebrow">{eyebrowText}</p>}{title && <h2>{title}</h2>}{body && <p>{body}</p>}</div>{buttonText && content.button_href && <Link className="primaryButton" href={content.button_href}>{buttonText}</Link>}</div></section>;
+    if (block.type === "news") return <section className={blockClass} style={outerStyle} key={`block-${block.id}`}><div className={innerClass}>{heading}<div className="homeNewsDbGrid sectionBuilderGrid">{allNews.slice(0, design.item_limit).map((article)=><NewsCard key={article.id} article={article} locale={locale}/>)}</div></div></section>;
+    if (block.type === "players") return <section className={blockClass} style={outerStyle} key={`block-${block.id}`}><div className={innerClass}>{heading}<div className="players sectionBuilderGrid">{allPlayers.slice(0, design.item_limit).map((player)=><PlayerCard key={player.id} player={player} locale={locale}/>)}</div></div></section>;
+    if (block.type === "media") {
+      const cards: Array<{ kind:"album"; item:MediaAlbum }|{ kind:"video"; item:MediaVideo }> = [];
+      for (let i=0; cards.length < design.item_limit && (i<albums.length || i<videos.length); i+=1) { if (albums[i] && cards.length<design.item_limit) cards.push({kind:"album",item:albums[i]}); if (videos[i] && cards.length<design.item_limit) cards.push({kind:"video",item:videos[i]}); }
+      return <section className={blockClass} style={outerStyle} key={`block-${block.id}`}><div className={innerClass}>{heading}<div className="homeMediaGrid sectionBuilderGrid">{cards.map((entry)=>entry.kind === "album" ? <Link href={`/media/${entry.item.slug}`} className="homeMediaCard" key={`cb-a-${entry.item.id}`}><div className="homeMediaImage">{entry.item.cover_image_url ? <img src={entry.item.cover_image_url} alt=""/> : <div className="homeMediaFallback">{text.album}</div>}</div><div><span>{text.album.toUpperCase()}</span><h3>{entry.item.title}</h3></div></Link> : <a href={entry.item.youtube_url} target="_blank" rel="noopener noreferrer" className="homeMediaCard" key={`cb-v-${entry.item.id}`}><div className="homeMediaImage"><img src={`https://img.youtube.com/vi/${entry.item.youtube_id}/hqdefault.jpg`} alt=""/><span className="homeMediaPlay">▶</span></div><div><span>{text.video.toUpperCase()}</span><h3>{entry.item.title}</h3></div></a>)}</div></div></section>;
+    }
+    if (block.type === "partners") return <section className={blockClass} style={outerStyle} key={`block-${block.id}`}><div className={innerClass}>{heading}<div className="homePartnersGrid sectionBuilderGrid">{allPartners.slice(0, design.item_limit).map((partner)=>partner.website_url ? <a className="homePartnerCard" href={partner.website_url} target="_blank" rel="noopener noreferrer" key={`cb-p-${partner.id}`}><div className="homePartnerLogo"><img src={partner.logo_url} alt={partner.name}/></div></a> : <div className="homePartnerCard" key={`cb-p-${partner.id}`}><div className="homePartnerLogo"><img src={partner.logo_url} alt={partner.name}/></div></div>)}</div></div></section>;
+    if (block.type === "next_match") return <section className={blockClass} style={outerStyle} key={`block-${block.id}`}><div className={innerClass}>{heading}<div className="customNextMatch">{nextMatch ? <><p>{nextMatch.competition?.name ?? "Матч"}</p><HomeStripMatch match={nextMatch} type="next"/><strong>{formatMatchDate(nextMatch.kickoff, locale)}</strong><span>{nextMatch.stadium || text.stadiumUnknown}</span><Link href="/matches">{publicText[locale].matches.title} →</Link></> : <div className="adminEmpty">{locale === "ro" ? "Următorul meci nu a fost încă adăugat." : "Следующий матч пока не добавлен."}</div>}</div></div></section>;
+    if (block.type === "standings") return <section className={blockClass} style={outerStyle} key={`block-${block.id}`}><div className={innerClass}>{heading}{standings.length ? <StandingsTable entries={standings} compact limit={design.item_limit} locale={locale}/> : <div className="adminEmpty">{text.standingsEmpty}</div>}</div></section>;
+    return null;
+  };
+
+  const homepageLayout = [
+    ...sections.filter((section) => section.is_enabled).map((section) => ({ kind: "section" as const, order: section.display_order, section })),
+    ...customBlocks.filter((block) => block.enabled).map((block) => ({ kind: "block" as const, order: block.display_order, block })),
+  ].sort((a, b) => a.order - b.order);
+
   return (
     <main>
       <section
@@ -620,9 +672,7 @@ export default async function Home() {
         </section>
       )}
 
-      {sections
-        .filter((section) => section.is_enabled)
-        .map((section) => renderSection(section.section_key))}
+      {homepageLayout.map((item) => item.kind === "section" ? renderSection(item.section.section_key) : renderCustomBlock(item.block))}
     </main>
   );
 }

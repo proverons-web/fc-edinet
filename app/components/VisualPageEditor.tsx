@@ -5,6 +5,7 @@ import type { PointerEvent as ReactPointerEvent } from "react";
 import { saveVisualEditor, type VisualEditorState } from "@/app/admin/design/actions";
 import VisualImageField from "@/app/components/VisualImageField";
 import HeroLayerPanel from "@/app/components/HeroLayerPanel";
+import HomepageBlockLibrary from "@/app/components/HomepageBlockLibrary";
 import {
   homepageSectionLabels,
   type HomepageCanvasConfig,
@@ -14,6 +15,8 @@ import {
   type DesignMediaAsset,
   type HomepageSectionKey,
   type HomepageSectionDesignMap,
+  type HomepageCustomBlock,
+  type HomepageLayoutItem,
 } from "@/lib/types";
 import { heroLayerState, heroLayerVisible, homeHeroLayerDefinitions } from "@/lib/hero-builder";
 import { homepageSectionCapabilities } from "@/lib/section-builder";
@@ -50,11 +53,12 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
   const [alignment, setAlignment] = useState(initial.text_alignment);
   const [canvas, setCanvas] = useState<HomepageCanvasConfig>(initial.canvas_config);
 
-  const [sections, setSections] = useState(initial.section_order);
+  const [customBlocks, setCustomBlocks] = useState<HomepageCustomBlock[]>(initial.custom_blocks);
+  const [layoutOrder, setLayoutOrder] = useState<HomepageLayoutItem[]>(initial.layout_order);
+  const sections = layoutOrder.filter((item): item is `section:${HomepageSectionKey}` => item.startsWith("section:")).map((item) => item.slice(8) as HomepageSectionKey);
   const [visible, setVisible] = useState(initial.section_visibility);
   const [sectionConfig, setSectionConfig] = useState<HomepageSectionDesignMap>(initial.section_config);
   const [selectedSection, setSelectedSection] = useState<HomepageSectionKey>(initial.section_order[0] ?? "news");
-  const [draggingSection, setDraggingSection] = useState<HomepageSectionKey | null>(null);
 
   const viewport = canvas[mode];
   const currentImage = mode === "desktop"
@@ -149,17 +153,6 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
     updateViewport(object === "text" ? { text_x: x, text_y: y } : { match_x: x, match_y: y });
   }
 
-  function moveSection(index: number, direction: -1 | 1) {
-    const nextIndex = index + direction;
-    if (nextIndex < 0 || nextIndex >= sections.length) return;
-    setSections((current) => { const next = [...current]; [next[index], next[nextIndex]] = [next[nextIndex], next[index]]; return next; });
-  }
-  function dropSection(target: HomepageSectionKey) {
-    if (!draggingSection || draggingSection === target) return;
-    setSections((current) => { const next = current.filter((key) => key !== draggingSection); next.splice(next.indexOf(target), 0, draggingSection); return next; });
-    setDraggingSection(null);
-  }
-
   function updateSectionConfig(patch: Partial<HomepageSectionDesignMap[HomepageSectionKey]>) {
     setSectionConfig((current) => ({
       ...current,
@@ -171,6 +164,8 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
     <form action={action} className="visualEditorForm">
       <input type="hidden" name="section_order" value={sections.join(",")} />
       <input type="hidden" name="section_config" value={JSON.stringify(sectionConfig)} />
+      <input type="hidden" name="custom_blocks" value={JSON.stringify(customBlocks)} />
+      <input type="hidden" name="layout_order" value={JSON.stringify(layoutOrder)} />
       <input type="hidden" name="canvas_config" value={JSON.stringify(canvas)} />
       <input type="hidden" name="hero_layer_config" value={JSON.stringify(layerConfig)} />
       <input type="hidden" name="desktop_position_x" value={canvas.desktop.background_x} />
@@ -283,7 +278,7 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
       <section className="clubAdminSection visualControlCard sectionBuilderCard">
         <div className="formSectionTitle"><p className="eyebrow blue">SECTION BUILDER</p><h2>Секции главной</h2><p>Перетаскивай блоки, выбирай секцию и настраивай её ширину, фон, отступы, количество карточек и адаптивную сетку.</p></div>
         <div className="sectionBuilderLayout">
-          <div className="visualSectionList">{sections.map((key,index)=><div onClick={()=>setSelectedSection(key)} className={`visualSectionRow ${draggingSection===key?"dragging":""} ${selectedSection===key?"selected":""}`} key={key} draggable onDragStart={()=>setDraggingSection(key)} onDragEnd={()=>setDraggingSection(null)} onDragOver={(e)=>e.preventDefault()} onDrop={()=>dropSection(key)}><span className="visualDragHandle">⋮⋮</span><label onClick={(e)=>e.stopPropagation()}><input type="checkbox" name={`section_${key}_enabled`} checked={visible[key]} onChange={(e)=>setVisible((current)=>({...current,[key]:e.target.checked}))}/><span><strong>{homepageSectionLabels[key]}</strong><small>{descriptions[key]}</small></span></label><div className="visualSectionButtons"><button type="button" onClick={(e)=>{e.stopPropagation();moveSection(index,-1)}} disabled={index===0}>↑</button><button type="button" onClick={(e)=>{e.stopPropagation();moveSection(index,1)}} disabled={index===sections.length-1}>↓</button></div></div>)}</div>
+          <div className="visualSectionList">{sections.map((key)=><div onClick={()=>setSelectedSection(key)} className={`visualSectionRow ${selectedSection===key?"selected":""}`} key={key}><span className="visualDragHandle">§</span><label onClick={(e)=>e.stopPropagation()}><input type="checkbox" name={`section_${key}_enabled`} checked={visible[key]} onChange={(e)=>setVisible((current)=>({...current,[key]:e.target.checked}))}/><span><strong>{homepageSectionLabels[key]}</strong><small>{descriptions[key]}</small></span></label><small className="sectionOrderHint">Порядок — в Block Library</small></div>)}</div>
 
           <div className="sectionBuilderInspector">
             <div className="sectionBuilderInspectorHead"><div><span>ВЫБРАНА СЕКЦИЯ</span><h3>{homepageSectionLabels[selectedSection]}</h3></div><b>{visible[selectedSection] ? "Включена" : "Скрыта"}</b></div>
@@ -310,7 +305,17 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
         </div>
       </section>
 
-      <section className="visualPublishBar"><div><p className="eyebrow blue">ПУБЛИКАЦИЯ</p><h2>Черновик или сразу на сайт</h2><p>Section Builder сохраняется в том же черновике: порядок и видимость секций, фон, ширина, отступы, количество элементов и отдельные сетки Desktop / Tablet / Mobile.</p></div><div className="visualPublishControls"><input name="version_label" placeholder="Название версии, например: Match card safe zone"/><div className="visualPublishButtons"><button className="secondaryAdminButton" type="submit" name="intent" value="draft" disabled={pending}>{pending?"Сохраняем…":"Сохранить черновик"}</button><button className="primaryButton homepageHeroSave" type="submit" name="intent" value="publish" disabled={pending}>{pending?"Публикуем…":"Опубликовать дизайн"}</button></div></div></section>
+      <HomepageBlockLibrary
+        blocks={customBlocks}
+        setBlocks={setCustomBlocks}
+        layoutOrder={layoutOrder}
+        setLayoutOrder={setLayoutOrder}
+        sectionVisibility={visible}
+        assets={assets}
+        mode={mode}
+      />
+
+      <section className="visualPublishBar"><div><p className="eyebrow blue">ПУБЛИКАЦИЯ</p><h2>Черновик или сразу на сайт</h2><p>Block Library и Section Builder сохраняются в одном черновике: стандартные секции, пользовательские блоки и их общий порядок публикуются только после проверки.</p></div><div className="visualPublishControls"><input name="version_label" placeholder="Название версии, например: Match card safe zone"/><div className="visualPublishButtons"><button className="secondaryAdminButton" type="submit" name="intent" value="draft" disabled={pending}>{pending?"Сохраняем…":"Сохранить черновик"}</button><button className="primaryButton homepageHeroSave" type="submit" name="intent" value="publish" disabled={pending}>{pending?"Публикуем…":"Опубликовать дизайн"}</button></div></div></section>
       {state.error && <div className="formError">{state.error}</div>}{state.success && <div className="formSuccess">{state.success}</div>}
     </form>
   );
