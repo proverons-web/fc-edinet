@@ -1919,3 +1919,38 @@ h1,h2,h3{font-family:var(--ds-font-heading);font-weight:var(--ds-heading-weight)
   .playerRecentOpponent,.playerRecentNumbers{grid-column:auto;grid-row:auto}
   .playerRecentNumbers{justify-content:flex-start}
 }
+
+/* ============================================================
+   FC EDINEȚ v2.2.4 — position-specific extended statistics
+   ============================================================ */
+.statisticsPlayerExtra summary{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.statisticsPositionHint{display:inline-flex;align-items:center;min-height:23px;padding:0 8px;border-radius:999px;background:#edf5ff;color:#1764bc;font-size:9px;font-weight:900;letter-spacing:.025em;text-transform:uppercase}
+.statisticsExtraSections{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.statisticsMetricGroup{min-width:0;border:1px solid #e5ebf3;border-radius:13px;padding:11px;background:#fafbfd}
+.statisticsMetricGroup h4{margin:0 0 9px;font-size:10px;font-weight:950;color:#234a78;text-transform:uppercase;letter-spacing:.055em}
+.statisticsMetricGroup .statisticsExtraGrid{grid-template-columns:repeat(3,minmax(95px,1fr));margin-top:0}
+.statisticsMetricGroup.position-goalkeeper{border-color:#cfe0f5;background:#f6faff}
+.statisticsMetricGroup.position-defence{border-color:#d8e7df;background:#f8fcfa}
+.statisticsNotesGroup{grid-column:1/-1}
+.statisticsNotesGroup .statisticsNotesField{display:grid;grid-template-columns:minmax(140px,.3fr) minmax(260px,1fr);gap:10px;align-items:center}
+.statisticsNotesGroup .statisticsNotesField input{min-width:0}
+.statisticsExtendedCell{max-width:300px;text-align:left!important;color:#52677f!important;font-size:10px!important;white-space:normal!important;line-height:1.35}
+.statisticsSeasonTable{min-width:1120px}
+.playerStatsAdvancedBlock{background:linear-gradient(145deg,#fff,#fbfdff)}
+.playerStatsAdvancedGrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px;padding:14px}
+.playerStatsAdvancedGrid .playerStatsMini{min-width:0;background:#f8fbff;border-color:#dbe7f5}
+.playerStatsAdvancedGrid .playerStatsMini strong{color:#0e5fbf}
+
+@media(max-width:1180px){
+  .playerStatsAdvancedGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:900px){
+  .statisticsExtraSections{grid-template-columns:1fr}
+  .statisticsNotesGroup{grid-column:auto}
+  .statisticsMetricGroup .statisticsExtraGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:620px){
+  .statisticsMetricGroup .statisticsExtraGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .statisticsNotesGroup .statisticsNotesField{grid-template-columns:1fr}
+  .playerStatsAdvancedGrid{grid-template-columns:repeat(2,minmax(0,1fr));padding:11px}
+}

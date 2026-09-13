@@ -387,6 +387,48 @@ function PlayerStatisticsSection({
       ]
     : [];
 
+  const passAccuracy = total && numberValue(total.passes_attempted) > 0
+    ? `${Math.round((numberValue(total.passes_completed) / numberValue(total.passes_attempted)) * 100)}%`
+    : "—";
+
+  const advancedStats: { label: string; value: string | number }[] = !total
+    ? []
+    : player.position === "goalkeeper"
+      ? [
+          { label: text.statsSaves, value: total.saves },
+          { label: text.statsGoalsConceded, value: total.goals_conceded },
+          { label: text.statsCleanSheets, value: total.clean_sheets },
+          { label: text.statsPenaltiesSaved, value: total.penalties_saved },
+          { label: text.statsPassAccuracy, value: passAccuracy },
+          { label: text.statsPasses, value: `${total.passes_completed}/${total.passes_attempted}` },
+        ]
+      : player.position === "defender"
+        ? [
+            { label: text.statsPassAccuracy, value: passAccuracy },
+            { label: text.statsTackles, value: total.tackles_won },
+            { label: text.statsInterceptions, value: total.interceptions },
+            { label: text.statsClearances, value: total.clearances },
+            { label: text.statsBlocks, value: total.blocks },
+            { label: text.statsShots, value: total.shots },
+          ]
+        : player.position === "midfielder"
+          ? [
+              { label: text.statsPassAccuracy, value: passAccuracy },
+              { label: text.statsKeyPasses, value: total.key_passes },
+              { label: text.statsTackles, value: total.tackles_won },
+              { label: text.statsInterceptions, value: total.interceptions },
+              { label: text.statsShots, value: total.shots },
+              { label: text.statsShotsOnTarget, value: total.shots_on_target },
+            ]
+          : [
+              { label: text.statsShots, value: total.shots },
+              { label: text.statsShotsOnTarget, value: total.shots_on_target },
+              { label: text.statsKeyPasses, value: total.key_passes },
+              { label: text.statsPassAccuracy, value: passAccuracy },
+              { label: text.statsFoulsWon, value: total.fouls_won },
+              { label: text.statsPasses, value: `${total.passes_completed}/${total.passes_attempted}` },
+            ];
+
   return (
     <section className="section playerStatsSection">
       <div className="container playerStatsContainer">
@@ -441,16 +483,20 @@ function PlayerStatisticsSection({
               <StatMini label={text.statsSubstitutes} value={total.substitute_appearances} />
               <StatMini label={text.statsYellowCards} value={total.yellow_cards} />
               <StatMini label={text.statsRedCards} value={total.red_cards} />
-              {isGoalkeeper ? (
-                <>
-                  <StatMini label={text.statsCleanSheets} value={total.clean_sheets} />
-                  <StatMini label={text.statsSaves} value={total.saves} />
-                  <StatMini label={text.statsGoalsConceded} value={total.goals_conceded} />
-                </>
-              ) : (
-                <StatMini label={text.statsCaptain} value={total.captain_appearances} />
-              )}
+              <StatMini label={text.statsCaptain} value={total.captain_appearances} />
             </div>
+
+            <section className="playerStatsBlock playerStatsAdvancedBlock">
+              <div className="playerStatsBlockHead">
+                <h3>{text.statsExtended}</h3>
+                <span>{advancedStats.length}</span>
+              </div>
+              <div className="playerStatsAdvancedGrid">
+                {advancedStats.map((item) => (
+                  <StatMini label={item.label} value={item.value} key={item.label} />
+                ))}
+              </div>
+            </section>
 
             {competitions.length > 0 && (
               <section className="playerStatsBlock">
@@ -468,7 +514,31 @@ function PlayerStatisticsSection({
                         <th>{text.statsMinutes}</th>
                         <th>{text.statsGoals}</th>
                         <th>{text.statsAssists}</th>
-                        {isGoalkeeper && <th>{text.statsCleanSheets}</th>}
+                        {player.position === "goalkeeper" ? (
+                          <>
+                            <th>{text.statsSaves}</th>
+                            <th>{text.statsCleanSheets}</th>
+                            <th>{text.statsPenaltiesSaved}</th>
+                          </>
+                        ) : player.position === "defender" ? (
+                          <>
+                            <th>{text.statsTackles}</th>
+                            <th>{text.statsInterceptions}</th>
+                            <th>{text.statsClearances}</th>
+                          </>
+                        ) : player.position === "midfielder" ? (
+                          <>
+                            <th>{text.statsPassAccuracy}</th>
+                            <th>{text.statsKeyPasses}</th>
+                            <th>{text.statsTackles}</th>
+                          </>
+                        ) : (
+                          <>
+                            <th>{text.statsShots}</th>
+                            <th>{text.statsShotsOnTarget}</th>
+                            <th>{text.statsKeyPasses}</th>
+                          </>
+                        )}
                       </tr>
                     </thead>
                     <tbody>
@@ -482,7 +552,31 @@ function PlayerStatisticsSection({
                           <td>{row.minutes_played}</td>
                           <td className="accent">{row.goals}</td>
                           <td className="accent">{row.assists}</td>
-                          {isGoalkeeper && <td>{row.clean_sheets}</td>}
+                          {player.position === "goalkeeper" ? (
+                            <>
+                              <td>{row.saves}</td>
+                              <td>{row.clean_sheets}</td>
+                              <td>{row.penalties_saved}</td>
+                            </>
+                          ) : player.position === "defender" ? (
+                            <>
+                              <td>{row.tackles_won}</td>
+                              <td>{row.interceptions}</td>
+                              <td>{row.clearances}</td>
+                            </>
+                          ) : player.position === "midfielder" ? (
+                            <>
+                              <td>{row.passes_attempted > 0 ? `${Math.round((row.passes_completed / row.passes_attempted) * 100)}%` : "—"}</td>
+                              <td>{row.key_passes}</td>
+                              <td>{row.tackles_won}</td>
+                            </>
+                          ) : (
+                            <>
+                              <td>{row.shots}</td>
+                              <td>{row.shots_on_target}</td>
+                              <td>{row.key_passes}</td>
+                            </>
+                          )}
                         </tr>
                       ))}
                     </tbody>
@@ -541,10 +635,21 @@ function PlayerStatisticsSection({
                             <b>{stat.assists}</b>
                             {text.statsAssists}
                           </span>
-                          {isGoalkeeper && (
+                          {isGoalkeeper ? (
+                            <>
+                              <span>
+                                <b>{stat.saves}</b>
+                                {text.statsSaves}
+                              </span>
+                              <span>
+                                <b>{stat.penalties_saved}</b>
+                                {text.statsPenaltiesSaved}
+                              </span>
+                            </>
+                          ) : (
                             <span>
-                              <b>{stat.saves}</b>
-                              {text.statsSaves}
+                              <b>{stat.shots_on_target}/{stat.shots}</b>
+                              {text.statsShotsOnTarget}
                             </span>
                           )}
                         </div>
@@ -561,7 +666,7 @@ function PlayerStatisticsSection({
   );
 }
 
-function StatMini({ label, value }: { label: string; value: number }) {
+function StatMini({ label, value }: { label: string; value: number | string }) {
   return (
     <div className="playerStatsMini">
       <span>{label}</span>

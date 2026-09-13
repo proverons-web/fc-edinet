@@ -781,6 +781,18 @@ export type PlayerMatchStat = {
   goals_conceded: number;
   saves: number;
   clean_sheet: boolean;
+  penalties_saved: number;
+  shots: number;
+  shots_on_target: number;
+  passes_attempted: number;
+  passes_completed: number;
+  key_passes: number;
+  tackles_won: number;
+  interceptions: number;
+  clearances: number;
+  blocks: number;
+  fouls_committed: number;
+  fouls_won: number;
   notes: string | null;
   created_by?: string | null;
   updated_by?: string | null;
@@ -819,6 +831,18 @@ export type PlayerSeasonStatistics = {
   goals_conceded: number;
   saves: number;
   clean_sheets: number;
+  penalties_saved: number;
+  shots: number;
+  shots_on_target: number;
+  passes_attempted: number;
+  passes_completed: number;
+  key_passes: number;
+  tackles_won: number;
+  interceptions: number;
+  clearances: number;
+  blocks: number;
+  fouls_committed: number;
+  fouls_won: number;
 };
 
 export type PlayerSeasonTotal = {
@@ -840,4 +864,16 @@ export type PlayerSeasonTotal = {
   goals_conceded: number;
   saves: number;
   clean_sheets: number;
+  penalties_saved: number;
+  shots: number;
+  shots_on_target: number;
+  passes_attempted: number;
+  passes_completed: number;
+  key_passes: number;
+  tackles_won: number;
+  interceptions: number;
+  clearances: number;
+  blocks: number;
+  fouls_committed: number;
+  fouls_won: number;
 };

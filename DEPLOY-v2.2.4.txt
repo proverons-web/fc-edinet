@@ -1,0 +1,19 @@
+FC EDINEȚ v2.2.4 — DEPLOY
+
+1. В Supabase SQL Editor один раз выполни:
+   database/038_position_specific_player_statistics.sql
+
+2. Убедись, что .env.local заполнен.
+
+3. Запусти из корня проекта:
+   DEPLOY_FC_EDINET.bat
+
+4. После Vercel deployment проверь:
+   https://fc-edinet.vercel.app/api/version
+
+Ожидается:
+   "version": "2.2.4"
+
+5. Проверка:
+   /admin/statistics
+   /team/[slug]

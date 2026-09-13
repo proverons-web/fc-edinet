@@ -55,6 +55,18 @@ type SummaryNumbers = {
   goals_conceded: number;
   saves: number;
   clean_sheets: number;
+  penalties_saved: number;
+  shots: number;
+  shots_on_target: number;
+  passes_attempted: number;
+  passes_completed: number;
+  key_passes: number;
+  tackles_won: number;
+  interceptions: number;
+  clearances: number;
+  blocks: number;
+  fouls_committed: number;
+  fouls_won: number;
 };
 
 type PlayerSummary = SummaryNumbers & {
@@ -64,7 +76,7 @@ type PlayerSummary = SummaryNumbers & {
   >;
 };
 
-type SortKey = "goals" | "assists" | "appearances" | "minutes" | "clean_sheets";
+type SortKey = "goals" | "assists" | "appearances" | "minutes" | "clean_sheets" | "shots" | "tackles_won" | "saves";
 
 const sortLabels: Record<SortKey, string> = {
   goals: "Голы",
@@ -72,6 +84,9 @@ const sortLabels: Record<SortKey, string> = {
   appearances: "Матчи",
   minutes: "Минуты",
   clean_sheets: "Сухие матчи",
+  shots: "Удары",
+  tackles_won: "Отборы",
+  saves: "Сейвы",
 };
 
 function one(value: string | string[] | undefined) {
@@ -110,6 +125,18 @@ function emptySummary(): SummaryNumbers {
     goals_conceded: 0,
     saves: 0,
     clean_sheets: 0,
+    penalties_saved: 0,
+    shots: 0,
+    shots_on_target: 0,
+    passes_attempted: 0,
+    passes_completed: 0,
+    key_passes: 0,
+    tackles_won: 0,
+    interceptions: 0,
+    clearances: 0,
+    blocks: 0,
+    fouls_committed: 0,
+    fouls_won: 0,
   };
 }
 
@@ -130,6 +157,18 @@ function mergeStat(target: SummaryNumbers, row: Partial<PlayerSeasonStatistics &
   target.goals_conceded += numberValue(row.goals_conceded);
   target.saves += numberValue(row.saves);
   target.clean_sheets += numberValue(row.clean_sheets);
+  target.penalties_saved += numberValue(row.penalties_saved);
+  target.shots += numberValue(row.shots);
+  target.shots_on_target += numberValue(row.shots_on_target);
+  target.passes_attempted += numberValue(row.passes_attempted);
+  target.passes_completed += numberValue(row.passes_completed);
+  target.key_passes += numberValue(row.key_passes);
+  target.tackles_won += numberValue(row.tackles_won);
+  target.interceptions += numberValue(row.interceptions);
+  target.clearances += numberValue(row.clearances);
+  target.blocks += numberValue(row.blocks);
+  target.fouls_committed += numberValue(row.fouls_committed);
+  target.fouls_won += numberValue(row.fouls_won);
 }
 
 function sortSummaries(rows: PlayerSummary[], sort: SortKey) {
@@ -155,6 +194,25 @@ function topBy(rows: PlayerSummary[], key: keyof SummaryNumbers) {
     if (diff !== 0) return diff;
     return b.appearances - a.appearances;
   })[0] ?? null;
+}
+
+function passAccuracy(row: Pick<SummaryNumbers, "passes_attempted" | "passes_completed">) {
+  if (row.passes_attempted <= 0) return 0;
+  return Math.round((row.passes_completed / row.passes_attempted) * 100);
+}
+
+function extendedSummary(row: PlayerSummary) {
+  const pass = `Пас ${passAccuracy(row)}%`;
+  if (row.player.position === "goalkeeper") {
+    return `${row.saves} сейв. · ${row.penalties_saved} пен. · ${pass}`;
+  }
+  if (row.player.position === "defender") {
+    return `${row.tackles_won} отб. · ${row.interceptions} пер. · ${row.clearances} вын. · ${pass}`;
+  }
+  if (row.player.position === "midfielder") {
+    return `${pass} · ${row.key_passes} ключ. · ${row.tackles_won} отб. · ${row.interceptions} пер.`;
+  }
+  return `${row.shots_on_target}/${row.shots} в створ · ${row.key_passes} ключ. · ${pass}`;
 }
 
 export default async function AdminStatisticsPage({ searchParams }: PageProps) {
@@ -303,11 +361,11 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
   let summaryQuery = selectedCompetitionId
     ? supabase
         .from("player_season_statistics")
-        .select("player_id,season_id,competition_id,appearances,starts,substitute_appearances,captain_appearances,minutes_played,goals,assists,own_goals,penalties_scored,penalties_missed,yellow_cards,red_cards,goals_conceded,saves,clean_sheets")
+        .select("player_id,season_id,competition_id,appearances,starts,substitute_appearances,captain_appearances,minutes_played,goals,assists,own_goals,penalties_scored,penalties_missed,yellow_cards,red_cards,goals_conceded,saves,clean_sheets,penalties_saved,shots,shots_on_target,passes_attempted,passes_completed,key_passes,tackles_won,interceptions,clearances,blocks,fouls_committed,fouls_won")
         .eq("competition_id", selectedCompetitionId)
     : supabase
         .from("player_season_totals")
-        .select("player_id,season_id,appearances,starts,substitute_appearances,captain_appearances,competitions_played,minutes_played,goals,assists,own_goals,penalties_scored,penalties_missed,yellow_cards,red_cards,goals_conceded,saves,clean_sheets");
+        .select("player_id,season_id,appearances,starts,substitute_appearances,captain_appearances,competitions_played,minutes_played,goals,assists,own_goals,penalties_scored,penalties_missed,yellow_cards,red_cards,goals_conceded,saves,clean_sheets,penalties_saved,shots,shots_on_target,passes_attempted,passes_completed,key_passes,tackles_won,interceptions,clearances,blocks,fouls_committed,fouls_won");
 
   if (selectedSeasonId) {
     summaryQuery = summaryQuery.eq("season_id", selectedSeasonId);
@@ -348,10 +406,10 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
       <section className="adminHero compactAdminHero">
         <div className="container adminHeroInner">
           <div>
-            <p className="eyebrow">FC EDINEȚ • v2.2.3</p>
+            <p className="eyebrow">FC EDINEȚ • v2.2.4</p>
             <h1>Статистика игроков</h1>
             <p>
-              Матчи — источник данных. Сезонные итоги, лидеры и турнирные срезы считаются автоматически.
+              Матчи — источник данных. Итоги и расширенные показатели по позициям считаются автоматически.
             </p>
           </div>
           <div className="adminHeroActions">
@@ -482,6 +540,7 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
                         <th title="Голы">Г</th>
                         <th title="Голевые передачи">А</th>
                         <th title="Голы + ассисты">Г+А</th>
+                        <th title="Расширенные показатели по позиции">Расшир.</th>
                         <th title="Жёлтые карточки">ЖК</th>
                         <th title="Красные карточки">КК</th>
                         <th title="Сухие матчи">Сух.</th>
@@ -516,6 +575,7 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
                           <td className="statisticsAccentCell">{row.goals}</td>
                           <td className="statisticsAccentCell">{row.assists}</td>
                           <td><b>{row.goals + row.assists}</b></td>
+                          <td className="statisticsExtendedCell">{extendedSummary(row)}</td>
                           <td>{row.yellow_cards}</td>
                           <td>{row.red_cards}</td>
                           <td>{row.player.position === "goalkeeper" ? row.clean_sheets : "—"}</td>
@@ -678,7 +738,7 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
           </section>
 
           <section className="statisticsArchitecture">
-            <p className="eyebrow blue">АРХИТЕКТУРА v2.2.2</p>
+            <p className="eyebrow blue">АРХИТЕКТУРА v2.2.4</p>
             <h2>Матч изменился — сезон пересчитался</h2>
             <p>
               Сезонная таблица не хранит отдельные ручные цифры. Она строится непосредственно из завершённой матчевой статистики. Поэтому гол, ассист или исправленная минута в матче автоматически меняет итог футболиста.
@@ -770,7 +830,7 @@ function StatisticsAggregationRequired({ message }: { message: string }) {
       <section className="adminHero compactAdminHero">
         <div className="container adminHeroInner">
           <div>
-            <p className="eyebrow">FC EDINEȚ • v2.2.2</p>
+            <p className="eyebrow">FC EDINEȚ • v2.2.4</p>
             <h1>Автоматические итоги сезона</h1>
             <p>Код обновлён, но базе нужна последняя миграция агрегирования.</p>
           </div>
@@ -780,11 +840,11 @@ function StatisticsAggregationRequired({ message }: { message: string }) {
       <section className="section adminSurface">
         <div className="container">
           <div className="statisticsSetupCard">
-            <span className="statisticsSetupIcon">036</span>
+            <span className="statisticsSetupIcon">038</span>
             <p className="eyebrow blue">ОДИН РАЗ</p>
-            <h2>Примени миграцию 036</h2>
+            <h2>Примени миграцию 038</h2>
             <p>
-              В Supabase → SQL Editor открой <code>database/036_player_season_aggregation.sql</code>, вставь файл целиком и нажми Run. После этого обнови страницу.
+              В Supabase → SQL Editor открой <code>database/038_position_specific_player_statistics.sql</code>, вставь файл целиком и нажми Run. После этого обнови страницу.
             </p>
             <small>Ответ базы: {message}</small>
           </div>

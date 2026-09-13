@@ -146,10 +146,10 @@ export default async function MatchStatisticsPage({
               <section className="statisticsPanel statisticsEntryIntro">
                 <div className="statisticsPanelHead">
                   <div>
-                    <p className="eyebrow blue">v2.2.2 • ВВОД ПО МАТЧУ</p>
+                    <p className="eyebrow blue">v2.2.4 • ВВОД ПО МАТЧУ</p>
                     <h2>Кто играл и что сделал</h2>
                     <p>
-                      Включи «Играл» только у участников матча. Для них укажи старт/замену, минуты и показатели. Игроки без отметки в сезонную статистику не попадут.
+                      Включи «Играл» только у участников матча. Базовые показатели всегда на виду, а расширенный набор автоматически меняется по позиции игрока.
                     </p>
                   </div>
                   <span className={`statisticsState ${currentStatus}`}>{currentStatus === "complete" ? "Готово" : currentStatus === "draft" ? "Черновик" : "Не заполнено"}</span>
@@ -175,6 +175,18 @@ export default async function MatchStatisticsPage({
                   goals_conceded: row.goals_conceded,
                   saves: row.saves,
                   clean_sheet: row.clean_sheet,
+                  penalties_saved: row.penalties_saved,
+                  shots: row.shots,
+                  shots_on_target: row.shots_on_target,
+                  passes_attempted: row.passes_attempted,
+                  passes_completed: row.passes_completed,
+                  key_passes: row.key_passes,
+                  tackles_won: row.tackles_won,
+                  interceptions: row.interceptions,
+                  clearances: row.clearances,
+                  blocks: row.blocks,
+                  fouls_committed: row.fouls_committed,
+                  fouls_won: row.fouls_won,
                   notes: row.notes,
                 }))}
                 currentStatus={currentStatus}

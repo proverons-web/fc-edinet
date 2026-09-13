@@ -30,6 +30,18 @@ type ExistingRow = {
   goals_conceded: number;
   saves: number;
   clean_sheet: boolean;
+  penalties_saved: number;
+  shots: number;
+  shots_on_target: number;
+  passes_attempted: number;
+  passes_completed: number;
+  key_passes: number;
+  tackles_won: number;
+  interceptions: number;
+  clearances: number;
+  blocks: number;
+  fouls_committed: number;
+  fouls_won: number;
   notes: string | null;
 };
 
@@ -39,6 +51,13 @@ type LocalState = {
   position: string;
   captain: boolean;
   cleanSheet: boolean;
+};
+
+const POSITION_HINTS: Record<string, string> = {
+  goalkeeper: "Вратарские действия + передачи",
+  defender: "Оборона + передачи + удары",
+  midfielder: "Передачи + создание + оборона + удары",
+  forward: "Удары + создание + передачи",
 };
 
 export default function MatchStatisticsForm({
@@ -108,7 +127,6 @@ export default function MatchStatisticsForm({
           const local = state[id];
           const played = local?.played ?? false;
           const position = local?.position || player.position;
-          const goalkeeper = position === "goalkeeper";
 
           return (
             <article className={`statisticsPlayerEntry ${played ? "isPlayed" : "isNotPlayed"}`} key={id}>
@@ -185,39 +203,43 @@ export default function MatchStatisticsForm({
               </div>
 
               <details className="statisticsPlayerExtra">
-                <summary>Дополнительная статистика</summary>
-                <div className="statisticsExtraGrid">
-                  <NumberField label="Автоголы" name={`own_goals_${id}`} value={row?.own_goals ?? 0} max={10} disabled={!played} />
-                  <NumberField label="Пенальти забито" name={`penalties_scored_${id}`} value={row?.penalties_scored ?? 0} max={20} disabled={!played} />
-                  <NumberField label="Пенальти мимо" name={`penalties_missed_${id}`} value={row?.penalties_missed ?? 0} max={20} disabled={!played} />
+                <summary>
+                  Расширенная статистика
+                  <span className="statisticsPositionHint">{POSITION_HINTS[position] ?? "Показатели игрока"}</span>
+                </summary>
 
-                  {goalkeeper && (
-                    <>
-                      <NumberField label="Пропущено" name={`goals_conceded_${id}`} value={row?.goals_conceded ?? 0} max={30} disabled={!played} />
-                      <NumberField label="Сейвы" name={`saves_${id}`} value={row?.saves ?? 0} max={50} disabled={!played} />
-                      <label className="statisticsCleanSheet">
-                        <span>Сухой матч</span>
-                        <input
-                          type="checkbox"
-                          name={`clean_sheet_${id}`}
-                          checked={local?.cleanSheet ?? false}
-                          disabled={!played}
-                          onChange={(event) => patch(id, { cleanSheet: event.target.checked })}
-                        />
-                      </label>
-                    </>
-                  )}
+                <div className="statisticsExtraSections">
+                  <section className="statisticsMetricGroup">
+                    <h4>События матча</h4>
+                    <div className="statisticsExtraGrid">
+                      <NumberField label="Автоголы" name={`own_goals_${id}`} value={row?.own_goals ?? 0} max={10} disabled={!played} />
+                      <NumberField label="Пенальти забито" name={`penalties_scored_${id}`} value={row?.penalties_scored ?? 0} max={20} disabled={!played} />
+                      <NumberField label="Пенальти мимо" name={`penalties_missed_${id}`} value={row?.penalties_missed ?? 0} max={20} disabled={!played} />
+                    </div>
+                  </section>
 
-                  <label className="statisticsNotesField">
-                    <span>Заметка</span>
-                    <input
-                      name={`notes_${id}`}
-                      defaultValue={row?.notes ?? ""}
-                      disabled={!played}
-                      maxLength={1000}
-                      placeholder="Например: вышел после перерыва"
-                    />
-                  </label>
+                  <PositionMetrics
+                    playerId={id}
+                    position={position}
+                    row={row}
+                    played={played}
+                    cleanSheet={local?.cleanSheet ?? false}
+                    onCleanSheet={(checked) => patch(id, { cleanSheet: checked })}
+                  />
+
+                  <section className="statisticsMetricGroup statisticsNotesGroup">
+                    <h4>Заметка</h4>
+                    <label className="statisticsNotesField">
+                      <span>Комментарий по игроку</span>
+                      <input
+                        name={`notes_${id}`}
+                        defaultValue={row?.notes ?? ""}
+                        disabled={!played}
+                        maxLength={1000}
+                        placeholder="Например: вышел после перерыва"
+                      />
+                    </label>
+                  </section>
                 </div>
               </details>
             </article>
@@ -228,7 +250,7 @@ export default function MatchStatisticsForm({
       <div className="statisticsSaveBar">
         <div>
           <strong>{playedCount} игроков выбрано</strong>
-          <span>Черновик можно менять сколько угодно. «Завершить» помечает статистику матча готовой.</span>
+          <span>Черновик можно менять сколько угодно. «Завершить» включает матч в сезонные итоги.</span>
         </div>
         <div className="statisticsSaveActions">
           <button className="rowAction muted statisticsDraftButton" type="submit" name="intent" value="draft">
@@ -240,6 +262,100 @@ export default function MatchStatisticsForm({
         </div>
       </div>
     </form>
+  );
+}
+
+function PositionMetrics({
+  playerId,
+  position,
+  row,
+  played,
+  cleanSheet,
+  onCleanSheet,
+}: {
+  playerId: string;
+  position: string;
+  row: ExistingRow | undefined;
+  played: boolean;
+  cleanSheet: boolean;
+  onCleanSheet: (checked: boolean) => void;
+}) {
+  const passFields = (
+    <>
+      <NumberField label="Передачи всего" name={`passes_attempted_${playerId}`} value={row?.passes_attempted ?? 0} max={400} disabled={!played} />
+      <NumberField label="Передачи точно" name={`passes_completed_${playerId}`} value={row?.passes_completed ?? 0} max={400} disabled={!played} />
+    </>
+  );
+
+  if (position === "goalkeeper") {
+    return (
+      <>
+        <section className="statisticsMetricGroup position-goalkeeper">
+          <h4>Вратарь</h4>
+          <div className="statisticsExtraGrid">
+            <NumberField label="Пропущено" name={`goals_conceded_${playerId}`} value={row?.goals_conceded ?? 0} max={30} disabled={!played} />
+            <NumberField label="Сейвы" name={`saves_${playerId}`} value={row?.saves ?? 0} max={50} disabled={!played} />
+            <NumberField label="Пенальти отражено" name={`penalties_saved_${playerId}`} value={row?.penalties_saved ?? 0} max={10} disabled={!played} />
+            <label className="statisticsCleanSheet">
+              <span>Сухой матч</span>
+              <input
+                type="checkbox"
+                name={`clean_sheet_${playerId}`}
+                checked={cleanSheet}
+                disabled={!played}
+                onChange={(event) => onCleanSheet(event.target.checked)}
+              />
+            </label>
+          </div>
+        </section>
+        <section className="statisticsMetricGroup">
+          <h4>Игра ногами</h4>
+          <div className="statisticsExtraGrid">{passFields}</div>
+        </section>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <section className="statisticsMetricGroup">
+        <h4>Атака и создание</h4>
+        <div className="statisticsExtraGrid">
+          <NumberField label="Удары" name={`shots_${playerId}`} value={row?.shots ?? 0} max={40} disabled={!played} />
+          <NumberField label="В створ" name={`shots_on_target_${playerId}`} value={row?.shots_on_target ?? 0} max={40} disabled={!played} />
+          <NumberField label="Ключевые передачи" name={`key_passes_${playerId}`} value={row?.key_passes ?? 0} max={60} disabled={!played} />
+          <NumberField label="Фолы заработано" name={`fouls_won_${playerId}`} value={row?.fouls_won ?? 0} max={30} disabled={!played} />
+        </div>
+      </section>
+
+      <section className="statisticsMetricGroup">
+        <h4>Передачи</h4>
+        <div className="statisticsExtraGrid">{passFields}</div>
+      </section>
+
+      {(position === "defender" || position === "midfielder") && (
+        <section className="statisticsMetricGroup position-defence">
+          <h4>{position === "defender" ? "Оборона" : "Работа без мяча"}</h4>
+          <div className="statisticsExtraGrid">
+            <NumberField label="Отборы выиграно" name={`tackles_won_${playerId}`} value={row?.tackles_won ?? 0} max={60} disabled={!played} />
+            <NumberField label="Перехваты" name={`interceptions_${playerId}`} value={row?.interceptions ?? 0} max={60} disabled={!played} />
+            {position === "defender" && (
+              <>
+                <NumberField label="Выносы" name={`clearances_${playerId}`} value={row?.clearances ?? 0} max={50} disabled={!played} />
+                <NumberField label="Блоки" name={`blocks_${playerId}`} value={row?.blocks ?? 0} max={60} disabled={!played} />
+              </>
+            )}
+          </div>
+        </section>
+      )}
+
+      <section className="statisticsMetricGroup">
+        <h4>Дисциплина</h4>
+        <div className="statisticsExtraGrid">
+          <NumberField label="Фолы" name={`fouls_committed_${playerId}`} value={row?.fouls_committed ?? 0} max={30} disabled={!played} />
+        </div>
+      </section>
+    </>
   );
 }
 
