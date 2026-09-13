@@ -112,7 +112,7 @@ export function designSystemCssVariables(config: DesignSystemConfig): CSSPropert
     "--ds-body-size": `${config.body_size}px`,
     "--ds-body-line-height": String(config.body_line_height),
     "--ds-heading-weight": String(config.heading_weight),
-    "--ds-heading-letter-spacing": `${config.heading_letter_spacing / 10}em`,
+    "--ds-heading-letter-spacing": `${config.heading_letter_spacing / 100}em`,
     "--ds-h1-scale": String(config.h1_scale / 100),
     "--ds-h2-scale": String(config.h2_scale / 100),
     "--ds-h3-scale": String(config.h3_scale / 100),

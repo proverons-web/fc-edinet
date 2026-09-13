@@ -77,7 +77,7 @@ export default function DesignSystemEditor({ initial }: { initial: DesignSystemC
             <Range label={`Базовый размер — ${config.body_size}px`} min={14} max={20} value={config.body_size} onChange={(body_size) => update({ body_size })} />
             <Range label={`Line-height — ${config.body_line_height.toFixed(1)}`} min={13} max={20} value={Math.round(config.body_line_height * 10)} onChange={(value) => update({ body_line_height: value / 10 })} />
             <Range label={`Вес заголовков — ${config.heading_weight}`} min={600} max={950} step={50} value={config.heading_weight} onChange={(heading_weight) => update({ heading_weight })} />
-            <Range label={`Letter spacing — ${(config.heading_letter_spacing / 10).toFixed(1)}em`} min={-6} max={2} value={config.heading_letter_spacing} onChange={(heading_letter_spacing) => update({ heading_letter_spacing })} />
+            <Range label={`Letter spacing — ${(config.heading_letter_spacing / 100).toFixed(2)}em`} min={-6} max={2} value={config.heading_letter_spacing} onChange={(heading_letter_spacing) => update({ heading_letter_spacing })} />
             <Range label={`H1 масштаб — ${config.h1_scale}%`} min={80} max={125} value={config.h1_scale} onChange={(h1_scale) => update({ h1_scale })} />
             <Range label={`H2 масштаб — ${config.h2_scale}%`} min={80} max={125} value={config.h2_scale} onChange={(h2_scale) => update({ h2_scale })} />
             <Range label={`H3 масштаб — ${config.h3_scale}%`} min={80} max={125} value={config.h3_scale} onChange={(h3_scale) => update({ h3_scale })} />

@@ -1,5 +1,5 @@
 /* ============================================================
-   FC EDINEȚ v2.1.12 — FINAL VISUAL POLISH + FULL PAGE CANVAS
+   FC EDINEȚ v2.1.13 — FINAL VISUAL POLISH + FULL PAGE CANVAS
    Loaded after globals.css. Keep overrides here so the audit
    remains easy to review/revert before v2.2.
    ============================================================ */
@@ -74,3 +74,10 @@ img{max-width:100%}
   .canvasPreviewZoom{justify-content:space-between}
   .canvasFullPreviewStage{min-height:520px!important;padding:10px!important}
 }
+
+
+/* v2.1.13 — production-accurate Canvas preview uses the real homepage in an iframe. */
+.canvasIframeViewport{background:#fff}
+.canvasSiteIframe{display:block;border:0;background:#fff;max-width:none!important}
+.canvasFullPreviewStage.fullPageMode .canvasIframeViewport{box-shadow:0 24px 60px rgba(13,41,74,.20)}
+.canvasFullPreviewStage.heroOnlyMode .canvasIframeViewport{box-shadow:0 18px 44px rgba(13,41,74,.16)}

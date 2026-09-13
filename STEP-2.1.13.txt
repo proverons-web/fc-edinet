@@ -1,0 +1,33 @@
+FC EDINEȚ v2.1.13 — CANVAS LIVE SITE PREVIEW + TYPOGRAPHY FIX
+
+1. HERO BUILDER 2.0 / CANVAS 2.0
+- Full Page Preview больше не рисует отдельную приблизительную копию сайта.
+- Preview загружает реальную главную страницу FC Edineț в same-origin iframe.
+- Desktop iframe имеет настоящий viewport 1920x1080, Tablet 1024x1366, Mobile 390x844.
+- Масштабирование выполняется снаружи iframe, поэтому CSS viewport units, media queries и шрифты совпадают с реальным сайтом.
+- В режиме «Вся страница» видны реальные Header, Hero, данные матчей, секции и Footer.
+- В режиме «Только Hero» используется тот же реальный Hero, а не второй mock-компонент.
+
+2. LIVE HERO EDITING
+- Текущие draft-настройки Canvas применяются поверх iframe без публикации:
+  фон/focus/zoom, overlay, высота Hero, X/Y текста, X/Y/ширина карточки, text alignment и visibility.
+- Safe Zone и центральные guides рисуются поверх настоящего Hero.
+- Выбранные Текст Hero / Карточка следующего матча получают видимую рамку и label.
+- Drag внутри iframe меняет координаты Canvas; Lock/Snap продолжают работать.
+- Свободные координаты остаются -200..300% при выключенном Safe Zone Lock.
+
+3. PAGE LAYOUT LIVE PATCH
+- Реальные секции главной получили data-home-layout-item.
+- В preview можно менять порядок, visibility, width/background/padding/columns текущих опубликованных секций без fake-карточек.
+
+4. TYPOGRAPHY FIX
+- Исправлена ошибка Design System: heading_letter_spacing=-2 раньше превращался в -0.2em.
+- Теперь -2 корректно означает -0.02em.
+- Это устраняет налезание букв в крупных заголовках.
+
+5. ACCEPTANCE
+- /admin/design?page=home показывает те же Header/Hero/секции, что и /.
+- На Desktop заголовок Hero и карточка следующего матча видимы в Canvas.
+- Изменение X/Y сразу двигает реальный элемент в preview.
+- При X<0 или X>100 объект не возвращается автоматически, если Lock выключен.
+- Буквы в заголовках не накладываются из-за ошибочного -0.2em letter spacing.

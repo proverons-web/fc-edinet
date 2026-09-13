@@ -1,7 +1,6 @@
 "use client";
 
-import { useActionState, useCallback, useMemo, useRef, useState } from "react";
-import type { PointerEvent as ReactPointerEvent } from "react";
+import { useActionState, useCallback, useMemo, useState } from "react";
 import { autosaveHomepageDesign, saveVisualEditor, type VisualEditorState } from "@/app/admin/design/actions";
 import Publishing2Bar from "@/app/components/Publishing2Bar";
 import { useDraftAutosave, useEditorHistory } from "@/app/components/usePublishing2";
@@ -52,7 +51,6 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
   const [selectedLayer, setSelectedLayer] = useState("match_card");
   const [layerConfig, setLayerConfig] = useState(initial.hero_layer_config);
   const [safeZoneVisible, setSafeZoneVisible] = useState(true);
-  const stageRef = useRef<HTMLDivElement | null>(null);
 
   const [desktopImage, setDesktopImage] = useState(initial.background_image_url ?? "");
   const [tabletImage, setTabletImage] = useState(initial.tablet_background_image_url ?? "");
@@ -155,22 +153,12 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
     setCanvas((current) => repairHomepageCanvas(current, current, next));
   }
 
-  function dragObject(object: CanvasObject, event: ReactPointerEvent<HTMLElement>) {
-    const layerKey = object === "text" ? "intro" : "match_card";
-    if (heroLayerState(layerConfig, layerKey).locked || !heroLayerVisible(layerConfig, layerKey)) return;
-    event.preventDefault();
-    event.currentTarget.setPointerCapture(event.pointerId);
-    setSelected(object);
-    setSelectedLayer(object === "text" ? "intro" : "match_card");
-
-    const move = (pointer: PointerEvent) => {
-      const stage = stageRef.current;
-      if (!stage) return;
-      const rect = stage.getBoundingClientRect();
-      let x = ((pointer.clientX - rect.left) / rect.width) * 100;
-      let y = ((pointer.clientY - rect.top) / rect.height) * 100;
-      const v = canvas[mode];
-      if (canvas.lock_safe_zone) {
+  const handlePreviewObjectPosition = useCallback((object: CanvasObject, rawX: number, rawY: number) => {
+    setCanvas((current) => {
+      const v = current[mode];
+      let x = rawX;
+      let y = rawY;
+      if (current.lock_safe_zone) {
         const range = homepageObjectSafeRange(v, mode, object);
         const minX = range.fitsHorizontally ? range.minX : 50;
         const maxX = range.fitsHorizontally ? range.maxX : 50;
@@ -178,27 +166,31 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
         const maxY = range.fitsVertically ? range.maxY : 50;
         x = clamp(x, minX, maxX);
         y = clamp(y, minY, maxY);
-        if (canvas.snap_enabled) {
+        if (current.snap_enabled) {
           x = snap(x, [50, minX, maxX]);
           y = snap(y, [50, minY, maxY]);
         }
       } else {
         x = clamp(x, POSITION_MIN, POSITION_MAX);
         y = clamp(y, POSITION_MIN, POSITION_MAX);
-        if (canvas.snap_enabled) {
+        if (current.snap_enabled) {
           x = snap(x, [0, 50, 100]);
           y = snap(y, [0, 50, 100]);
         }
       }
-      updateViewport(object === "text" ? { text_x: Math.round(x), text_y: Math.round(y) } : { match_x: Math.round(x), match_y: Math.round(y) });
-    };
-    const up = () => {
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", up);
-    };
-    window.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", up, { once: true });
-  }
+      const patch = object === "text"
+        ? { text_x: Math.round(x), text_y: Math.round(y) }
+        : { match_x: Math.round(x), match_y: Math.round(y) };
+      const next = { ...current, [mode]: { ...v, ...patch } };
+      return repairHomepageCanvas(next, current, layerConfig);
+    });
+  }, [layerConfig, mode]);
+
+  const handlePreviewSelectLayer = useCallback((layer: "background" | "intro" | "match_card") => {
+    setSelectedLayer(layer);
+    if (layer === "intro") setSelected("text");
+    if (layer === "match_card") setSelected("match");
+  }, []);
 
   function nudge(object: CanvasObject, dx: number, dy: number) {
     const v = canvas[mode];
@@ -262,42 +254,23 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
 
         <HomepageCanvasPreviewFrame
           mode={mode}
+          canvas={canvas}
+          currentImage={currentImage}
+          backgroundVisible={backgroundVisible}
+          introVisible={introVisible}
+          matchVisible={matchLayerVisible}
+          overlay={overlay}
+          alignment={alignment}
+          layerConfig={layerConfig}
+          safeZoneVisible={safeZoneVisible}
+          selectedLayer={selectedLayer}
           layoutOrder={layoutOrder}
           sectionVisibility={visible}
           sectionConfig={sectionConfig}
           customBlocks={customBlocks}
-        >
-          <div ref={stageRef} className="visualHeroPreview canvas2Preview" style={{ height: viewport.hero_height }}>
-            {backgroundVisible && currentImage ? <img className={`visualHeroImage heroBuilderSelectable ${selectedLayer === "background" ? "selected" : ""}`} onClick={() => setSelectedLayer("background")} src={currentImage} alt="" style={{ objectPosition: `${viewport.background_x}% ${viewport.background_y}%`, transform: `scale(${viewport.background_zoom / 100})`, transformOrigin: `${viewport.background_x}% ${viewport.background_y}%` }} /> : <div className={`visualHeroFallback heroBuilderSelectable ${selectedLayer === "background" ? "selected" : ""}`} onClick={() => setSelectedLayer("background")} />}
-            <div className="visualHeroOverlay" style={{ opacity: overlay / 100 }} />
-            {safeZoneVisible && <div className="canvasSafeZone" style={{ top: `${viewport.safe_top}%`, right: `${viewport.safe_right}%`, bottom: `${viewport.safe_bottom}%`, left: `${viewport.safe_left}%` }}><span>SAFE ZONE</span></div>}
-            <div className="canvasCenterGuide horizontal"/><div className="canvasCenterGuide vertical"/>
-
-            {introVisible && <div
-              className={`canvasObject canvasTextObject heroBuilderSelectable ${selectedLayer === "intro" ? "selected" : ""} ${heroLayerState(layerConfig, "intro").locked ? "locked" : ""} align-${alignment}`}
-              style={{ left: `${viewport.text_x}%`, top: `${viewport.text_y}%`, zIndex: heroLayerState(layerConfig, "intro").order }}
-              onPointerDown={(event) => dragObject("text", event)}
-              onClick={() => { setSelected("text"); setSelectedLayer("intro"); }}
-            >
-              <span className="canvasObjectLabel">ТЕКСТ</span>
-              <div className="visualHeroPreviewText">
-                <p className="eyebrow">{eyebrow}</p><h1>{titleMain}<span>{titleAccent}</span></h1><p>{description}</p>
-                <div className="visualPreviewButtons"><span>Смотреть матчи</span><span>Последние новости</span></div>
-              </div>
-            </div>}
-
-            {matchLayerVisible && viewport.match_visible && <div
-              className={`canvasObject canvasMatchObject heroBuilderSelectable ${selectedLayer === "match_card" ? "selected" : ""} ${heroLayerState(layerConfig, "match_card").locked ? "locked" : ""}`}
-              style={{ left: `${viewport.match_x}%`, top: `${viewport.match_y}%`, width: `${viewport.match_width}px`, zIndex: heroLayerState(layerConfig, "match_card").order }}
-              onPointerDown={(event) => dragObject("match", event)}
-              onClick={() => { setSelected("match"); setSelectedLayer("match_card"); }}
-            >
-              <span className="canvasObjectLabel">СЛЕДУЮЩИЙ МАТЧ</span>
-              <div className="visualMatchMock"><small>СЛЕДУЮЩИЙ МАТЧ</small><b>FC EDINEȚ</b><strong>VS</strong><b>СОПЕРНИК</b><span>Дата • Стадион</span></div>
-            </div>}
-            <div className="heroBuilderSelectedBadge">Выбран: {homeHeroLayerDefinitions.find((layer) => layer.key === selectedLayer)?.label ?? selectedLayer}{heroLayerState(layerConfig, selectedLayer).locked ? " • 🔒" : ""}</div>
-          </div>
-        </HomepageCanvasPreviewFrame>
+          onSelectLayer={handlePreviewSelectLayer}
+          onObjectPositionChange={handlePreviewObjectPosition}
+        />
 
         <div className="canvasStatusBar">
           <label><input type="checkbox" checked={safeZoneVisible} onChange={(e) => setSafeZoneVisible(e.target.checked)} /> Safe Zone</label>
