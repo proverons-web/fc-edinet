@@ -1,0 +1,23 @@
+FC EDINEȚ v2.2.1 — DEPLOY
+========================
+
+1. Supabase -> SQL Editor -> один раз выполнить:
+   database/035_player_statistics_entry.sql
+
+2. Создать .env.local как обычно, если папка новой версии его не содержит.
+
+3. Дважды запустить из корня проекта:
+   DEPLOY_FC_EDINET.bat
+
+BAT автоматически выполнит:
+- npm install
+- npm run deploy:check
+- git init / fetch / main
+- git add / commit / push
+
+4. После Vercel deployment:
+   https://fc-edinet.vercel.app/api/version
+   Ожидается version: 2.2.1
+
+5. Проверить:
+   https://fc-edinet.vercel.app/admin/statistics

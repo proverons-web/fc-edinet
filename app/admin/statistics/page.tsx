@@ -177,7 +177,7 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
       <section className="adminHero compactAdminHero">
         <div className="container adminHeroInner">
           <div>
-            <p className="eyebrow">FC EDINEȚ • v2.2</p>
+            <p className="eyebrow">FC EDINEȚ • v2.2.1</p>
             <h1>Статистика игроков</h1>
             <p>
               Фундамент сезонной статистики: сезоны, турниры, матчи и единый источник данных по каждому игроку.
@@ -348,7 +348,7 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
                 <p className="eyebrow blue">МАТЧИ</p>
                 <h2>Готовность статистики</h2>
                 <p>
-                  Здесь уже видно, какие завершённые матчи ждут статистику. Сам ввод состава и показателей добавим следующим шагом — v2.2.1.
+                  Открой завершённый матч, отметь сыгравших футболистов и внеси их показатели. Черновик можно сохранить и продолжить позже.
                 </p>
               </div>
               <span className="statisticsCount">{enrichedMatches.length}</span>
@@ -386,7 +386,9 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
                       </div>
                       <div className="statisticsMatchActions">
                         <Link href={`/admin/matches/${match.id}/edit`} className="rowAction muted">Матч</Link>
-                        <span className="statisticsComingSoon">Ввод статистики · v2.2.1</span>
+                        <Link href={`/admin/statistics/${match.id}`} className="rowAction statisticsEntryLink">
+                          {state === "complete" ? "Редактировать" : state === "draft" ? "Продолжить" : "Ввести статистику"}
+                        </Link>
                       </div>
                     </article>
                   );

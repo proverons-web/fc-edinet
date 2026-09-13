@@ -122,7 +122,7 @@ export default async function AdminPage() {
               text="Сезоны, турниры, матчевые показатели и автоматические итоги игроков."
               badge={
                 profile.role === "editor" || profile.role === "admin"
-                  ? "v2.2"
+                  ? "v2.2.1"
                   : "Editor/Admin"
               }
               href={

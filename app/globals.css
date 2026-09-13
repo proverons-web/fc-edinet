@@ -1701,3 +1701,81 @@ h1,h2,h3{font-family:var(--ds-font-heading);font-weight:var(--ds-heading-weight)
   .statisticsArchitecture h2{font-size:25px}
   .statisticsSetupCard{padding:22px}
 }
+
+/* ============================================================
+   FC EDINEȚ v2.2.1 — match player statistics entry
+   ============================================================ */
+.statisticsMatchEditorPage .adminSurface{padding-bottom:120px}
+.statisticsMatchHero h1{max-width:980px;font-size:clamp(30px,4vw,52px)}
+.statisticsEntryContainer{max-width:1440px}
+.statisticsEntryIntro{margin-bottom:14px}
+.statisticsEntryForm{display:grid;gap:14px}
+.statisticsEntrySummary{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border:1px solid #dfe7f1;border-radius:16px;background:#f8fafd}
+.statisticsEntrySummary>div{display:flex;align-items:baseline;gap:6px;min-width:110px;padding-right:12px;border-right:1px solid #dce4ee}
+.statisticsEntrySummary>div strong{font-size:22px;color:#0b2b54}
+.statisticsEntrySummary>div span{font-size:11px;font-weight:800;color:#738298;text-transform:uppercase;letter-spacing:.04em}
+.statisticsEntrySummary>.statisticsState{margin-left:auto}
+.statisticsPlayerEntryList{display:grid;gap:10px}
+.statisticsPlayerEntry{display:grid;grid-template-columns:minmax(270px,330px) minmax(0,1fr);gap:14px 18px;align-items:center;padding:14px;border:1px solid #dfe6ef;border-radius:17px;background:#fff;box-shadow:0 7px 24px rgba(18,43,77,.025);transition:border-color .16s ease,background .16s ease,box-shadow .16s ease}
+.statisticsPlayerEntry.isPlayed{border-color:#b8d1f2;box-shadow:0 9px 28px rgba(29,96,184,.06)}
+.statisticsPlayerEntry.isNotPlayed{background:#fafbfc}
+.statisticsPlayerEntry.isNotPlayed .statisticsCoreFields,.statisticsPlayerEntry.isNotPlayed .statisticsPlayerExtra{opacity:.48}
+.statisticsPlayerIdentity{display:grid;grid-template-columns:auto 48px 38px minmax(0,1fr);gap:10px;align-items:center;min-width:0}
+.statisticsPlayedToggle{grid-column:1/-1;display:flex;align-items:center;gap:8px;width:max-content;cursor:pointer}
+.statisticsPlayedToggle input{width:18px;height:18px;accent-color:#1769d2}
+.statisticsPlayedToggle span{font-size:11px;font-weight:900;letter-spacing:.045em;text-transform:uppercase;color:#65768b}
+.statisticsPlayerEntry.isPlayed .statisticsPlayedToggle span{color:#1769d2}
+.statisticsPlayerPhoto{width:48px;height:48px;border-radius:12px;overflow:hidden;background:#e8eef6;display:grid;place-items:center;color:#426184;font-size:10px;font-weight:900}
+.statisticsPlayerPhoto img{width:100%;height:100%;object-fit:cover}
+.statisticsPlayerNumber{display:grid;place-items:center;min-width:36px;height:36px;border-radius:10px;background:#0d2b55;color:#fff;font-size:15px;font-weight:900}
+.statisticsPlayerName{display:grid;gap:3px;min-width:0}
+.statisticsPlayerName strong{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.statisticsPlayerName span{font-size:11px;color:var(--muted)}
+.statisticsCoreFields{display:grid;grid-template-columns:minmax(92px,1fr) minmax(128px,1.25fr) repeat(5,minmax(54px,.58fr)) minmax(68px,.7fr);gap:8px;align-items:end;min-width:0}
+.statisticsCoreFields label,.statisticsExtraGrid label{display:grid;gap:5px;min-width:0}
+.statisticsCoreFields label>span,.statisticsExtraGrid label>span{font-size:10px;font-weight:850;color:#64758a;white-space:nowrap}
+.statisticsCoreFields input[type="number"],.statisticsCoreFields select,.statisticsExtraGrid input[type="number"],.statisticsExtraGrid input[type="text"],.statisticsExtraGrid input:not([type]),.statisticsExtraGrid select{width:100%;min-width:0;height:38px;border:1px solid #d7e0eb;border-radius:10px;background:#fff;padding:0 9px;color:#102a4d;font:inherit;font-size:12px;font-weight:750}
+.statisticsCoreFields input[type="number"]{text-align:center;padding-inline:5px}
+.statisticsCoreFields input:disabled,.statisticsCoreFields select:disabled,.statisticsExtraGrid input:disabled,.statisticsExtraGrid select:disabled{background:#f2f4f7;color:#9ba7b6;cursor:not-allowed}
+.statisticsCaptainField{justify-items:center}
+.statisticsCaptainField input,.statisticsCleanSheet input{width:20px!important;height:20px!important;min-height:0!important;accent-color:#1769d2}
+.statisticsPlayerExtra{grid-column:1/-1;border-top:1px solid #edf1f5;padding-top:10px}
+.statisticsPlayerExtra summary{cursor:pointer;width:max-content;max-width:100%;font-size:11px;font-weight:850;color:#3b648f;user-select:none}
+.statisticsExtraGrid{display:grid;grid-template-columns:repeat(6,minmax(100px,1fr));gap:10px;margin-top:12px;align-items:end}
+.statisticsCleanSheet{justify-items:start}
+.statisticsNotesField{grid-column:span 2}
+.statisticsNotesField input{min-width:180px;text-align:left!important}
+.statisticsSaveBar{position:sticky;z-index:35;bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:6px;padding:13px 14px;border:1px solid rgba(182,199,219,.92);border-radius:16px;background:rgba(255,255,255,.94);box-shadow:0 18px 50px rgba(13,38,71,.16);backdrop-filter:blur(14px)}
+.statisticsSaveBar>div:first-child{display:grid;gap:3px}
+.statisticsSaveBar>div:first-child strong{font-size:13px;color:#18385f}
+.statisticsSaveBar>div:first-child span{font-size:10px;color:#738298}
+.statisticsSaveActions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.statisticsDraftButton{min-height:42px}
+.statisticsSaveActions .primaryButton:disabled{opacity:.48;cursor:not-allowed}
+.statisticsMatchActions .statisticsEntryLink{background:#0d6efd;color:#fff;border-color:#0d6efd}
+.statisticsMatchActions .statisticsEntryLink:hover{background:#0a58ca;color:#fff}
+
+@media(max-width:1180px){
+  .statisticsPlayerEntry{grid-template-columns:1fr}
+  .statisticsCoreFields{grid-template-columns:minmax(100px,1fr) minmax(130px,1.2fr) repeat(5,minmax(60px,.7fr)) minmax(70px,.75fr)}
+}
+@media(max-width:900px){
+  .statisticsCoreFields{grid-template-columns:repeat(4,minmax(90px,1fr))}
+  .statisticsExtraGrid{grid-template-columns:repeat(3,minmax(100px,1fr))}
+  .statisticsNotesField{grid-column:span 3}
+}
+@media(max-width:620px){
+  .statisticsMatchEditorPage .adminSurface{padding-bottom:145px}
+  .statisticsPlayerEntry{padding:12px}
+  .statisticsPlayerIdentity{grid-template-columns:44px 36px minmax(0,1fr)}
+  .statisticsPlayedToggle{grid-column:1/-1}
+  .statisticsPlayerPhoto{width:44px;height:44px}
+  .statisticsCoreFields{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .statisticsExtraGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .statisticsNotesField{grid-column:1/-1}
+  .statisticsEntrySummary>div{min-width:auto;padding-right:8px}
+  .statisticsEntrySummary>.statisticsState{margin-left:0}
+  .statisticsSaveBar{bottom:8px;align-items:stretch;flex-direction:column}
+  .statisticsSaveActions{display:grid;grid-template-columns:1fr 1fr}
+  .statisticsSaveActions button{width:100%;justify-content:center;text-align:center}
+}
