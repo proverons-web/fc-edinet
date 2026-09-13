@@ -23,6 +23,12 @@ import {
 } from "@/lib/types";
 import { heroLayerState, heroLayerVisible, homeHeroLayerDefinitions } from "@/lib/hero-builder";
 import { homepageSectionCapabilities } from "@/lib/section-builder";
+import {
+  fitHomepageViewportToSafeZone,
+  homepageObjectSafeRange,
+  homepageViewportSafeIssues,
+  repairHomepageCanvas,
+} from "@/lib/homepage-safe-zone";
 
 const initialState: VisualEditorState = {};
 type ViewMode = "desktop" | "tablet" | "mobile";
@@ -54,7 +60,7 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
   const [clearMobile, setClearMobile] = useState(false);
   const [overlay, setOverlay] = useState(initial.overlay_opacity);
   const [alignment, setAlignment] = useState(initial.text_alignment);
-  const [canvas, setCanvas] = useState<HomepageCanvasConfig>(initial.canvas_config);
+  const [canvas, setCanvas] = useState<HomepageCanvasConfig>(() => repairHomepageCanvas(initial.canvas_config, initial.canvas_config, initial.hero_layer_config));
 
   const [customBlocks, setCustomBlocks] = useState<HomepageCustomBlock[]>(initial.custom_blocks);
   const [layoutOrder, setLayoutOrder] = useState<HomepageLayoutItem[]>(initial.layout_order);
@@ -110,7 +116,7 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
   const applySnapshot = useCallback((value: HomepageDesignSnapshot) => {
     setDesktopImage(value.background_image_url ?? ""); setTabletImage(value.tablet_background_image_url ?? ""); setMobileImage(value.mobile_background_image_url ?? "");
     setClearDesktop(value.background_image_url == null); setClearTablet(value.tablet_background_image_url == null); setClearMobile(value.mobile_background_image_url == null);
-    setOverlay(value.overlay_opacity); setAlignment(value.text_alignment); setCanvas(value.canvas_config); setLayerConfig(value.hero_layer_config);
+    setOverlay(value.overlay_opacity); setAlignment(value.text_alignment); setLayerConfig(value.hero_layer_config); setCanvas(repairHomepageCanvas(value.canvas_config, value.canvas_config, value.hero_layer_config));
     setVisible(value.section_visibility); setSectionConfig(value.section_config); setCustomBlocks(value.custom_blocks); setLayoutOrder(value.layout_order);
     const nextSection = value.section_order[0]; if (nextSection) setSelectedSection(nextSection);
   }, []);
@@ -118,23 +124,37 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
   const autosaveAction = useCallback((value: HomepageDesignSnapshot) => autosaveHomepageDesign(value), []);
   const autosave = useDraftAutosave(editorSnapshot, autosaveAction);
   const checks = useMemo(() => homepagePublishingChecks(editorSnapshot), [editorSnapshot]);
-  const hasBlockingChecks = checks.some((check) => check.level === "error");
   const hasPendingMedia = [desktopImage, tabletImage, mobileImage].some((url) => url.startsWith("blob:"));
 
-  const safeWarning = useMemo(() => {
-    const v = viewport;
-    const checks: string[] = [];
-    if (introVisible && (v.text_x < v.safe_left || v.text_x > 100 - v.safe_right || v.text_y < v.safe_top || v.text_y > 100 - v.safe_bottom)) checks.push("текст");
-    if (matchLayerVisible && v.match_visible && (v.match_x < v.safe_left || v.match_x > 100 - v.safe_right || v.match_y < v.safe_top || v.match_y > 100 - v.safe_bottom)) checks.push("карточка матча");
-    return checks;
-  }, [viewport, introVisible, matchLayerVisible]);
+  const safeWarning = useMemo(() => homepageViewportSafeIssues(viewport, mode, layerConfig), [viewport, mode, layerConfig]);
+  const allSafeWarnings = useMemo(() => (["desktop", "tablet", "mobile"] as ViewMode[]).flatMap((key) =>
+    homepageViewportSafeIssues(canvas[key], key, layerConfig).map((issue) => ({ mode: key, ...issue }))
+  ), [canvas, layerConfig]);
 
   function updateViewport(patch: Partial<HomepageCanvasViewport>) {
-    setCanvas((current) => ({ ...current, [mode]: { ...current[mode], ...patch } }));
+    setCanvas((current) => {
+      const nextViewport = { ...current[mode], ...patch };
+      return {
+        ...current,
+        [mode]: current.lock_safe_zone ? fitHomepageViewportToSafeZone(nextViewport, mode, layerConfig, current[mode]) : nextViewport,
+      };
+    });
   }
 
   function updateConfig(patch: Partial<Pick<HomepageCanvasConfig, "snap_enabled" | "lock_safe_zone">>) {
-    setCanvas((current) => ({ ...current, ...patch }));
+    setCanvas((current) => {
+      const next = { ...current, ...patch };
+      return next.lock_safe_zone ? repairHomepageCanvas(next, current, layerConfig) : next;
+    });
+  }
+
+  function fixAllSafeZones() {
+    setCanvas((current) => repairHomepageCanvas({ ...current, lock_safe_zone: true }, current, layerConfig));
+  }
+
+  function updateLayerConfig(next: typeof layerConfig) {
+    setLayerConfig(next);
+    setCanvas((current) => current.lock_safe_zone ? repairHomepageCanvas(current, current, next) : current);
   }
 
   function dragObject(object: CanvasObject, event: ReactPointerEvent<HTMLElement>) {
@@ -152,11 +172,12 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
       let x = ((pointer.clientX - rect.left) / rect.width) * 100;
       let y = ((pointer.clientY - rect.top) / rect.height) * 100;
       const v = canvas[mode];
-      const halfWidth = object === "match" ? Math.min(24, (v.match_width / rect.width) * 50) : mode === "mobile" ? 38 : mode === "tablet" ? 34 : 27;
-      const minX = canvas.lock_safe_zone ? v.safe_left + halfWidth : halfWidth;
-      const maxX = canvas.lock_safe_zone ? 100 - v.safe_right - halfWidth : 100 - halfWidth;
-      const minY = canvas.lock_safe_zone ? v.safe_top + 5 : 3;
-      const maxY = canvas.lock_safe_zone ? 100 - v.safe_bottom - 5 : 97;
+      const rangeViewport = canvas.lock_safe_zone ? v : { ...v, safe_top: 0, safe_right: 0, safe_bottom: 0, safe_left: 0 };
+      const range = homepageObjectSafeRange(rangeViewport, mode, object);
+      const minX = range.fitsHorizontally ? range.minX : 50;
+      const maxX = range.fitsHorizontally ? range.maxX : 50;
+      const minY = range.fitsVertically ? range.minY : 50;
+      const maxY = range.fitsVertically ? range.maxY : 50;
       x = clamp(x, minX, maxX);
       y = clamp(y, minY, maxY);
       if (canvas.snap_enabled) {
@@ -182,8 +203,9 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
 
   function alignObject(object: CanvasObject, horizontal: "left" | "center" | "right") {
     const v = canvas[mode];
-    const pad = object === "match" ? 18 : mode === "mobile" ? 32 : 24;
-    const x = horizontal === "center" ? 50 : horizontal === "left" ? v.safe_left + pad : 100 - v.safe_right - pad;
+    const range = homepageObjectSafeRange(v, mode, object);
+    const safeCenterX = Math.round((v.safe_left + (100 - v.safe_right)) / 2);
+    const x = horizontal === "center" || !range.fitsHorizontally ? safeCenterX : horizontal === "left" ? Math.ceil(range.minX) : Math.floor(range.maxX);
     updateViewport(object === "text" ? { text_x: x } : { match_x: x });
   }
 
@@ -254,7 +276,7 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
 
             {matchLayerVisible && viewport.match_visible && <div
               className={`canvasObject canvasMatchObject heroBuilderSelectable ${selectedLayer === "match_card" ? "selected" : ""} ${heroLayerState(layerConfig, "match_card").locked ? "locked" : ""}`}
-              style={{ left: `${viewport.match_x}%`, top: `${viewport.match_y}%`, width: `${viewport.match_width}px`, maxWidth: "90%", zIndex: heroLayerState(layerConfig, "match_card").order }}
+              style={{ left: `${viewport.match_x}%`, top: `${viewport.match_y}%`, width: `${viewport.match_width}px`, zIndex: heroLayerState(layerConfig, "match_card").order }}
               onPointerDown={(event) => dragObject("match", event)}
               onClick={() => { setSelected("match"); setSelectedLayer("match_card"); }}
             >
@@ -269,19 +291,20 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
           <label><input type="checkbox" checked={safeZoneVisible} onChange={(e) => setSafeZoneVisible(e.target.checked)} /> Safe Zone</label>
           <label><input type="checkbox" checked={canvas.snap_enabled} onChange={(e) => updateConfig({ snap_enabled: e.target.checked })} /> Snap</label>
           <label><input type="checkbox" checked={canvas.lock_safe_zone} onChange={(e) => updateConfig({ lock_safe_zone: e.target.checked })} /> Не выходить за Safe Zone</label>
-          <span className={safeWarning.length ? "canvasWarning bad" : "canvasWarning good"}>{safeWarning.length ? `⚠ За Safe Zone: ${safeWarning.join(", ")}` : "✓ Центры объектов внутри Safe Zone"}</span>
+          <span className={safeWarning.length ? "canvasWarning bad" : "canvasWarning good"}>{safeWarning.length ? `⚠ За Safe Zone: ${safeWarning.map((issue) => issue.label).join(", ")}` : "✓ Объекты полностью внутри Safe Zone"}</span>
+          {allSafeWarnings.length > 0 && <button className="canvasAutoFix" type="button" onClick={fixAllSafeZones}>Исправить Safe Zone ({allSafeWarnings.length})</button>}
         </div>
       </section>
 
       <div className="visualEditorColumns canvas2Columns heroBuilderColumns">
-        <HeroLayerPanel definitions={homeHeroLayerDefinitions} config={layerConfig} setConfig={setLayerConfig} selected={selectedLayer} setSelected={(key) => { setSelectedLayer(key); if (key === "intro") setSelected("text"); if (key === "match_card") setSelected("match"); }} />
+        <HeroLayerPanel definitions={homeHeroLayerDefinitions} config={layerConfig} setConfig={updateLayerConfig} selected={selectedLayer} setSelected={(key) => { setSelectedLayer(key); if (key === "intro") setSelected("text"); if (key === "match_card") setSelected("match"); }} />
         <section className="clubAdminSection visualControlCard">
           <div className="formSectionTitle"><p className="eyebrow blue">ОБЪЕКТ</p><h2>{selectedLayer === "background" ? "Фон Hero" : selected === "match" ? "Карточка следующего матча" : "Текст Hero"}</h2><p>{selectedLayer === "background" ? "Фон защищён как отдельный слой и редактируется в Image Editor 2.0 ниже." : `Положение настраивается отдельно для ${mode === "desktop" ? "Desktop" : mode === "tablet" ? "Tablet" : "Mobile"}.`}</p></div>
           {selectedLayer === "background" ? <div className="adminNotice">Разблокируй слой «Фон» только если хочешь скрыть его или изменить его положение в порядке слоёв. Crop, Focus и Zoom остаются в Image Editor 2.0.</div> : <>
           <div className={`heroLayerStatus ${heroLayerState(layerConfig, selected === "text" ? "intro" : "match_card").locked ? "locked" : "editable"}`}><strong>{heroLayerState(layerConfig, selected === "text" ? "intro" : "match_card").locked ? "🔒 Объект заблокирован" : "Объект можно перемещать"}</strong><span>{heroLayerState(layerConfig, selected === "text" ? "intro" : "match_card").locked ? "Разблокируй слой выше, чтобы drag & drop и точные настройки снова работали." : "Позиция независима для Desktop / Tablet / Mobile."}</span></div><div className="canvasObjectTabs"><button type="button" className={selected === "text" ? "active" : ""} onClick={() => { setSelected("text"); setSelectedLayer("intro"); }}>Текст Hero</button><button type="button" className={selected === "match" ? "active" : ""} onClick={() => { setSelected("match"); setSelectedLayer("match_card"); }}>Карточка матча</button></div>
           <fieldset className="heroObjectFieldset" disabled={heroLayerState(layerConfig, selected === "text" ? "intro" : "match_card").locked}>
           <div className="canvasPresetButtons"><button type="button" onClick={() => alignObject(selected, "left")}>Слева</button><button type="button" onClick={() => alignObject(selected, "center")}>По центру</button><button type="button" onClick={() => alignObject(selected, "right")}>Справа</button><button type="button" onClick={() => centerSafe(selected)}>Центр Safe Zone</button></div>
-          <div className="canvasCoords"><label>X <input type="number" min="0" max="100" value={selected === "text" ? viewport.text_x : viewport.match_x} onChange={(e) => updateViewport(selected === "text" ? { text_x: clampInt(Number(e.target.value),0,100) } : { match_x: clampInt(Number(e.target.value),0,100) })}/><span>%</span></label><label>Y <input type="number" min="0" max="100" value={selected === "text" ? viewport.text_y : viewport.match_y} onChange={(e) => updateViewport(selected === "text" ? { text_y: clampInt(Number(e.target.value),0,100) } : { match_y: clampInt(Number(e.target.value),0,100) })}/><span>%</span></label></div>
+          <div className="canvasCoords"><label>X <input type="number" min="0" max="100" value={selected === "text" ? viewport.text_x : viewport.match_x} onFocus={(e)=>e.currentTarget.select()} onChange={(e) => { const value=e.currentTarget.valueAsNumber; if (!Number.isFinite(value)) return; updateViewport(selected === "text" ? { text_x: clampInt(value,0,100) } : { match_x: clampInt(value,0,100) }); }}/><span>%</span></label><label>Y <input type="number" min="0" max="100" value={selected === "text" ? viewport.text_y : viewport.match_y} onFocus={(e)=>e.currentTarget.select()} onChange={(e) => { const value=e.currentTarget.valueAsNumber; if (!Number.isFinite(value)) return; updateViewport(selected === "text" ? { text_y: clampInt(value,0,100) } : { match_y: clampInt(value,0,100) }); }}/><span>%</span></label></div>
           <div className="canvasNudge"><button type="button" onClick={() => nudge(selected,0,-1)}>↑</button><button type="button" onClick={() => nudge(selected,-1,0)}>←</button><button type="button" onClick={() => nudge(selected,1,0)}>→</button><button type="button" onClick={() => nudge(selected,0,1)}>↓</button></div>
           {selected === "match" && <><Range label="Ширина карточки" min={240} max={520} step={10} value={viewport.match_width} setValue={(value) => updateViewport({ match_width: value })} suffix=" px"/><label className="checkRow"><input type="checkbox" checked={viewport.match_visible} onChange={(e) => updateViewport({ match_visible: e.target.checked })}/><span><strong>Показывать на этом устройстве</strong><small>Можно скрыть только на Mobile, не затрагивая Desktop/Tablet.</small></span></label></>}
           {selected === "text" && <div className="fieldGroup"><label>Выравнивание текста</label><select value={alignment} onChange={(e) => setAlignment(e.target.value as "left"|"center"|"right")}><option value="left">Слева</option><option value="center">По центру</option><option value="right">Справа</option></select></div>}
@@ -290,9 +313,9 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
         </section>
 
         <section className="clubAdminSection visualControlCard">
-          <div className="formSectionTitle"><p className="eyebrow blue">SAFE ZONE 2.0</p><h2>Безопасные отступы</h2><p>Границы независимы для каждого режима. При включённом Lock drag & drop не даст вынести объект наружу.</p></div>
+          <div className="formSectionTitle"><p className="eyebrow blue">SAFE ZONE 3.0</p><h2>Безопасные отступы</h2><p>Проверяется весь объект, а не только его центр. При включённом Lock координаты, drag & drop, ширина карточки и изменение границ автоматически остаются внутри зоны.</p></div>
           <div className="canvasSafeInputs">
-            {(["safe_top","safe_right","safe_bottom","safe_left"] as const).map((key) => <label key={key}><span>{{safe_top:"Сверху",safe_right:"Справа",safe_bottom:"Снизу",safe_left:"Слева"}[key]}</span><input type="number" min="0" max="30" value={viewport[key]} onChange={(e) => updateViewport({ [key]: clampInt(Number(e.target.value),0,30) })}/><b>%</b></label>)}
+            {(["safe_top","safe_right","safe_bottom","safe_left"] as const).map((key) => <label key={key}><span>{{safe_top:"Сверху",safe_right:"Справа",safe_bottom:"Снизу",safe_left:"Слева"}[key]}</span><input type="number" min="0" max="30" value={viewport[key]} onFocus={(e)=>e.currentTarget.select()} onChange={(e) => { const value=e.currentTarget.valueAsNumber; if (!Number.isFinite(value)) return; updateViewport({ [key]: clampInt(value,0,30) }); }}/><b>%</b></label>)}
           </div>
         </section>
       </div>
@@ -313,7 +336,7 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
         <section className="clubAdminSection visualControlCard">
           <div className="formSectionTitle"><p className="eyebrow blue">ВИД</p><h2>Затемнение и быстрые настройки</h2></div>
           <Range label="Затемнение фотографии" name="overlay_opacity" min={0} max={95} value={overlay} setValue={setOverlay} suffix="%"/>
-          <div className="canvasDeviceSummary">{(["desktop","tablet","mobile"] as ViewMode[]).map((key)=><button type="button" key={key} className={mode===key?"active":""} onClick={()=>setMode(key)}><strong>{key}</strong><span>Text {canvas[key].text_x}/{canvas[key].text_y}</span><span>Match {canvas[key].match_visible ? `${canvas[key].match_x}/${canvas[key].match_y}` : "off"}</span></button>)}</div>
+          <div className="canvasDeviceSummary">{(["desktop","tablet","mobile"] as ViewMode[]).map((key)=>{ const deviceIssues = homepageViewportSafeIssues(canvas[key], key, layerConfig); return <button type="button" key={key} className={`${mode===key?"active":""} ${deviceIssues.length?"hasSafeIssue":"safeOk"}`} onClick={()=>setMode(key)}><strong>{key}</strong><span>Text {canvas[key].text_x}/{canvas[key].text_y}</span><span>Match {canvas[key].match_visible ? `${canvas[key].match_x}/${canvas[key].match_y}` : "off"}</span><em>{deviceIssues.length ? `⚠ ${deviceIssues.map((issue)=>issue.label).join(", ")}` : "✓ Safe Zone"}</em></button>})}</div>
         </section>
       </div>
 

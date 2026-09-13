@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/locale";
 import { dateLocale, localized, publicText, type Locale } from "@/lib/i18n";
 import { defaultHomepageCanvas, normalizeHomepageCanvas } from "@/lib/homepage-canvas";
+import { repairHomepageCanvas } from "@/lib/homepage-safe-zone";
 import { defaultHeroLayerConfig, heroLayerState, heroLayerVisible, homeHeroLayerDefinitions, normalizeHeroLayerConfig } from "@/lib/hero-builder";
 import { defaultHomepageSectionDesignMap, normalizeHomepageSectionDesignMap } from "@/lib/section-builder";
 import { normalizeHomepageBlock } from "@/lib/block-library";
@@ -213,8 +214,8 @@ export default async function Home() {
     text_alignment: hero?.text_alignment,
     show_match_card: hero?.show_match_card,
   });
-  const heroCanvas = normalizeHomepageCanvas(hero?.canvas_config, canvasFallback);
   const heroLayers = normalizeHeroLayerConfig(hero?.hero_layer_config, homeHeroLayerDefinitions, defaultHeroLayerConfig(homeHeroLayerDefinitions));
+  const heroCanvas = repairHomepageCanvas(normalizeHomepageCanvas(hero?.canvas_config, canvasFallback), canvasFallback, heroLayers);
   const heroTextAlignment = hero?.text_alignment ?? "left";
   const showHeroIntro = heroLayerVisible(heroLayers, "intro");
   const showHeroBackground = heroLayerVisible(heroLayers, "background");

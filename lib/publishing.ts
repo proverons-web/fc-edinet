@@ -1,10 +1,10 @@
 import type {
-  HomepageCanvasViewport,
   HomepageDesignSnapshot,
   SitePageDesignSnapshot,
 } from "@/lib/types";
 import type { FooterDesignConfig, HeaderDesignConfig } from "@/lib/global-design";
 import type { DesignSystemConfig } from "@/lib/design-system";
+import { homepageViewportSafeIssues } from "@/lib/homepage-safe-zone";
 
 export type PublishingCheckLevel = "pass" | "warning" | "error";
 export type PublishingCheck = {
@@ -21,15 +21,14 @@ export type VersionChange = {
   after: string;
 };
 
-const VIEWPORT_WIDTH = { desktop: 1440, tablet: 900, mobile: 390 } as const;
 
 export function homepagePublishingChecks(snapshot: HomepageDesignSnapshot): PublishingCheck[] {
   const checks: PublishingCheck[] = [];
   const deviceIssues: string[] = [];
   for (const mode of ["desktop", "tablet", "mobile"] as const) {
     const viewport = snapshot.canvas_config[mode];
-    const issues = viewportSafeIssues(viewport, mode, snapshot.hero_layer_config);
-    if (issues.length) deviceIssues.push(`${mode}: ${issues.join(", ")}`);
+    const issues = homepageViewportSafeIssues(viewport, mode, snapshot.hero_layer_config);
+    if (issues.length) deviceIssues.push(`${mode}: ${issues.map((issue) => issue.label).join(", ")}`);
   }
   checks.push({
     key: "responsive",
@@ -138,24 +137,6 @@ function walkDiff(before: unknown, after: unknown, path: string, out: VersionCha
 
 function makeChange(path: string, before: unknown, after: unknown): VersionChange {
   return { path, label: changeLabel(path), before: formatValue(before), after: formatValue(after) };
-}
-
-function viewportSafeIssues(viewport: HomepageCanvasViewport, mode: keyof typeof VIEWPORT_WIDTH, layers: HomepageDesignSnapshot["hero_layer_config"]) {
-  const issues: string[] = [];
-  const stageWidth = VIEWPORT_WIDTH[mode];
-  const intro = layers.intro;
-  const match = layers.match_card;
-  if (!intro || intro.visible) {
-    const halfText = mode === "mobile" ? 39 : mode === "tablet" ? 34 : 27;
-    const topHalf = 8;
-    if (viewport.text_x - halfText < viewport.safe_left || viewport.text_x + halfText > 100 - viewport.safe_right || viewport.text_y - topHalf < viewport.safe_top || viewport.text_y + topHalf > 100 - viewport.safe_bottom) issues.push("текст");
-  }
-  if ((!match || match.visible) && viewport.match_visible) {
-    const halfMatch = Math.min(45, (viewport.match_width / stageWidth) * 50);
-    const halfHeight = Math.max(5, Math.min(16, (110 / Math.max(220, viewport.hero_height)) * 50));
-    if (viewport.match_x - halfMatch < viewport.safe_left || viewport.match_x + halfMatch > 100 - viewport.safe_right || viewport.match_y - halfHeight < viewport.safe_top || viewport.match_y + halfHeight > 100 - viewport.safe_bottom) issues.push("карточка матча");
-  }
-  return issues;
 }
 
 function validHref(value: string) {

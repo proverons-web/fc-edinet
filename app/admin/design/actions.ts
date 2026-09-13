@@ -14,6 +14,7 @@ import type {
 } from "@/lib/types";
 import { defaultSitePageDesign, normalizeSitePageDesign, sitePageDesignCatalog } from "@/lib/page-design";
 import { defaultHomepageCanvas, normalizeHomepageCanvas } from "@/lib/homepage-canvas";
+import { repairHomepageCanvas } from "@/lib/homepage-safe-zone";
 import { defaultHeroLayerConfig, homeHeroLayerDefinitions, normalizeHeroLayerConfig, siteHeroLayerDefinitions } from "@/lib/hero-builder";
 import { defaultHomepageSectionDesignMap, normalizeHomepageSectionDesignMap } from "@/lib/section-builder";
 import { normalizeHomepageBlock, normalizeHomepageBlocks, normalizeHomepageLayoutOrder } from "@/lib/block-library";
@@ -113,6 +114,9 @@ export async function saveVisualEditor(
   const sectionConfig = parseSectionConfig(formData.get("section_config"), currentDraft.section_config);
   const customBlocks = parseCustomBlocks(formData.get("custom_blocks"), currentDraft.custom_blocks);
   const layoutOrder = parseLayoutOrder(formData.get("layout_order"), sectionOrder, customBlocks, currentDraft.layout_order);
+  const heroLayerConfig = parseHeroLayerConfig(formData.get("hero_layer_config"), homeHeroLayerDefinitions, currentDraft.hero_layer_config);
+  const parsedCanvas = parseCanvasConfig(formData.get("canvas_config"), currentDraft.canvas_config);
+  const canvasConfig = repairHomepageCanvas(parsedCanvas, currentDraft.canvas_config, heroLayerConfig);
 
   const snapshot: HomepageDesignSnapshot = {
     background_image_url: desktopImageUrl,
@@ -129,8 +133,8 @@ export async function saveVisualEditor(
     overlay_opacity: intInRange(formData.get("overlay_opacity"), 0, 95, currentDraft.overlay_opacity),
     text_alignment: alignment(text(formData.get("text_alignment")), currentDraft.text_alignment),
     show_match_card: formData.get("show_match_card") === "on",
-    canvas_config: parseCanvasConfig(formData.get("canvas_config"), currentDraft.canvas_config),
-    hero_layer_config: parseHeroLayerConfig(formData.get("hero_layer_config"), homeHeroLayerDefinitions, currentDraft.hero_layer_config),
+    canvas_config: canvasConfig,
+    hero_layer_config: heroLayerConfig,
     section_order: sectionOrder,
     section_visibility: sectionVisibility,
     section_config: sectionConfig,
@@ -345,6 +349,13 @@ function publishedSnapshot(hero: HomepageHero | null, sections: HomepageSection[
   const visible = Object.fromEntries(
     sectionKeys.map((key) => [key, sections.find((section) => section.section_key === key)?.is_enabled ?? true])
   ) as Record<HomepageSectionKey, boolean>;
+  const canvasFallback = defaultHomepageCanvas({
+    desktop_position_x: hero?.desktop_position_x, desktop_position_y: hero?.desktop_position_y, desktop_zoom_percent: hero?.desktop_zoom_percent,
+    mobile_position_x: hero?.mobile_position_x, mobile_position_y: hero?.mobile_position_y, mobile_zoom_percent: hero?.mobile_zoom_percent,
+    hero_height_desktop: hero?.hero_height_desktop, hero_height_mobile: hero?.hero_height_mobile, text_alignment: hero?.text_alignment, show_match_card: hero?.show_match_card,
+  });
+  const heroLayers = normalizeHeroLayerConfig(hero?.hero_layer_config, homeHeroLayerDefinitions, defaultHeroLayerConfig(homeHeroLayerDefinitions));
+  const canvas = repairHomepageCanvas(normalizeHomepageCanvas(hero?.canvas_config, canvasFallback), canvasFallback, heroLayers);
 
   return {
     background_image_url: hero?.background_image_url ?? null,
@@ -361,19 +372,8 @@ function publishedSnapshot(hero: HomepageHero | null, sections: HomepageSection[
     overlay_opacity: hero?.overlay_opacity ?? 72,
     text_alignment: hero?.text_alignment ?? "left",
     show_match_card: hero?.show_match_card ?? true,
-    canvas_config: normalizeHomepageCanvas(hero?.canvas_config, defaultHomepageCanvas({
-      desktop_position_x: hero?.desktop_position_x,
-      desktop_position_y: hero?.desktop_position_y,
-      desktop_zoom_percent: hero?.desktop_zoom_percent,
-      mobile_position_x: hero?.mobile_position_x,
-      mobile_position_y: hero?.mobile_position_y,
-      mobile_zoom_percent: hero?.mobile_zoom_percent,
-      hero_height_desktop: hero?.hero_height_desktop,
-      hero_height_mobile: hero?.hero_height_mobile,
-      text_alignment: hero?.text_alignment,
-      show_match_card: hero?.show_match_card,
-    })),
-    hero_layer_config: normalizeHeroLayerConfig(hero?.hero_layer_config, homeHeroLayerDefinitions, defaultHeroLayerConfig(homeHeroLayerDefinitions)),
+    canvas_config: canvas,
+    hero_layer_config: heroLayers,
     section_order: order,
     section_visibility: visible,
     section_config: normalizeHomepageSectionDesignMap(
@@ -393,6 +393,8 @@ function publishedSnapshot(hero: HomepageHero | null, sections: HomepageSection[
 
 function normalizeSnapshot(raw: Record<string, unknown>, fallback: HomepageDesignSnapshot): HomepageDesignSnapshot {
   const rawVisibility = isRecord(raw.section_visibility) ? raw.section_visibility : {};
+  const heroLayers = normalizeHeroLayerConfig(raw.hero_layer_config, homeHeroLayerDefinitions, fallback.hero_layer_config);
+  const canvas = repairHomepageCanvas(normalizeHomepageCanvas(raw.canvas_config, fallback.canvas_config), fallback.canvas_config, heroLayers);
   return {
     background_image_url: nullableText(raw.background_image_url, fallback.background_image_url),
     tablet_background_image_url: nullableText(raw.tablet_background_image_url, fallback.tablet_background_image_url),
@@ -408,8 +410,8 @@ function normalizeSnapshot(raw: Record<string, unknown>, fallback: HomepageDesig
     overlay_opacity: numberValue(raw.overlay_opacity, 0, 95, fallback.overlay_opacity),
     text_alignment: alignment(String(raw.text_alignment ?? ""), fallback.text_alignment),
     show_match_card: typeof raw.show_match_card === "boolean" ? raw.show_match_card : fallback.show_match_card,
-    canvas_config: normalizeHomepageCanvas(raw.canvas_config, fallback.canvas_config),
-    hero_layer_config: normalizeHeroLayerConfig(raw.hero_layer_config, homeHeroLayerDefinitions, fallback.hero_layer_config),
+    canvas_config: canvas,
+    hero_layer_config: heroLayers,
     section_order: normalizeSectionOrder(Array.isArray(raw.section_order) ? raw.section_order.map(String) : fallback.section_order),
     section_visibility: Object.fromEntries(
       sectionKeys.map((key) => [key, typeof rawVisibility[key] === "boolean" ? rawVisibility[key] : fallback.section_visibility[key]])
