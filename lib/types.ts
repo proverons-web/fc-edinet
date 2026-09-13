@@ -877,3 +877,58 @@ export type PlayerSeasonTotal = {
   fouls_committed: number;
   fouls_won: number;
 };
+
+
+export type PlayerCareerTotal = {
+  player_id: string | number;
+  seasons_played: number;
+  competitions_played: number;
+  appearances: number;
+  starts: number;
+  substitute_appearances: number;
+  captain_appearances: number;
+  minutes_played: number;
+  goals: number;
+  assists: number;
+  own_goals: number;
+  penalties_scored: number;
+  penalties_missed: number;
+  yellow_cards: number;
+  red_cards: number;
+  goals_conceded: number;
+  saves: number;
+  clean_sheets: number;
+  penalties_saved: number;
+  shots: number;
+  shots_on_target: number;
+  passes_attempted: number;
+  passes_completed: number;
+  key_passes: number;
+  tackles_won: number;
+  interceptions: number;
+  clearances: number;
+  blocks: number;
+  fouls_committed: number;
+  fouls_won: number;
+  first_match_at: string | null;
+  last_match_at: string | null;
+};
+
+export type ClubSeasonHistory = {
+  season_id: string | number;
+  season_name: string;
+  season_slug: string;
+  starts_on: string | null;
+  ends_on: string | null;
+  is_current: boolean;
+  played: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goals_for: number;
+  goals_against: number;
+  goal_difference: number;
+  win_rate: number;
+  statistics_complete: number;
+  players_with_stats: number;
+};

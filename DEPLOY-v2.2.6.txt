@@ -1,0 +1,29 @@
+FC EDINEȚ v2.2.6 — DEPLOY
+
+1. Перед первым запуском версии выполнить ОДИН РАЗ:
+   Supabase -> SQL Editor -> database/039_history_and_career_statistics.sql -> Run
+
+2. После Success распаковать полный архив в отдельную папку, например:
+   E:\Projects\FC Edinet\fc-edinet-v2.2.6
+
+3. Если .env.local не перенесён автоматически — скопировать его из предыдущей рабочей версии.
+   Не коммитить .env.local.
+
+4. Запустить двойным кликом:
+   DEPLOY_FC_EDINET.bat
+
+BAT сам выполняет:
+- npm install
+- npm run deploy:check
+- git init / remote / fetch
+- подготовку main
+- git add / commit
+- git push
+
+5. После Vercel проверить:
+   https://fc-edinet.vercel.app/api/version
+   Ожидаем version = 2.2.6
+
+6. Проверить:
+   https://fc-edinet.vercel.app/statistics#history
+   и страницу любого игрока с завершённой статистикой.

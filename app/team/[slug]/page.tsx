@@ -9,6 +9,7 @@ import type {
   Competition,
   Player,
   PlayerMatchStat,
+  PlayerCareerTotal,
   PlayerSeasonStatistics,
   PlayerSeasonTotal,
   Season,
@@ -33,6 +34,10 @@ type CompetitionSummary = PlayerSeasonStatistics & {
 type RecentPlayerMatch = {
   stat: PlayerMatchStat;
   match: ClubMatch;
+};
+
+type PlayerSeasonHistory = PlayerSeasonTotal & {
+  season: Season | null;
 };
 
 async function getPlayer(slug: string): Promise<Player | null> {
@@ -110,6 +115,36 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
     seasons.find((season) => season.is_current) ??
     seasons[0] ??
     null;
+
+  const [careerResult, careerSeasonsResult] = await Promise.all([
+    supabase
+      .from("player_career_totals")
+      .select("*")
+      .eq("player_id", player.id)
+      .maybeSingle(),
+    supabase
+      .from("player_season_totals")
+      .select("*")
+      .eq("player_id", player.id),
+  ]);
+
+  const careerTotal = (careerResult.data as PlayerCareerTotal | null) ?? null;
+  const seasonById = new Map(seasons.map((season) => [String(season.id), season]));
+  const careerSeasons = ((careerSeasonsResult.data ?? []) as PlayerSeasonTotal[])
+    .filter((row) => numberValue(row.appearances) > 0)
+    .map((row) => ({
+      ...row,
+      season: row.season_id !== null && row.season_id !== undefined
+        ? seasonById.get(String(row.season_id)) ?? null
+        : null,
+    }))
+    .sort((a, b) => {
+      const aDate = a.season?.starts_on ? new Date(`${a.season.starts_on}T00:00:00`).getTime() : 0;
+      const bDate = b.season?.starts_on ? new Date(`${b.season.starts_on}T00:00:00`).getTime() : 0;
+      if (bDate !== aDate) return bDate - aDate;
+      return String(b.season?.name ?? "").localeCompare(String(a.season?.name ?? ""), "ru");
+    });
+  const careerError = careerResult.error?.message || careerSeasonsResult.error?.message || null;
 
   let seasonTotal: PlayerSeasonTotal | null = null;
   let competitionSummaries: CompetitionSummary[] = [];
@@ -306,6 +341,15 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
         </>
       </PageHeroShell>
 
+      <PlayerCareerSection
+        player={player}
+        career={careerTotal}
+        seasons={careerSeasons}
+        error={careerError}
+        locale={locale}
+        slug={slug}
+      />
+
       <PlayerStatisticsSection
         player={player}
         seasons={seasons}
@@ -344,6 +388,170 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
         </div>
       </section>
     </main>
+  );
+}
+
+const careerTextByLocale = {
+  ru: {
+    eyebrow: "КАРЬЕРА В FC EDINEȚ",
+    title: "За всё время в клубе",
+    description: "Итоговые показатели складываются только из завершённой матчевой статистики всех сезонов.",
+    seasons: "Сезоны",
+    matches: "Матчи",
+    starts: "В старте",
+    minutes: "Минуты",
+    goals: "Голы",
+    assists: "Ассисты",
+    contribution: "Гол + пас",
+    cleanSheets: "Сухие матчи",
+    saves: "Сейвы",
+    yellow: "Жёлтые",
+    red: "Красные",
+    history: "По сезонам",
+    season: "Сезон",
+    noData: "История статистики пока не накоплена.",
+    noDataHint: "Она появится после завершения статистики хотя бы одного матча.",
+    unavailable: "История карьеры временно недоступна.",
+    openSeason: "Открыть сезон",
+  },
+  ro: {
+    eyebrow: "CARIERĂ LA FC EDINEȚ",
+    title: "Total pentru club",
+    description: "Indicatorii sunt calculați numai din statisticile finalizate ale meciurilor din toate sezoanele.",
+    seasons: "Sezoane",
+    matches: "Meciuri",
+    starts: "Titular",
+    minutes: "Minute",
+    goals: "Goluri",
+    assists: "Assisturi",
+    contribution: "Gol + assist",
+    cleanSheets: "Meciuri fără gol",
+    saves: "Intervenții",
+    yellow: "Galbene",
+    red: "Roșii",
+    history: "Pe sezoane",
+    season: "Sezon",
+    noData: "Istoricul statistic nu este încă disponibil.",
+    noDataHint: "Va apărea după finalizarea statisticii pentru cel puțin un meci.",
+    unavailable: "Istoricul carierei este temporar indisponibil.",
+    openSeason: "Deschide sezonul",
+  },
+} as const;
+
+function PlayerCareerSection({
+  player,
+  career,
+  seasons,
+  error,
+  locale,
+  slug,
+}: {
+  player: Player;
+  career: PlayerCareerTotal | null;
+  seasons: PlayerSeasonHistory[];
+  error: string | null;
+  locale: "ru" | "ro";
+  slug: string;
+}) {
+  const text = careerTextByLocale[locale];
+  const hasCareer = Boolean(career && numberValue(career.appearances) > 0);
+  const contribution = career ? numberValue(career.goals) + numberValue(career.assists) : 0;
+
+  return (
+    <section className="section playerCareerSection">
+      <div className="container playerCareerContainer">
+        <header className="playerCareerHeader">
+          <div>
+            <p className="eyebrow blue">{text.eyebrow}</p>
+            <h2>{text.title}</h2>
+          </div>
+          <p>{text.description}</p>
+        </header>
+
+        {error ? (
+          <div className="playerStatsEmpty playerStatsError">
+            <strong>{text.unavailable}</strong>
+            <span>{error}</span>
+          </div>
+        ) : !hasCareer || !career ? (
+          <div className="playerStatsEmpty">
+            <strong>{text.noData}</strong>
+            <span>{text.noDataHint}</span>
+          </div>
+        ) : (
+          <>
+            <div className="playerCareerKpis">
+              <StatMini label={text.seasons} value={career.seasons_played} />
+              <StatMini label={text.matches} value={career.appearances} />
+              <StatMini label={text.starts} value={career.starts} />
+              <StatMini label={text.minutes} value={career.minutes_played} />
+              <StatMini label={text.goals} value={career.goals} />
+              <StatMini label={text.assists} value={career.assists} />
+              <StatMini label={text.contribution} value={contribution} />
+              {player.position === "goalkeeper" ? (
+                <>
+                  <StatMini label={text.cleanSheets} value={career.clean_sheets} />
+                  <StatMini label={text.saves} value={career.saves} />
+                </>
+              ) : (
+                <>
+                  <StatMini label={text.yellow} value={career.yellow_cards} />
+                  <StatMini label={text.red} value={career.red_cards} />
+                </>
+              )}
+            </div>
+
+            {seasons.length > 0 && (
+              <section className="playerStatsBlock playerCareerHistoryBlock">
+                <div className="playerStatsBlockHead">
+                  <h3>{text.history}</h3>
+                  <span>{seasons.length}</span>
+                </div>
+                <div className="playerCompetitionStatsWrap">
+                  <table className="playerCompetitionStats playerCareerHistoryTable">
+                    <thead>
+                      <tr>
+                        <th>{text.season}</th>
+                        <th>{text.matches}</th>
+                        <th>{text.starts}</th>
+                        <th>{text.minutes}</th>
+                        <th>{text.goals}</th>
+                        <th>{text.assists}</th>
+                        <th>{text.contribution}</th>
+                        {player.position === "goalkeeper" ? <th>{text.cleanSheets}</th> : null}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {seasons.map((row) => (
+                        <tr key={String(row.season_id ?? row.season?.id ?? row.season?.name ?? "season")}>
+                          <td>
+                            {row.season ? (
+                              <Link className="playerCareerSeasonLink" href={`/team/${slug}?season=${row.season.id}`}>
+                                <strong>{row.season.name}</strong>
+                                <small>{text.openSeason} →</small>
+                              </Link>
+                            ) : (
+                              <strong>—</strong>
+                            )}
+                          </td>
+                          <td>{row.appearances}</td>
+                          <td>{row.starts}</td>
+                          <td>{row.minutes_played}</td>
+                          <td className="accent">{row.goals}</td>
+                          <td className="accent">{row.assists}</td>
+                          <td>{numberValue(row.goals) + numberValue(row.assists)}</td>
+                          {player.position === "goalkeeper" ? <td>{row.clean_sheets}</td> : null}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
+          </>
+        )}
+      </div>
+    </section>
   );
 }
 

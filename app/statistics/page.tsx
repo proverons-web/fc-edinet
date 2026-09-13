@@ -4,8 +4,10 @@ import PageHeroShell from "@/app/components/PageHeroShell";
 import { createClient } from "@/lib/supabase/server";
 import type {
   ClubMatch,
+  ClubSeasonHistory,
   Competition,
   Player,
+  PlayerCareerTotal,
   PlayerSeasonStatistics,
   PlayerSeasonTotal,
   Season,
@@ -126,6 +128,18 @@ const textByLocale = {
     shotsTarget: "в створ",
     keyPasses: "ключ. пас",
     playerProfile: "Профиль →",
+    historyEyebrow: "ИСТОРИЯ КЛУБА",
+    historyTitle: "Все сезоны FC Edineț",
+    historyDescription: "Результаты команды и рекорды игроков за всю доступную историю матчевой статистики.",
+    allTime: "За всё время",
+    seasonsPlayed: "Сезоны",
+    allTimeLeaders: "Рекорды клуба",
+    seasonArchive: "Архив сезонов",
+    seasonPlayers: "Игроков со статистикой",
+    openSeason: "Открыть сезон",
+    currentSeason: "Текущий",
+    careerDataCoverage: "Матчей со статистикой",
+    historyEmpty: "История появится после добавления завершённых матчей в сезоны.",
   },
   ro: {
     eyebrow: "FC EDINEȚ • CIFRELE SEZONULUI",
@@ -170,6 +184,18 @@ const textByLocale = {
     shotsTarget: "pe poartă",
     keyPasses: "pase-cheie",
     playerProfile: "Profil →",
+    historyEyebrow: "ISTORIA CLUBULUI",
+    historyTitle: "Toate sezoanele FC Edineț",
+    historyDescription: "Rezultatele echipei și recordurile jucătorilor pentru întreaga istorie disponibilă a statisticilor.",
+    allTime: "Total club",
+    seasonsPlayed: "Sezoane",
+    allTimeLeaders: "Recordurile clubului",
+    seasonArchive: "Arhiva sezoanelor",
+    seasonPlayers: "Jucători cu statistici",
+    openSeason: "Deschide sezonul",
+    currentSeason: "Curent",
+    careerDataCoverage: "Meciuri cu statistici",
+    historyEmpty: "Istoria va apărea după adăugarea meciurilor finalizate în sezoane.",
   },
 } as const;
 
@@ -224,7 +250,7 @@ function emptySummary(): SummaryNumbers {
   };
 }
 
-function mergeSummary(target: SummaryNumbers, row: Partial<PlayerSeasonStatistics & PlayerSeasonTotal>) {
+function mergeSummary(target: SummaryNumbers, row: Partial<SummaryNumbers>) {
   target.appearances += numberValue(row.appearances);
   target.starts += numberValue(row.starts);
   target.substitute_appearances += numberValue(row.substitute_appearances);
@@ -362,7 +388,14 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
   const requestedSort = one(params.sort);
   const sort: SortKey = requestedSort && requestedSort in sortLabels ? (requestedSort as SortKey) : "goals";
 
-  const [seasonsResult, competitionsResult, playersResult, clubResult] = await Promise.all([
+  const [
+    seasonsResult,
+    competitionsResult,
+    playersResult,
+    clubResult,
+    historyResult,
+    careerResult,
+  ] = await Promise.all([
     supabase
       .from("seasons")
       .select("id,name,slug,starts_on,ends_on,is_current,is_active")
@@ -386,12 +419,22 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
       .eq("is_club", true)
       .limit(1)
       .maybeSingle(),
+    supabase
+      .from("club_season_history")
+      .select("*")
+      .order("starts_on", { ascending: false, nullsFirst: false }),
+    supabase
+      .from("player_career_totals")
+      .select("*"),
   ]);
 
   const seasons = (seasonsResult.data ?? []) as Season[];
   const competitions = (competitionsResult.data ?? []) as Competition[];
   const players = (playersResult.data ?? []) as Player[];
   const club = clubResult.data;
+  const clubHistory = (historyResult.data ?? []) as ClubSeasonHistory[];
+  const careerRows = (careerResult.data ?? []) as PlayerCareerTotal[];
+  const historyError = historyResult.error?.message || careerResult.error?.message || null;
 
   const currentSeason = seasons.find((item) => item.is_current) ?? seasons[0] ?? null;
   const requestedSeason = one(params.season);
@@ -454,6 +497,16 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
   const summaries = [...summaryByPlayer.values()].filter((row) => row.appearances > 0);
   const sortedSummaries = sortRows(summaries, sort);
 
+  const careerSummaries = careerRows
+    .map((career) => {
+      const player = playerById.get(String(career.player_id));
+      if (!player) return null;
+      const summary: PlayerSummary = { ...emptySummary(), player };
+      mergeSummary(summary, career);
+      return summary;
+    })
+    .filter((row): row is PlayerSummary => Boolean(row && row.appearances > 0));
+
   const competitionIds = selectedCompetition
     ? [selectedCompetition.id]
     : seasonCompetitions.map((competition) => competition.id);
@@ -482,6 +535,31 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
   }
 
   const results = club ? resultSummary(finishedMatches, club.id, completedMatchIds) : resultSummary([], "", completedMatchIds);
+
+  const historyTotals = clubHistory.reduce(
+    (acc, row) => {
+      acc.played += numberValue(row.played);
+      acc.wins += numberValue(row.wins);
+      acc.draws += numberValue(row.draws);
+      acc.losses += numberValue(row.losses);
+      acc.goalsFor += numberValue(row.goals_for);
+      acc.goalsAgainst += numberValue(row.goals_against);
+      acc.statisticsComplete += numberValue(row.statistics_complete);
+      return acc;
+    },
+    { played: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, statisticsComplete: 0 }
+  );
+  const historyWinRate = historyTotals.played
+    ? Math.round((historyTotals.wins / historyTotals.played) * 100)
+    : 0;
+
+  const careerLeaderboards = [
+    { title: text.scorers, key: "career-goals", rows: topRows(careerSummaries, "goals"), value: (row: PlayerSummary) => row.goals },
+    { title: text.assistants, key: "career-assists", rows: topRows(careerSummaries, "assists"), value: (row: PlayerSummary) => row.assists },
+    { title: text.appearances, key: "career-appearances", rows: topRows(careerSummaries, "appearances"), value: (row: PlayerSummary) => row.appearances },
+    { title: text.minutes, key: "career-minutes", rows: topRows(careerSummaries, "minutes_played"), value: (row: PlayerSummary) => row.minutes_played },
+    { title: text.cleanSheets, key: "career-clean", rows: topRows(careerSummaries, "clean_sheets"), value: (row: PlayerSummary) => row.clean_sheets },
+  ];
 
   const leaderboards = [
     { title: text.scorers, key: "goals" as const, rows: topRows(summaries, "goals"), value: (row: PlayerSummary) => row.goals },
@@ -653,6 +731,104 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
               </section>
             </>
           )}
+
+          <section className="teamStatisticsHistorySection" id="history">
+            <div className="teamStatisticsHeading teamStatisticsHistoryHeading">
+              <div>
+                <p className="eyebrow blue">{text.historyEyebrow}</p>
+                <h2>{text.historyTitle}</h2>
+                <p className="teamStatisticsHistoryDescription">{text.historyDescription}</p>
+              </div>
+              <span>{text.allTime}</span>
+            </div>
+
+            {historyError ? (
+              <div className="teamStatisticsEmpty errorBox">{historyError}</div>
+            ) : clubHistory.length === 0 ? (
+              <div className="teamStatisticsEmpty">
+                <strong>{text.historyEmpty}</strong>
+              </div>
+            ) : (
+              <>
+                <div className="teamStatisticsHistoryScoreboard">
+                  <TeamMetric label={text.seasonsPlayed} value={clubHistory.length} accent="blue" />
+                  <TeamMetric label={text.matches} value={historyTotals.played} />
+                  <TeamMetric label={text.wins} value={historyTotals.wins} accent="good" />
+                  <TeamMetric label={text.draws} value={historyTotals.draws} />
+                  <TeamMetric label={text.losses} value={historyTotals.losses} accent="bad" />
+                  <TeamMetric label={text.goals} value={`${historyTotals.goalsFor}:${historyTotals.goalsAgainst}`} />
+                  <TeamMetric label={text.winRate} value={`${historyWinRate}%`} accent="blue" />
+                  <TeamMetric label={text.careerDataCoverage} value={`${historyTotals.statisticsComplete}/${historyTotals.played}`} accent="blue" />
+                </div>
+
+                {careerSummaries.length > 0 && (
+                  <section className="teamStatisticsHistoryLeaders">
+                    <div className="teamStatisticsSubheading">
+                      <h3>{text.allTimeLeaders}</h3>
+                      <span>{text.allTime}</span>
+                    </div>
+                    <div className="teamStatisticsLeaderboards">
+                      {careerLeaderboards.map((board) => (
+                        <Leaderboard
+                          key={board.key}
+                          title={board.title}
+                          rows={board.rows}
+                          value={board.value}
+                          empty={text.noLeaderboardData}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                <section className="teamStatisticsHistoryArchive">
+                  <div className="teamStatisticsSubheading">
+                    <h3>{text.seasonArchive}</h3>
+                    <span>{clubHistory.length}</span>
+                  </div>
+                  <div className="teamStatisticsHistoryTableWrap">
+                    <table className="teamStatisticsHistoryTable">
+                      <thead>
+                        <tr>
+                          <th>{text.season}</th>
+                          <th>{text.matches}</th>
+                          <th>{text.wins}</th>
+                          <th>{text.draws}</th>
+                          <th>{text.losses}</th>
+                          <th>{text.goals}</th>
+                          <th>{text.goalDifference}</th>
+                          <th>{text.winRate}</th>
+                          <th>{text.dataCoverage}</th>
+                          <th>{text.seasonPlayers}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {clubHistory.map((row) => (
+                          <tr key={String(row.season_id)}>
+                            <td>
+                              <Link className="teamStatisticsHistorySeason" href={statHref(String(row.season_id), "", sort)}>
+                                <strong>{row.season_name}</strong>
+                                <small>{row.is_current ? `${text.currentSeason} • ${text.openSeason}` : text.openSeason} →</small>
+                              </Link>
+                            </td>
+                            <td><strong>{row.played}</strong></td>
+                            <td className="historyWin">{row.wins}</td>
+                            <td>{row.draws}</td>
+                            <td className="historyLoss">{row.losses}</td>
+                            <td>{row.goals_for}:{row.goals_against}</td>
+                            <td>{numberValue(row.goal_difference) > 0 ? `+${row.goal_difference}` : row.goal_difference}</td>
+                            <td>{numberValue(row.win_rate)}%</td>
+                            <td>{row.statistics_complete}/{row.played}</td>
+                            <td>{row.players_with_stats}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              </>
+            )}
+          </section>
         </div>
       </section>
     </main>
