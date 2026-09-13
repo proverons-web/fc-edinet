@@ -91,6 +91,11 @@ export default async function MatchStatisticsPage({
   const state = stateResult.data as MatchStatisticsState | null;
   const currentStatus = state?.status ?? (existing.length > 0 ? "draft" : "empty");
   const seasonId = match.competition?.season_id;
+  const contextWarning = !match.competition_id
+    ? "Матч не привязан к турниру. Черновик можно сохранить, но завершить статистику нельзя."
+    : !seasonId
+      ? "Турнир матча не привязан к сезону. Черновик можно сохранить, но завершить статистику нельзя."
+      : null;
   let season: Season | null = null;
 
   if (seasonId) {
@@ -146,7 +151,7 @@ export default async function MatchStatisticsPage({
               <section className="statisticsPanel statisticsEntryIntro">
                 <div className="statisticsPanelHead">
                   <div>
-                    <p className="eyebrow blue">v2.2.5 • ВВОД ПО МАТЧУ</p>
+                    <p className="eyebrow blue">v2.2.7 • ВВОД ПО МАТЧУ</p>
                     <h2>Кто играл и что сделал</h2>
                     <p>
                       Включи «Играл» только у участников матча. Базовые показатели всегда на виду, а расширенный набор автоматически меняется по позиции игрока.
@@ -155,6 +160,13 @@ export default async function MatchStatisticsPage({
                   <span className={`statisticsState ${currentStatus}`}>{currentStatus === "complete" ? "Готово" : currentStatus === "draft" ? "Черновик" : "Не заполнено"}</span>
                 </div>
               </section>
+
+              {contextWarning && (
+                <div className="statisticsQaHint warning statisticsContextWarning">
+                  <strong>Нужна настройка контекста</strong>
+                  <span>{contextWarning}</span>
+                </div>
+              )}
 
               <MatchStatisticsForm
                 matchId={matchId}
@@ -190,6 +202,7 @@ export default async function MatchStatisticsPage({
                   notes: row.notes,
                 }))}
                 currentStatus={currentStatus}
+                canCompleteContext={!contextWarning}
               />
             </>
           )}

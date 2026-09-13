@@ -1,0 +1,20 @@
+FC EDINEȚ v2.2.7 — DEPLOY
+==========================
+
+ОДИН РАЗ ПЕРЕД DEPLOY:
+Supabase -> SQL Editor -> выполнить:
+  database/040_statistics_final_qa.sql
+
+Затем в папке проекта просто запустить:
+  DEPLOY_FC_EDINET.bat
+
+BAT автоматически выполняет npm install, npm run deploy:check, Git commit и push.
+
+После Vercel проверить:
+  https://fc-edinet.vercel.app/api/version
+Ожидаем:
+  version = 2.2.7
+
+Проверка статистики:
+  https://fc-edinet.vercel.app/admin/statistics
+  https://fc-edinet.vercel.app/statistics

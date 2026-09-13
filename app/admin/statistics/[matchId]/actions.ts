@@ -53,7 +53,7 @@ export async function saveMatchStatistics(formData: FormData) {
 
   const { data: match, error: matchError } = await supabase
     .from("matches")
-    .select("id,status")
+    .select("id,status,competition_id")
     .eq("id", matchId)
     .maybeSingle();
 
@@ -63,6 +63,20 @@ export async function saveMatchStatistics(formData: FormData) {
 
   if (match.status !== "finished") {
     go(matchId, { error: "Статистику можно заполнять только для завершённого матча." });
+  }
+
+  if (intent === "complete") {
+    if (!match.competition_id) {
+      go(matchId, { error: "Перед завершением статистики привяжи матч к турниру." });
+    }
+    const { data: competition, error: competitionError } = await supabase
+      .from("competitions")
+      .select("id,season_id")
+      .eq("id", match.competition_id)
+      .maybeSingle();
+    if (competitionError || !competition?.season_id) {
+      go(matchId, { error: "Перед завершением статистики привяжи турнир к сезону." });
+    }
   }
 
   const requestedPlayerIds = parsePlayerIds(text(formData, "player_ids"));
@@ -81,6 +95,9 @@ export async function saveMatchStatistics(formData: FormData) {
 
   const validPlayerIds = new Set((players ?? []).map((player) => String(player.id)));
   const payload: Record<string, unknown>[] = [];
+  let startersCount = 0;
+  let goalkeepersCount = 0;
+  let captainsCount = 0;
 
   try {
     for (const player of players ?? []) {
@@ -96,6 +113,10 @@ export async function saveMatchStatistics(formData: FormData) {
         : "midfielder";
       const position = validPositions.has(positionRaw) ? positionRaw : fallbackPosition;
       const isGoalkeeper = position === "goalkeeper";
+      const isCaptain = formData.get(`captain_${playerId}`) === "on";
+      if (appearance === "starter") startersCount += 1;
+      if (isGoalkeeper) goalkeepersCount += 1;
+      if (isCaptain) captainsCount += 1;
 
       const shots = isGoalkeeper
         ? 0
@@ -127,13 +148,20 @@ export async function saveMatchStatistics(formData: FormData) {
 
       const defensiveRole = position === "defender" || position === "midfielder";
       const defender = position === "defender";
+      const goalsConceded = isGoalkeeper
+        ? integer(formData, `goals_conceded_${playerId}`, 0, 30, "Пропущенные голы")
+        : 0;
+      const cleanSheet = isGoalkeeper && formData.get(`clean_sheet_${playerId}`) === "on";
+      if (cleanSheet && goalsConceded > 0) {
+        throw new Error("Сухой матч нельзя отметить, если у вратаря указаны пропущенные голы.");
+      }
 
       payload.push({
         match_id: matchId,
         player_id: playerId,
         appearance,
         position,
-        is_captain: formData.get(`captain_${playerId}`) === "on",
+        is_captain: isCaptain,
         minutes_played: integer(formData, `minutes_${playerId}`, 0, 130, "Минуты"),
         goals: integer(formData, `goals_${playerId}`, 0, 20, "Голы"),
         assists: integer(formData, `assists_${playerId}`, 0, 20, "Ассисты"),
@@ -143,13 +171,11 @@ export async function saveMatchStatistics(formData: FormData) {
         yellow_cards: integer(formData, `yellow_${playerId}`, 0, 2, "Жёлтые карточки"),
         red_cards: integer(formData, `red_${playerId}`, 0, 1, "Красные карточки"),
 
-        goals_conceded: isGoalkeeper
-          ? integer(formData, `goals_conceded_${playerId}`, 0, 30, "Пропущенные голы")
-          : 0,
+        goals_conceded: goalsConceded,
         saves: isGoalkeeper
           ? integer(formData, `saves_${playerId}`, 0, 50, "Сейвы")
           : 0,
-        clean_sheet: isGoalkeeper && formData.get(`clean_sheet_${playerId}`) === "on",
+        clean_sheet: cleanSheet,
         penalties_saved: isGoalkeeper
           ? integer(formData, `penalties_saved_${playerId}`, 0, 10, "Отражённые пенальти")
           : 0,
@@ -189,8 +215,19 @@ export async function saveMatchStatistics(formData: FormData) {
     go(matchId, { error: error instanceof Error ? error.message : "Проверь значения статистики." });
   }
 
-  if (intent === "complete" && payload.length === 0) {
-    go(matchId, { error: "Нельзя завершить статистику без сыгравших футболистов." });
+  if (intent === "complete") {
+    if (payload.length === 0) {
+      go(matchId, { error: "Нельзя завершить статистику без сыгравших футболистов." });
+    }
+    if (startersCount === 0) {
+      go(matchId, { error: "Для завершённой статистики отметь хотя бы одного игрока в стартовом составе." });
+    }
+    if (goalkeepersCount === 0) {
+      go(matchId, { error: "Для завершённой статистики отметь хотя бы одного вратаря." });
+    }
+    if (captainsCount > 1) {
+      go(matchId, { error: "В одном матче можно отметить только одного капитана." });
+    }
   }
 
   const selectedPlayerIds = new Set(payload.map((row) => String(row.player_id)));
@@ -255,6 +292,7 @@ export async function saveMatchStatistics(formData: FormData) {
   revalidatePath("/admin/statistics");
   revalidatePath(`/admin/statistics/${matchId}`);
   revalidatePath("/team");
+  revalidatePath("/statistics");
 
   go(matchId, { saved: completed ? "complete" : "draft" });
 }

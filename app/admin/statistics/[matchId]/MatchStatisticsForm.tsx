@@ -65,11 +65,13 @@ export default function MatchStatisticsForm({
   players,
   existing,
   currentStatus,
+  canCompleteContext,
 }: {
   matchId: string;
   players: PlayerRow[];
   existing: ExistingRow[];
   currentStatus: "draft" | "complete" | "empty";
+  canCompleteContext: boolean;
 }) {
   const existingByPlayer = useMemo(
     () => new Map(existing.map((row) => [String(row.player_id), row])),
@@ -98,12 +100,28 @@ export default function MatchStatisticsForm({
   const startersCount = Object.values(state).filter(
     (item) => item.played && item.appearance === "starter"
   ).length;
+  const goalkeepersCount = Object.values(state).filter(
+    (item) => item.played && item.position === "goalkeeper"
+  ).length;
+  const captainsCount = Object.values(state).filter(
+    (item) => item.played && item.captain
+  ).length;
+  const readyToComplete = canCompleteContext && playedCount > 0 && startersCount > 0 && goalkeepersCount > 0 && captainsCount <= 1;
 
   function patch(playerId: string, changes: Partial<LocalState>) {
-    setState((current) => ({
-      ...current,
-      [playerId]: { ...current[playerId], ...changes },
-    }));
+    setState((current) => {
+      const next = { ...current };
+      if (changes.captain === true) {
+        for (const id of Object.keys(next)) {
+          next[id] = { ...next[id], captain: false };
+        }
+      }
+      next[playerId] = { ...next[playerId], ...changes };
+      if (changes.played === false) {
+        next[playerId] = { ...next[playerId], captain: false, cleanSheet: false };
+      }
+      return next;
+    });
   }
 
   return (
@@ -115,10 +133,23 @@ export default function MatchStatisticsForm({
         <div><strong>{playedCount}</strong><span>играли</span></div>
         <div><strong>{startersCount}</strong><span>в старте</span></div>
         <div><strong>{Math.max(playedCount - startersCount, 0)}</strong><span>на замену</span></div>
+        <div><strong>{goalkeepersCount}</strong><span>вратари</span></div>
+        <div><strong>{captainsCount}</strong><span>капитан</span></div>
         <span className={`statisticsState ${currentStatus}`}>
           {currentStatus === "complete" ? "Статистика готова" : currentStatus === "draft" ? "Черновик" : "Не заполнено"}
         </span>
       </div>
+
+      {playedCount > 0 && !readyToComplete && (
+        <div className="statisticsQaHint warning" role="status">
+          <strong>Перед завершением проверь состав:</strong>
+          <span>
+            {startersCount === 0 ? " нет игрока в старте;" : ""}
+            {goalkeepersCount === 0 ? " не отмечен вратарь;" : ""}
+            {captainsCount > 1 ? " отмечено больше одного капитана;" : ""}
+          </span>
+        </div>
+      )}
 
       <div className="statisticsPlayerEntryList">
         {players.map((player) => {
@@ -256,7 +287,7 @@ export default function MatchStatisticsForm({
           <button className="rowAction muted statisticsDraftButton" type="submit" name="intent" value="draft">
             Сохранить черновик
           </button>
-          <button className="primaryButton" type="submit" name="intent" value="complete" disabled={playedCount === 0}>
+          <button className="primaryButton" type="submit" name="intent" value="complete" disabled={!readyToComplete}>
             ✓ Сохранить и завершить
           </button>
         </div>

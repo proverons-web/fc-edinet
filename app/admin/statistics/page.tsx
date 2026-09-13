@@ -33,6 +33,13 @@ type StatisticsStateRow = {
   status: "draft" | "complete";
 };
 
+type StatisticsIntegrityIssue = {
+  issue_type: string;
+  severity: "warning" | "error";
+  match_id: string | number | null;
+  message: string;
+};
+
 type StatMatch = ClubMatch & {
   stats_state?: StatisticsStateRow | null;
   stats_rows?: number;
@@ -246,7 +253,7 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
           ? String(currentSeason.id)
           : "";
 
-  const [competitionsResult, playersResult] = await Promise.all([
+  const [competitionsResult, playersResult, integrityResult] = await Promise.all([
     supabase
       .from("competitions")
       .select("id,name,slug,season,season_id,is_active")
@@ -258,14 +265,25 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
       .order("is_active", { ascending: false })
       .order("display_order", { ascending: true, nullsFirst: false })
       .order("last_name"),
+    supabase
+      .from("statistics_integrity_issues")
+      .select("issue_type,severity,match_id,message")
+      .limit(100),
   ]);
 
   if (competitionsResult.error) {
     return <StatisticsMigrationRequired message={competitionsResult.error.message} />;
   }
 
+  if (integrityResult.error) {
+    return <StatisticsFinalizationRequired message={integrityResult.error.message} />;
+  }
+
   const competitions = (competitionsResult.data ?? []) as Competition[];
   const players = (playersResult.data ?? []) as Player[];
+  const integrityIssues = (integrityResult.data ?? []) as StatisticsIntegrityIssue[];
+  const integrityErrors = integrityIssues.filter((item) => item.severity === "error");
+  const integrityWarnings = integrityIssues.filter((item) => item.severity === "warning");
   const activePlayersCount = players.filter((player) => player.is_active).length;
   const playerById = new Map(players.map((player) => [String(player.id), player]));
 
@@ -406,7 +424,7 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
       <section className="adminHero compactAdminHero">
         <div className="container adminHeroInner">
           <div>
-            <p className="eyebrow">FC EDINEȚ • v2.2.5</p>
+            <p className="eyebrow">FC EDINEȚ • v2.2.7</p>
             <h1>Статистика игроков</h1>
             <p>
               Матчи — источник данных. Итоги и расширенные показатели по позициям считаются автоматически.
@@ -437,6 +455,47 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
             <Stat label="Статистика готова" value={completedMatches} />
             <Stat label="Готовность" value={`${completionPercent}%`} />
           </div>
+
+          <section className={`statisticsPanel statisticsQaPanel ${integrityIssues.length === 0 ? "isHealthy" : "hasIssues"}`}>
+            <div className="statisticsPanelHead">
+              <div>
+                <p className="eyebrow blue">QA • ЦЕЛОСТНОСТЬ ДАННЫХ</p>
+                <h2>{integrityIssues.length === 0 ? "Проверка пройдена" : "Есть что проверить"}</h2>
+                <p>
+                  Автоматическая диагностика ищет матчи без сезона, готовую статистику без игроков, несовпадение контекста и другие ошибки, которые могут исказить итоговые таблицы.
+                </p>
+              </div>
+              <span className={`statisticsQaStatus ${integrityIssues.length === 0 ? "ok" : integrityErrors.length > 0 ? "error" : "warning"}`}>
+                {integrityIssues.length === 0 ? "✓ Всё чисто" : `${integrityIssues.length} замеч.`}
+              </span>
+            </div>
+
+            <div className="statisticsQaCounters">
+              <div><strong>{integrityErrors.length}</strong><span>ошибки</span></div>
+              <div><strong>{integrityWarnings.length}</strong><span>предупреждения</span></div>
+              <div><strong>{integrityIssues.length === 0 ? "OK" : "CHECK"}</strong><span>статус</span></div>
+            </div>
+
+            {integrityIssues.length > 0 && (
+              <div className="statisticsQaIssueList">
+                {integrityIssues.slice(0, 12).map((issue, index) => (
+                  <article className={`statisticsQaIssue ${issue.severity}`} key={`${issue.issue_type}-${issue.match_id ?? "none"}-${index}`}>
+                    <span className="statisticsQaIssueIcon">{issue.severity === "error" ? "!" : "⚠"}</span>
+                    <div>
+                      <strong>{issue.message}</strong>
+                      <small>{issue.issue_type}</small>
+                    </div>
+                    {issue.match_id != null && (
+                      <Link href={`/admin/statistics/${issue.match_id}`} className="rowAction muted">Открыть матч</Link>
+                    )}
+                  </article>
+                ))}
+                {integrityIssues.length > 12 && (
+                  <div className="statisticsQaMore">Ещё замечаний: {integrityIssues.length - 12}</div>
+                )}
+              </div>
+            )}
+          </section>
 
           <section className="statisticsPanel statisticsFilterPanel">
             <div className="statisticsPanelHead">
@@ -738,7 +797,7 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
           </section>
 
           <section className="statisticsArchitecture">
-            <p className="eyebrow blue">АРХИТЕКТУРА v2.2.5</p>
+            <p className="eyebrow blue">АРХИТЕКТУРА v2.2.7</p>
             <h2>Матч изменился — сезон пересчитался</h2>
             <p>
               Сезонная таблица не хранит отдельные ручные цифры. Она строится непосредственно из завершённой матчевой статистики. Поэтому гол, ассист или исправленная минута в матче автоматически меняет итог футболиста.
@@ -812,9 +871,39 @@ function StatisticsMigrationRequired({ message }: { message: string }) {
           <div className="statisticsSetupCard">
             <span className="statisticsSetupIcon">DB</span>
             <p className="eyebrow blue">БАЗА</p>
-            <h2>Проверь миграции 034–035</h2>
+            <h2>Проверь миграции статистики</h2>
             <p>
-              Базовые таблицы статистики ещё недоступны. Проверь, что в Supabase уже выполнены <code>034_player_statistics_foundation.sql</code> и <code>035_player_statistics_entry.sql</code>.
+              Базовые таблицы статистики ещё недоступны. Проверь последовательное выполнение миграций <code>034–040</code> в Supabase.
+            </p>
+            <small>Ответ базы: {message}</small>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function StatisticsFinalizationRequired({ message }: { message: string }) {
+  return (
+    <main className="adminPage statisticsAdminPage">
+      <section className="adminHero compactAdminHero">
+        <div className="container adminHeroInner">
+          <div>
+            <p className="eyebrow">FC EDINEȚ • v2.2.7</p>
+            <h1>Финальная проверка статистики</h1>
+            <p>Интерфейс обновлён, но базе нужна финальная QA-миграция.</p>
+          </div>
+          <Link href="/admin" className="adminBack">← Админка</Link>
+        </div>
+      </section>
+      <section className="section adminSurface">
+        <div className="container">
+          <div className="statisticsSetupCard">
+            <span className="statisticsSetupIcon">040</span>
+            <p className="eyebrow blue">ОДИН РАЗ</p>
+            <h2>Примени миграцию 040</h2>
+            <p>
+              В Supabase → SQL Editor открой <code>database/040_statistics_final_qa.sql</code>, вставь файл целиком и нажми Run. После этого обнови страницу.
             </p>
             <small>Ответ базы: {message}</small>
           </div>
@@ -830,7 +919,7 @@ function StatisticsAggregationRequired({ message }: { message: string }) {
       <section className="adminHero compactAdminHero">
         <div className="container adminHeroInner">
           <div>
-            <p className="eyebrow">FC EDINEȚ • v2.2.5</p>
+            <p className="eyebrow">FC EDINEȚ • v2.2.7</p>
             <h1>Автоматические итоги сезона</h1>
             <p>Код обновлён, но базе нужна последняя миграция агрегирования.</p>
           </div>

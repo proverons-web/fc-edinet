@@ -2088,3 +2088,44 @@ h1,h2,h3{font-family:var(--ds-font-heading);font-weight:var(--ds-heading-weight)
   .teamStatisticsHistoryScoreboard{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
   .teamStatisticsSubheading{align-items:flex-start;flex-direction:column;gap:6px}
 }
+
+/* ============================================================
+   FC EDINEȚ v2.2.7 — statistics QA, integrity and final responsive pass
+   ============================================================ */
+.statisticsQaPanel{margin:18px 0;background:linear-gradient(145deg,#fff,#f9fbfe)}
+.statisticsQaPanel.isHealthy{border-color:#cfe7d8;background:linear-gradient(145deg,#fff,#f6fcf8)}
+.statisticsQaPanel.hasIssues{border-color:#eadfc3}
+.statisticsQaStatus{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 13px;border-radius:999px;font-size:11px;font-weight:950;letter-spacing:.035em;text-transform:uppercase;white-space:nowrap}
+.statisticsQaStatus.ok{background:#e8f7ee;color:#167043}.statisticsQaStatus.warning{background:#fff4d8;color:#8a6100}.statisticsQaStatus.error{background:#fff0f2;color:#a12f45}
+.statisticsQaCounters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:14px}
+.statisticsQaCounters>div{display:flex;align-items:baseline;justify-content:space-between;gap:10px;border:1px solid #e3e9f1;border-radius:13px;padding:11px 13px;background:rgba(255,255,255,.82)}
+.statisticsQaCounters strong{font-size:22px;color:#173a61}.statisticsQaCounters span{font-size:9px;font-weight:900;letter-spacing:.055em;text-transform:uppercase;color:#7a899b}
+.statisticsQaIssueList{display:grid;gap:8px;margin-top:13px}
+.statisticsQaIssue{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid #e5eaf0;border-radius:13px;padding:10px 11px;background:#fff}
+.statisticsQaIssue.error{border-color:#f1d6dc;background:#fff9fa}.statisticsQaIssue.warning{border-color:#ece1c6;background:#fffdf7}
+.statisticsQaIssueIcon{display:grid;place-items:center;width:28px;height:28px;border-radius:9px;background:#eef2f7;color:#556a82;font-size:12px;font-weight:950}
+.statisticsQaIssue.error .statisticsQaIssueIcon{background:#feecef;color:#ab3048}.statisticsQaIssue.warning .statisticsQaIssueIcon{background:#fff2cc;color:#8c6300}
+.statisticsQaIssue>div{display:grid;gap:2px;min-width:0}.statisticsQaIssue strong{font-size:12px;color:#294766}.statisticsQaIssue small{font-size:9px;color:#8a97a7;overflow-wrap:anywhere}
+.statisticsQaMore{padding:8px 10px;color:#75859a;font-size:10px;font-weight:800;text-align:center}
+.statisticsQaHint{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border:1px solid #dce5ef;border-radius:12px;padding:10px 12px;background:#f7f9fc;color:#61748b;font-size:11px}
+.statisticsQaHint strong{color:#294b72}.statisticsQaHint.warning{border-color:#eadfbf;background:#fffaf0;color:#7a641e}.statisticsQaHint.warning strong{color:#765500}
+.statisticsContextWarning{margin-bottom:12px}
+
+/* Keep the player identity readable while large statistics tables scroll. */
+@media(max-width:900px){
+  .statisticsSeasonTable th:nth-child(2),.statisticsSeasonTable td:nth-child(2),
+  .teamStatisticsTable th:nth-child(2),.teamStatisticsTable td:nth-child(2){position:sticky;left:0;z-index:3;background:#fff;box-shadow:8px 0 14px -14px rgba(17,45,78,.55)}
+  .statisticsSeasonTable th:nth-child(2),.teamStatisticsTable th:nth-child(2){z-index:4;background:#f8fafc}
+  .statisticsQaIssue{grid-template-columns:30px minmax(0,1fr)}
+  .statisticsQaIssue .rowAction{grid-column:2;justify-self:start}
+}
+@media(max-width:620px){
+  .statisticsQaCounters{grid-template-columns:1fr 1fr}
+  .statisticsQaCounters>div:last-child{grid-column:1/-1}
+  .statisticsEntrySummary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
+  .statisticsEntrySummary>div{border-right:0;border:1px solid #e1e7ef;border-radius:10px;padding:8px 9px;justify-content:space-between;background:#fff}
+  .statisticsEntrySummary>.statisticsState{grid-column:1/-1;justify-self:start}
+  .statisticsSaveActions{grid-template-columns:1fr}
+  .statisticsSaveBar>div:first-child span{line-height:1.45}
+  .playerCompetitionStatsWrap,.playerRecentMatchesWrap,.teamStatisticsTableWrap,.teamStatisticsHistoryTableWrap,.statisticsSeasonTableWrap{-webkit-overflow-scrolling:touch}
+}
