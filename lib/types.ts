@@ -551,9 +551,11 @@ export type HomepageDesignDraft = {
   layout_order: HomepageLayoutItem[];
   updated_by: string | null;
   updated_at: string;
+  autosaved_at?: string | null;
+  autosave_revision?: number;
 };
 
-export type HomepageDesignSnapshot = Omit<HomepageDesignDraft, "id" | "updated_by" | "updated_at">;
+export type HomepageDesignSnapshot = Omit<HomepageDesignDraft, "id" | "updated_by" | "updated_at" | "autosaved_at" | "autosave_revision">;
 
 export type HomepageDesignVersion = {
   id: string | number;
@@ -561,6 +563,7 @@ export type HomepageDesignVersion = {
   snapshot: HomepageDesignSnapshot;
   published_by: string | null;
   created_at: string;
+  change_summary?: Array<{ path: string; label: string; before: string; after: string }>;
 };
 
 export type SitePageDesignKey =
@@ -616,7 +619,7 @@ export type SitePageDesign = SitePageDesignSnapshot & {
   updated_at: string;
 };
 
-export type SitePageDesignDraft = SitePageDesign & {};
+export type SitePageDesignDraft = SitePageDesign & { autosaved_at?: string | null; autosave_revision?: number };
 
 export type SitePageDesignVersion = {
   id: string | number;
@@ -625,6 +628,7 @@ export type SitePageDesignVersion = {
   snapshot: SitePageDesignSnapshot;
   published_by: string | null;
   created_at: string;
+  change_summary?: Array<{ path: string; label: string; before: string; after: string }>;
 };
 
 export const homepageSectionLabels: Record<HomepageSectionKey, string> = {

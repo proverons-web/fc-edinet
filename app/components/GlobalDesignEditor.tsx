@@ -1,7 +1,10 @@
 "use client";
 
-import { useActionState, useMemo, useState, type ReactNode } from "react";
-import { saveGlobalDesign } from "@/app/admin/design/global-actions";
+import { useActionState, useCallback, useMemo, useState, type ReactNode } from "react";
+import { autosaveGlobalDesign, saveGlobalDesign } from "@/app/admin/design/global-actions";
+import Publishing2Bar from "@/app/components/Publishing2Bar";
+import { useDraftAutosave, useEditorHistory } from "@/app/components/usePublishing2";
+import { globalPublishingChecks } from "@/lib/publishing";
 import {
   headerNavKeys,
   type FooterColumnConfig,
@@ -28,13 +31,19 @@ export default function GlobalDesignEditor({
   const [mode, setMode] = useState<"desktop" | "mobile">("desktop");
   const imageAssets = useMemo(() => assets.filter((asset) => Boolean(asset.public_url)), [assets]);
   const isHeader = componentKey === "header";
+  const history = useEditorHistory(config, (value) => setConfig(value));
+  const autosaveAction = useCallback((value: HeaderDesignConfig | FooterDesignConfig) => autosaveGlobalDesign(componentKey, value), [componentKey]);
+  const autosave = useDraftAutosave(config, autosaveAction);
+  const checks = useMemo(() => globalPublishingChecks(componentKey, config), [componentKey, config]);
+  const hasBlockingChecks = checks.some((check) => check.level === "error");
 
   return <form action={action} className="globalBuilderForm">
     <input type="hidden" name="component_key" value={componentKey} />
     <input type="hidden" name="config_json" value={JSON.stringify(config)} />
+    <Publishing2Bar autosave={autosave} canUndo={history.canUndo} canRedo={history.canRedo} onUndo={history.undo} onRedo={history.redo} previewHref={`/admin/design/preview?page=global_${componentKey}`} checks={checks} preparePreview={() => autosaveAction(config)} />
     <div className="globalBuilderToolbar">
       <div className="deviceToggle"><button type="button" className={mode === "desktop" ? "active" : ""} onClick={() => setMode("desktop")}>Desktop</button><button type="button" className={mode === "mobile" ? "active" : ""} onClick={() => setMode("mobile")}>Mobile</button></div>
-      <div className="globalBuilderActions"><input name="version_label" placeholder="Комментарий к версии"/><button type="submit" name="intent" value="draft" className="rowAction" disabled={pending}>Сохранить черновик</button><button type="submit" name="intent" value="publish" className="primaryButton" disabled={pending}>Опубликовать</button></div>
+      <div className="globalBuilderActions"><input name="version_label" placeholder="Комментарий к версии"/><button type="submit" name="intent" value="draft" className="rowAction" disabled={pending}>Сохранить черновик</button><button type="submit" name="intent" value="publish" className="primaryButton" disabled={pending || hasBlockingChecks} title={hasBlockingChecks ? "Исправь ошибки Preflight перед публикацией" : undefined}>Опубликовать</button></div>
     </div>
     {state.error && <div className="formError">{state.error}</div>}
     {state.success && <div className="formSuccess">{state.success}</div>}
@@ -128,7 +137,7 @@ function HeaderPreview({ config, mode }: { config: HeaderDesignConfig; mode: "de
     <div className="headerPreviewMain" style={{ minHeight: mode === 'desktop' ? config.height_desktop : config.height_mobile }}><PreviewBrand mode={config.logo_mode} logoUrl={config.logo_url} width={config.logo_width} brand={config.brand_name} subtitle={config.brand_subtitle} showText={config.show_brand_text}/>{mode==='desktop' ? <div className="headerPreviewNav">{visibleNav.map((key)=><span key={key}>{navLabels[key]}</span>)}</div> : <span className="previewBurger">☰</span>}<div className="headerPreviewActions">{config.show_search && <span>⌕</span>}{config.show_account && <span>●</span>}</div></div>
   </div>;
 }
-function FooterPreview({ config }: { config: FooterDesignConfig }) { return <div className={`footerPreview ${config.background}`} style={{ paddingTop: Math.max(24, config.padding_top/2), paddingBottom: Math.max(16, config.padding_bottom/2) }}><div className="footerPreviewGrid"><div><PreviewBrand mode={config.logo_mode} logoUrl={config.logo_url} width={config.logo_width} brand={config.brand_name} subtitle={config.brand_subtitle} showText/><p>{config.show_about ? config.about_ru : ''}</p></div>{config.columns.filter(c=>c.visible).map(column=><div key={column.id}><strong>{column.title_ru}</strong>{column.links.map(link=><span key={link.id}>{link.label_ru}</span>)}</div>)}</div>{config.social_enabled && <div className="footerPreviewSocial">{['Facebook','Instagram','YouTube','TikTok'].filter((_,i)=>[config.facebook_url,config.instagram_url,config.youtube_url,config.tiktok_url][i]).join(' • ')}</div>}<div className="footerPreviewBottom">{config.show_copyright && <span>{config.copyright_text}</span>}{config.show_version && <span>Версия 2.1.9</span>}</div></div>; }
+function FooterPreview({ config }: { config: FooterDesignConfig }) { return <div className={`footerPreview ${config.background}`} style={{ paddingTop: Math.max(24, config.padding_top/2), paddingBottom: Math.max(16, config.padding_bottom/2) }}><div className="footerPreviewGrid"><div><PreviewBrand mode={config.logo_mode} logoUrl={config.logo_url} width={config.logo_width} brand={config.brand_name} subtitle={config.brand_subtitle} showText/><p>{config.show_about ? config.about_ru : ''}</p></div>{config.columns.filter(c=>c.visible).map(column=><div key={column.id}><strong>{column.title_ru}</strong>{column.links.map(link=><span key={link.id}>{link.label_ru}</span>)}</div>)}</div>{config.social_enabled && <div className="footerPreviewSocial">{['Facebook','Instagram','YouTube','TikTok'].filter((_,i)=>[config.facebook_url,config.instagram_url,config.youtube_url,config.tiktok_url][i]).join(' • ')}</div>}<div className="footerPreviewBottom">{config.show_copyright && <span>{config.copyright_text}</span>}{config.show_version && <span>Версия 2.1.10</span>}</div></div>; }
 function PreviewBrand({mode,logoUrl,width,brand,subtitle,showText}:{mode:'crest'|'image';logoUrl:string|null;width:number;brand:string;subtitle:string;showText:boolean}) { return <div className="previewBrand">{mode==='image'&&logoUrl?<img src={logoUrl} alt="" style={{width}}/>:<span className="previewCrest" style={{width,height:Math.round(width*1.17)}}>FCE</span>}{showText&&<span><strong>{brand}</strong><small>{subtitle}</small></span>}</div>; }
 
 function ControlSection({ title, children }: { title: string; children: ReactNode }) { return <section className="globalControlSection"><h3>{title}</h3>{children}</section>; }

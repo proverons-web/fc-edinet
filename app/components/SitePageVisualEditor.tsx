@@ -1,7 +1,10 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
-import { saveSitePageVisualEditor, type VisualEditorState } from "@/app/admin/design/actions";
+import { useActionState, useCallback, useMemo, useState } from "react";
+import { autosaveSitePageDesign, saveSitePageVisualEditor, type VisualEditorState } from "@/app/admin/design/actions";
+import Publishing2Bar from "@/app/components/Publishing2Bar";
+import { useDraftAutosave, useEditorHistory } from "@/app/components/usePublishing2";
+import { sitePagePublishingChecks } from "@/lib/publishing";
 import HeroLayerPanel from "@/app/components/HeroLayerPanel";
 import VisualImageField, { type VisualImageDevice } from "@/app/components/VisualImageField";
 import type { SitePageDesignCatalogItem } from "@/lib/page-design";
@@ -74,6 +77,45 @@ export default function SitePageVisualEditor({
   const [titleRo, setTitleRo] = useState(initial.title_ro ?? "");
   const [descriptionRu, setDescriptionRu] = useState(initial.description_ru ?? "");
   const [descriptionRo, setDescriptionRo] = useState(initial.description_ro ?? "");
+
+  const editorSnapshot = useMemo<SitePageDesignSnapshot>(() => ({
+    background_mode: backgroundMode,
+    desktop_image_url: clearDesktop ? null : desktopImage || null,
+    tablet_image_url: clearTablet ? null : tabletImage || null,
+    mobile_image_url: clearMobile ? null : mobileImage || null,
+    desktop_position_x: desktopX, desktop_position_y: desktopY, desktop_zoom_percent: desktopZoom,
+    tablet_position_x: tabletX, tablet_position_y: tabletY, tablet_zoom_percent: tabletZoom,
+    mobile_position_x: mobileX, mobile_position_y: mobileY, mobile_zoom_percent: mobileZoom,
+    hero_height_desktop: desktopHeight, hero_height_tablet: tabletHeight, hero_height_mobile: mobileHeight,
+    overlay_opacity: overlay, overlay_style: overlayStyle, text_alignment: alignment, content_width: contentWidth,
+    show_eyebrow: showEyebrow, show_description: showDescription,
+    eyebrow_ru: item.editableText ? (eyebrowRu.trim() || null) : initial.eyebrow_ru,
+    eyebrow_ro: item.editableText ? (eyebrowRo.trim() || null) : initial.eyebrow_ro,
+    title_ru: item.editableText ? (titleRu.trim() || null) : initial.title_ru,
+    title_ro: item.editableText ? (titleRo.trim() || null) : initial.title_ro,
+    description_ru: item.editableText ? (descriptionRu.trim() || null) : initial.description_ru,
+    description_ro: item.editableText ? (descriptionRo.trim() || null) : initial.description_ro,
+    layer_config: layerConfig,
+  }), [backgroundMode, clearDesktop, desktopImage, clearTablet, tabletImage, clearMobile, mobileImage, desktopX, desktopY, desktopZoom, tabletX, tabletY, tabletZoom, mobileX, mobileY, mobileZoom, desktopHeight, tabletHeight, mobileHeight, overlay, overlayStyle, alignment, contentWidth, showEyebrow, showDescription, eyebrowRu, eyebrowRo, titleRu, titleRo, descriptionRu, descriptionRo, layerConfig, item.editableText, initial.eyebrow_ru, initial.eyebrow_ro, initial.title_ru, initial.title_ro, initial.description_ru, initial.description_ro]);
+
+  const applySnapshot = useCallback((value: SitePageDesignSnapshot) => {
+    setBackgroundMode(value.background_mode);
+    setDesktopImage(value.desktop_image_url ?? ""); setTabletImage(value.tablet_image_url ?? ""); setMobileImage(value.mobile_image_url ?? "");
+    setClearDesktop(value.desktop_image_url == null); setClearTablet(value.tablet_image_url == null); setClearMobile(value.mobile_image_url == null);
+    setDesktopX(value.desktop_position_x); setDesktopY(value.desktop_position_y); setDesktopZoom(value.desktop_zoom_percent);
+    setTabletX(value.tablet_position_x); setTabletY(value.tablet_position_y); setTabletZoom(value.tablet_zoom_percent);
+    setMobileX(value.mobile_position_x); setMobileY(value.mobile_position_y); setMobileZoom(value.mobile_zoom_percent);
+    setDesktopHeight(value.hero_height_desktop); setTabletHeight(value.hero_height_tablet); setMobileHeight(value.hero_height_mobile);
+    setOverlay(value.overlay_opacity); setOverlayStyle(value.overlay_style); setAlignment(value.text_alignment); setContentWidth(value.content_width);
+    setShowEyebrow(value.show_eyebrow); setShowDescription(value.show_description); setLayerConfig(value.layer_config);
+    setEyebrowRu(value.eyebrow_ru ?? ""); setEyebrowRo(value.eyebrow_ro ?? ""); setTitleRu(value.title_ru ?? ""); setTitleRo(value.title_ro ?? ""); setDescriptionRu(value.description_ru ?? ""); setDescriptionRo(value.description_ro ?? "");
+  }, []);
+  const history = useEditorHistory(editorSnapshot, applySnapshot);
+  const autosaveAction = useCallback((value: SitePageDesignSnapshot) => autosaveSitePageDesign(pageKey, value), [pageKey]);
+  const autosave = useDraftAutosave(editorSnapshot, autosaveAction);
+  const checks = useMemo(() => sitePagePublishingChecks(editorSnapshot, item.supportsContentImage), [editorSnapshot, item.supportsContentImage]);
+  const hasBlockingChecks = checks.some((check) => check.level === "error");
+  const hasPendingMedia = [editorSnapshot.desktop_image_url, editorSnapshot.tablet_image_url, editorSnapshot.mobile_image_url].some((url) => Boolean(url?.startsWith("blob:")));
 
   const preview = useMemo(() => {
     if (mode === "desktop") return { x: desktopX, y: desktopY, zoom: desktopZoom, height: desktopHeight };
@@ -158,6 +200,7 @@ export default function SitePageVisualEditor({
       <input type="hidden" name="desktop_position_x" value={desktopX} /><input type="hidden" name="desktop_position_y" value={desktopY} /><input type="hidden" name="desktop_zoom_percent" value={desktopZoom} /><input type="hidden" name="hero_height_desktop" value={desktopHeight} />
       <input type="hidden" name="tablet_position_x" value={tabletX} /><input type="hidden" name="tablet_position_y" value={tabletY} /><input type="hidden" name="tablet_zoom_percent" value={tabletZoom} /><input type="hidden" name="hero_height_tablet" value={tabletHeight} />
       <input type="hidden" name="mobile_position_x" value={mobileX} /><input type="hidden" name="mobile_position_y" value={mobileY} /><input type="hidden" name="mobile_zoom_percent" value={mobileZoom} /><input type="hidden" name="hero_height_mobile" value={mobileHeight} />
+      <Publishing2Bar autosave={autosave} canUndo={history.canUndo} canRedo={history.canRedo} onUndo={history.undo} onRedo={history.redo} previewHref={`/admin/design/preview?page=${pageKey}`} checks={checks} pendingMedia={hasPendingMedia} preparePreview={() => autosaveAction(editorSnapshot)} />
 
       <section className="visualEditorWorkspace heroBuilderWorkspace">
         <div className="visualEditorToolbar">
@@ -233,7 +276,7 @@ export default function SitePageVisualEditor({
 
       <section className="visualPublishBar">
         <div><p className="eyebrow blue">ПУБЛИКАЦИЯ</p><h2>Черновик Hero Builder</h2><p>В историю теперь попадают изображения, crop/focus, параметры Hero и конфигурация всех слоёв.</p></div>
-        <div className="visualPublishControls"><input name="version_label" placeholder={`Название версии: ${item.label} Hero Builder`} /><div className="visualPublishButtons"><button className="secondaryAdminButton" type="submit" name="intent" value="draft" disabled={pending}>{pending ? "Сохраняем…" : "Сохранить черновик"}</button><button className="primaryButton homepageHeroSave" type="submit" name="intent" value="publish" disabled={pending}>{pending ? "Публикуем…" : "Опубликовать"}</button></div></div>
+        <div className="visualPublishControls"><input name="version_label" placeholder={`Название версии: ${item.label} Hero Builder`} /><div className="visualPublishButtons"><button className="secondaryAdminButton" type="submit" name="intent" value="draft" disabled={pending}>{pending ? "Сохраняем…" : "Сохранить черновик"}</button><button className="primaryButton homepageHeroSave" type="submit" name="intent" value="publish" disabled={pending || hasBlockingChecks} title={hasBlockingChecks ? "Исправь ошибки Preflight перед публикацией" : undefined}>{pending ? "Публикуем…" : "Опубликовать"}</button></div></div>
       </section>
 
       {state.error && <div className="formError">{state.error}</div>}

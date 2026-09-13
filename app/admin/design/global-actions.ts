@@ -12,6 +12,7 @@ import {
   type HeaderDesignConfig,
 } from "@/lib/global-design";
 import { defaultDesignSystem, normalizeDesignSystem, type DesignSystemConfig } from "@/lib/design-system";
+import { blockingPublishingChecks, globalPublishingChecks, summarizeVersionChanges } from "@/lib/publishing";
 
 type State = { success?: string; error?: string };
 export type GlobalComponentKey = "header" | "footer" | "design_system";
@@ -33,6 +34,11 @@ export async function saveGlobalDesign(_prev: State, formData: FormData): Promis
 
   const currentConfig = normalizeForKey(key, currentRow?.config);
   const config = normalizeForKey(key, rawConfig, currentConfig);
+  const publishChecks = globalPublishingChecks(key, config);
+  if (intent === "publish") {
+    const blockers = blockingPublishingChecks(publishChecks);
+    if (blockers.length) return { error: `Публикация остановлена: ${blockers.map((item) => item.detail).join(" ")}` };
+  }
 
   if (intent === "draft") {
     const { error } = await supabase.from("site_global_design_drafts").upsert({
@@ -52,6 +58,7 @@ export async function saveGlobalDesign(_prev: State, formData: FormData): Promis
       component_key: key,
       label: "Исходный дизайн",
       snapshot: currentConfig,
+      change_summary: [],
       published_by: userId,
     });
     if (baselineError) return { error: `Не удалось создать исходную версию: ${baselineError.message}` };
@@ -71,6 +78,7 @@ export async function saveGlobalDesign(_prev: State, formData: FormData): Promis
     component_key: key,
     label,
     snapshot: config,
+    change_summary: summarizeVersionChanges(currentConfig, config),
     published_by: userId,
   });
   if (versionError) return { error: `Дизайн опубликован, но история версии не записалась: ${versionError.message}` };
@@ -80,6 +88,20 @@ export async function saveGlobalDesign(_prev: State, formData: FormData): Promis
   revalidatePath("/");
   revalidatePath("/admin/design");
   return { success: key === "header" ? "Header опубликован." : key === "footer" ? "Footer опубликован." : "Design System опубликован." };
+}
+
+export async function autosaveGlobalDesign(key: GlobalComponentKey, rawConfig: unknown) {
+  const { supabase, userId } = await requireEditor();
+  if (!isGlobalKey(key)) return { ok: false, error: "Неизвестный глобальный компонент." };
+  const { data: currentRow } = await supabase.from("site_global_designs").select("config").eq("component_key", key).maybeSingle();
+  const currentConfig = normalizeForKey(key, currentRow?.config);
+  const config = normalizeForKey(key, rawConfig, currentConfig);
+  const { data: draftRow } = await supabase.from("site_global_design_drafts").select("autosave_revision").eq("component_key", key).maybeSingle();
+  const savedAt = new Date().toISOString();
+  const revision = Number((draftRow as { autosave_revision?: number } | null)?.autosave_revision ?? 0) + 1;
+  const { error } = await supabase.from("site_global_design_drafts").upsert({ component_key: key, config, updated_by: userId, updated_at: savedAt, autosaved_at: savedAt, autosave_revision: revision }, { onConflict: "component_key" });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, savedAt };
 }
 
 export async function resetGlobalDesignDraft(formData: FormData) {

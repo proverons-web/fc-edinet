@@ -1,7 +1,10 @@
 "use client";
 
-import { useActionState, useState, type CSSProperties, type ReactNode } from "react";
-import { saveGlobalDesign } from "@/app/admin/design/global-actions";
+import { useActionState, useCallback, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { autosaveGlobalDesign, saveGlobalDesign } from "@/app/admin/design/global-actions";
+import Publishing2Bar from "@/app/components/Publishing2Bar";
+import { useDraftAutosave, useEditorHistory } from "@/app/components/usePublishing2";
+import { globalPublishingChecks } from "@/lib/publishing";
 import { fontStack, shadowValue, type DesignSystemConfig, type SiteFontPreset, type SiteShadowPreset } from "@/lib/design-system";
 
 const initialState: { success?: string; error?: string } = {};
@@ -10,6 +13,11 @@ export default function DesignSystemEditor({ initial }: { initial: DesignSystemC
   const [state, action, pending] = useActionState(saveGlobalDesign, initialState);
   const [config, setConfig] = useState(initial);
   const update = (patch: Partial<DesignSystemConfig>) => setConfig((current) => ({ ...current, ...patch }));
+  const history = useEditorHistory(config, (value) => setConfig(value));
+  const autosaveAction = useCallback((value: DesignSystemConfig) => autosaveGlobalDesign("design_system", value), []);
+  const autosave = useDraftAutosave(config, autosaveAction);
+  const checks = useMemo(() => globalPublishingChecks("design_system", config), [config]);
+  const hasBlockingChecks = checks.some((check) => check.level === "error");
 
   const previewStyle = {
     "--preview-primary": config.primary,
@@ -32,13 +40,14 @@ export default function DesignSystemEditor({ initial }: { initial: DesignSystemC
     <form action={action} className="designSystemForm">
       <input type="hidden" name="component_key" value="design_system" />
       <input type="hidden" name="config_json" value={JSON.stringify(config)} />
+      <Publishing2Bar autosave={autosave} canUndo={history.canUndo} canRedo={history.canRedo} onUndo={history.undo} onRedo={history.redo} previewHref="/admin/design/preview?page=global_design_system" checks={checks} preparePreview={() => autosaveAction(config)} />
 
       <div className="globalBuilderToolbar">
         <div><strong>Design Tokens</strong><span className="designSystemHint">Все значения применяются ко всему сайту после публикации.</span></div>
         <div className="globalBuilderActions">
           <input name="version_label" placeholder="Комментарий к версии" />
           <button type="submit" name="intent" value="draft" className="rowAction" disabled={pending}>Сохранить черновик</button>
-          <button type="submit" name="intent" value="publish" className="primaryButton" disabled={pending}>Опубликовать</button>
+          <button type="submit" name="intent" value="publish" className="primaryButton" disabled={pending || hasBlockingChecks} title={hasBlockingChecks ? "Исправь ошибки Preflight перед публикацией" : undefined}>Опубликовать</button>
         </div>
       </div>
 

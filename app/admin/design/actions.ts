@@ -17,6 +17,7 @@ import { defaultHomepageCanvas, normalizeHomepageCanvas } from "@/lib/homepage-c
 import { defaultHeroLayerConfig, homeHeroLayerDefinitions, normalizeHeroLayerConfig, siteHeroLayerDefinitions } from "@/lib/hero-builder";
 import { defaultHomepageSectionDesignMap, normalizeHomepageSectionDesignMap } from "@/lib/section-builder";
 import { normalizeHomepageBlock, normalizeHomepageBlocks, normalizeHomepageLayoutOrder } from "@/lib/block-library";
+import { blockingPublishingChecks, homepagePublishingChecks, sitePagePublishingChecks, summarizeVersionChanges } from "@/lib/publishing";
 
 export type VisualEditorState = {
   error?: string;
@@ -137,6 +138,12 @@ export async function saveVisualEditor(
     layout_order: layoutOrder,
   };
 
+  const publishChecks = homepagePublishingChecks(snapshot);
+  if (intent === "publish") {
+    const blockers = blockingPublishingChecks(publishChecks);
+    if (blockers.length) return { error: `Публикация остановлена: ${blockers.map((item) => item.detail).join(" ")}` };
+  }
+
   const { error: draftError } = await supabase
     .from("homepage_design_draft")
     .upsert(
@@ -168,6 +175,7 @@ export async function saveVisualEditor(
       .insert({
         label: "Исходный дизайн до Visual Editor",
         snapshot: currentPublished,
+        change_summary: [],
         published_by: userId,
       });
 
@@ -250,7 +258,7 @@ export async function saveVisualEditor(
 
   const { error: versionError } = await supabase
     .from("homepage_design_versions")
-    .insert({ label, snapshot, published_by: userId });
+    .insert({ label, snapshot, change_summary: summarizeVersionChanges(currentPublished, snapshot), published_by: userId });
 
   if (versionError) {
     return { error: `Дизайн опубликован, но история версии не записалась: ${versionError.message}` };
@@ -263,6 +271,27 @@ export async function saveVisualEditor(
   revalidatePath("/admin/home");
 
   return { success: "Дизайн опубликован. Новая версия главной страницы уже активна." };
+}
+
+export async function autosaveHomepageDesign(payload: HomepageDesignSnapshot) {
+  const { supabase, userId } = await requireEditor();
+  const [{ data: heroData }, { data: sectionsData }, { data: blocksData }, { data: draftData }] = await Promise.all([
+    supabase.from("homepage_hero").select("*").eq("id", 1).maybeSingle(),
+    supabase.from("homepage_sections").select("*").order("display_order", { ascending: true }),
+    supabase.from("homepage_blocks").select("*").order("display_order", { ascending: true }),
+    supabase.from("homepage_design_draft").select("*").eq("id", 1).maybeSingle(),
+  ]);
+  const published = publishedSnapshot(heroData as HomepageHero | null, (sectionsData ?? []) as HomepageSection[], publishedBlocks(blocksData ?? []));
+  const current = draftData ? normalizeSnapshot(draftData as Record<string, unknown>, published) : published;
+  const snapshot = normalizeSnapshot(payload as unknown as Record<string, unknown>, current);
+  snapshot.background_image_url = autosaveImage(snapshot.background_image_url, current.background_image_url);
+  snapshot.tablet_background_image_url = autosaveImage(snapshot.tablet_background_image_url, current.tablet_background_image_url);
+  snapshot.mobile_background_image_url = autosaveImage(snapshot.mobile_background_image_url, current.mobile_background_image_url);
+  const savedAt = new Date().toISOString();
+  const revision = Number((draftData as { autosave_revision?: number } | null)?.autosave_revision ?? 0) + 1;
+  const { error } = await supabase.from("homepage_design_draft").upsert({ id: 1, ...snapshot, updated_by: userId, updated_at: savedAt, autosaved_at: savedAt, autosave_revision: revision }, { onConflict: "id" });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, savedAt };
 }
 
 export async function restoreVisualVersion(formData: FormData) {
@@ -611,6 +640,12 @@ export async function saveSitePageVisualEditor(
     layer_config: parseHeroLayerConfig(formData.get("layer_config"), siteHeroLayerDefinitions(pageKey), current.layer_config),
   };
 
+  const publishChecks = sitePagePublishingChecks(snapshot, item.supportsContentImage);
+  if (intent === "publish") {
+    const blockers = blockingPublishingChecks(publishChecks);
+    if (blockers.length) return { error: `Публикация остановлена: ${blockers.map((entry) => entry.detail).join(" ")}` };
+  }
+
   const { error: draftError } = await supabase.from("site_page_design_drafts").upsert({
     page_key: pageKey,
     ...snapshot,
@@ -631,6 +666,7 @@ export async function saveSitePageVisualEditor(
       page_key: pageKey,
       label: `Исходный дизайн: ${item.label}`,
       snapshot: published,
+      change_summary: [],
       published_by: userId,
     });
     if (error) return { error: `Не удалось сохранить исходную версию: ${error.message}` };
@@ -650,6 +686,7 @@ export async function saveSitePageVisualEditor(
     page_key: pageKey,
     label,
     snapshot,
+    change_summary: summarizeVersionChanges(published, snapshot),
     published_by: userId,
   });
   if (versionError) return { error: `Дизайн опубликован, но история версии не записалась: ${versionError.message}` };
@@ -658,6 +695,27 @@ export async function saveSitePageVisualEditor(
   revalidatePath(item.route.includes("[") ? item.route.split("/[")[0] || "/" : item.route);
   revalidatePath("/admin/design");
   return { success: `Дизайн «${item.label}» опубликован.` };
+}
+
+export async function autosaveSitePageDesign(pageKey: SitePageDesignKey, payload: SitePageDesignSnapshot) {
+  const { supabase, userId } = await requireEditor();
+  if (!sitePageKeys.has(pageKey)) return { ok: false, error: "Неизвестная страница." };
+  const [{ data: publishedData }, { data: draftData }] = await Promise.all([
+    supabase.from("site_page_designs").select("*").eq("page_key", pageKey).maybeSingle(),
+    supabase.from("site_page_design_drafts").select("*").eq("page_key", pageKey).maybeSingle(),
+  ]);
+  const fallback = defaultSitePageDesign(pageKey);
+  const published = publishedData ? normalizeSitePageDesign(publishedData as Record<string, unknown>, fallback) : fallback;
+  const current = draftData ? normalizeSitePageDesign(draftData as Record<string, unknown>, published) : published;
+  const snapshot = normalizeSitePageDesign(payload as unknown as Record<string, unknown>, current);
+  snapshot.desktop_image_url = autosaveImage(snapshot.desktop_image_url, current.desktop_image_url);
+  snapshot.tablet_image_url = autosaveImage(snapshot.tablet_image_url, current.tablet_image_url);
+  snapshot.mobile_image_url = autosaveImage(snapshot.mobile_image_url, current.mobile_image_url);
+  const savedAt = new Date().toISOString();
+  const revision = Number((draftData as { autosave_revision?: number } | null)?.autosave_revision ?? 0) + 1;
+  const { error } = await supabase.from("site_page_design_drafts").upsert({ page_key: pageKey, ...snapshot, updated_by: userId, updated_at: savedAt, autosaved_at: savedAt, autosave_revision: revision }, { onConflict: "page_key" });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, savedAt };
 }
 
 export async function restoreSitePageVisualVersion(formData: FormData) {
@@ -740,4 +798,9 @@ function parseOverlayStyle(value: string, fallback: SitePageDesignSnapshot["over
 function nullableFormText(value: FormDataEntryValue | null) {
   const result = text(value);
   return result || null;
+}
+
+function autosaveImage(value: string | null, fallback: string | null) {
+  if (!value) return value;
+  return /^(https?:\/\/|\/)/i.test(value) ? value : fallback;
 }

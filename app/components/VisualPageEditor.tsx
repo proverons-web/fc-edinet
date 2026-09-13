@@ -1,8 +1,11 @@
 "use client";
 
-import { useActionState, useMemo, useRef, useState } from "react";
+import { useActionState, useCallback, useMemo, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
-import { saveVisualEditor, type VisualEditorState } from "@/app/admin/design/actions";
+import { autosaveHomepageDesign, saveVisualEditor, type VisualEditorState } from "@/app/admin/design/actions";
+import Publishing2Bar from "@/app/components/Publishing2Bar";
+import { useDraftAutosave, useEditorHistory } from "@/app/components/usePublishing2";
+import { homepagePublishingChecks } from "@/lib/publishing";
 import VisualImageField from "@/app/components/VisualImageField";
 import HeroLayerPanel from "@/app/components/HeroLayerPanel";
 import HomepageBlockLibrary from "@/app/components/HomepageBlockLibrary";
@@ -79,6 +82,44 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
   const titleAccent = hero?.title_accent || "ЗА ЕДИНЕЦ";
   const eyebrow = hero?.eyebrow || "ЕДИНЕЦ • МОЛДОВА";
   const description = hero?.description || "Новости клуба, матчи, состав, история и медиаконтент — в одном официальном пространстве.";
+
+  const editorSnapshot = useMemo<HomepageDesignSnapshot>(() => ({
+    background_image_url: clearDesktop ? null : desktopImage || null,
+    tablet_background_image_url: clearTablet ? null : tabletImage || null,
+    mobile_background_image_url: clearMobile ? null : mobileImage || null,
+    desktop_position_x: canvas.desktop.background_x,
+    desktop_position_y: canvas.desktop.background_y,
+    desktop_zoom_percent: canvas.desktop.background_zoom,
+    mobile_position_x: canvas.mobile.background_x,
+    mobile_position_y: canvas.mobile.background_y,
+    mobile_zoom_percent: canvas.mobile.background_zoom,
+    hero_height_desktop: canvas.desktop.hero_height,
+    hero_height_mobile: canvas.mobile.hero_height,
+    overlay_opacity: overlay,
+    text_alignment: alignment,
+    show_match_card: anyMatchVisible,
+    canvas_config: canvas,
+    hero_layer_config: layerConfig,
+    section_order: sections,
+    section_visibility: visible,
+    section_config: sectionConfig,
+    custom_blocks: customBlocks,
+    layout_order: layoutOrder,
+  }), [clearDesktop, desktopImage, clearTablet, tabletImage, clearMobile, mobileImage, canvas, overlay, alignment, anyMatchVisible, layerConfig, sections, visible, sectionConfig, customBlocks, layoutOrder]);
+
+  const applySnapshot = useCallback((value: HomepageDesignSnapshot) => {
+    setDesktopImage(value.background_image_url ?? ""); setTabletImage(value.tablet_background_image_url ?? ""); setMobileImage(value.mobile_background_image_url ?? "");
+    setClearDesktop(value.background_image_url == null); setClearTablet(value.tablet_background_image_url == null); setClearMobile(value.mobile_background_image_url == null);
+    setOverlay(value.overlay_opacity); setAlignment(value.text_alignment); setCanvas(value.canvas_config); setLayerConfig(value.hero_layer_config);
+    setVisible(value.section_visibility); setSectionConfig(value.section_config); setCustomBlocks(value.custom_blocks); setLayoutOrder(value.layout_order);
+    const nextSection = value.section_order[0]; if (nextSection) setSelectedSection(nextSection);
+  }, []);
+  const history = useEditorHistory(editorSnapshot, applySnapshot);
+  const autosaveAction = useCallback((value: HomepageDesignSnapshot) => autosaveHomepageDesign(value), []);
+  const autosave = useDraftAutosave(editorSnapshot, autosaveAction);
+  const checks = useMemo(() => homepagePublishingChecks(editorSnapshot), [editorSnapshot]);
+  const hasBlockingChecks = checks.some((check) => check.level === "error");
+  const hasPendingMedia = [desktopImage, tabletImage, mobileImage].some((url) => url.startsWith("blob:"));
 
   const safeWarning = useMemo(() => {
     const v = viewport;
@@ -181,6 +222,7 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
       <input type="hidden" name="clear_background_image" value={clearDesktop ? "on" : ""} />
       <input type="hidden" name="clear_tablet_background_image" value={clearTablet ? "on" : ""} />
       <input type="hidden" name="clear_mobile_background_image" value={clearMobile ? "on" : ""} />
+      <Publishing2Bar autosave={autosave} canUndo={history.canUndo} canRedo={history.canRedo} onUndo={history.undo} onRedo={history.redo} previewHref="/admin/design/preview?page=home" checks={checks} pendingMedia={hasPendingMedia} preparePreview={() => autosaveAction(editorSnapshot)} />
 
       <section className="visualEditorWorkspace canvas2Workspace">
         <div className="visualEditorToolbar">
