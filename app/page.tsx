@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/locale";
 import { dateLocale, localized, publicText, type Locale } from "@/lib/i18n";
 import { defaultHomepageCanvas, normalizeHomepageCanvas } from "@/lib/homepage-canvas";
+import { defaultHeroLayerConfig, heroLayerState, heroLayerVisible, homeHeroLayerDefinitions, normalizeHeroLayerConfig } from "@/lib/hero-builder";
 import type {
   ClubMatch,
   Competition,
@@ -190,9 +191,12 @@ export default async function Home() {
     show_match_card: hero?.show_match_card,
   });
   const heroCanvas = normalizeHomepageCanvas(hero?.canvas_config, canvasFallback);
+  const heroLayers = normalizeHeroLayerConfig(hero?.hero_layer_config, homeHeroLayerDefinitions, defaultHeroLayerConfig(homeHeroLayerDefinitions));
   const heroTextAlignment = hero?.text_alignment ?? "left";
-  const showHeroMatchCard = heroCanvas.desktop.match_visible || heroCanvas.tablet.match_visible || heroCanvas.mobile.match_visible;
-  const heroBaseImage = hero?.background_image_url || hero?.tablet_background_image_url || hero?.mobile_background_image_url || null;
+  const showHeroIntro = heroLayerVisible(heroLayers, "intro");
+  const showHeroBackground = heroLayerVisible(heroLayers, "background");
+  const showHeroMatchCard = heroLayerVisible(heroLayers, "match_card") && (heroCanvas.desktop.match_visible || heroCanvas.tablet.match_visible || heroCanvas.mobile.match_visible);
+  const heroBaseImage = showHeroBackground ? (hero?.background_image_url || hero?.tablet_background_image_url || hero?.mobile_background_image_url || null) : null;
   const heroStyle = {
     "--hero-desktop-x": `${heroCanvas.desktop.background_x}%`,
     "--hero-desktop-y": `${heroCanvas.desktop.background_y}%`,
@@ -537,7 +541,7 @@ export default async function Home() {
         )}
 
         <div className={`container heroContent canvasPublicHeroContent ${showHeroMatchCard ? "" : "heroContentSingle"}`}>
-          <div className="heroIntro">
+          {showHeroIntro && <div className="heroIntro" style={{ zIndex: heroLayerState(heroLayers, "intro").order }}>
             <p className="eyebrow">{heroEyebrow}</p>
             <h1>
               {heroTitleMain}
@@ -558,10 +562,10 @@ export default async function Home() {
                 </Link>
               )}
             </div>
-          </div>
+          </div>}
 
           {showHeroMatchCard && (
-            <aside className="heroMatchCard">
+            <aside className="heroMatchCard" style={{ zIndex: heroLayerState(heroLayers, "match_card").order }}>
               <span className="matchTag">{text.nextMatch}</span>
               {nextMatch ? (
                 <>

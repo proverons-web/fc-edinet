@@ -13,6 +13,7 @@ import type {
 } from "@/lib/types";
 import { defaultSitePageDesign, normalizeSitePageDesign, sitePageDesignCatalog } from "@/lib/page-design";
 import { defaultHomepageCanvas, normalizeHomepageCanvas } from "@/lib/homepage-canvas";
+import { defaultHeroLayerConfig, homeHeroLayerDefinitions, normalizeHeroLayerConfig, siteHeroLayerDefinitions } from "@/lib/hero-builder";
 
 export type VisualEditorState = {
   error?: string;
@@ -120,6 +121,7 @@ export async function saveVisualEditor(
     text_alignment: alignment(text(formData.get("text_alignment")), currentDraft.text_alignment),
     show_match_card: formData.get("show_match_card") === "on",
     canvas_config: parseCanvasConfig(formData.get("canvas_config"), currentDraft.canvas_config),
+    hero_layer_config: parseHeroLayerConfig(formData.get("hero_layer_config"), homeHeroLayerDefinitions, currentDraft.hero_layer_config),
     section_order: sectionOrder,
     section_visibility: sectionVisibility,
   };
@@ -181,6 +183,7 @@ export async function saveVisualEditor(
       text_alignment: snapshot.text_alignment,
       show_match_card: snapshot.show_match_card,
       canvas_config: snapshot.canvas_config,
+      hero_layer_config: snapshot.hero_layer_config,
     })
     .eq("id", 1);
 
@@ -304,6 +307,7 @@ function publishedSnapshot(hero: HomepageHero | null, sections: HomepageSection[
       text_alignment: hero?.text_alignment,
       show_match_card: hero?.show_match_card,
     })),
+    hero_layer_config: normalizeHeroLayerConfig(hero?.hero_layer_config, homeHeroLayerDefinitions, defaultHeroLayerConfig(homeHeroLayerDefinitions)),
     section_order: order,
     section_visibility: visible,
   };
@@ -327,6 +331,7 @@ function normalizeSnapshot(raw: Record<string, unknown>, fallback: HomepageDesig
     text_alignment: alignment(String(raw.text_alignment ?? ""), fallback.text_alignment),
     show_match_card: typeof raw.show_match_card === "boolean" ? raw.show_match_card : fallback.show_match_card,
     canvas_config: normalizeHomepageCanvas(raw.canvas_config, fallback.canvas_config),
+    hero_layer_config: normalizeHeroLayerConfig(raw.hero_layer_config, homeHeroLayerDefinitions, fallback.hero_layer_config),
     section_order: normalizeSectionOrder(Array.isArray(raw.section_order) ? raw.section_order.map(String) : fallback.section_order),
     section_visibility: Object.fromEntries(
       sectionKeys.map((key) => [key, typeof rawVisibility[key] === "boolean" ? rawVisibility[key] : fallback.section_visibility[key]])
@@ -338,6 +343,15 @@ function parseCanvasConfig(value: FormDataEntryValue | null, fallback: HomepageD
   if (typeof value !== "string" || !value.trim()) return fallback;
   try {
     return normalizeHomepageCanvas(JSON.parse(value), fallback);
+  } catch {
+    return fallback;
+  }
+}
+
+function parseHeroLayerConfig(value: FormDataEntryValue | null, definitions: ReturnType<typeof siteHeroLayerDefinitions> | typeof homeHeroLayerDefinitions, fallback: HomepageDesignSnapshot["hero_layer_config"] | SitePageDesignSnapshot["layer_config"]) {
+  if (typeof value !== "string" || !value.trim()) return fallback;
+  try {
+    return normalizeHeroLayerConfig(JSON.parse(value), definitions, fallback);
   } catch {
     return fallback;
   }
@@ -516,6 +530,7 @@ export async function saveSitePageVisualEditor(
     title_ro: item.editableText ? nullableFormText(formData.get("title_ro")) : current.title_ro,
     description_ru: item.editableText ? nullableFormText(formData.get("description_ru")) : current.description_ru,
     description_ro: item.editableText ? nullableFormText(formData.get("description_ro")) : current.description_ro,
+    layer_config: parseHeroLayerConfig(formData.get("layer_config"), siteHeroLayerDefinitions(pageKey), current.layer_config),
   };
 
   const { error: draftError } = await supabase.from("site_page_design_drafts").upsert({

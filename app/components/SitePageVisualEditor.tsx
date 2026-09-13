@@ -2,8 +2,14 @@
 
 import { useActionState, useMemo, useState } from "react";
 import { saveSitePageVisualEditor, type VisualEditorState } from "@/app/admin/design/actions";
+import HeroLayerPanel from "@/app/components/HeroLayerPanel";
 import VisualImageField, { type VisualImageDevice } from "@/app/components/VisualImageField";
 import type { SitePageDesignCatalogItem } from "@/lib/page-design";
+import {
+  heroLayerState,
+  heroLayerVisible,
+  siteHeroLayerDefinitions,
+} from "@/lib/hero-builder";
 import type {
   DesignMediaAsset,
   PageHeroBackgroundMode,
@@ -32,6 +38,9 @@ export default function SitePageVisualEditor({
   const [mode, setMode] = useState<ViewMode>("desktop");
   const [safeZone, setSafeZone] = useState(true);
   const [backgroundMode, setBackgroundMode] = useState<PageHeroBackgroundMode>(initial.background_mode);
+  const layerDefinitions = useMemo(() => siteHeroLayerDefinitions(pageKey), [pageKey]);
+  const [layerConfig, setLayerConfig] = useState(initial.layer_config);
+  const [selectedLayer, setSelectedLayer] = useState(layerDefinitions.find((layer) => layer.key !== "background")?.key ?? "background");
 
   const [desktopImage, setDesktopImage] = useState(initial.desktop_image_url ?? "");
   const [tabletImage, setTabletImage] = useState(initial.tablet_image_url ?? "");
@@ -80,7 +89,8 @@ export default function SitePageVisualEditor({
     : mode === "tablet"
       ? customTablet || customDesktop
       : customMobile || customTablet || customDesktop;
-  const previewImage = backgroundMode === "custom" ? customImage : "";
+  const backgroundVisible = heroLayerVisible(layerConfig, "background");
+  const previewImage = backgroundVisible && backgroundMode === "custom" ? customImage : "";
   const previewEyebrow = eyebrowRu || item.preview.eyebrow;
   const previewTitle = titleRu || item.preview.title;
   const previewDescription = descriptionRu || item.preview.description;
@@ -90,9 +100,58 @@ export default function SitePageVisualEditor({
   function setZoom(value: number) { mode === "desktop" ? setDesktopZoom(value) : mode === "tablet" ? setTabletZoom(value) : setMobileZoom(value); }
   function setHeight(value: number) { mode === "desktop" ? setDesktopHeight(value) : mode === "tablet" ? setTabletHeight(value) : setMobileHeight(value); }
 
+  function selectable(key: string, className = "") {
+    const state = heroLayerState(layerConfig, key);
+    return `${className} heroBuilderSelectable ${selectedLayer === key ? "selected" : ""} ${state.locked ? "locked" : ""}`.trim();
+  }
+
+  function selectLayer(key: string) {
+    setSelectedLayer(key);
+  }
+
+  function renderPreviewLayers() {
+    const visible = (key: string) => heroLayerVisible(layerConfig, key);
+    const style = (key: string) => ({ order: heroLayerState(layerConfig, key).order });
+
+    if (pageKey === "club") {
+      return <>
+        {visible("intro") && <div className={selectable("intro", "heroBuilderDemoGroup")} style={style("intro")} onClick={() => selectLayer("intro")}><p className="eyebrow">EDINEȚ • MOLDOVA</p><h1>FC EDINEȚ</h1><p>{previewDescription}</p></div>}
+        {visible("facts") && <div className={selectable("facts", "heroBuilderDemoFacts")} style={style("facts")} onClick={() => selectLayer("facts")}><span>2015</span><span>EDINEȚ</span><span>ALBASTRU • ALB</span></div>}
+      </>;
+    }
+    if (pageKey === "template_player") {
+      return <>
+        {visible("photo") && <div className={selectable("photo", "heroBuilderDemoPlayerPhoto")} style={style("photo")} onClick={() => selectLayer("photo")}><span>10</span><b>FOTO JUCĂTOR</b></div>}
+        {visible("intro") && <div className={selectable("intro", "heroBuilderDemoPlayerIntro")} style={style("intro")} onClick={() => selectLayer("intro")}><p className="eyebrow">MIJLOCAȘ</p><h1>NUME<br/>JUCĂTOR</h1><p>Număr • Naționalitate • Înălțime</p></div>}
+      </>;
+    }
+    if (pageKey === "template_news") {
+      return <>
+        {visible("navigation") && <div className={selectable("navigation", "heroBuilderDemoMeta")} style={style("navigation")} onClick={() => selectLayer("navigation")}>← Новости · 12 сентября</div>}
+        {visible("title") && <h1 className={selectable("title")} style={style("title")} onClick={() => selectLayer("title")}>{previewTitle}</h1>}
+        {visible("description") && <p className={selectable("description")} style={style("description")} onClick={() => selectLayer("description")}>{previewDescription}</p>}
+        {visible("author") && <div className={selectable("author", "heroBuilderDemoAuthor")} style={style("author")} onClick={() => selectLayer("author")}>Автор: FC Edineț</div>}
+      </>;
+    }
+    if (pageKey === "template_album") {
+      return <>
+        {visible("navigation") && <div className={selectable("navigation", "heroBuilderDemoMeta")} style={style("navigation")} onClick={() => selectLayer("navigation")}>← Все альбомы · EDINEȚ</div>}
+        {visible("title") && <h1 className={selectable("title")} style={style("title")} onClick={() => selectLayer("title")}>{previewTitle}</h1>}
+        {visible("description") && <p className={selectable("description")} style={style("description")} onClick={() => selectLayer("description")}>{previewDescription}</p>}
+        {visible("count") && <span className={selectable("count", "heroBuilderDemoCount")} style={style("count")} onClick={() => selectLayer("count")}>24 фотографии</span>}
+      </>;
+    }
+    return <>
+      {visible("eyebrow") && showEyebrow && <p className={selectable("eyebrow", "eyebrow")} style={style("eyebrow")} onClick={() => selectLayer("eyebrow")}>{previewEyebrow}</p>}
+      {visible("title") && <h1 className={selectable("title")} style={style("title")} onClick={() => selectLayer("title")}>{previewTitle}</h1>}
+      {visible("description") && showDescription && <p className={selectable("description")} style={style("description")} onClick={() => selectLayer("description")}>{previewDescription}</p>}
+    </>;
+  }
+
   return (
     <form action={action} className="visualEditorForm sitewideEditorForm">
       <input type="hidden" name="page_key" value={pageKey} />
+      <input type="hidden" name="layer_config" value={JSON.stringify(layerConfig)} />
       <input type="hidden" name="clear_desktop_image" value={clearDesktop ? "on" : ""} />
       <input type="hidden" name="clear_tablet_image" value={clearTablet ? "on" : ""} />
       <input type="hidden" name="clear_mobile_image" value={clearMobile ? "on" : ""} />
@@ -100,12 +159,12 @@ export default function SitePageVisualEditor({
       <input type="hidden" name="tablet_position_x" value={tabletX} /><input type="hidden" name="tablet_position_y" value={tabletY} /><input type="hidden" name="tablet_zoom_percent" value={tabletZoom} /><input type="hidden" name="hero_height_tablet" value={tabletHeight} />
       <input type="hidden" name="mobile_position_x" value={mobileX} /><input type="hidden" name="mobile_position_y" value={mobileY} /><input type="hidden" name="mobile_zoom_percent" value={mobileZoom} /><input type="hidden" name="hero_height_mobile" value={mobileHeight} />
 
-      <section className="visualEditorWorkspace">
+      <section className="visualEditorWorkspace heroBuilderWorkspace">
         <div className="visualEditorToolbar">
           <div>
-            <p className="eyebrow blue">IMAGE EDITOR 2.0 • {item.route}</p>
+            <p className="eyebrow blue">HERO BUILDER 2.0 • {item.route}</p>
             <h2>{item.label}</h2>
-            <small>{hasDraft ? "Открыт неопубликованный черновик этой страницы." : "Показан опубликованный дизайн страницы."} Каждый viewport теперь имеет независимый кадр.</small>
+            <small>{hasDraft ? "Открыт неопубликованный черновик." : "Показан опубликованный дизайн."} Нажми на объект прямо в Preview или выбери его в списке слоёв.</small>
           </div>
           <div className="visualViewportTabs" role="tablist" aria-label="Размер предпросмотра">
             {(["desktop","tablet","mobile"] as ViewMode[]).map((key) => <button type="button" key={key} className={mode === key ? "active" : ""} onClick={() => setMode(key)}>{key === "desktop" ? "Desktop" : key === "tablet" ? "Tablet" : "Mobile"}</button>)}
@@ -113,20 +172,27 @@ export default function SitePageVisualEditor({
         </div>
 
         <div className={`visualPreviewStage ${mode}`}>
-          <div className={`visualHeroPreview sitePagePreview align-${alignment}`} style={{ height: Math.min(preview.height, mode === "mobile" ? 720 : 620) }}>
-            {previewImage ? <img className="visualHeroImage" src={previewImage} alt="" style={{ objectPosition: `${preview.x}% ${preview.y}%`, transform: `scale(${preview.zoom / 100})`, transformOrigin: `${preview.x}% ${preview.y}%` }} />
-              : <div className={`visualHeroFallback ${backgroundMode === "content" ? "contentMode" : ""}`}>{backgroundMode === "content" && <span>Динамическое фото материала</span>}</div>}
-            {backgroundMode !== "default" && <div className={`visualHeroOverlay ${overlayStyle}`} style={{ opacity: overlay / 100 }} />}
+          <div className={`visualHeroPreview sitePagePreview heroBuilderPreview align-${alignment}`} style={{ height: Math.min(preview.height, mode === "mobile" ? 720 : 620) }}>
+            {backgroundVisible && previewImage ? <img className={selectable("background", "visualHeroImage")} src={previewImage} alt="" style={{ objectPosition: `${preview.x}% ${preview.y}%`, transform: `scale(${preview.zoom / 100})`, transformOrigin: `${preview.x}% ${preview.y}%` }} onClick={() => selectLayer("background")} />
+              : <div className={selectable("background", `visualHeroFallback ${backgroundMode === "content" && backgroundVisible ? "contentMode" : ""}`)} onClick={() => selectLayer("background")}>{backgroundMode === "content" && backgroundVisible && <span>Динамическое фото материала</span>}</div>}
+            {backgroundVisible && backgroundMode !== "default" && <div className={`visualHeroOverlay ${overlayStyle}`} style={{ opacity: overlay / 100 }} />}
             {safeZone && <div className="visualSafeZone"><span>SAFE ZONE</span></div>}
-            <div className="sitePagePreviewContent" style={{ maxWidth: `${contentWidth}px` }}>
-              {showEyebrow && <p className="eyebrow">{previewEyebrow}</p>}
-              <h1>{previewTitle}</h1>
-              {showDescription && <p>{previewDescription}</p>}
-            </div>
+            <div className="sitePagePreviewContent heroBuilderPreviewContent" style={{ maxWidth: `${contentWidth}px` }}>{renderPreviewLayers()}</div>
+            <div className="heroBuilderSelectedBadge">Выбран: {layerDefinitions.find((layer) => layer.key === selectedLayer)?.label ?? selectedLayer}{heroLayerState(layerConfig, selectedLayer).locked ? " • 🔒" : ""}</div>
           </div>
         </div>
         <label className="visualSafeToggle"><input type="checkbox" checked={safeZone} onChange={(event) => setSafeZone(event.target.checked)} /><span>Показывать безопасную зону</span></label>
       </section>
+
+      <div className="visualEditorColumns heroBuilderColumns">
+        <HeroLayerPanel definitions={layerDefinitions} config={layerConfig} setConfig={setLayerConfig} selected={selectedLayer} setSelected={setSelectedLayer} />
+        <section className="clubAdminSection visualControlCard heroSelectedLayerCard">
+          <div className="formSectionTitle"><p className="eyebrow blue">АКТИВНЫЙ ОБЪЕКТ</p><h2>{layerDefinitions.find((layer) => layer.key === selectedLayer)?.label ?? selectedLayer}</h2><p>{layerDefinitions.find((layer) => layer.key === selectedLayer)?.description}</p></div>
+          <div className={`heroLayerStatus ${heroLayerState(layerConfig, selectedLayer).visible ? "visible" : "hidden"}`}><strong>{heroLayerState(layerConfig, selectedLayer).visible ? "Слой видим" : "Слой скрыт"}</strong><span>{heroLayerState(layerConfig, selectedLayer).locked ? "🔒 Заблокирован — сначала разблокируй его в списке слоёв." : "Можно менять видимость и порядок слоя."}</span></div>
+          {selectedLayer === "background" && <div className="adminNotice">Для фона ниже доступны Image Editor 2.0, crop, focus, zoom и отдельные кадры Desktop / Tablet / Mobile.</div>}
+          {selectedLayer !== "background" && <div className="adminNotice">В v2.1.5 объектный редактор управляет слоями, видимостью, блокировкой и порядком. Точное drag & drop позиционирование отдельных элементов всех Hero будет развиваться поверх этой общей системы.</div>}
+        </section>
+      </div>
 
       <div className="visualEditorColumns">
         <section className="clubAdminSection visualControlCard imageEditor2Card">
@@ -142,19 +208,19 @@ export default function SitePageVisualEditor({
         </section>
 
         <section className="clubAdminSection visualControlCard">
-          <div className="formSectionTitle"><p className="eyebrow blue">КОМПОЗИЦИЯ</p><h2>Hero и текст</h2><p>Эти параметры общие для страницы, а изображение и кадрирование независимы для Desktop / Tablet / Mobile.</p></div>
+          <div className="formSectionTitle"><p className="eyebrow blue">КОМПОЗИЦИЯ</p><h2>Hero и текст</h2><p>Глобальные параметры выбранного Hero. Управление отдельными объектами находится в панели слоёв.</p></div>
           <Range label="Затемнение фото" name="overlay_opacity" min={0} max={95} value={overlay} setValue={setOverlay} suffix="%" />
           <Range label="Максимальная ширина текста" name="content_width" min={420} max={1200} step={10} value={contentWidth} setValue={setContentWidth} suffix=" px" />
           <div className="fieldGroup"><label htmlFor={`${pageKey}_overlay_style`}>Тип затемнения</label><select id={`${pageKey}_overlay_style`} name="overlay_style" value={overlayStyle} onChange={(e) => setOverlayStyle(e.target.value as PageHeroOverlayStyle)}><option value="solid">Равномерное</option><option value="gradient-left">Сильнее слева</option><option value="gradient-right">Сильнее справа</option></select></div>
           <div className="fieldGroup"><label htmlFor={`${pageKey}_alignment`}>Выравнивание текста</label><select id={`${pageKey}_alignment`} name="text_alignment" value={alignment} onChange={(e) => setAlignment(e.target.value as typeof alignment)}><option value="left">Слева</option><option value="center">По центру</option><option value="right">Справа</option></select></div>
-          <label className="checkRow"><input type="checkbox" name="show_eyebrow" checked={showEyebrow} onChange={(e) => setShowEyebrow(e.target.checked)} /><span><strong>Показывать eyebrow</strong><small>Маленькая строка над заголовком.</small></span></label>
-          <label className="checkRow"><input type="checkbox" name="show_description" checked={showDescription} onChange={(e) => setShowDescription(e.target.checked)} /><span><strong>Показывать описание</strong><small>Текст под основным заголовком.</small></span></label>
+          <label className="checkRow"><input type="checkbox" name="show_eyebrow" checked={showEyebrow} onChange={(e) => setShowEyebrow(e.target.checked)} /><span><strong>Показывать eyebrow</strong><small>Сохраняется для обратной совместимости; слой Eyebrow имеет приоритет.</small></span></label>
+          <label className="checkRow"><input type="checkbox" name="show_description" checked={showDescription} onChange={(e) => setShowDescription(e.target.checked)} /><span><strong>Показывать описание</strong><small>Слой Description/Анонс также может скрыть его отдельно.</small></span></label>
           <div className="canvasDeviceSummary">{(["desktop","tablet","mobile"] as ViewMode[]).map((key) => <button type="button" key={key} className={mode === key ? "active" : ""} onClick={() => setMode(key)}><strong>{key}</strong><span>{key === "desktop" ? `${desktopX}/${desktopY} • ${desktopZoom}%` : key === "tablet" ? `${tabletX}/${tabletY} • ${tabletZoom}%` : `${mobileX}/${mobileY} • ${mobileZoom}%`}</span></button>)}</div>
         </section>
       </div>
 
       <section className="clubAdminSection visualControlCard">
-        <div className="formSectionTitle"><p className="eyebrow blue">ТЕКСТ</p><h2>{item.editableText ? "Текст страницы" : "Динамический контент"}</h2><p>{item.editableText ? "Пустое поле означает: использовать штатный текст сайта. Можно задать отдельные RU и RO варианты." : "На шаблонах имя игрока, заголовок новости и название альбома берутся из самого материала. Здесь меняется только визуальная подача."}</p></div>
+        <div className="formSectionTitle"><p className="eyebrow blue">ТЕКСТ</p><h2>{item.editableText ? "Текст страницы" : "Динамический контент"}</h2><p>{item.editableText ? "Пустое поле означает: использовать штатный текст сайта. Можно задать отдельные RU и RO варианты." : "На шаблонах данные берутся из конкретного материала; Hero Builder управляет слоями и визуальной подачей."}</p></div>
         {item.editableText ? <div className="sitePageTextFields">
           <TextField label="Eyebrow RU" name="eyebrow_ru" value={eyebrowRu} setValue={setEyebrowRu} placeholder={item.preview.eyebrow} />
           <TextField label="Eyebrow RO" name="eyebrow_ro" value={eyebrowRo} setValue={setEyebrowRo} />
@@ -166,8 +232,8 @@ export default function SitePageVisualEditor({
       </section>
 
       <section className="visualPublishBar">
-        <div><p className="eyebrow blue">ПУБЛИКАЦИЯ</p><h2>Черновик страницы</h2><p>В версии сохраняются три независимых изображения, focus/zoom каждого устройства и остальные настройки Hero.</p></div>
-        <div className="visualPublishControls"><input name="version_label" placeholder={`Название версии: ${item.label} Image Editor`} /><div className="visualPublishButtons"><button className="secondaryAdminButton" type="submit" name="intent" value="draft" disabled={pending}>{pending ? "Сохраняем…" : "Сохранить черновик"}</button><button className="primaryButton homepageHeroSave" type="submit" name="intent" value="publish" disabled={pending}>{pending ? "Публикуем…" : "Опубликовать"}</button></div></div>
+        <div><p className="eyebrow blue">ПУБЛИКАЦИЯ</p><h2>Черновик Hero Builder</h2><p>В историю теперь попадают изображения, crop/focus, параметры Hero и конфигурация всех слоёв.</p></div>
+        <div className="visualPublishControls"><input name="version_label" placeholder={`Название версии: ${item.label} Hero Builder`} /><div className="visualPublishButtons"><button className="secondaryAdminButton" type="submit" name="intent" value="draft" disabled={pending}>{pending ? "Сохраняем…" : "Сохранить черновик"}</button><button className="primaryButton homepageHeroSave" type="submit" name="intent" value="publish" disabled={pending}>{pending ? "Публикуем…" : "Опубликовать"}</button></div></div>
       </section>
 
       {state.error && <div className="formError">{state.error}</div>}

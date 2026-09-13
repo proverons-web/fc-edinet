@@ -5,6 +5,7 @@ import type { MediaAlbum, MediaVideo } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { dateLocale, publicText, type Locale } from "@/lib/i18n";
 import { getPublishedSitePageDesign, resolvePageHeroText } from "@/lib/page-design";
+import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,7 @@ export default async function MediaPage() {
   const hero = resolvePageHeroText(design, locale, { eyebrow: "FC EDINEȚ MEDIA", title: text.heroTitle, description: text.heroText });
 
   return <main>
-    <PageHeroShell design={design} className="mediaHero"><>{design.show_eyebrow && <p className="eyebrow">{hero.eyebrow}</p>}<h1>{hero.title}</h1>{design.show_description && <p>{hero.description}</p>}</></PageHeroShell>
+    <PageHeroShell design={design} className="mediaHero"><>{design.show_eyebrow && heroLayerVisible(design.layer_config,"eyebrow") && <p className="eyebrow" style={heroLayerStyle(design.layer_config,"eyebrow")}>{hero.eyebrow}</p>}{heroLayerVisible(design.layer_config,"title") && <h1 style={heroLayerStyle(design.layer_config,"title")}>{hero.title}</h1>}{design.show_description && heroLayerVisible(design.layer_config,"description") && <p style={heroLayerStyle(design.layer_config,"description")}>{hero.description}</p>}</></PageHeroShell>
     <section className="section mediaAlbumsSection"><div className="container"><div className="sectionHeading"><div><p className="eyebrow blue">{text.photo}</p><h2>{text.albums}</h2></div></div>{albums.length ? <div className="mediaAlbumGrid">{albums.map((album, index) => <Link href={`/media/${album.slug}`} className={`mediaAlbumCard ${index === 0 ? "featured" : ""}`} key={album.id}><div className="mediaAlbumCover">{album.cover_image_url ? <img src={album.cover_image_url} alt={album.title}/> : <span>FC EDINEȚ</span>}<div className="mediaAlbumOverlay"/><div className="mediaAlbumCardContent"><span>{formatDate(album.event_date, locale)}{album.location ? ` · ${album.location}` : ""}</span><h3>{album.title}</h3>{album.description && <p>{album.description}</p>}<b>{text.openAlbum}</b></div></div></Link>)}</div> : <div className="adminEmpty">{text.albumsEmpty}</div>}</div></section>
     <section className="section mediaVideosSection"><div className="container"><div className="sectionHeading light"><div><p className="eyebrow">FC EDINEȚ TV</p><h2>{text.videos}</h2></div></div>{videos.length ? <div className="mediaVideoGrid">{videos.map((video) => <article className="mediaVideoCard" key={video.id}><div className="mediaVideoEmbed"><iframe src={`https://www.youtube-nocookie.com/embed/${video.youtube_id}`} title={video.title} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen/></div><div><span>{formatDate(video.published_at, locale)}</span><h3>{video.title}</h3>{video.description && <p>{video.description}</p>}</div></article>)}</div> : <div className="clubDarkEmpty">{text.videosEmpty}</div>}</div></section>
   </main>;

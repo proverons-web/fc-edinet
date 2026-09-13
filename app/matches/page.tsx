@@ -8,6 +8,7 @@ import { getLocale } from "@/lib/locale";
 import { accountText } from "@/lib/account-i18n";
 import { dateLocale, matchStatusLabelsI18n, publicText, type Locale } from "@/lib/i18n";
 import { getPublishedSitePageDesign, resolvePageHeroText } from "@/lib/page-design";
+import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
 export const dynamic="force-dynamic";
 export default async function MatchesPage(){
  const locale=await getLocale();const text=publicText[locale].matches;const account=accountText[locale];const supabase=await createClient();const now=new Date().toISOString();
@@ -22,7 +23,7 @@ export default async function MatchesPage(){
  const favoriteIds=new Set(favoriteRows.map(row=>String(row.match_id)));
  if(competition){const {data}=await supabase.from("standings").select(standingsSelect()).eq("competition_id",competition.id).order("points",{ascending:false}).order("goal_difference",{ascending:false}).order("goals_for",{ascending:false});standings=(data??[]) as unknown as StandingEntry[]}
  const hero=resolvePageHeroText(design,locale,{eyebrow:"FC EDINEȚ",title:text.title,description:text.description});
- return <main><PageHeroShell design={design} className="pageHero"><>{design.show_eyebrow&&<p className="eyebrow">{hero.eyebrow}</p>}<h1>{hero.title}</h1>{design.show_description&&<p>{hero.description}</p>}</></PageHeroShell><section className="section matchPublicSection"><div className="container">
+ return <main><PageHeroShell design={design} className="pageHero"><>{design.show_eyebrow&&heroLayerVisible(design.layer_config,"eyebrow")&&<p className="eyebrow" style={heroLayerStyle(design.layer_config,"eyebrow")}>{hero.eyebrow}</p>}{heroLayerVisible(design.layer_config,"title") && <h1 style={heroLayerStyle(design.layer_config,"title")}>{hero.title}</h1>}{design.show_description&&heroLayerVisible(design.layer_config,"description")&&<p style={heroLayerStyle(design.layer_config,"description")}>{hero.description}</p>}</></PageHeroShell><section className="section matchPublicSection"><div className="container">
   <div className="sectionHeading"><div><p className="eyebrow blue">{text.calendar}</p><h2>{text.upcoming}</h2></div></div>{upcoming.length?<div className="publicMatchList">{upcoming.map(m=><PublicMatchCard key={m.id} match={m} locale={locale} isAuthenticated={Boolean(userId)} isFavorite={favoriteIds.has(String(m.id))}/>)}</div>:<div className="adminEmpty">{text.upcomingEmpty}</div>}
   <div className="sectionHeading matchResultsHeading"><div><p className="eyebrow blue">{text.results}</p><h2>{text.latest}</h2></div></div>{finished.length?<div className="publicMatchList">{finished.map(m=><PublicMatchCard key={m.id} match={m} locale={locale} isAuthenticated={Boolean(userId)} isFavorite={favoriteIds.has(String(m.id))}/>)}</div>:<div className="adminEmpty">{text.resultsEmpty}</div>}
   <div className="sectionHeading matchResultsHeading"><div><p className="eyebrow blue">{text.table}</p><h2>{competition?.name??text.championship}{competition?.season?` · ${competition.season}`:""}</h2></div><Link href="/standings">{text.fullTable}</Link></div>{standings.length?<StandingsTable entries={standings} locale={locale}/>:<div className="adminEmpty">{text.tableEmpty}</div>}

@@ -9,6 +9,7 @@ import { getLocale } from "@/lib/locale";
 import { accountText } from "@/lib/account-i18n";
 import { dateLocale, footLabelsI18n, localized, positionLabelsI18n, publicText } from "@/lib/i18n";
 import { getPublishedSitePageDesign } from "@/lib/page-design";
+import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
 
 export const dynamic = "force-dynamic";
 type PageProps = { params: Promise<{ slug: string }> };
@@ -40,11 +41,11 @@ export default async function PlayerPage({ params }: PageProps) {
   return <main>
     <PageHeroShell design={design} className="playerProfileHero" contentClassName="container playerProfileGrid" contentImageUrl={player.photo_url}>
       <>
-        <div className="profilePhotoWrap">{player.photo_url ? <img className="profilePhoto" src={player.photo_url} alt={fullName} /> : <div className="profilePhoto profilePhotoPlaceholder">{text.photo}</div>}<span className="profileNumber">{player.shirt_number ?? "—"}</span></div>
-        <div className="profileIntro"><Link className="backLink" href="/team">{text.back}</Link>{design.show_eyebrow && <p className="eyebrow">{pos}</p>}<h1>{player.first_name}<span>{player.last_name}</span></h1>
+        {heroLayerVisible(design.layer_config,"photo") && <div className="profilePhotoWrap" style={heroLayerStyle(design.layer_config,"photo")}>{player.photo_url ? <img className="profilePhoto" src={player.photo_url} alt={fullName} /> : <div className="profilePhoto profilePhotoPlaceholder">{text.photo}</div>}<span className="profileNumber">{player.shirt_number ?? "—"}</span></div>}
+        {heroLayerVisible(design.layer_config,"intro") && <div className="profileIntro" style={heroLayerStyle(design.layer_config,"intro")}><Link className="backLink" href="/team">{text.back}</Link>{design.show_eyebrow && <p className="eyebrow">{pos}</p>}<h1>{player.first_name}<span>{player.last_name}</span></h1>
           {design.show_description && <div className="profileFacts"><Fact label={text.number} value={player.shirt_number?.toString()} /><Fact label={text.nationality} value={player.nationality} /><Fact label={text.height} value={player.height_cm ? `${player.height_cm} cm` : null} /><Fact label={text.foot} value={foot} /></div>}
           <div className="playerFavoriteAction">{userId ? <form action={toggleFavoritePlayer.bind(null, String(player.id), `/team/${slug}`)}><button className={isFavorite ? "favoriteActiveButton" : "favoriteButton"} type="submit">{isFavorite ? account.removePlayer : account.addPlayer}</button></form> : <Link className="favoriteButton" href="/login">{account.loginToFavorite}</Link>}</div>
-        </div>
+        </div>}
       </>
     </PageHeroShell>
     <section className="section profileSection"><div className="container profileContentGrid"><article className="bioCard"><p className="eyebrow blue">{text.aboutEyebrow}</p><h2>{text.profile}</h2><p className="bioText">{localized(player.bio, player.bio_ro, locale) || text.bioEmpty}</p></article>

@@ -6,6 +6,7 @@ import type { Competition, StandingEntry } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { publicText } from "@/lib/i18n";
 import { getPublishedSitePageDesign, resolvePageHeroText } from "@/lib/page-design";
+import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
 
 export const dynamic = "force-dynamic";
 type PageProps = { searchParams: Promise<{ competition?: string | string[] }> };
@@ -29,7 +30,7 @@ export default async function StandingsPage({ searchParams }: PageProps) {
   }
   const hero = resolvePageHeroText(design, locale, { eyebrow: "FC EDINEȚ", title: text.title, description: text.description });
   return <main>
-    <PageHeroShell design={design} className="pageHero"><>{design.show_eyebrow && <p className="eyebrow">{hero.eyebrow}</p>}<h1>{hero.title}</h1>{design.show_description && <p>{hero.description}</p>}</></PageHeroShell>
+    <PageHeroShell design={design} className="pageHero"><>{design.show_eyebrow && heroLayerVisible(design.layer_config,"eyebrow") && <p className="eyebrow" style={heroLayerStyle(design.layer_config,"eyebrow")}>{hero.eyebrow}</p>}{heroLayerVisible(design.layer_config,"title") && <h1 style={heroLayerStyle(design.layer_config,"title")}>{hero.title}</h1>}{design.show_description && heroLayerVisible(design.layer_config,"description") && <p style={heroLayerStyle(design.layer_config,"description")}>{hero.description}</p>}</></PageHeroShell>
     <section className="section standingsPublicSection"><div className="container"><div className="sectionHeading"><div><p className="eyebrow blue">{text.championship}</p><h2>{competition?.name ?? text.tournament}{competition?.season ? ` · ${competition.season}` : ""}</h2></div><Link href="/matches">{text.matches}</Link></div>{competitions.length > 1 && <nav className="standingsTabs">{competitions.map((item) => <Link key={item.id} className={String(item.id) === String(competition?.id) ? "active" : ""} href={`/standings?competition=${item.id}`}>{item.name}{item.season ? ` ${item.season}` : ""}</Link>)}</nav>}{standings.length ? <StandingsTable entries={standings} locale={locale}/> : <div className="adminEmpty">{text.empty}</div>}</div></section>
   </main>;
 }

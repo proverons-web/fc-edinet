@@ -4,6 +4,7 @@ import type { ClubAchievement, ClubLeader, ClubProfile } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { localized, publicText } from "@/lib/i18n";
 import { getPublishedSitePageDesign } from "@/lib/page-design";
+import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,7 @@ export default async function ClubPage() {
 
   return <main>
     <PageHeroShell design={design} className="clubHero" contentClassName="container clubHeroInner" contentImageUrl={profile?.hero_image_url}>
-      <>{design.show_eyebrow && <p className="eyebrow">{city.toUpperCase()} • MOLDOVA</p>}<h1>{clubName}</h1>{design.show_description && <p className="clubHeroMotto">{motto}</p>}<div className="clubHeroFacts"><Fact label={text.founded} value={profile?.founded_year ? String(profile.founded_year) : "—"}/><Fact label={text.city} value={city}/><Fact label={text.colors} value={colors}/></div></>
+<>{heroLayerVisible(design.layer_config,"intro") && <div className="clubHeroIntro" style={heroLayerStyle(design.layer_config,"intro")}>{design.show_eyebrow && <p className="eyebrow">{city.toUpperCase()} • MOLDOVA</p>}<h1>{clubName}</h1>{design.show_description && <p className="clubHeroMotto">{motto}</p>}</div>}{heroLayerVisible(design.layer_config,"facts") && <div className="clubHeroFacts" style={heroLayerStyle(design.layer_config,"facts")}><Fact label={text.founded} value={profile?.founded_year ? String(profile.founded_year) : "—"}/><Fact label={text.city} value={city}/><Fact label={text.colors} value={colors}/></div>}</>
     </PageHeroShell>
     <section className="section clubAboutSection"><div className="container clubStoryGrid"><div><p className="eyebrow blue">{text.about}</p><h2>{clubName}</h2><RichText value={localized(profile?.about_text, profile?.about_text_ro, locale) || text.aboutEmpty}/></div><aside className="clubContactCard"><p className="eyebrow blue">{text.contacts}</p><h3>{text.contactTitle}</h3><Contact label="Email" value={profile?.email}/><Contact label={text.phone} value={profile?.phone}/><Contact label={text.address} value={address}/></aside></div></section>
     <section className="section clubHistorySection"><div className="container"><div className="clubNarrowText"><p className="eyebrow blue">{text.historyEyebrow}</p><h2>{text.history}</h2><RichText value={localized(profile?.history_text, profile?.history_text_ro, locale) || text.historyEmpty}/></div></div></section>

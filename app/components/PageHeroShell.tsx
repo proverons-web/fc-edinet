@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
+import { heroLayerVisible } from "@/lib/hero-builder";
 import type { SitePageDesignSnapshot } from "@/lib/types";
 
 export default function PageHeroShell({
@@ -14,21 +15,28 @@ export default function PageHeroShell({
   contentImageUrl?: string | null;
   children: ReactNode;
 }) {
-  const selectedDesktop = design.background_mode === "custom"
-    ? design.desktop_image_url
-    : design.background_mode === "content"
-      ? contentImageUrl
-      : null;
-  const selectedTablet = design.background_mode === "custom"
-    ? design.tablet_image_url || design.desktop_image_url
-    : design.background_mode === "content"
-      ? contentImageUrl
-      : null;
-  const selectedMobile = design.background_mode === "custom"
-    ? design.mobile_image_url || design.tablet_image_url || design.desktop_image_url
-    : design.background_mode === "content"
-      ? contentImageUrl
-      : null;
+  const backgroundVisible = heroLayerVisible(design.layer_config, "background");
+  const selectedDesktop = backgroundVisible
+    ? design.background_mode === "custom"
+      ? design.desktop_image_url
+      : design.background_mode === "content"
+        ? contentImageUrl
+        : null
+    : null;
+  const selectedTablet = backgroundVisible
+    ? design.background_mode === "custom"
+      ? design.tablet_image_url || design.desktop_image_url
+      : design.background_mode === "content"
+        ? contentImageUrl
+        : null
+    : null;
+  const selectedMobile = backgroundVisible
+    ? design.background_mode === "custom"
+      ? design.mobile_image_url || design.tablet_image_url || design.desktop_image_url
+      : design.background_mode === "content"
+        ? contentImageUrl
+        : null
+    : null;
   const desktopSrc = selectedDesktop || selectedTablet || selectedMobile;
   const tabletSrc = selectedTablet || desktopSrc || selectedMobile;
   const mobileSrc = selectedMobile || tabletSrc || desktopSrc;
@@ -52,7 +60,7 @@ export default function PageHeroShell({
   } as CSSProperties;
 
   return (
-    <section className={`${className} managedPageHero align-${design.text_alignment}`} style={style}>
+    <section className={`${className} managedPageHero heroBuilderShell align-${design.text_alignment}`} style={style}>
       {hasMedia && desktopSrc && tabletSrc && mobileSrc && (
         <div className="managedPageHeroMedia" aria-hidden="true">
           <img className="managedPageHeroDesktop" src={desktopSrc} alt="" />
@@ -61,7 +69,7 @@ export default function PageHeroShell({
         </div>
       )}
       {hasMedia && <div className={`managedPageHeroOverlay ${design.overlay_style}`} aria-hidden="true" />}
-      <div className={`${contentClassName} managedPageHeroInner`}>{children}</div>
+      <div className={`${contentClassName} managedPageHeroInner heroBuilderContent`}>{children}</div>
     </section>
   );
 }

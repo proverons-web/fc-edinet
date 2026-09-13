@@ -4,6 +4,7 @@ import { useActionState, useMemo, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import { saveVisualEditor, type VisualEditorState } from "@/app/admin/design/actions";
 import VisualImageField from "@/app/components/VisualImageField";
+import HeroLayerPanel from "@/app/components/HeroLayerPanel";
 import {
   homepageSectionLabels,
   type HomepageCanvasConfig,
@@ -13,6 +14,7 @@ import {
   type DesignMediaAsset,
   type HomepageSectionKey,
 } from "@/lib/types";
+import { heroLayerState, heroLayerVisible, homeHeroLayerDefinitions } from "@/lib/hero-builder";
 
 const initialState: VisualEditorState = {};
 type ViewMode = "desktop" | "tablet" | "mobile";
@@ -31,6 +33,8 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
   const [state, action, pending] = useActionState(saveVisualEditor, initialState);
   const [mode, setMode] = useState<ViewMode>("desktop");
   const [selected, setSelected] = useState<CanvasObject>("match");
+  const [selectedLayer, setSelectedLayer] = useState("match_card");
+  const [layerConfig, setLayerConfig] = useState(initial.hero_layer_config);
   const [safeZoneVisible, setSafeZoneVisible] = useState(true);
   const stageRef = useRef<HTMLDivElement | null>(null);
 
@@ -54,8 +58,11 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
     : mode === "tablet"
       ? (clearTablet ? "" : tabletImage) || (clearDesktop ? "" : desktopImage)
       : (clearMobile ? "" : mobileImage) || (clearTablet ? "" : tabletImage) || (clearDesktop ? "" : desktopImage);
+  const backgroundVisible = heroLayerVisible(layerConfig, "background");
+  const introVisible = heroLayerVisible(layerConfig, "intro");
+  const matchLayerVisible = heroLayerVisible(layerConfig, "match_card");
   const previewHeight = mode === "desktop" ? Math.min(viewport.hero_height, 650) : mode === "tablet" ? Math.min(viewport.hero_height, 680) : Math.min(viewport.hero_height, 760);
-  const anyMatchVisible = canvas.desktop.match_visible || canvas.tablet.match_visible || canvas.mobile.match_visible;
+  const anyMatchVisible = matchLayerVisible && (canvas.desktop.match_visible || canvas.tablet.match_visible || canvas.mobile.match_visible);
 
   const titleMain = hero?.title_main || "ВМЕСТЕ";
   const titleAccent = hero?.title_accent || "ЗА ЕДИНЕЦ";
@@ -65,10 +72,10 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
   const safeWarning = useMemo(() => {
     const v = viewport;
     const checks: string[] = [];
-    if (v.text_x < v.safe_left || v.text_x > 100 - v.safe_right || v.text_y < v.safe_top || v.text_y > 100 - v.safe_bottom) checks.push("текст");
-    if (v.match_visible && (v.match_x < v.safe_left || v.match_x > 100 - v.safe_right || v.match_y < v.safe_top || v.match_y > 100 - v.safe_bottom)) checks.push("карточка матча");
+    if (introVisible && (v.text_x < v.safe_left || v.text_x > 100 - v.safe_right || v.text_y < v.safe_top || v.text_y > 100 - v.safe_bottom)) checks.push("текст");
+    if (matchLayerVisible && v.match_visible && (v.match_x < v.safe_left || v.match_x > 100 - v.safe_right || v.match_y < v.safe_top || v.match_y > 100 - v.safe_bottom)) checks.push("карточка матча");
     return checks;
-  }, [viewport]);
+  }, [viewport, introVisible, matchLayerVisible]);
 
   function updateViewport(patch: Partial<HomepageCanvasViewport>) {
     setCanvas((current) => ({ ...current, [mode]: { ...current[mode], ...patch } }));
@@ -79,9 +86,12 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
   }
 
   function dragObject(object: CanvasObject, event: ReactPointerEvent<HTMLElement>) {
+    const layerKey = object === "text" ? "intro" : "match_card";
+    if (heroLayerState(layerConfig, layerKey).locked || !heroLayerVisible(layerConfig, layerKey)) return;
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
     setSelected(object);
+    setSelectedLayer(object === "text" ? "intro" : "match_card");
 
     const move = (pointer: PointerEvent) => {
       const stage = stageRef.current;
@@ -147,6 +157,7 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
     <form action={action} className="visualEditorForm">
       <input type="hidden" name="section_order" value={sections.join(",")} />
       <input type="hidden" name="canvas_config" value={JSON.stringify(canvas)} />
+      <input type="hidden" name="hero_layer_config" value={JSON.stringify(layerConfig)} />
       <input type="hidden" name="desktop_position_x" value={canvas.desktop.background_x} />
       <input type="hidden" name="desktop_position_y" value={canvas.desktop.background_y} />
       <input type="hidden" name="desktop_zoom_percent" value={canvas.desktop.background_zoom} />
@@ -163,7 +174,7 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
 
       <section className="visualEditorWorkspace canvas2Workspace">
         <div className="visualEditorToolbar">
-          <div><p className="eyebrow blue">CANVAS 2.0</p><h2>Hero главной</h2><small>{hasDraft ? "Открыт сохранённый черновик." : "Показан опубликованный дизайн."} Выдели объект и перетащи его мышкой.</small></div>
+          <div><p className="eyebrow blue">HERO BUILDER 2.0 • CANVAS 2.0</p><h2>Hero главной</h2><small>{hasDraft ? "Открыт сохранённый черновик." : "Показан опубликованный дизайн."} Выбери слой, разблокируй при необходимости и настрой объект прямо в preview.</small></div>
           <div className="visualViewportTabs" role="tablist" aria-label="Размер предпросмотра">
             {(["desktop", "tablet", "mobile"] as ViewMode[]).map((item) => <button type="button" key={item} className={mode === item ? "active" : ""} onClick={() => setMode(item)}>{item === "desktop" ? "Desktop" : item === "tablet" ? "Tablet" : "Mobile"}</button>)}
           </div>
@@ -171,33 +182,34 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
 
         <div className={`visualPreviewStage canvas2Stage ${mode}`}>
           <div ref={stageRef} className="visualHeroPreview canvas2Preview" style={{ height: previewHeight }}>
-            {currentImage ? <img className="visualHeroImage" src={currentImage} alt="" style={{ objectPosition: `${viewport.background_x}% ${viewport.background_y}%`, transform: `scale(${viewport.background_zoom / 100})`, transformOrigin: `${viewport.background_x}% ${viewport.background_y}%` }} /> : <div className="visualHeroFallback" />}
+            {backgroundVisible && currentImage ? <img className={`visualHeroImage heroBuilderSelectable ${selectedLayer === "background" ? "selected" : ""}`} onClick={() => setSelectedLayer("background")} src={currentImage} alt="" style={{ objectPosition: `${viewport.background_x}% ${viewport.background_y}%`, transform: `scale(${viewport.background_zoom / 100})`, transformOrigin: `${viewport.background_x}% ${viewport.background_y}%` }} /> : <div className={`visualHeroFallback heroBuilderSelectable ${selectedLayer === "background" ? "selected" : ""}`} onClick={() => setSelectedLayer("background")} />}
             <div className="visualHeroOverlay" style={{ opacity: overlay / 100 }} />
             {safeZoneVisible && <div className="canvasSafeZone" style={{ top: `${viewport.safe_top}%`, right: `${viewport.safe_right}%`, bottom: `${viewport.safe_bottom}%`, left: `${viewport.safe_left}%` }}><span>SAFE ZONE</span></div>}
             <div className="canvasCenterGuide horizontal"/><div className="canvasCenterGuide vertical"/>
 
-            <div
-              className={`canvasObject canvasTextObject ${selected === "text" ? "selected" : ""} align-${alignment}`}
-              style={{ left: `${viewport.text_x}%`, top: `${viewport.text_y}%` }}
+            {introVisible && <div
+              className={`canvasObject canvasTextObject heroBuilderSelectable ${selectedLayer === "intro" ? "selected" : ""} ${heroLayerState(layerConfig, "intro").locked ? "locked" : ""} align-${alignment}`}
+              style={{ left: `${viewport.text_x}%`, top: `${viewport.text_y}%`, zIndex: heroLayerState(layerConfig, "intro").order }}
               onPointerDown={(event) => dragObject("text", event)}
-              onClick={() => setSelected("text")}
+              onClick={() => { setSelected("text"); setSelectedLayer("intro"); }}
             >
               <span className="canvasObjectLabel">ТЕКСТ</span>
               <div className="visualHeroPreviewText">
                 <p className="eyebrow">{eyebrow}</p><h1>{titleMain}<span>{titleAccent}</span></h1><p>{description}</p>
                 <div className="visualPreviewButtons"><span>Смотреть матчи</span><span>Последние новости</span></div>
               </div>
-            </div>
+            </div>}
 
-            {viewport.match_visible && <div
-              className={`canvasObject canvasMatchObject ${selected === "match" ? "selected" : ""}`}
-              style={{ left: `${viewport.match_x}%`, top: `${viewport.match_y}%`, width: `${viewport.match_width}px`, maxWidth: "90%" }}
+            {matchLayerVisible && viewport.match_visible && <div
+              className={`canvasObject canvasMatchObject heroBuilderSelectable ${selectedLayer === "match_card" ? "selected" : ""} ${heroLayerState(layerConfig, "match_card").locked ? "locked" : ""}`}
+              style={{ left: `${viewport.match_x}%`, top: `${viewport.match_y}%`, width: `${viewport.match_width}px`, maxWidth: "90%", zIndex: heroLayerState(layerConfig, "match_card").order }}
               onPointerDown={(event) => dragObject("match", event)}
-              onClick={() => setSelected("match")}
+              onClick={() => { setSelected("match"); setSelectedLayer("match_card"); }}
             >
               <span className="canvasObjectLabel">СЛЕДУЮЩИЙ МАТЧ</span>
               <div className="visualMatchMock"><small>СЛЕДУЮЩИЙ МАТЧ</small><b>FC EDINEȚ</b><strong>VS</strong><b>СОПЕРНИК</b><span>Дата • Стадион</span></div>
             </div>}
+            <div className="heroBuilderSelectedBadge">Выбран: {homeHeroLayerDefinitions.find((layer) => layer.key === selectedLayer)?.label ?? selectedLayer}{heroLayerState(layerConfig, selectedLayer).locked ? " • 🔒" : ""}</div>
           </div>
         </div>
 
@@ -209,15 +221,20 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
         </div>
       </section>
 
-      <div className="visualEditorColumns canvas2Columns">
+      <div className="visualEditorColumns canvas2Columns heroBuilderColumns">
+        <HeroLayerPanel definitions={homeHeroLayerDefinitions} config={layerConfig} setConfig={setLayerConfig} selected={selectedLayer} setSelected={(key) => { setSelectedLayer(key); if (key === "intro") setSelected("text"); if (key === "match_card") setSelected("match"); }} />
         <section className="clubAdminSection visualControlCard">
-          <div className="formSectionTitle"><p className="eyebrow blue">ОБЪЕКТ</p><h2>{selected === "match" ? "Карточка следующего матча" : "Текст Hero"}</h2><p>Положение настраивается отдельно для {mode === "desktop" ? "Desktop" : mode === "tablet" ? "Tablet" : "Mobile"}.</p></div>
-          <div className="canvasObjectTabs"><button type="button" className={selected === "text" ? "active" : ""} onClick={() => setSelected("text")}>Текст Hero</button><button type="button" className={selected === "match" ? "active" : ""} onClick={() => setSelected("match")}>Карточка матча</button></div>
+          <div className="formSectionTitle"><p className="eyebrow blue">ОБЪЕКТ</p><h2>{selectedLayer === "background" ? "Фон Hero" : selected === "match" ? "Карточка следующего матча" : "Текст Hero"}</h2><p>{selectedLayer === "background" ? "Фон защищён как отдельный слой и редактируется в Image Editor 2.0 ниже." : `Положение настраивается отдельно для ${mode === "desktop" ? "Desktop" : mode === "tablet" ? "Tablet" : "Mobile"}.`}</p></div>
+          {selectedLayer === "background" ? <div className="adminNotice">Разблокируй слой «Фон» только если хочешь скрыть его или изменить его положение в порядке слоёв. Crop, Focus и Zoom остаются в Image Editor 2.0.</div> : <>
+          <div className={`heroLayerStatus ${heroLayerState(layerConfig, selected === "text" ? "intro" : "match_card").locked ? "locked" : "editable"}`}><strong>{heroLayerState(layerConfig, selected === "text" ? "intro" : "match_card").locked ? "🔒 Объект заблокирован" : "Объект можно перемещать"}</strong><span>{heroLayerState(layerConfig, selected === "text" ? "intro" : "match_card").locked ? "Разблокируй слой выше, чтобы drag & drop и точные настройки снова работали." : "Позиция независима для Desktop / Tablet / Mobile."}</span></div><div className="canvasObjectTabs"><button type="button" className={selected === "text" ? "active" : ""} onClick={() => { setSelected("text"); setSelectedLayer("intro"); }}>Текст Hero</button><button type="button" className={selected === "match" ? "active" : ""} onClick={() => { setSelected("match"); setSelectedLayer("match_card"); }}>Карточка матча</button></div>
+          <fieldset className="heroObjectFieldset" disabled={heroLayerState(layerConfig, selected === "text" ? "intro" : "match_card").locked}>
           <div className="canvasPresetButtons"><button type="button" onClick={() => alignObject(selected, "left")}>Слева</button><button type="button" onClick={() => alignObject(selected, "center")}>По центру</button><button type="button" onClick={() => alignObject(selected, "right")}>Справа</button><button type="button" onClick={() => centerSafe(selected)}>Центр Safe Zone</button></div>
           <div className="canvasCoords"><label>X <input type="number" min="0" max="100" value={selected === "text" ? viewport.text_x : viewport.match_x} onChange={(e) => updateViewport(selected === "text" ? { text_x: clampInt(Number(e.target.value),0,100) } : { match_x: clampInt(Number(e.target.value),0,100) })}/><span>%</span></label><label>Y <input type="number" min="0" max="100" value={selected === "text" ? viewport.text_y : viewport.match_y} onChange={(e) => updateViewport(selected === "text" ? { text_y: clampInt(Number(e.target.value),0,100) } : { match_y: clampInt(Number(e.target.value),0,100) })}/><span>%</span></label></div>
           <div className="canvasNudge"><button type="button" onClick={() => nudge(selected,0,-1)}>↑</button><button type="button" onClick={() => nudge(selected,-1,0)}>←</button><button type="button" onClick={() => nudge(selected,1,0)}>→</button><button type="button" onClick={() => nudge(selected,0,1)}>↓</button></div>
           {selected === "match" && <><Range label="Ширина карточки" min={240} max={520} step={10} value={viewport.match_width} setValue={(value) => updateViewport({ match_width: value })} suffix=" px"/><label className="checkRow"><input type="checkbox" checked={viewport.match_visible} onChange={(e) => updateViewport({ match_visible: e.target.checked })}/><span><strong>Показывать на этом устройстве</strong><small>Можно скрыть только на Mobile, не затрагивая Desktop/Tablet.</small></span></label></>}
           {selected === "text" && <div className="fieldGroup"><label>Выравнивание текста</label><select value={alignment} onChange={(e) => setAlignment(e.target.value as "left"|"center"|"right")}><option value="left">Слева</option><option value="center">По центру</option><option value="right">Справа</option></select></div>}
+          </fieldset>
+          </>}
         </section>
 
         <section className="clubAdminSection visualControlCard">
@@ -253,7 +270,7 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
         <div className="visualSectionList">{sections.map((key,index)=><div className={`visualSectionRow ${draggingSection===key?"dragging":""}`} key={key} draggable onDragStart={()=>setDraggingSection(key)} onDragEnd={()=>setDraggingSection(null)} onDragOver={(e)=>e.preventDefault()} onDrop={()=>dropSection(key)}><span className="visualDragHandle">⋮⋮</span><label><input type="checkbox" name={`section_${key}_enabled`} checked={visible[key]} onChange={(e)=>setVisible((current)=>({...current,[key]:e.target.checked}))}/><span><strong>{homepageSectionLabels[key]}</strong><small>{descriptions[key]}</small></span></label><div className="visualSectionButtons"><button type="button" onClick={()=>moveSection(index,-1)} disabled={index===0}>↑</button><button type="button" onClick={()=>moveSection(index,1)} disabled={index===sections.length-1}>↓</button></div></div>)}</div>
       </section>
 
-      <section className="visualPublishBar"><div><p className="eyebrow blue">ПУБЛИКАЦИЯ</p><h2>Черновик или сразу на сайт</h2><p>Canvas 2.0 целиком сохраняется в версии дизайна: все три viewport, Safe Zone, позиции текста и карточки.</p></div><div className="visualPublishControls"><input name="version_label" placeholder="Название версии, например: Match card safe zone"/><div className="visualPublishButtons"><button className="secondaryAdminButton" type="submit" name="intent" value="draft" disabled={pending}>{pending?"Сохраняем…":"Сохранить черновик"}</button><button className="primaryButton homepageHeroSave" type="submit" name="intent" value="publish" disabled={pending}>{pending?"Публикуем…":"Опубликовать дизайн"}</button></div></div></section>
+      <section className="visualPublishBar"><div><p className="eyebrow blue">ПУБЛИКАЦИЯ</p><h2>Черновик или сразу на сайт</h2><p>Hero Builder 2.0 сохраняет слои вместе с Canvas: видимость, блокировки, порядок, три viewport, Safe Zone и позиции объектов.</p></div><div className="visualPublishControls"><input name="version_label" placeholder="Название версии, например: Match card safe zone"/><div className="visualPublishButtons"><button className="secondaryAdminButton" type="submit" name="intent" value="draft" disabled={pending}>{pending?"Сохраняем…":"Сохранить черновик"}</button><button className="primaryButton homepageHeroSave" type="submit" name="intent" value="publish" disabled={pending}>{pending?"Публикуем…":"Опубликовать дизайн"}</button></div></div></section>
       {state.error && <div className="formError">{state.error}</div>}{state.success && <div className="formSuccess">{state.success}</div>}
     </form>
   );

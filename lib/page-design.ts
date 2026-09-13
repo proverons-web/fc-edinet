@@ -6,6 +6,7 @@ import type {
   SitePageDesignSnapshot,
 } from "@/lib/types";
 import type { Locale } from "@/lib/i18n";
+import { defaultHeroLayerConfig, normalizeHeroLayerConfig, siteHeroLayerDefinitions } from "@/lib/hero-builder";
 
 export type SitePageDesignCatalogItem = {
   key: SitePageDesignKey;
@@ -44,7 +45,7 @@ const defaults: Record<SitePageDesignKey, SitePageDesignSnapshot> = {
 };
 
 export function defaultSitePageDesign(key: SitePageDesignKey): SitePageDesignSnapshot {
-  return { ...defaults[key] };
+  return { ...defaults[key], layer_config: defaultHeroLayerConfig(siteHeroLayerDefinitions(key)) };
 }
 
 export async function getPublishedSitePageDesign(
@@ -90,6 +91,7 @@ export function normalizeSitePageDesign(
     title_ro: nullable(raw.title_ro, fallback.title_ro),
     description_ru: nullable(raw.description_ru, fallback.description_ru),
     description_ro: nullable(raw.description_ro, fallback.description_ro),
+    layer_config: normalizeHeroLayerConfig(raw.layer_config, layerDefinitionsForRaw(raw, fallback), fallback.layer_config),
   };
 }
 
@@ -136,8 +138,15 @@ function base(overrides: Partial<SitePageDesignSnapshot> = {}): SitePageDesignSn
     title_ro: null,
     description_ru: null,
     description_ro: null,
+    layer_config: {},
     ...overrides,
   };
+}
+
+function layerDefinitionsForRaw(raw: Record<string, unknown>, fallback: SitePageDesignSnapshot) {
+  const key = raw.page_key;
+  if (typeof key === "string" && sitePageDesignCatalog.some((item) => item.key === key)) return siteHeroLayerDefinitions(key as SitePageDesignKey);
+  return Object.keys(fallback.layer_config).map((layerKey) => ({ key: layerKey, label: layerKey, description: "" }));
 }
 
 function integer(value: unknown, min: number, max: number, fallback: number) {

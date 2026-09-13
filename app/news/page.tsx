@@ -6,6 +6,7 @@ import type { NewsArticle, NewsCategory, SitePageDesignSnapshot } from "@/lib/ty
 import { getLocale } from "@/lib/locale";
 import { localized, publicText } from "@/lib/i18n";
 import { getPublishedSitePageDesign, resolvePageHeroText } from "@/lib/page-design";
+import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
 
 export const dynamic = "force-dynamic";
 type PageProps = { searchParams: Promise<{ category?: string | string[] }> };
@@ -38,7 +39,7 @@ export default async function NewsPage({ searchParams }: PageProps) {
   const hero = resolvePageHeroText(design, locale, { eyebrow: "FC EDINEȚ", title: text.title, description: text.description });
 
   return <main>
-    <PageHeroShell design={design} className="pageHero newsPageHero"><>{design.show_eyebrow && <p className="eyebrow">{hero.eyebrow}</p>}<h1>{hero.title}</h1>{design.show_description && <p>{hero.description}</p>}</></PageHeroShell>
+    <PageHeroShell design={design} className="pageHero newsPageHero"><>{design.show_eyebrow && heroLayerVisible(design.layer_config,"eyebrow") && <p className="eyebrow" style={heroLayerStyle(design.layer_config,"eyebrow")}>{hero.eyebrow}</p>}{heroLayerVisible(design.layer_config,"title") && <h1 style={heroLayerStyle(design.layer_config,"title")}>{hero.title}</h1>}{design.show_description && heroLayerVisible(design.layer_config,"description") && <p style={heroLayerStyle(design.layer_config,"description")}>{hero.description}</p>}</></PageHeroShell>
     <section className="section newsArchiveSection"><div className="container">
       <CategoryFilters categories={categories} selectedSlug={selectedSlug} locale={locale} />
       {error ? <div className="archiveMessage">{text.loadError}: {error.message}</div>
@@ -55,5 +56,5 @@ function CategoryFilters({ categories, selectedSlug, locale }: { categories: New
 function renderInvalid(categories: NewsCategory[], selectedSlug: string, locale: "ru" | "ro", design: SitePageDesignSnapshot) {
   const text = publicText[locale].news;
   const hero = resolvePageHeroText(design, locale, { eyebrow: "FC EDINEȚ", title: text.title, description: text.description });
-  return <main><PageHeroShell design={design} className="pageHero newsPageHero"><>{design.show_eyebrow && <p className="eyebrow">{hero.eyebrow}</p>}<h1>{hero.title}</h1>{design.show_description && <p>{hero.description}</p>}</></PageHeroShell><section className="section"><div className="container"><CategoryFilters categories={categories} selectedSlug={selectedSlug} locale={locale}/><div className="archiveMessage">{text.invalidCategory}</div></div></section></main>;
+  return <main><PageHeroShell design={design} className="pageHero newsPageHero"><>{design.show_eyebrow && heroLayerVisible(design.layer_config,"eyebrow") && <p className="eyebrow" style={heroLayerStyle(design.layer_config,"eyebrow")}>{hero.eyebrow}</p>}{heroLayerVisible(design.layer_config,"title") && <h1 style={heroLayerStyle(design.layer_config,"title")}>{hero.title}</h1>}{design.show_description && heroLayerVisible(design.layer_config,"description") && <p style={heroLayerStyle(design.layer_config,"description")}>{hero.description}</p>}</></PageHeroShell><section className="section"><div className="container"><CategoryFilters categories={categories} selectedSlug={selectedSlug} locale={locale}/><div className="archiveMessage">{text.invalidCategory}</div></div></section></main>;
 }

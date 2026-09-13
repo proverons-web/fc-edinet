@@ -334,6 +334,15 @@ export type MediaVideo = {
 };
 
 
+
+export type HeroLayerState = {
+  visible: boolean;
+  locked: boolean;
+  order: number;
+};
+
+export type HeroLayerConfig = Record<string, HeroLayerState>;
+
 export type HomepageCanvasViewport = {
   background_x: number;
   background_y: number;
@@ -394,6 +403,7 @@ export type HomepageHero = {
   text_alignment?: "left" | "center" | "right" | null;
   show_match_card?: boolean | null;
   canvas_config?: HomepageCanvasConfig | null;
+  hero_layer_config?: HeroLayerConfig | null;
   show_primary_button: boolean;
   show_secondary_button: boolean;
   updated_at: string;
@@ -457,6 +467,7 @@ export type HomepageDesignDraft = {
   text_alignment: "left" | "center" | "right";
   show_match_card: boolean;
   canvas_config: HomepageCanvasConfig;
+  hero_layer_config: HeroLayerConfig;
   section_order: HomepageSectionKey[];
   section_visibility: Record<HomepageSectionKey, boolean>;
   updated_by: string | null;
@@ -517,6 +528,7 @@ export type SitePageDesignSnapshot = {
   title_ro: string | null;
   description_ru: string | null;
   description_ro: string | null;
+  layer_config: HeroLayerConfig;
 };
 
 export type SitePageDesign = SitePageDesignSnapshot & {

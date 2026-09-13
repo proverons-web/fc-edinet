@@ -9,6 +9,7 @@ import type { CommentBlock, NewsArticle, NewsComment } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { localized, publicText } from "@/lib/i18n";
 import { getPublishedSitePageDesign } from "@/lib/page-design";
+import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
 
 export const dynamic = "force-dynamic";
 type PageProps = {
@@ -95,10 +96,9 @@ export default async function NewsArticlePage({ params, searchParams }: PageProp
   return <main><article>
     <PageHeroShell design={design} className="articleHeader" contentClassName="container articleHeaderInner" contentImageUrl={article.cover_image_url}>
       <>
-        <Link className="articleBack" href="/news">{text.back}</Link>
-        {design.show_eyebrow && <div className="articleMeta"><span>{category}</span><time>{formatNewsDate(article.published_at, locale)}</time></div>}
-        <h1>{title}</h1>{design.show_description && excerpt && <p className="articleLead">{excerpt}</p>}
-        <div className="articleAuthor">{text.author}: <strong>{article.author_name || "FC Edineț"}</strong></div>
+        {heroLayerVisible(design.layer_config,"navigation") && <div className="articleHeroNavigation" style={heroLayerStyle(design.layer_config,"navigation")}><Link className="articleBack" href="/news">{text.back}</Link>{design.show_eyebrow && <div className="articleMeta"><span>{category}</span><time>{formatNewsDate(article.published_at, locale)}</time></div>}</div>}
+        {heroLayerVisible(design.layer_config,"title") && <h1 style={heroLayerStyle(design.layer_config,"title")}>{title}</h1>}{heroLayerVisible(design.layer_config,"description") && design.show_description && excerpt && <p className="articleLead" style={heroLayerStyle(design.layer_config,"description")}>{excerpt}</p>}
+        {heroLayerVisible(design.layer_config,"author") && <div className="articleAuthor" style={heroLayerStyle(design.layer_config,"author")}>{text.author}: <strong>{article.author_name || "FC Edineț"}</strong></div>}
       </>
     </PageHeroShell>
     <div className="container articleLayout"><div className="articleMain">
