@@ -20,16 +20,23 @@ export type HomepageSafeIssue = {
   impossible: boolean;
 };
 
+/**
+ * Conservative widths for each breakpoint. Desktop/tablet use the smallest
+ * width of their media-query range so a position that is safe here stays safe
+ * as the browser gets wider. Mobile width is representative; the text width is
+ * percentage-based, so its footprint remains effectively the same on smaller
+ * devices.
+ */
 const VIEWPORT_WIDTH: Record<HomepageCanvasMode, number> = {
-  desktop: 1440,
-  tablet: 900,
+  desktop: 981,
+  tablet: 681,
   mobile: 390,
 };
 
 /**
  * Keep these values in sync with the public Canvas Hero CSS in app/globals.css.
- * Width is deterministic. Height is intentionally a conservative estimate because
- * the real text/card height depends on locale and live match data.
+ * Width is deterministic. Height is a conservative estimate because real text
+ * and live match data can wrap differently between RU/RO and devices.
  */
 export function homepageObjectFootprint(viewport: HomepageCanvasViewport, mode: HomepageCanvasMode, object: HomepageCanvasObject) {
   const width = VIEWPORT_WIDTH[mode];
@@ -39,35 +46,47 @@ export function homepageObjectFootprint(viewport: HomepageCanvasViewport, mode: 
       : mode === "tablet"
         ? Math.min(650, width * 0.78)
         : Math.min(520, width * 0.88);
-    const estimatedHeight = mode === "desktop" ? 290 : mode === "tablet" ? 250 : 240;
+    const estimatedHeight = mode === "desktop" ? 300 : mode === "tablet" ? 270 : 250;
     return {
       halfWidthPercent: (objectWidth / width) * 50,
-      halfHeightPercent: Math.min(28, (estimatedHeight / Math.max(320, viewport.hero_height)) * 50),
+      halfHeightPercent: Math.min(34, (estimatedHeight / Math.max(320, viewport.hero_height)) * 50),
     };
   }
 
   const responsiveCap = mode === "desktop" ? width * 0.42 : mode === "tablet" ? width * 0.72 : width * 0.88;
   const objectWidth = Math.min(viewport.match_width, responsiveCap);
-  const estimatedHeight = mode === "desktop" ? 280 : mode === "tablet" ? 245 : 205;
+  const estimatedHeight = mode === "desktop" ? 280 : mode === "tablet" ? 245 : 210;
   return {
     halfWidthPercent: (objectWidth / width) * 50,
-    halfHeightPercent: Math.min(26, (estimatedHeight / Math.max(320, viewport.hero_height)) * 50),
+    halfHeightPercent: Math.min(30, (estimatedHeight / Math.max(320, viewport.hero_height)) * 50),
   };
 }
 
 export function homepageObjectSafeRange(viewport: HomepageCanvasViewport, mode: HomepageCanvasMode, object: HomepageCanvasObject): HomepageSafeRange {
+  return objectRange(viewport, mode, object, true);
+}
+
+export function homepageObjectVisibleRange(viewport: HomepageCanvasViewport, mode: HomepageCanvasMode, object: HomepageCanvasObject): HomepageSafeRange {
+  return objectRange(viewport, mode, object, false);
+}
+
+function objectRange(viewport: HomepageCanvasViewport, mode: HomepageCanvasMode, object: HomepageCanvasObject, useSafeZone: boolean): HomepageSafeRange {
   const footprint = homepageObjectFootprint(viewport, mode, object);
-  const minX = viewport.safe_left + footprint.halfWidthPercent;
-  const maxX = 100 - viewport.safe_right - footprint.halfWidthPercent;
-  const minY = viewport.safe_top + footprint.halfHeightPercent;
-  const maxY = 100 - viewport.safe_bottom - footprint.halfHeightPercent;
+  const safeLeft = useSafeZone ? viewport.safe_left : 0;
+  const safeRight = useSafeZone ? viewport.safe_right : 0;
+  const safeTop = useSafeZone ? viewport.safe_top : 0;
+  const safeBottom = useSafeZone ? viewport.safe_bottom : 0;
+  const minX = safeLeft + footprint.halfWidthPercent;
+  const maxX = 100 - safeRight - footprint.halfWidthPercent;
+  const minY = safeTop + footprint.halfHeightPercent;
+  const maxY = 100 - safeBottom - footprint.halfHeightPercent;
   return {
     minX,
     maxX,
     minY,
     maxY,
-    fitsHorizontally: minX <= maxX,
-    fitsVertically: minY <= maxY,
+    fitsHorizontally: Math.ceil(minX) <= Math.floor(maxX),
+    fitsVertically: Math.ceil(minY) <= Math.floor(maxY),
   };
 }
 
@@ -78,15 +97,15 @@ export function homepageViewportSafeIssues(viewport: HomepageCanvasViewport, mod
 
   if (textVisible) {
     const range = homepageObjectSafeRange(viewport, mode, "text");
-    const horizontal = !range.fitsHorizontally || viewport.text_x < range.minX || viewport.text_x > range.maxX;
-    const vertical = !range.fitsVertically || viewport.text_y < range.minY || viewport.text_y > range.maxY;
+    const horizontal = !range.fitsHorizontally || viewport.text_x < Math.ceil(range.minX) || viewport.text_x > Math.floor(range.maxX);
+    const vertical = !range.fitsVertically || viewport.text_y < Math.ceil(range.minY) || viewport.text_y > Math.floor(range.maxY);
     if (horizontal || vertical) issues.push({ object: "text", label: "текст", horizontal, vertical, impossible: !range.fitsHorizontally || !range.fitsVertically });
   }
 
   if (matchVisible) {
     const range = homepageObjectSafeRange(viewport, mode, "match");
-    const horizontal = !range.fitsHorizontally || viewport.match_x < range.minX || viewport.match_x > range.maxX;
-    const vertical = !range.fitsVertically || viewport.match_y < range.minY || viewport.match_y > range.maxY;
+    const horizontal = !range.fitsHorizontally || viewport.match_x < Math.ceil(range.minX) || viewport.match_x > Math.floor(range.maxX);
+    const vertical = !range.fitsVertically || viewport.match_y < Math.ceil(range.minY) || viewport.match_y > Math.floor(range.maxY);
     if (horizontal || vertical) issues.push({ object: "match", label: "карточка матча", horizontal, vertical, impossible: !range.fitsHorizontally || !range.fitsVertically });
   }
 
@@ -99,63 +118,80 @@ export function fitHomepageViewportToSafeZone(
   layers?: HeroLayerConfig,
   fallback?: HomepageCanvasViewport,
 ): HomepageCanvasViewport {
+  return fitHomepageViewport(viewport, mode, layers, fallback, true);
+}
+
+export function fitHomepageViewportToVisibleBounds(
+  viewport: HomepageCanvasViewport,
+  mode: HomepageCanvasMode,
+  layers?: HeroLayerConfig,
+  fallback?: HomepageCanvasViewport,
+): HomepageCanvasViewport {
+  return fitHomepageViewport(viewport, mode, layers, fallback, false);
+}
+
+function fitHomepageViewport(
+  viewport: HomepageCanvasViewport,
+  mode: HomepageCanvasMode,
+  layers: HeroLayerConfig | undefined,
+  fallback: HomepageCanvasViewport | undefined,
+  useSafeZone: boolean,
+): HomepageCanvasViewport {
   let next = { ...viewport };
   const textVisible = !layers?.intro || layers.intro.visible;
   const matchVisible = (!layers?.match_card || layers.match_card.visible) && next.match_visible;
 
   if (textVisible) {
-    const range = homepageObjectSafeRange(next, mode, "text");
-    if (range.fitsHorizontally) next.text_x = repairCoordinate(next.text_x, range.minX, range.maxX, fallback?.text_x);
-    else next.text_x = safeCenter(next.safe_left, next.safe_right);
-    if (range.fitsVertically) next.text_y = repairCoordinate(next.text_y, range.minY, range.maxY, fallback?.text_y);
-    else next.text_y = safeCenter(next.safe_top, next.safe_bottom);
+    const range = objectRange(next, mode, "text", useSafeZone);
+    next.text_x = repairCoordinate(next.text_x, range.minX, range.maxX, fallback?.text_x);
+    next.text_y = repairCoordinate(next.text_y, range.minY, range.maxY, fallback?.text_y);
   }
 
   if (matchVisible) {
-    const range = homepageObjectSafeRange(next, mode, "match");
-    if (range.fitsHorizontally) next.match_x = repairCoordinate(next.match_x, range.minX, range.maxX, fallback?.match_x);
-    else next.match_x = safeCenter(next.safe_left, next.safe_right);
-    if (range.fitsVertically) next.match_y = repairCoordinate(next.match_y, range.minY, range.maxY, fallback?.match_y);
-    else next.match_y = safeCenter(next.safe_top, next.safe_bottom);
+    const range = objectRange(next, mode, "match", useSafeZone);
+    next.match_x = repairCoordinate(next.match_x, range.minX, range.maxX, fallback?.match_x);
+    next.match_y = repairCoordinate(next.match_y, range.minY, range.maxY, fallback?.match_y);
   }
 
-  return {
-    ...next,
-    text_x: Math.round(next.text_x),
-    text_y: Math.round(next.text_y),
-    match_x: Math.round(next.match_x),
-    match_y: Math.round(next.match_y),
-  };
+  return next;
 }
 
+/**
+ * Safe Zone lock controls whether objects are clamped to the safe rectangle.
+ * Even with the lock disabled, objects are clamped to the visible Hero bounds
+ * so text/card can never disappear completely outside the canvas.
+ */
 export function repairHomepageCanvas(
   canvas: HomepageCanvasConfig,
   fallback: HomepageCanvasConfig = canvas,
   layers?: HeroLayerConfig,
 ): HomepageCanvasConfig {
-  if (!canvas.lock_safe_zone) return canvas;
+  const fitter = canvas.lock_safe_zone ? fitHomepageViewportToSafeZone : fitHomepageViewportToVisibleBounds;
   return {
     ...canvas,
-    desktop: fitHomepageViewportToSafeZone(canvas.desktop, "desktop", layers, fallback.desktop),
-    tablet: fitHomepageViewportToSafeZone(canvas.tablet, "tablet", layers, fallback.tablet),
-    mobile: fitHomepageViewportToSafeZone(canvas.mobile, "mobile", layers, fallback.mobile),
+    desktop: fitter(canvas.desktop, "desktop", layers, fallback.desktop),
+    tablet: fitter(canvas.tablet, "tablet", layers, fallback.tablet),
+    mobile: fitter(canvas.mobile, "mobile", layers, fallback.mobile),
   };
 }
 
 export function homepageCanvasSafeIssueSummary(canvas: HomepageCanvasConfig, layers?: HeroLayerConfig) {
-  return (Object.keys(VIEWPORT_WIDTH) as HomepageCanvasMode[]).flatMap((mode) =>
+  return (["desktop", "tablet", "mobile"] as HomepageCanvasMode[]).flatMap((mode) =>
     homepageViewportSafeIssues(canvas[mode], mode, layers).map((issue) => ({ mode, ...issue }))
   );
 }
 
 function repairCoordinate(value: number, min: number, max: number, fallback?: number) {
-  if (value >= min && value <= max) return value;
-  if (typeof fallback === "number" && Number.isFinite(fallback) && fallback >= min && fallback <= max) return fallback;
-  return clamp(value, min, max);
-}
-
-function safeCenter(start: number, end: number) {
-  return Math.round((start + (100 - end)) / 2);
+  const intMin = Math.ceil(min);
+  const intMax = Math.floor(max);
+  if (intMin > intMax) return Math.round((min + max) / 2);
+  const rounded = Math.round(value);
+  if (rounded >= intMin && rounded <= intMax) return rounded;
+  if (typeof fallback === "number" && Number.isFinite(fallback)) {
+    const roundedFallback = Math.round(fallback);
+    if (roundedFallback >= intMin && roundedFallback <= intMax) return roundedFallback;
+  }
+  return clamp(rounded, intMin, intMax);
 }
 
 function clamp(value: number, min: number, max: number) {

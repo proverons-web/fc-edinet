@@ -24,7 +24,6 @@ import {
 import { heroLayerState, heroLayerVisible, homeHeroLayerDefinitions } from "@/lib/hero-builder";
 import { homepageSectionCapabilities } from "@/lib/section-builder";
 import {
-  fitHomepageViewportToSafeZone,
   homepageObjectSafeRange,
   homepageViewportSafeIssues,
   repairHomepageCanvas,
@@ -133,18 +132,15 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
 
   function updateViewport(patch: Partial<HomepageCanvasViewport>) {
     setCanvas((current) => {
-      const nextViewport = { ...current[mode], ...patch };
-      return {
-        ...current,
-        [mode]: current.lock_safe_zone ? fitHomepageViewportToSafeZone(nextViewport, mode, layerConfig, current[mode]) : nextViewport,
-      };
+      const next = { ...current, [mode]: { ...current[mode], ...patch } };
+      return repairHomepageCanvas(next, current, layerConfig);
     });
   }
 
   function updateConfig(patch: Partial<Pick<HomepageCanvasConfig, "snap_enabled" | "lock_safe_zone">>) {
     setCanvas((current) => {
       const next = { ...current, ...patch };
-      return next.lock_safe_zone ? repairHomepageCanvas(next, current, layerConfig) : next;
+      return repairHomepageCanvas(next, current, layerConfig);
     });
   }
 
@@ -154,7 +150,7 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
 
   function updateLayerConfig(next: typeof layerConfig) {
     setLayerConfig(next);
-    setCanvas((current) => current.lock_safe_zone ? repairHomepageCanvas(current, current, next) : current);
+    setCanvas((current) => repairHomepageCanvas(current, current, next));
   }
 
   function dragObject(object: CanvasObject, event: ReactPointerEvent<HTMLElement>) {

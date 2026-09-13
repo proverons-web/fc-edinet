@@ -1617,3 +1617,9 @@ h1,h2,h3{font-family:var(--ds-font-heading);font-weight:var(--ds-heading-weight)
 .canvasAutoFix:hover{background:var(--blue);color:#fff}.canvasWarning+.canvasAutoFix{margin-left:0}
 .canvasDeviceSummary button em{font-style:normal;font-size:9px;font-weight:900;color:#24714a}.canvasDeviceSummary button.hasSafeIssue em{color:#ae5a18}.canvasDeviceSummary button.hasSafeIssue{border-color:#e2b075;background:#fff9f1}.canvasDeviceSummary button.safeOk{box-shadow:inset 0 0 0 1px rgba(36,113,74,.04)}
 @media(max-width:720px){.canvasAutoFix{width:100%;margin-left:0}.canvasStatusBar{align-items:stretch}}
+/* v2.1.11 — Full Screen Preview uses the same object widths as the public Hero */
+.publishingPreviewViewport.desktop .draftHomeIntro{width:min(610px,54%)}
+.publishingPreviewViewport.desktop .draftMatchCard{width:min(var(--preview-match-desktop-width,360px),42%)}
+.publishingPreviewViewport.tablet .draftHomeIntro{width:min(650px,78%)}
+.publishingPreviewViewport.tablet .draftMatchCard{width:min(var(--preview-match-tablet-width,350px),72%)}
+.publishingPreviewViewport.mobile .draftHomeIntro{width:min(520px,88%)}

@@ -27,10 +27,28 @@ export default function Publishing2Bar({
   const errors = checks.filter((item) => item.level === "error").length;
   const warnings = checks.filter((item) => item.level === "warning").length;
   async function openPreview() {
-    const target = window.open("about:blank", "_blank");
-    try { if (preparePreview) await preparePreview(); } catch { /* Preview still opens with the last saved draft. */ }
-    if (target) target.location.href = previewHref;
-    else window.open(previewHref, "_blank", "noopener,noreferrer");
+    // Open the actual preview immediately. The old about:blank flow could leave
+    // the user staring at an empty tab while a server autosave was slow.
+    const target = window.open(previewHref, "_blank");
+    if (!target) {
+      // If the browser blocks the new tab, never leave the user with no feedback:
+      // fall back to the same tab and show the preview immediately.
+      window.location.assign(previewHref);
+      return;
+    }
+    target.opener = null;
+
+    if (!preparePreview) return;
+    try {
+      await preparePreview();
+      if (target && !target.closed) {
+        const separator = previewHref.includes("?") ? "&" : "?";
+        target.location.replace(`${previewHref}${separator}refresh=${Date.now()}`);
+      }
+    } catch {
+      // The preview is already open with the latest saved draft. Keep it visible
+      // instead of replacing it with a blank/error tab.
+    }
   }
   return <section className="publishing2Bar">
     <div className="publishing2Tools">

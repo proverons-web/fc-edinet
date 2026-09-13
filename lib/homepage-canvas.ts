@@ -23,7 +23,7 @@ export function defaultHomepageCanvas(input: LegacyInput = {}): HomepageCanvasCo
   const desktopHeight = clampInt(input.hero_height_desktop, 420, 900, 650);
   const mobileHeight = clampInt(input.hero_height_mobile, 360, 850, 620);
   const alignment = input.text_alignment ?? "left";
-  const textX = alignment === "center" ? 50 : alignment === "right" ? 68 : 28;
+  const textX = alignment === "center" ? 50 : alignment === "right" ? 66 : 34;
   const show = input.show_match_card ?? true;
 
   return {
@@ -36,7 +36,7 @@ export function defaultHomepageCanvas(input: LegacyInput = {}): HomepageCanvasCo
       hero_height: desktopHeight,
       text_x: textX,
       text_y: 50,
-      match_x: 79,
+      match_x: 74,
       match_y: 50,
       match_width: 360,
       match_visible: show,
@@ -53,7 +53,7 @@ export function defaultHomepageCanvas(input: LegacyInput = {}): HomepageCanvasCo
       text_x: 50,
       text_y: show ? 30 : 50,
       match_x: 50,
-      match_y: 73,
+      match_y: 72,
       match_width: 350,
       match_visible: show,
       safe_top: 7,
