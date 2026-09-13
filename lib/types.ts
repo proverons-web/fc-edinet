@@ -384,6 +384,7 @@ export type HomepageHero = {
   desktop_position_x?: number | null;
   desktop_position_y?: number | null;
   desktop_zoom_percent?: number | null;
+  tablet_background_image_url?: string | null;
   mobile_background_image_url?: string | null;
   mobile_position_x?: number | null;
   mobile_position_y?: number | null;
@@ -442,6 +443,7 @@ export type HomepageSettings = {
 export type HomepageDesignDraft = {
   id: number;
   background_image_url: string | null;
+  tablet_background_image_url: string | null;
   mobile_background_image_url: string | null;
   desktop_position_x: number;
   desktop_position_y: number;
@@ -489,14 +491,19 @@ export type PageHeroOverlayStyle = "solid" | "gradient-left" | "gradient-right";
 export type SitePageDesignSnapshot = {
   background_mode: PageHeroBackgroundMode;
   desktop_image_url: string | null;
+  tablet_image_url: string | null;
   mobile_image_url: string | null;
   desktop_position_x: number;
   desktop_position_y: number;
   desktop_zoom_percent: number;
+  tablet_position_x: number;
+  tablet_position_y: number;
+  tablet_zoom_percent: number;
   mobile_position_x: number;
   mobile_position_y: number;
   mobile_zoom_percent: number;
   hero_height_desktop: number;
+  hero_height_tablet: number;
   hero_height_mobile: number;
   overlay_opacity: number;
   overlay_style: PageHeroOverlayStyle;
@@ -538,6 +545,25 @@ export const homepageSectionLabels: Record<HomepageSectionKey, string> = {
   partners: "Партнёры",
 };
 
+
+
+export type DesignMediaAsset = {
+  id: string;
+  storage_path: string;
+  public_url: string;
+  file_name: string;
+  mime_type: string;
+  file_size: number;
+  width: number | null;
+  height: number | null;
+  variant: "desktop" | "tablet" | "mobile" | "source" | null;
+  alt_ru: string | null;
+  alt_ro: string | null;
+  uploaded_by: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
 
 export type PartnerLevel = "main" | "official" | "technical" | "supporter";
 

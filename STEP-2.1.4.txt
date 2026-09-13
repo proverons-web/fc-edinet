@@ -1,0 +1,12 @@
+FC EDINET v2.1.4 — Image Editor 2.0
+
+Главное:
+- отдельные Desktop / Tablet / Mobile изображения для Hero;
+- физическое кадрирование через react-easy-crop;
+- автоматическая подготовка WebP 1920x800, 1400x900, 900x1200;
+- независимые Focus X/Y, Zoom и высота Hero для каждого viewport;
+- Media Library для повторного использования загруженных изображений;
+- Image Editor работает на главной и на всех Site-wide Hero/шаблонах;
+- существующий дизайн не меняется, пока админ не нажмёт Publish.
+
+Миграция: database/026_image_editor_2.sql

@@ -192,7 +192,7 @@ export default async function Home() {
   const heroCanvas = normalizeHomepageCanvas(hero?.canvas_config, canvasFallback);
   const heroTextAlignment = hero?.text_alignment ?? "left";
   const showHeroMatchCard = heroCanvas.desktop.match_visible || heroCanvas.tablet.match_visible || heroCanvas.mobile.match_visible;
-  const heroBaseImage = hero?.background_image_url || hero?.mobile_background_image_url || null;
+  const heroBaseImage = hero?.background_image_url || hero?.tablet_background_image_url || hero?.mobile_background_image_url || null;
   const heroStyle = {
     "--hero-desktop-x": `${heroCanvas.desktop.background_x}%`,
     "--hero-desktop-y": `${heroCanvas.desktop.background_y}%`,
@@ -526,6 +526,9 @@ export default async function Home() {
             <picture>
               {hero?.mobile_background_image_url && (
                 <source media="(max-width: 680px)" srcSet={hero.mobile_background_image_url} />
+              )}
+              {hero?.tablet_background_image_url && (
+                <source media="(max-width: 980px)" srcSet={hero.tablet_background_image_url} />
               )}
               <img src={heroBaseImage} alt="" />
             </picture>

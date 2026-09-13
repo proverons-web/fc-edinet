@@ -61,27 +61,42 @@ export async function saveVisualEditor(
     : currentPublished;
 
   let desktopImageUrl = currentDraft.background_image_url;
+  let tabletImageUrl = currentDraft.tablet_background_image_url;
   let mobileImageUrl = currentDraft.mobile_background_image_url;
+
+  desktopImageUrl = await resolveAssetSelection(formData, "background_image_asset_id", desktopImageUrl, supabase);
+  tabletImageUrl = await resolveAssetSelection(formData, "tablet_background_image_asset_id", tabletImageUrl, supabase);
+  mobileImageUrl = await resolveAssetSelection(formData, "mobile_background_image_asset_id", mobileImageUrl, supabase);
 
   const desktopFile = formData.get("background_image");
   if (desktopFile instanceof File && desktopFile.size > 0) {
     const validation = validateImage(desktopFile);
     if (validation) return { error: validation };
-    const uploaded = await uploadVisualImage(desktopFile, "desktop", userId, supabase);
+    const uploaded = await uploadVisualImage(desktopFile, "desktop", userId, supabase, intInRange(formData.get("background_image_width"), 1, 5000, 1920), intInRange(formData.get("background_image_height"), 1, 5000, 800));
     if ("error" in uploaded) return { error: uploaded.error };
     desktopImageUrl = uploaded.url;
+  }
+
+  const tabletFile = formData.get("tablet_background_image");
+  if (tabletFile instanceof File && tabletFile.size > 0) {
+    const validation = validateImage(tabletFile);
+    if (validation) return { error: validation };
+    const uploaded = await uploadVisualImage(tabletFile, "tablet", userId, supabase, intInRange(formData.get("tablet_background_image_width"), 1, 5000, 1400), intInRange(formData.get("tablet_background_image_height"), 1, 5000, 900));
+    if ("error" in uploaded) return { error: uploaded.error };
+    tabletImageUrl = uploaded.url;
   }
 
   const mobileFile = formData.get("mobile_background_image");
   if (mobileFile instanceof File && mobileFile.size > 0) {
     const validation = validateImage(mobileFile);
     if (validation) return { error: validation };
-    const uploaded = await uploadVisualImage(mobileFile, "mobile", userId, supabase);
+    const uploaded = await uploadVisualImage(mobileFile, "mobile", userId, supabase, intInRange(formData.get("mobile_background_image_width"), 1, 5000, 900), intInRange(formData.get("mobile_background_image_height"), 1, 5000, 1200));
     if ("error" in uploaded) return { error: uploaded.error };
     mobileImageUrl = uploaded.url;
   }
 
   if (formData.get("clear_background_image") === "on") desktopImageUrl = null;
+  if (formData.get("clear_tablet_background_image") === "on") tabletImageUrl = null;
   if (formData.get("clear_mobile_background_image") === "on") mobileImageUrl = null;
 
   const sectionOrder = parseSectionOrder(text(formData.get("section_order")));
@@ -91,6 +106,7 @@ export async function saveVisualEditor(
 
   const snapshot: HomepageDesignSnapshot = {
     background_image_url: desktopImageUrl,
+    tablet_background_image_url: tabletImageUrl,
     mobile_background_image_url: mobileImageUrl,
     desktop_position_x: intInRange(formData.get("desktop_position_x"), 0, 100, currentDraft.desktop_position_x),
     desktop_position_y: intInRange(formData.get("desktop_position_y"), 0, 100, currentDraft.desktop_position_y),
@@ -151,6 +167,7 @@ export async function saveVisualEditor(
     .from("homepage_hero")
     .update({
       background_image_url: snapshot.background_image_url,
+      tablet_background_image_url: snapshot.tablet_background_image_url,
       mobile_background_image_url: snapshot.mobile_background_image_url,
       desktop_position_x: snapshot.desktop_position_x,
       desktop_position_y: snapshot.desktop_position_y,
@@ -262,6 +279,7 @@ function publishedSnapshot(hero: HomepageHero | null, sections: HomepageSection[
 
   return {
     background_image_url: hero?.background_image_url ?? null,
+    tablet_background_image_url: hero?.tablet_background_image_url ?? null,
     mobile_background_image_url: hero?.mobile_background_image_url ?? null,
     desktop_position_x: hero?.desktop_position_x ?? legacy.x,
     desktop_position_y: hero?.desktop_position_y ?? legacy.y,
@@ -295,6 +313,7 @@ function normalizeSnapshot(raw: Record<string, unknown>, fallback: HomepageDesig
   const rawVisibility = isRecord(raw.section_visibility) ? raw.section_visibility : {};
   return {
     background_image_url: nullableText(raw.background_image_url, fallback.background_image_url),
+    tablet_background_image_url: nullableText(raw.tablet_background_image_url, fallback.tablet_background_image_url),
     mobile_background_image_url: nullableText(raw.mobile_background_image_url, fallback.mobile_background_image_url),
     desktop_position_x: numberValue(raw.desktop_position_x, 0, 100, fallback.desktop_position_x),
     desktop_position_y: numberValue(raw.desktop_position_y, 0, 100, fallback.desktop_position_y),
@@ -348,9 +367,11 @@ function legacyPosition(position?: HomepageHero["background_position"] | null) {
 
 async function uploadVisualImage(
   file: File,
-  variant: "desktop" | "mobile",
+  variant: "desktop" | "tablet" | "mobile",
   userId: string,
-  supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"]
+  supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"],
+  width: number,
+  height: number
 ) {
   const ext = imageExtension(file.type);
   const path = `${userId}/visual-editor/${Date.now()}-${variant}.${ext}`;
@@ -360,7 +381,9 @@ async function uploadVisualImage(
     contentType: file.type,
   });
   if (error) return { error: `Не удалось загрузить изображение: ${error.message}` } as const;
-  return { url: supabase.storage.from("homepage").getPublicUrl(path).data.publicUrl } as const;
+  const url = supabase.storage.from("homepage").getPublicUrl(path).data.publicUrl;
+  await registerDesignMediaAsset({ supabase, path, url, file, userId, variant, width, height });
+  return { url } as const;
 }
 
 function validateImage(file: File) {
@@ -423,25 +446,40 @@ export async function saveSitePageVisualEditor(
   const current = draftData ? normalizeSitePageDesign(draftData as Record<string, unknown>, published) : published;
 
   let desktopImageUrl = current.desktop_image_url;
+  let tabletImageUrl = current.tablet_image_url;
   let mobileImageUrl = current.mobile_image_url;
+
+  desktopImageUrl = await resolveAssetSelection(formData, "desktop_image_asset_id", desktopImageUrl, supabase);
+  tabletImageUrl = await resolveAssetSelection(formData, "tablet_image_asset_id", tabletImageUrl, supabase);
+  mobileImageUrl = await resolveAssetSelection(formData, "mobile_image_asset_id", mobileImageUrl, supabase);
 
   const desktopFile = formData.get("desktop_image");
   if (desktopFile instanceof File && desktopFile.size > 0) {
     const validation = validateImage(desktopFile);
     if (validation) return { error: validation };
-    const uploaded = await uploadSitePageImage(desktopFile, pageKey, "desktop", userId, supabase);
+    const uploaded = await uploadSitePageImage(desktopFile, pageKey, "desktop", userId, supabase, intInRange(formData.get("desktop_image_width"), 1, 5000, 1920), intInRange(formData.get("desktop_image_height"), 1, 5000, 800));
     if ("error" in uploaded) return { error: uploaded.error };
     desktopImageUrl = uploaded.url;
   }
+  const tabletFile = formData.get("tablet_image");
+  if (tabletFile instanceof File && tabletFile.size > 0) {
+    const validation = validateImage(tabletFile);
+    if (validation) return { error: validation };
+    const uploaded = await uploadSitePageImage(tabletFile, pageKey, "tablet", userId, supabase, intInRange(formData.get("tablet_image_width"), 1, 5000, 1400), intInRange(formData.get("tablet_image_height"), 1, 5000, 900));
+    if ("error" in uploaded) return { error: uploaded.error };
+    tabletImageUrl = uploaded.url;
+  }
+
   const mobileFile = formData.get("mobile_image");
   if (mobileFile instanceof File && mobileFile.size > 0) {
     const validation = validateImage(mobileFile);
     if (validation) return { error: validation };
-    const uploaded = await uploadSitePageImage(mobileFile, pageKey, "mobile", userId, supabase);
+    const uploaded = await uploadSitePageImage(mobileFile, pageKey, "mobile", userId, supabase, intInRange(formData.get("mobile_image_width"), 1, 5000, 900), intInRange(formData.get("mobile_image_height"), 1, 5000, 1200));
     if ("error" in uploaded) return { error: uploaded.error };
     mobileImageUrl = uploaded.url;
   }
   if (formData.get("clear_desktop_image") === "on") desktopImageUrl = null;
+  if (formData.get("clear_tablet_image") === "on") tabletImageUrl = null;
   if (formData.get("clear_mobile_image") === "on") mobileImageUrl = null;
 
   const requestedMode = text(formData.get("background_mode"));
@@ -452,14 +490,19 @@ export async function saveSitePageVisualEditor(
   const snapshot: SitePageDesignSnapshot = {
     background_mode: backgroundMode,
     desktop_image_url: desktopImageUrl,
+    tablet_image_url: tabletImageUrl,
     mobile_image_url: mobileImageUrl,
     desktop_position_x: intInRange(formData.get("desktop_position_x"), 0, 100, current.desktop_position_x),
     desktop_position_y: intInRange(formData.get("desktop_position_y"), 0, 100, current.desktop_position_y),
-    desktop_zoom_percent: intInRange(formData.get("desktop_zoom_percent"), 100, 240, current.desktop_zoom_percent),
+    desktop_zoom_percent: intInRange(formData.get("desktop_zoom_percent"), 100, 300, current.desktop_zoom_percent),
+    tablet_position_x: intInRange(formData.get("tablet_position_x"), 0, 100, current.tablet_position_x),
+    tablet_position_y: intInRange(formData.get("tablet_position_y"), 0, 100, current.tablet_position_y),
+    tablet_zoom_percent: intInRange(formData.get("tablet_zoom_percent"), 100, 300, current.tablet_zoom_percent),
     mobile_position_x: intInRange(formData.get("mobile_position_x"), 0, 100, current.mobile_position_x),
     mobile_position_y: intInRange(formData.get("mobile_position_y"), 0, 100, current.mobile_position_y),
     mobile_zoom_percent: intInRange(formData.get("mobile_zoom_percent"), 100, 300, current.mobile_zoom_percent),
     hero_height_desktop: intInRange(formData.get("hero_height_desktop"), 200, 950, current.hero_height_desktop),
+    hero_height_tablet: intInRange(formData.get("hero_height_tablet"), 180, 950, current.hero_height_tablet),
     hero_height_mobile: intInRange(formData.get("hero_height_mobile"), 180, 900, current.hero_height_mobile),
     overlay_opacity: intInRange(formData.get("overlay_opacity"), 0, 95, current.overlay_opacity),
     overlay_style: parseOverlayStyle(text(formData.get("overlay_style")), current.overlay_style),
@@ -559,15 +602,40 @@ export async function resetSitePageVisualDraft(formData: FormData) {
 async function uploadSitePageImage(
   file: File,
   pageKey: SitePageDesignKey,
-  variant: "desktop" | "mobile",
+  variant: "desktop" | "tablet" | "mobile",
   userId: string,
-  supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"]
+  supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"],
+  width: number,
+  height: number
 ) {
   const ext = imageExtension(file.type);
   const path = `${userId}/visual-editor/pages/${pageKey}/${Date.now()}-${variant}.${ext}`;
   const { error } = await supabase.storage.from("homepage").upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
   if (error) return { error: `Не удалось загрузить изображение: ${error.message}` } as const;
-  return { url: supabase.storage.from("homepage").getPublicUrl(path).data.publicUrl } as const;
+  const url = supabase.storage.from("homepage").getPublicUrl(path).data.publicUrl;
+  await registerDesignMediaAsset({ supabase, path, url, file, userId, variant, width, height });
+  return { url } as const;
+}
+
+
+async function resolveAssetSelection(
+  formData: FormData,
+  field: string,
+  fallback: string | null,
+  supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"]
+) {
+  const id = text(formData.get(field));
+  if (!id) return fallback;
+  const { data } = await supabase.from("design_media_assets").select("public_url").eq("id", id).eq("is_active", true).maybeSingle();
+  return typeof data?.public_url === "string" ? data.public_url : fallback;
+}
+
+async function registerDesignMediaAsset({ supabase, path, url, file, userId, variant, width, height }: {
+  supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"]; path: string; url: string; file: File; userId: string; variant: "desktop" | "tablet" | "mobile"; width: number; height: number;
+}) {
+  await supabase.from("design_media_assets").upsert({
+    storage_path: path, public_url: url, file_name: file.name || `${variant}.webp`, mime_type: file.type || "image/webp", file_size: file.size, width, height, variant, uploaded_by: userId, is_active: true,
+  }, { onConflict: "storage_path" });
 }
 
 function parseSitePageKey(value: string): SitePageDesignKey | null {

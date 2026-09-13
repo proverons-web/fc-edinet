@@ -1,14 +1,16 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { useActionState, useMemo, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import { saveVisualEditor, type VisualEditorState } from "@/app/admin/design/actions";
+import VisualImageField from "@/app/components/VisualImageField";
 import {
   homepageSectionLabels,
   type HomepageCanvasConfig,
   type HomepageCanvasViewport,
   type HomepageDesignSnapshot,
   type HomepageHero,
+  type DesignMediaAsset,
   type HomepageSectionKey,
 } from "@/lib/types";
 
@@ -25,7 +27,7 @@ const descriptions: Record<HomepageSectionKey, string> = {
   partners: "Партнёры клуба",
 };
 
-export default function VisualPageEditor({ initial, hero, hasDraft }: { initial: HomepageDesignSnapshot; hero: HomepageHero | null; hasDraft: boolean }) {
+export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { initial: HomepageDesignSnapshot; hero: HomepageHero | null; hasDraft: boolean; assets: DesignMediaAsset[] }) {
   const [state, action, pending] = useActionState(saveVisualEditor, initialState);
   const [mode, setMode] = useState<ViewMode>("desktop");
   const [selected, setSelected] = useState<CanvasObject>("match");
@@ -33,10 +35,10 @@ export default function VisualPageEditor({ initial, hero, hasDraft }: { initial:
   const stageRef = useRef<HTMLDivElement | null>(null);
 
   const [desktopImage, setDesktopImage] = useState(initial.background_image_url ?? "");
+  const [tabletImage, setTabletImage] = useState(initial.tablet_background_image_url ?? "");
   const [mobileImage, setMobileImage] = useState(initial.mobile_background_image_url ?? "");
-  const [desktopObjectUrl, setDesktopObjectUrl] = useState<string | null>(null);
-  const [mobileObjectUrl, setMobileObjectUrl] = useState<string | null>(null);
   const [clearDesktop, setClearDesktop] = useState(false);
+  const [clearTablet, setClearTablet] = useState(false);
   const [clearMobile, setClearMobile] = useState(false);
   const [overlay, setOverlay] = useState(initial.overlay_opacity);
   const [alignment, setAlignment] = useState(initial.text_alignment);
@@ -46,15 +48,12 @@ export default function VisualPageEditor({ initial, hero, hasDraft }: { initial:
   const [visible, setVisible] = useState(initial.section_visibility);
   const [draggingSection, setDraggingSection] = useState<HomepageSectionKey | null>(null);
 
-  useEffect(() => () => {
-    if (desktopObjectUrl) URL.revokeObjectURL(desktopObjectUrl);
-    if (mobileObjectUrl) URL.revokeObjectURL(mobileObjectUrl);
-  }, [desktopObjectUrl, mobileObjectUrl]);
-
   const viewport = canvas[mode];
-  const currentImage = mode === "mobile"
-    ? (clearMobile ? "" : mobileImage) || (clearDesktop ? "" : desktopImage)
-    : (clearDesktop ? "" : desktopImage);
+  const currentImage = mode === "desktop"
+    ? (clearDesktop ? "" : desktopImage)
+    : mode === "tablet"
+      ? (clearTablet ? "" : tabletImage) || (clearDesktop ? "" : desktopImage)
+      : (clearMobile ? "" : mobileImage) || (clearTablet ? "" : tabletImage) || (clearDesktop ? "" : desktopImage);
   const previewHeight = mode === "desktop" ? Math.min(viewport.hero_height, 650) : mode === "tablet" ? Math.min(viewport.hero_height, 680) : Math.min(viewport.hero_height, 760);
   const anyMatchVisible = canvas.desktop.match_visible || canvas.tablet.match_visible || canvas.mobile.match_visible;
 
@@ -158,6 +157,9 @@ export default function VisualPageEditor({ initial, hero, hasDraft }: { initial:
       <input type="hidden" name="hero_height_mobile" value={canvas.mobile.hero_height} />
       <input type="hidden" name="text_alignment" value={alignment} />
       <input type="hidden" name="show_match_card" value={anyMatchVisible ? "on" : ""} />
+      <input type="hidden" name="clear_background_image" value={clearDesktop ? "on" : ""} />
+      <input type="hidden" name="clear_tablet_background_image" value={clearTablet ? "on" : ""} />
+      <input type="hidden" name="clear_mobile_background_image" value={clearMobile ? "on" : ""} />
 
       <section className="visualEditorWorkspace canvas2Workspace">
         <div className="visualEditorToolbar">
@@ -227,17 +229,16 @@ export default function VisualPageEditor({ initial, hero, hasDraft }: { initial:
       </div>
 
       <div className="visualEditorColumns">
-        <section className="clubAdminSection visualControlCard">
-          <div className="formSectionTitle"><p className="eyebrow blue">ФОН</p><h2>{mode === "tablet" ? "Tablet кадр" : mode === "mobile" ? "Mobile кадр" : "Desktop кадр"}</h2></div>
-          {mode === "desktop" && <div className="fieldGroup"><label htmlFor="visual_desktop_image">Фоновое фото</label><input id="visual_desktop_image" name="background_image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { const file=event.target.files?.[0]; if(!file)return; if(desktopObjectUrl)URL.revokeObjectURL(desktopObjectUrl); const url=URL.createObjectURL(file); setDesktopObjectUrl(url); setDesktopImage(url); setClearDesktop(false); }}/><small className="fieldHint">Рекомендуется 1920×1080 или больше, до 8 МБ.</small></div>}
-          {mode === "mobile" && <div className="fieldGroup"><label htmlFor="visual_mobile_image">Отдельное фото Mobile</label><input id="visual_mobile_image" name="mobile_background_image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { const file=event.target.files?.[0]; if(!file)return; if(mobileObjectUrl)URL.revokeObjectURL(mobileObjectUrl); const url=URL.createObjectURL(file); setMobileObjectUrl(url); setMobileImage(url); setClearMobile(false); }}/><small className="fieldHint">Если не загружать — используется Desktop-фото.</small></div>}
-          {mode === "tablet" && <div className="adminNotice">Tablet пока использует Desktop-фото, но имеет собственные focus, zoom и высоту. Отдельные crop-файлы появятся в Image Editor 2.0.</div>}
+        <section className="clubAdminSection visualControlCard imageEditor2Card">
+          <div className="formSectionTitle"><p className="eyebrow blue">IMAGE EDITOR 2.0</p><h2>{mode === "tablet" ? "Tablet кадр" : mode === "mobile" ? "Mobile кадр" : "Desktop кадр"}</h2><p>Загрузи фото, выбери точный crop или используй уже подготовленное изображение из Media Library.</p></div>
+          {mode === "desktop" && <VisualImageField device="desktop" fileName="background_image" assetFieldName="background_image_asset_id" currentUrl={clearDesktop ? "" : desktopImage} assets={assets} onPreviewChange={setDesktopImage} onClearChange={setClearDesktop} clear={clearDesktop} onActivate={() => setMode("desktop")} />}
+          {mode === "tablet" && <VisualImageField device="tablet" fileName="tablet_background_image" assetFieldName="tablet_background_image_asset_id" currentUrl={clearTablet ? "" : tabletImage} assets={assets} onPreviewChange={setTabletImage} onClearChange={setClearTablet} clear={clearTablet} onActivate={() => setMode("tablet")} />}
+          {mode === "mobile" && <VisualImageField device="mobile" fileName="mobile_background_image" assetFieldName="mobile_background_image_asset_id" currentUrl={clearMobile ? "" : mobileImage} assets={assets} onPreviewChange={setMobileImage} onClearChange={setClearMobile} clear={clearMobile} onActivate={() => setMode("mobile")} />}
           <Range label="Фокус по горизонтали" min={0} max={100} value={viewport.background_x} setValue={(value) => updateViewport({ background_x:value })} suffix="%"/>
           <Range label="Фокус по вертикали" min={0} max={100} value={viewport.background_y} setValue={(value) => updateViewport({ background_y:value })} suffix="%"/>
-          <Range label="Масштаб" min={100} max={300} value={viewport.background_zoom} setValue={(value) => updateViewport({ background_zoom:value })} suffix="%"/>
+          <Range label="Дополнительный масштаб" min={100} max={300} value={viewport.background_zoom} setValue={(value) => updateViewport({ background_zoom:value })} suffix="%"/>
           <Range label="Высота Hero" min={320} max={950} step={10} value={viewport.hero_height} setValue={(value) => updateViewport({ hero_height:value })} suffix=" px"/>
-          {mode === "desktop" && desktopImage && <label className="checkRow compact"><input type="checkbox" name="clear_background_image" checked={clearDesktop} onChange={(e)=>setClearDesktop(e.target.checked)}/><span>Убрать Desktop-фото</span></label>}
-          {mode === "mobile" && mobileImage && <label className="checkRow compact"><input type="checkbox" name="clear_mobile_background_image" checked={clearMobile} onChange={(e)=>setClearMobile(e.target.checked)}/><span>Удалить отдельное Mobile-фото</span></label>}
+          <div className="adminNotice">Crop сохраняется как оптимизированный WebP. Focus/Zoom остаются неразрушающими настройками и позволяют чуть подправить уже готовый кадр без повторной загрузки.</div>
         </section>
 
         <section className="clubAdminSection visualControlCard">
