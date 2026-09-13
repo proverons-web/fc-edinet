@@ -418,10 +418,29 @@ export type HomepageSectionKey =
   | "media"
   | "partners";
 
+export type HomepageSectionWidth = "container" | "wide" | "full";
+export type HomepageSectionBackground = "inherit" | "light" | "dark" | "brand";
+
+export type HomepageSectionDesign = {
+  width: HomepageSectionWidth;
+  background: HomepageSectionBackground;
+  padding_top: number;
+  padding_bottom: number;
+  item_limit: number;
+  columns_desktop: number;
+  columns_tablet: number;
+  columns_mobile: number;
+  show_heading: boolean;
+  show_action: boolean;
+};
+
+export type HomepageSectionDesignMap = Record<HomepageSectionKey, HomepageSectionDesign>;
+
 export type HomepageSection = {
   section_key: HomepageSectionKey;
   is_enabled: boolean;
   display_order: number;
+  design_config?: HomepageSectionDesign | null;
   updated_at: string;
 };
 
@@ -470,6 +489,7 @@ export type HomepageDesignDraft = {
   hero_layer_config: HeroLayerConfig;
   section_order: HomepageSectionKey[];
   section_visibility: Record<HomepageSectionKey, boolean>;
+  section_config: HomepageSectionDesignMap;
   updated_by: string | null;
   updated_at: string;
 };

@@ -14,6 +14,7 @@ import type {
 import { defaultSitePageDesign, normalizeSitePageDesign, sitePageDesignCatalog } from "@/lib/page-design";
 import { defaultHomepageCanvas, normalizeHomepageCanvas } from "@/lib/homepage-canvas";
 import { defaultHeroLayerConfig, homeHeroLayerDefinitions, normalizeHeroLayerConfig, siteHeroLayerDefinitions } from "@/lib/hero-builder";
+import { defaultHomepageSectionDesignMap, normalizeHomepageSectionDesignMap } from "@/lib/section-builder";
 
 export type VisualEditorState = {
   error?: string;
@@ -104,6 +105,7 @@ export async function saveVisualEditor(
   const sectionVisibility = Object.fromEntries(
     sectionKeys.map((key) => [key, formData.get(`section_${key}_enabled`) === "on"])
   ) as Record<HomepageSectionKey, boolean>;
+  const sectionConfig = parseSectionConfig(formData.get("section_config"), currentDraft.section_config);
 
   const snapshot: HomepageDesignSnapshot = {
     background_image_url: desktopImageUrl,
@@ -124,6 +126,7 @@ export async function saveVisualEditor(
     hero_layer_config: parseHeroLayerConfig(formData.get("hero_layer_config"), homeHeroLayerDefinitions, currentDraft.hero_layer_config),
     section_order: sectionOrder,
     section_visibility: sectionVisibility,
+    section_config: sectionConfig,
   };
 
   const { error: draftError } = await supabase
@@ -195,6 +198,7 @@ export async function saveVisualEditor(
     section_key: key,
     is_enabled: snapshot.section_visibility[key],
     display_order: (index + 1) * 10,
+    design_config: snapshot.section_config[key],
   }));
 
   const { error: sectionsError } = await supabase
@@ -310,6 +314,10 @@ function publishedSnapshot(hero: HomepageHero | null, sections: HomepageSection[
     hero_layer_config: normalizeHeroLayerConfig(hero?.hero_layer_config, homeHeroLayerDefinitions, defaultHeroLayerConfig(homeHeroLayerDefinitions)),
     section_order: order,
     section_visibility: visible,
+    section_config: normalizeHomepageSectionDesignMap(
+      Object.fromEntries(sections.map((section) => [section.section_key, section.design_config ?? {}])),
+      defaultHomepageSectionDesignMap()
+    ),
   };
 }
 
@@ -336,6 +344,7 @@ function normalizeSnapshot(raw: Record<string, unknown>, fallback: HomepageDesig
     section_visibility: Object.fromEntries(
       sectionKeys.map((key) => [key, typeof rawVisibility[key] === "boolean" ? rawVisibility[key] : fallback.section_visibility[key]])
     ) as Record<HomepageSectionKey, boolean>,
+    section_config: normalizeHomepageSectionDesignMap(raw.section_config, fallback.section_config),
   };
 }
 
@@ -352,6 +361,15 @@ function parseHeroLayerConfig(value: FormDataEntryValue | null, definitions: Ret
   if (typeof value !== "string" || !value.trim()) return fallback;
   try {
     return normalizeHeroLayerConfig(JSON.parse(value), definitions, fallback);
+  } catch {
+    return fallback;
+  }
+}
+
+function parseSectionConfig(value: FormDataEntryValue | null, fallback: HomepageDesignSnapshot["section_config"]) {
+  if (typeof value !== "string" || !value.trim()) return fallback;
+  try {
+    return normalizeHomepageSectionDesignMap(JSON.parse(value), fallback);
   } catch {
     return fallback;
   }

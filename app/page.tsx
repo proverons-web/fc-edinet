@@ -8,6 +8,7 @@ import { getLocale } from "@/lib/locale";
 import { dateLocale, localized, publicText, type Locale } from "@/lib/i18n";
 import { defaultHomepageCanvas, normalizeHomepageCanvas } from "@/lib/homepage-canvas";
 import { defaultHeroLayerConfig, heroLayerState, heroLayerVisible, homeHeroLayerDefinitions, normalizeHeroLayerConfig } from "@/lib/hero-builder";
+import { defaultHomepageSectionDesignMap, normalizeHomepageSectionDesignMap } from "@/lib/section-builder";
 import type {
   ClubMatch,
   Competition,
@@ -26,12 +27,12 @@ import type {
 export const dynamic = "force-dynamic";
 
 const defaultSectionOrder: HomepageSection[] = [
-  { section_key: "matches", is_enabled: true, display_order: 10, updated_at: "" },
-  { section_key: "standings", is_enabled: true, display_order: 20, updated_at: "" },
-  { section_key: "news", is_enabled: true, display_order: 30, updated_at: "" },
-  { section_key: "players", is_enabled: true, display_order: 40, updated_at: "" },
-  { section_key: "media", is_enabled: true, display_order: 50, updated_at: "" },
-  { section_key: "partners", is_enabled: true, display_order: 60, updated_at: "" },
+  { section_key: "matches", is_enabled: true, display_order: 10, design_config: null, updated_at: "" },
+  { section_key: "standings", is_enabled: true, display_order: 20, design_config: null, updated_at: "" },
+  { section_key: "news", is_enabled: true, display_order: 30, design_config: null, updated_at: "" },
+  { section_key: "players", is_enabled: true, display_order: 40, design_config: null, updated_at: "" },
+  { section_key: "media", is_enabled: true, display_order: 50, design_config: null, updated_at: "" },
+  { section_key: "partners", is_enabled: true, display_order: 60, design_config: null, updated_at: "" },
 ];
 
 export default async function Home() {
@@ -65,6 +66,10 @@ export default async function Home() {
   const sections = defaultSectionOrder
     .map((fallback) => sectionMap.get(fallback.section_key) ?? fallback)
     .sort((a, b) => a.display_order - b.display_order);
+  const sectionConfig = normalizeHomepageSectionDesignMap(
+    Object.fromEntries(sections.map((section) => [section.section_key, section.design_config ?? {}])),
+    defaultHomepageSectionDesignMap()
+  );
 
   const [
     playersResult,
@@ -82,7 +87,7 @@ export default async function Home() {
       .select("*")
       .eq("is_active", true)
       .order("display_order", { ascending: true })
-      .limit(4),
+      .limit(12),
     supabase
       .from("news")
       .select(`
@@ -94,7 +99,7 @@ export default async function Home() {
       .lte("published_at", now)
       .order("is_featured", { ascending: false })
       .order("published_at", { ascending: false })
-      .limit(6),
+      .limit(12),
     supabase
       .from("matches")
       .select(matchSelect())
@@ -124,21 +129,21 @@ export default async function Home() {
       .eq("show_on_homepage", true)
       .order("display_order")
       .order("name")
-      .limit(12),
+      .limit(24),
     supabase
       .from("media_albums")
       .select("*")
       .eq("is_published", true)
       .order("event_date", { ascending: false, nullsFirst: false })
       .order("display_order", { ascending: true })
-      .limit(3),
+      .limit(12),
     supabase
       .from("media_videos")
       .select("*")
       .eq("is_published", true)
       .order("published_at", { ascending: false, nullsFirst: false })
       .order("display_order", { ascending: true })
-      .limit(2),
+      .limit(12),
     settings?.show_pinned_news && settings.pinned_news_id
       ? supabase
           .from("news")
@@ -154,12 +159,13 @@ export default async function Home() {
       : Promise.resolve({ data: null, error: null }),
   ]);
 
-  const players = (playersResult.data ?? []) as Player[];
+  const allPlayers = (playersResult.data ?? []) as Player[];
+  const players = allPlayers.slice(0, sectionConfig.players.item_limit);
   const allNews = (newsResult.data ?? []) as unknown as NewsArticle[];
   const pinnedNews = pinnedNewsResult.data as unknown as NewsArticle | null;
   const news = allNews
     .filter((article) => String(article.id) !== String(pinnedNews?.id ?? ""))
-    .slice(0, 4);
+    .slice(0, sectionConfig.news.item_limit);
   const nextMatch = nextMatchResult.data as unknown as ClubMatch | null;
   const lastMatch = lastMatchResult.data as unknown as ClubMatch | null;
   const competition =
@@ -168,9 +174,15 @@ export default async function Home() {
       competitionResult.data) as Competition | null;
 
   const hero = heroResult.data as HomepageHero | null;
-  const partners = (partnersResult.data ?? []) as Partner[];
+  const allPartners = (partnersResult.data ?? []) as Partner[];
+  const partners = allPartners.slice(0, sectionConfig.partners.item_limit);
   const albums = (albumsResult.data ?? []) as MediaAlbum[];
   const videos = (videosResult.data ?? []) as MediaVideo[];
+  const mediaCards: Array<{ kind: "album"; item: MediaAlbum } | { kind: "video"; item: MediaVideo }> = [];
+  for (let index = 0; mediaCards.length < sectionConfig.media.item_limit && (index < albums.length || index < videos.length); index += 1) {
+    if (albums[index] && mediaCards.length < sectionConfig.media.item_limit) mediaCards.push({ kind: "album", item: albums[index] });
+    if (videos[index] && mediaCards.length < sectionConfig.media.item_limit) mediaCards.push({ kind: "video", item: videos[index] });
+  }
 
   const heroEyebrow = localized(hero?.eyebrow, hero?.eyebrow_ro, locale) || text.heroEyebrow;
   const heroTitleMain = localized(hero?.title_main, hero?.title_main_ro, locale) || text.heroMain;
@@ -253,12 +265,27 @@ export default async function Home() {
     standings = (data ?? []) as unknown as StandingEntry[];
   }
 
+  const sectionOuterStyle = (key: HomepageSectionKey) => ({
+    "--section-pad-top": `${sectionConfig[key].padding_top}px`,
+    "--section-pad-bottom": `${sectionConfig[key].padding_bottom}px`,
+    "--section-cols-desktop": sectionConfig[key].columns_desktop,
+    "--section-cols-tablet": sectionConfig[key].columns_tablet,
+    "--section-cols-mobile": sectionConfig[key].columns_mobile,
+  } as CSSProperties);
+  const sectionOuterClass = (key: HomepageSectionKey, base: string) => `${base} sectionBuilderPublic sectionBg-${sectionConfig[key].background}`;
+  const sectionInnerClass = (key: HomepageSectionKey, extra = "") => `${sectionConfig[key].width === "container" ? "container" : sectionConfig[key].width === "wide" ? "sectionBuilderWide" : "sectionBuilderFull"} ${extra}`.trim();
+  const sectionHeadingClass = (key: HomepageSectionKey, defaultDark = false) => {
+    const background = sectionConfig[key].background;
+    const dark = background === "dark" || background === "brand" || (background === "inherit" && defaultDark);
+    return `sectionHeading${dark ? " light" : ""}`;
+  };
+
   const renderSection = (key: HomepageSectionKey) => {
     switch (key) {
       case "matches":
         return (
-          <section className="matchStrip" key={key}>
-            <div className="container matchGrid">
+          <section className={sectionOuterClass(key, "matchStrip")} style={sectionOuterStyle(key)} key={key}>
+            <div className={sectionInnerClass(key, "matchGrid sectionBuilderGrid")}>
               <article>
                 <span className="sectionLabel">{text.lastMatch}</span>
                 {lastMatch ? (
@@ -310,18 +337,18 @@ export default async function Home() {
 
       case "standings":
         return (
-          <section className="section homeStandingsSection" key={key}>
-            <div className="container">
-              <div className="sectionHeading">
-                <div>
+          <section className={sectionOuterClass(key, "section homeStandingsSection")} style={sectionOuterStyle(key)} key={key}>
+            <div className={sectionInnerClass(key)}>
+              {(sectionConfig[key].show_heading || sectionConfig[key].show_action) && <div className={sectionHeadingClass(key)}>
+                {sectionConfig[key].show_heading && <div>
                   <p className="eyebrow blue">{text.standingsEyebrow}</p>
                   <h2>{text.standingsTitle}</h2>
-                </div>
-                <Link href="/standings">{text.fullStandings}</Link>
-              </div>
+                </div>}
+                {sectionConfig[key].show_action && <Link href="/standings">{text.fullStandings}</Link>}
+              </div>}
 
               {standings.length > 0 ? (
-                <StandingsTable entries={standings} compact limit={5} locale={locale} />
+                <StandingsTable entries={standings} compact limit={sectionConfig[key].item_limit} locale={locale} />
               ) : (
                 <div className="adminEmpty">{text.standingsEmpty}</div>
               )}
@@ -331,15 +358,15 @@ export default async function Home() {
 
       case "news":
         return (
-          <section className="section homeNewsSection" key={key}>
-            <div className="container">
-              <div className="sectionHeading">
-                <div>
+          <section className={sectionOuterClass(key, "section homeNewsSection")} style={sectionOuterStyle(key)} key={key}>
+            <div className={sectionInnerClass(key)}>
+              {(sectionConfig[key].show_heading || sectionConfig[key].show_action) && <div className={sectionHeadingClass(key)}>
+                {sectionConfig[key].show_heading && <div>
                   <p className="eyebrow blue">{text.newsEyebrow}</p>
                   <h2>{text.newsTitle}</h2>
-                </div>
-                <Link href="/news">{text.allNews}</Link>
-              </div>
+                </div>}
+                {sectionConfig[key].show_action && <Link href="/news">{text.allNews}</Link>}
+              </div>}
 
               {pinnedNews && (
                 <Link
@@ -365,7 +392,7 @@ export default async function Home() {
               )}
 
               {news.length > 0 ? (
-                <div className="homeNewsDbGrid">
+                <div className="homeNewsDbGrid sectionBuilderGrid">
                   {news.map((article) => (
                     <NewsCard key={article.id} article={article} locale={locale} />
                   ))}
@@ -381,18 +408,18 @@ export default async function Home() {
 
       case "players":
         return (
-          <section className="section darkSection" key={key}>
-            <div className="container">
-              <div className="sectionHeading light">
-                <div>
+          <section className={sectionOuterClass(key, "section darkSection")} style={sectionOuterStyle(key)} key={key}>
+            <div className={sectionInnerClass(key)}>
+              {(sectionConfig[key].show_heading || sectionConfig[key].show_action) && <div className={sectionHeadingClass(key, true)}>
+                {sectionConfig[key].show_heading && <div>
                   <p className="eyebrow">{text.teamEyebrow}</p>
                   <h2>{text.teamTitle}</h2>
-                </div>
-                <Link href="/team">{text.allPlayers}</Link>
-              </div>
+                </div>}
+                {sectionConfig[key].show_action && <Link href="/team">{text.allPlayers}</Link>}
+              </div>}
 
               {players.length > 0 ? (
-                <div className="players">
+                <div className="players sectionBuilderGrid">
                   {players.map((player) => (
                     <PlayerCard key={player.id} player={player} locale={locale} />
                   ))}
@@ -406,57 +433,29 @@ export default async function Home() {
 
       case "media":
         return (
-          <section className="section homeMediaSection" key={key}>
-            <div className="container">
-              <div className="sectionHeading">
-                <div>
+          <section className={sectionOuterClass(key, "section homeMediaSection")} style={sectionOuterStyle(key)} key={key}>
+            <div className={sectionInnerClass(key)}>
+              {(sectionConfig[key].show_heading || sectionConfig[key].show_action) && <div className={sectionHeadingClass(key)}>
+                {sectionConfig[key].show_heading && <div>
                   <p className="eyebrow blue">{text.mediaEyebrow}</p>
                   <h2>{text.mediaTitle}</h2>
-                </div>
-                <Link href="/media">{text.allMedia}</Link>
-              </div>
+                </div>}
+                {sectionConfig[key].show_action && <Link href="/media">{text.allMedia}</Link>}
+              </div>}
 
-              {albums.length > 0 || videos.length > 0 ? (
-                <div className="homeMediaGrid">
-                  {albums.map((album) => (
-                    <Link
-                      href={`/media/${album.slug}`}
-                      className="homeMediaCard"
-                      key={`album-${album.id}`}
-                    >
+              {mediaCards.length > 0 ? (
+                <div className="homeMediaGrid sectionBuilderGrid">
+                  {mediaCards.map((entry) => entry.kind === "album" ? (
+                    <Link href={`/media/${entry.item.slug}`} className="homeMediaCard" key={`album-${entry.item.id}`}>
                       <div className="homeMediaImage">
-                        {album.cover_image_url ? (
-                          <img src={album.cover_image_url} alt="" />
-                        ) : (
-                          <div className="homeMediaFallback">{text.album}</div>
-                        )}
+                        {entry.item.cover_image_url ? <img src={entry.item.cover_image_url} alt="" /> : <div className="homeMediaFallback">{text.album}</div>}
                       </div>
-                      <div>
-                        <span>{text.album.toUpperCase()}</span>
-                        <h3>{album.title}</h3>
-                      </div>
+                      <div><span>{text.album.toUpperCase()}</span><h3>{entry.item.title}</h3></div>
                     </Link>
-                  ))}
-
-                  {videos.map((video) => (
-                    <a
-                      href={video.youtube_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="homeMediaCard"
-                      key={`video-${video.id}`}
-                    >
-                      <div className="homeMediaImage">
-                        <img
-                          src={`https://img.youtube.com/vi/${video.youtube_id}/hqdefault.jpg`}
-                          alt=""
-                        />
-                        <span className="homeMediaPlay">▶</span>
-                      </div>
-                      <div>
-                        <span>{text.video.toUpperCase()}</span>
-                        <h3>{video.title}</h3>
-                      </div>
+                  ) : (
+                    <a href={entry.item.youtube_url} target="_blank" rel="noopener noreferrer" className="homeMediaCard" key={`video-${entry.item.id}`}>
+                      <div className="homeMediaImage"><img src={`https://img.youtube.com/vi/${entry.item.youtube_id}/hqdefault.jpg`} alt="" /><span className="homeMediaPlay">▶</span></div>
+                      <div><span>{text.video.toUpperCase()}</span><h3>{entry.item.title}</h3></div>
                     </a>
                   ))}
                 </div>
@@ -473,17 +472,17 @@ export default async function Home() {
         if (partners.length === 0) return null;
 
         return (
-          <section className="section homePartnersSection" key={key}>
-            <div className="container">
-              <div className="sectionHeading">
-                <div>
+          <section className={sectionOuterClass(key, "section homePartnersSection")} style={sectionOuterStyle(key)} key={key}>
+            <div className={sectionInnerClass(key)}>
+              {(sectionConfig[key].show_heading || sectionConfig[key].show_action) && <div className={sectionHeadingClass(key)}>
+                {sectionConfig[key].show_heading && <div>
                   <p className="eyebrow blue">{text.partnersEyebrow}</p>
                   <h2>{text.partnersTitle}</h2>
-                </div>
-                <Link href="/partners">{text.allPartners}</Link>
-              </div>
+                </div>}
+                {sectionConfig[key].show_action && <Link href="/partners">{text.allPartners}</Link>}
+              </div>}
 
-              <div className="homePartnersGrid">
+              <div className="homePartnersGrid sectionBuilderGrid">
                 {partners.map((partner) => {
                   const logo = (
                     <div className="homePartnerLogo">

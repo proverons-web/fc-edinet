@@ -77,6 +77,7 @@ const fieldLabels: Record<string, string> = {
   show_on_homepage: "Показывать на главной",
   section_key: "Блок",
   is_enabled: "Показывать блок",
+  design_config: "Настройки Section Builder",
   show_pinned_news: "Закреплённая новость включена",
   pinned_news_id: "Закреплённая новость",
   banner_enabled: "Баннер включён",
