@@ -334,6 +334,31 @@ export type MediaVideo = {
 };
 
 
+export type HomepageCanvasViewport = {
+  background_x: number;
+  background_y: number;
+  background_zoom: number;
+  hero_height: number;
+  text_x: number;
+  text_y: number;
+  match_x: number;
+  match_y: number;
+  match_width: number;
+  match_visible: boolean;
+  safe_top: number;
+  safe_right: number;
+  safe_bottom: number;
+  safe_left: number;
+};
+
+export type HomepageCanvasConfig = {
+  snap_enabled: boolean;
+  lock_safe_zone: boolean;
+  desktop: HomepageCanvasViewport;
+  tablet: HomepageCanvasViewport;
+  mobile: HomepageCanvasViewport;
+};
+
 export type HomepageHero = {
   id: number;
   eyebrow: string;
@@ -367,6 +392,7 @@ export type HomepageHero = {
   hero_height_mobile?: number | null;
   text_alignment?: "left" | "center" | "right" | null;
   show_match_card?: boolean | null;
+  canvas_config?: HomepageCanvasConfig | null;
   show_primary_button: boolean;
   show_secondary_button: boolean;
   updated_at: string;
@@ -428,6 +454,7 @@ export type HomepageDesignDraft = {
   overlay_opacity: number;
   text_alignment: "left" | "center" | "right";
   show_match_card: boolean;
+  canvas_config: HomepageCanvasConfig;
   section_order: HomepageSectionKey[];
   section_visibility: Record<HomepageSectionKey, boolean>;
   updated_by: string | null;

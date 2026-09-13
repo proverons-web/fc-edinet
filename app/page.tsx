@@ -6,6 +6,7 @@ import StandingsTable from "@/app/components/StandingsTable";
 import { createClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/locale";
 import { dateLocale, localized, publicText, type Locale } from "@/lib/i18n";
+import { defaultHomepageCanvas, normalizeHomepageCanvas } from "@/lib/homepage-canvas";
 import type {
   ClubMatch,
   Competition,
@@ -176,28 +177,57 @@ export default async function Home() {
   const heroDescription = localized(hero?.description, hero?.description_ro, locale) || text.heroDescription;
   const heroOverlay = Math.max(0, Math.min(95, hero?.overlay_opacity ?? 72)) / 100;
   const legacyHeroPosition = legacyHeroCoordinates(hero?.background_position);
-  const heroDesktopX = hero?.desktop_position_x ?? legacyHeroPosition.x;
-  const heroDesktopY = hero?.desktop_position_y ?? legacyHeroPosition.y;
-  const heroDesktopZoom = (hero?.desktop_zoom_percent ?? 100) / 100;
-  const heroMobileX = hero?.mobile_position_x ?? heroDesktopX;
-  const heroMobileY = hero?.mobile_position_y ?? heroDesktopY;
-  const heroMobileZoom = (hero?.mobile_zoom_percent ?? hero?.desktop_zoom_percent ?? 100) / 100;
-  const heroHeightDesktop = hero?.hero_height_desktop ?? 650;
-  const heroHeightMobile = hero?.hero_height_mobile ?? 520;
+  const canvasFallback = defaultHomepageCanvas({
+    desktop_position_x: hero?.desktop_position_x ?? legacyHeroPosition.x,
+    desktop_position_y: hero?.desktop_position_y ?? legacyHeroPosition.y,
+    desktop_zoom_percent: hero?.desktop_zoom_percent,
+    mobile_position_x: hero?.mobile_position_x ?? legacyHeroPosition.x,
+    mobile_position_y: hero?.mobile_position_y ?? legacyHeroPosition.y,
+    mobile_zoom_percent: hero?.mobile_zoom_percent,
+    hero_height_desktop: hero?.hero_height_desktop,
+    hero_height_mobile: hero?.hero_height_mobile,
+    text_alignment: hero?.text_alignment,
+    show_match_card: hero?.show_match_card,
+  });
+  const heroCanvas = normalizeHomepageCanvas(hero?.canvas_config, canvasFallback);
   const heroTextAlignment = hero?.text_alignment ?? "left";
-  const showHeroMatchCard = hero?.show_match_card ?? true;
+  const showHeroMatchCard = heroCanvas.desktop.match_visible || heroCanvas.tablet.match_visible || heroCanvas.mobile.match_visible;
   const heroBaseImage = hero?.background_image_url || hero?.mobile_background_image_url || null;
   const heroStyle = {
-    "--hero-desktop-x": `${heroDesktopX}%`,
-    "--hero-desktop-y": `${heroDesktopY}%`,
-    "--hero-desktop-zoom": heroDesktopZoom,
-    "--hero-mobile-x": `${heroMobileX}%`,
-    "--hero-mobile-y": `${heroMobileY}%`,
-    "--hero-mobile-zoom": heroMobileZoom,
-    "--hero-height-desktop": `${heroHeightDesktop}px`,
-    "--hero-height-mobile": `${heroHeightMobile}px`,
+    "--hero-desktop-x": `${heroCanvas.desktop.background_x}%`,
+    "--hero-desktop-y": `${heroCanvas.desktop.background_y}%`,
+    "--hero-desktop-zoom": heroCanvas.desktop.background_zoom / 100,
+    "--hero-tablet-x": `${heroCanvas.tablet.background_x}%`,
+    "--hero-tablet-y": `${heroCanvas.tablet.background_y}%`,
+    "--hero-tablet-zoom": heroCanvas.tablet.background_zoom / 100,
+    "--hero-mobile-x": `${heroCanvas.mobile.background_x}%`,
+    "--hero-mobile-y": `${heroCanvas.mobile.background_y}%`,
+    "--hero-mobile-zoom": heroCanvas.mobile.background_zoom / 100,
+    "--hero-height-desktop": `${heroCanvas.desktop.hero_height}px`,
+    "--hero-height-tablet": `${heroCanvas.tablet.hero_height}px`,
+    "--hero-height-mobile": `${heroCanvas.mobile.hero_height}px`,
     "--hero-overlay": heroOverlay,
+    "--hero-text-desktop-x": `${heroCanvas.desktop.text_x}%`,
+    "--hero-text-desktop-y": `${heroCanvas.desktop.text_y}%`,
+    "--hero-text-tablet-x": `${heroCanvas.tablet.text_x}%`,
+    "--hero-text-tablet-y": `${heroCanvas.tablet.text_y}%`,
+    "--hero-text-mobile-x": `${heroCanvas.mobile.text_x}%`,
+    "--hero-text-mobile-y": `${heroCanvas.mobile.text_y}%`,
+    "--hero-match-desktop-x": `${heroCanvas.desktop.match_x}%`,
+    "--hero-match-desktop-y": `${heroCanvas.desktop.match_y}%`,
+    "--hero-match-desktop-width": `${heroCanvas.desktop.match_width}px`,
+    "--hero-match-tablet-x": `${heroCanvas.tablet.match_x}%`,
+    "--hero-match-tablet-y": `${heroCanvas.tablet.match_y}%`,
+    "--hero-match-tablet-width": `${heroCanvas.tablet.match_width}px`,
+    "--hero-match-mobile-x": `${heroCanvas.mobile.match_x}%`,
+    "--hero-match-mobile-y": `${heroCanvas.mobile.match_y}%`,
+    "--hero-match-mobile-width": `${heroCanvas.mobile.match_width}px`,
   } as CSSProperties;
+  const matchVisibilityClasses = [
+    heroCanvas.desktop.match_visible ? "" : "heroMatchDesktopOff",
+    heroCanvas.tablet.match_visible ? "" : "heroMatchTabletOff",
+    heroCanvas.mobile.match_visible ? "" : "heroMatchMobileOff",
+  ].filter(Boolean).join(" ");
 
   let standings: StandingEntry[] = [];
 
@@ -488,7 +518,7 @@ export default async function Home() {
   return (
     <main>
       <section
-        className={`hero visualHero heroTextAlign-${heroTextAlignment} ${showHeroMatchCard ? "" : "heroWithoutMatch"}`}
+        className={`hero visualHero canvasPublicHero heroTextAlign-${heroTextAlignment} ${showHeroMatchCard ? "" : "heroWithoutMatch"} ${matchVisibilityClasses}`}
         style={heroStyle}
       >
         {heroBaseImage && (
@@ -503,7 +533,7 @@ export default async function Home() {
           </div>
         )}
 
-        <div className={`container heroContent ${showHeroMatchCard ? "" : "heroContentSingle"}`}>
+        <div className={`container heroContent canvasPublicHeroContent ${showHeroMatchCard ? "" : "heroContentSingle"}`}>
           <div className="heroIntro">
             <p className="eyebrow">{heroEyebrow}</p>
             <h1>

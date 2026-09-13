@@ -12,6 +12,7 @@ import type {
   SitePageDesignSnapshot,
 } from "@/lib/types";
 import { defaultSitePageDesign, normalizeSitePageDesign, sitePageDesignCatalog } from "@/lib/page-design";
+import { defaultHomepageCanvas, normalizeHomepageCanvas } from "@/lib/homepage-canvas";
 
 export type VisualEditorState = {
   error?: string;
@@ -102,6 +103,7 @@ export async function saveVisualEditor(
     overlay_opacity: intInRange(formData.get("overlay_opacity"), 0, 95, currentDraft.overlay_opacity),
     text_alignment: alignment(text(formData.get("text_alignment")), currentDraft.text_alignment),
     show_match_card: formData.get("show_match_card") === "on",
+    canvas_config: parseCanvasConfig(formData.get("canvas_config"), currentDraft.canvas_config),
     section_order: sectionOrder,
     section_visibility: sectionVisibility,
   };
@@ -161,6 +163,7 @@ export async function saveVisualEditor(
       overlay_opacity: snapshot.overlay_opacity,
       text_alignment: snapshot.text_alignment,
       show_match_card: snapshot.show_match_card,
+      canvas_config: snapshot.canvas_config,
     })
     .eq("id", 1);
 
@@ -271,6 +274,18 @@ function publishedSnapshot(hero: HomepageHero | null, sections: HomepageSection[
     overlay_opacity: hero?.overlay_opacity ?? 72,
     text_alignment: hero?.text_alignment ?? "left",
     show_match_card: hero?.show_match_card ?? true,
+    canvas_config: normalizeHomepageCanvas(hero?.canvas_config, defaultHomepageCanvas({
+      desktop_position_x: hero?.desktop_position_x,
+      desktop_position_y: hero?.desktop_position_y,
+      desktop_zoom_percent: hero?.desktop_zoom_percent,
+      mobile_position_x: hero?.mobile_position_x,
+      mobile_position_y: hero?.mobile_position_y,
+      mobile_zoom_percent: hero?.mobile_zoom_percent,
+      hero_height_desktop: hero?.hero_height_desktop,
+      hero_height_mobile: hero?.hero_height_mobile,
+      text_alignment: hero?.text_alignment,
+      show_match_card: hero?.show_match_card,
+    })),
     section_order: order,
     section_visibility: visible,
   };
@@ -292,11 +307,21 @@ function normalizeSnapshot(raw: Record<string, unknown>, fallback: HomepageDesig
     overlay_opacity: numberValue(raw.overlay_opacity, 0, 95, fallback.overlay_opacity),
     text_alignment: alignment(String(raw.text_alignment ?? ""), fallback.text_alignment),
     show_match_card: typeof raw.show_match_card === "boolean" ? raw.show_match_card : fallback.show_match_card,
+    canvas_config: normalizeHomepageCanvas(raw.canvas_config, fallback.canvas_config),
     section_order: normalizeSectionOrder(Array.isArray(raw.section_order) ? raw.section_order.map(String) : fallback.section_order),
     section_visibility: Object.fromEntries(
       sectionKeys.map((key) => [key, typeof rawVisibility[key] === "boolean" ? rawVisibility[key] : fallback.section_visibility[key]])
     ) as Record<HomepageSectionKey, boolean>,
   };
+}
+
+function parseCanvasConfig(value: FormDataEntryValue | null, fallback: HomepageDesignSnapshot["canvas_config"]) {
+  if (typeof value !== "string" || !value.trim()) return fallback;
+  try {
+    return normalizeHomepageCanvas(JSON.parse(value), fallback);
+  } catch {
+    return fallback;
+  }
 }
 
 function parseSectionOrder(raw: string) {
