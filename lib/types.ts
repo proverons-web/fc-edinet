@@ -807,6 +807,28 @@ export type PlayerSeasonStatistics = {
   appearances: number;
   starts: number;
   substitute_appearances: number;
+  captain_appearances: number;
+  minutes_played: number;
+  goals: number;
+  assists: number;
+  own_goals: number;
+  penalties_scored: number;
+  penalties_missed: number;
+  yellow_cards: number;
+  red_cards: number;
+  goals_conceded: number;
+  saves: number;
+  clean_sheets: number;
+};
+
+export type PlayerSeasonTotal = {
+  player_id: string | number;
+  season_id: string | number | null;
+  appearances: number;
+  starts: number;
+  substitute_appearances: number;
+  captain_appearances: number;
+  competitions_played: number;
   minutes_played: number;
   goals: number;
   assists: number;

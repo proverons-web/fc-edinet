@@ -1,6 +1,14 @@
 import Link from "next/link";
 import { requireEditor } from "@/lib/editorial";
-import type { ClubMatch, Competition, Season } from "@/lib/types";
+import type {
+  ClubMatch,
+  Competition,
+  Player,
+  PlayerSeasonStatistics,
+  PlayerSeasonTotal,
+  Season,
+} from "@/lib/types";
+import { positionLabels } from "@/lib/types";
 import {
   assignCompetitionSeason,
   createSeason,
@@ -14,6 +22,7 @@ type PageProps = {
   searchParams: Promise<{
     season?: string | string[];
     competition?: string | string[];
+    sort?: string | string[];
     saved?: string | string[];
     error?: string | string[];
   }>;
@@ -29,6 +38,42 @@ type StatMatch = ClubMatch & {
   stats_rows?: number;
 };
 
+type SummaryNumbers = {
+  appearances: number;
+  starts: number;
+  substitute_appearances: number;
+  captain_appearances: number;
+  competitions_played: number;
+  minutes_played: number;
+  goals: number;
+  assists: number;
+  own_goals: number;
+  penalties_scored: number;
+  penalties_missed: number;
+  yellow_cards: number;
+  red_cards: number;
+  goals_conceded: number;
+  saves: number;
+  clean_sheets: number;
+};
+
+type PlayerSummary = SummaryNumbers & {
+  player: Pick<
+    Player,
+    "id" | "first_name" | "last_name" | "slug" | "shirt_number" | "position" | "photo_url" | "is_active"
+  >;
+};
+
+type SortKey = "goals" | "assists" | "appearances" | "minutes" | "clean_sheets";
+
+const sortLabels: Record<SortKey, string> = {
+  goals: "Голы",
+  assists: "Ассисты",
+  appearances: "Матчи",
+  minutes: "Минуты",
+  clean_sheets: "Сухие матчи",
+};
+
 function one(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
@@ -42,14 +87,85 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+function numberValue(value: unknown) {
+  const n = Number(value ?? 0);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function emptySummary(): SummaryNumbers {
+  return {
+    appearances: 0,
+    starts: 0,
+    substitute_appearances: 0,
+    captain_appearances: 0,
+    competitions_played: 0,
+    minutes_played: 0,
+    goals: 0,
+    assists: 0,
+    own_goals: 0,
+    penalties_scored: 0,
+    penalties_missed: 0,
+    yellow_cards: 0,
+    red_cards: 0,
+    goals_conceded: 0,
+    saves: 0,
+    clean_sheets: 0,
+  };
+}
+
+function mergeStat(target: SummaryNumbers, row: Partial<PlayerSeasonStatistics & PlayerSeasonTotal>) {
+  target.appearances += numberValue(row.appearances);
+  target.starts += numberValue(row.starts);
+  target.substitute_appearances += numberValue(row.substitute_appearances);
+  target.captain_appearances += numberValue(row.captain_appearances);
+  target.competitions_played += Math.max(numberValue(row.competitions_played), row.competition_id ? 1 : 0);
+  target.minutes_played += numberValue(row.minutes_played);
+  target.goals += numberValue(row.goals);
+  target.assists += numberValue(row.assists);
+  target.own_goals += numberValue(row.own_goals);
+  target.penalties_scored += numberValue(row.penalties_scored);
+  target.penalties_missed += numberValue(row.penalties_missed);
+  target.yellow_cards += numberValue(row.yellow_cards);
+  target.red_cards += numberValue(row.red_cards);
+  target.goals_conceded += numberValue(row.goals_conceded);
+  target.saves += numberValue(row.saves);
+  target.clean_sheets += numberValue(row.clean_sheets);
+}
+
+function sortSummaries(rows: PlayerSummary[], sort: SortKey) {
+  const key: keyof SummaryNumbers =
+    sort === "minutes" ? "minutes_played" : sort;
+
+  return [...rows].sort((a, b) => {
+    const primary = numberValue(b[key]) - numberValue(a[key]);
+    if (primary !== 0) return primary;
+    if (b.goals !== a.goals) return b.goals - a.goals;
+    if (b.assists !== a.assists) return b.assists - a.assists;
+    if (b.appearances !== a.appearances) return b.appearances - a.appearances;
+    return `${a.player.last_name} ${a.player.first_name}`.localeCompare(
+      `${b.player.last_name} ${b.player.first_name}`,
+      "ru"
+    );
+  });
+}
+
+function topBy(rows: PlayerSummary[], key: keyof SummaryNumbers) {
+  return [...rows].sort((a, b) => {
+    const diff = numberValue(b[key]) - numberValue(a[key]);
+    if (diff !== 0) return diff;
+    return b.appearances - a.appearances;
+  })[0] ?? null;
+}
+
 export default async function AdminStatisticsPage({ searchParams }: PageProps) {
   const { supabase } = await requireEditor();
   const params = await searchParams;
   const saved = one(params.saved);
   const errorMessage = one(params.error);
+  const requestedSort = one(params.sort);
+  const sort: SortKey =
+    requestedSort && requestedSort in sortLabels ? (requestedSort as SortKey) : "goals";
 
-  // Query seasons first so a not-yet-applied migration produces a friendly setup screen
-  // instead of breaking the whole admin route.
   const { data: seasonsData, error: seasonsError } = await supabase
     .from("seasons")
     .select("id,name,slug,starts_on,ends_on,is_current,is_active,created_at,updated_at")
@@ -80,8 +196,10 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
       .order("name"),
     supabase
       .from("players")
-      .select("id", { count: "exact", head: true })
-      .eq("is_active", true),
+      .select("id,first_name,last_name,slug,shirt_number,position,photo_url,is_active")
+      .order("is_active", { ascending: false })
+      .order("display_order", { ascending: true, nullsFirst: false })
+      .order("last_name"),
   ]);
 
   if (competitionsResult.error) {
@@ -89,12 +207,20 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
   }
 
   const competitions = (competitionsResult.data ?? []) as Competition[];
+  const players = (playersResult.data ?? []) as Player[];
+  const activePlayersCount = players.filter((player) => player.is_active).length;
+  const playerById = new Map(players.map((player) => [String(player.id), player]));
+
   const requestedCompetition = one(params.competition);
   const selectedCompetitionId =
     requestedCompetition &&
     competitions.some((item) => String(item.id) === requestedCompetition)
       ? requestedCompetition
       : "";
+
+  const selectedSeason = seasons.find((item) => String(item.id) === selectedSeasonId) ?? null;
+  const selectedCompetition =
+    competitions.find((item) => String(item.id) === selectedCompetitionId) ?? null;
 
   const seasonCompetitionIds = competitions
     .filter((item) => !selectedSeasonId || String(item.season_id ?? "") === selectedSeasonId)
@@ -118,7 +244,6 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
     if (seasonCompetitionIds.length > 0) {
       matchQuery = matchQuery.in("competition_id", seasonCompetitionIds);
     } else {
-      // An impossible id keeps the result empty without issuing invalid `.in([])`.
       matchQuery = matchQuery.eq("competition_id", -1);
     }
   }
@@ -171,16 +296,62 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
     (match) => match.stats_state?.status === "complete"
   ).length;
   const matchesWithRows = enrichedMatches.filter((match) => (match.stats_rows ?? 0) > 0).length;
+  const completionPercent = enrichedMatches.length
+    ? Math.round((completedMatches / enrichedMatches.length) * 100)
+    : 0;
+
+  let summaryQuery = selectedCompetitionId
+    ? supabase
+        .from("player_season_statistics")
+        .select("player_id,season_id,competition_id,appearances,starts,substitute_appearances,captain_appearances,minutes_played,goals,assists,own_goals,penalties_scored,penalties_missed,yellow_cards,red_cards,goals_conceded,saves,clean_sheets")
+        .eq("competition_id", selectedCompetitionId)
+    : supabase
+        .from("player_season_totals")
+        .select("player_id,season_id,appearances,starts,substitute_appearances,captain_appearances,competitions_played,minutes_played,goals,assists,own_goals,penalties_scored,penalties_missed,yellow_cards,red_cards,goals_conceded,saves,clean_sheets");
+
+  if (selectedSeasonId) {
+    summaryQuery = summaryQuery.eq("season_id", selectedSeasonId);
+  }
+
+  const { data: summaryData, error: summaryError } = await summaryQuery;
+  if (summaryError) {
+    return <StatisticsAggregationRequired message={summaryError.message} />;
+  }
+
+  const summaryByPlayer = new Map<string, SummaryNumbers>();
+  for (const row of summaryData ?? []) {
+    const key = String(row.player_id);
+    const current = summaryByPlayer.get(key) ?? emptySummary();
+    mergeStat(current, row as Partial<PlayerSeasonStatistics & PlayerSeasonTotal>);
+    summaryByPlayer.set(key, current);
+  }
+
+  const summaries: PlayerSummary[] = [];
+  for (const [playerId, totals] of summaryByPlayer) {
+    const player = playerById.get(playerId);
+    if (!player || totals.appearances <= 0) continue;
+    summaries.push({ player, ...totals });
+  }
+
+  const sortedSummaries = sortSummaries(summaries, sort);
+  const topScorer = topBy(summaries, "goals");
+  const topAssistant = topBy(summaries, "assists");
+  const mostAppearances = topBy(summaries, "appearances");
+  const mostMinutes = topBy(summaries, "minutes_played");
+  const bestKeeper = topBy(
+    summaries.filter((row) => row.player.position === "goalkeeper"),
+    "clean_sheets"
+  );
 
   return (
     <main className="adminPage statisticsAdminPage">
       <section className="adminHero compactAdminHero">
         <div className="container adminHeroInner">
           <div>
-            <p className="eyebrow">FC EDINEȚ • v2.2.1</p>
+            <p className="eyebrow">FC EDINEȚ • v2.2.2</p>
             <h1>Статистика игроков</h1>
             <p>
-              Фундамент сезонной статистики: сезоны, турниры, матчи и единый источник данных по каждому игроку.
+              Матчи — источник данных. Сезонные итоги, лидеры и турнирные срезы считаются автоматически.
             </p>
           </div>
           <div className="adminHeroActions">
@@ -203,25 +374,27 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
           )}
 
           <div className="adminStats statisticsKpis">
-            <Stat label="Активные игроки" value={playersResult.count ?? 0} />
+            <Stat label="Активные игроки" value={activePlayersCount} />
             <Stat label="Завершённые матчи" value={enrichedMatches.length} />
-            <Stat label="Есть строки статистики" value={matchesWithRows} />
-            <Stat label="Статистика завершена" value={completedMatches} />
+            <Stat label="Статистика готова" value={completedMatches} />
+            <Stat label="Готовность" value={`${completionPercent}%`} />
           </div>
 
           <section className="statisticsPanel statisticsFilterPanel">
             <div className="statisticsPanelHead">
               <div>
                 <p className="eyebrow blue">КОНТЕКСТ</p>
-                <h2>Сезон и турнир</h2>
-                <p>Вся будущая статистика строится в разрезе сезона и конкретного турнира.</p>
+                <h2>Сезонная сводка</h2>
+                <p>
+                  Выбери сезон и турнир. Таблица игроков ниже пересчитывается автоматически только по матчам, где статистика отмечена «Готово».
+                </p>
               </div>
               {currentSeason && (
                 <span className="statisticsCurrentBadge">Текущий: {currentSeason.name}</span>
               )}
             </div>
 
-            <form method="get" className="statisticsFilters">
+            <form method="get" className="statisticsFilters statisticsFiltersV222">
               <label>
                 <span>Сезон</span>
                 <select name="season" defaultValue={selectedSeasonId}>
@@ -249,8 +422,115 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
                     ))}
                 </select>
               </label>
+              <label>
+                <span>Сортировка</span>
+                <select name="sort" defaultValue={sort}>
+                  {Object.entries(sortLabels).map(([value, label]) => (
+                    <option value={value} key={value}>{label}</option>
+                  ))}
+                </select>
+              </label>
               <button className="primaryButton" type="submit">Показать</button>
             </form>
+          </section>
+
+          <section className="statisticsPanel statisticsSeasonSummaryPanel">
+            <div className="statisticsPanelHead">
+              <div>
+                <p className="eyebrow blue">АВТОМАТИЧЕСКИЙ ПОДСЧЁТ</p>
+                <h2>
+                  {selectedSeason?.name ?? "Все сезоны"}
+                  {selectedCompetition ? ` · ${selectedCompetition.name}` : " · все турниры"}
+                </h2>
+                <p>
+                  Никаких ручных итогов: один завершённый матч меняет эту таблицу автоматически.
+                </p>
+              </div>
+              <div className="statisticsCompletionBadge">
+                <strong>{completedMatches}/{enrichedMatches.length}</strong>
+                <span>матчей учтено</span>
+              </div>
+            </div>
+
+            {summaries.length === 0 ? (
+              <div className="statisticsSummaryEmpty">
+                <strong>Пока нечего суммировать</strong>
+                <span>Заверши статистику хотя бы одного матча — игроки сразу появятся здесь.</span>
+              </div>
+            ) : (
+              <>
+                <div className="statisticsLeaderGrid">
+                  <LeaderCard title="Бомбардир" row={topScorer} metric="goals" suffix="гол." />
+                  <LeaderCard title="Ассистент" row={topAssistant} metric="assists" suffix="асс." />
+                  <LeaderCard title="Больше матчей" row={mostAppearances} metric="appearances" suffix="матч." />
+                  <LeaderCard title="Больше минут" row={mostMinutes} metric="minutes_played" suffix="мин." />
+                  {bestKeeper && bestKeeper.clean_sheets > 0 && (
+                    <LeaderCard title="Сухие матчи" row={bestKeeper} metric="clean_sheets" suffix="сух." />
+                  )}
+                </div>
+
+                <div className="statisticsSeasonTableWrap">
+                  <table className="statisticsSeasonTable">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Игрок</th>
+                        <th title="Матчи">И</th>
+                        <th title="В старте">Старт</th>
+                        <th title="Выходы на замену">Зам.</th>
+                        <th title="Минуты">Мин</th>
+                        <th title="Голы">Г</th>
+                        <th title="Голевые передачи">А</th>
+                        <th title="Голы + ассисты">Г+А</th>
+                        <th title="Жёлтые карточки">ЖК</th>
+                        <th title="Красные карточки">КК</th>
+                        <th title="Сухие матчи">Сух.</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortedSummaries.map((row, index) => (
+                        <tr key={row.player.id}>
+                          <td className="statisticsRankCell">{index + 1}</td>
+                          <td>
+                            <Link href={`/team/${row.player.slug}`} className="statisticsSummaryPlayer">
+                              <span className="statisticsSummaryPlayerPhoto">
+                                {row.player.photo_url ? (
+                                  <img src={row.player.photo_url} alt="" />
+                                ) : (
+                                  <b>{row.player.shirt_number ?? "FC"}</b>
+                                )}
+                              </span>
+                              <span>
+                                <strong>{row.player.first_name} {row.player.last_name}</strong>
+                                <small>
+                                  {positionLabels[row.player.position] ?? row.player.position}
+                                  {!row.player.is_active ? " · архив" : ""}
+                                </small>
+                              </span>
+                            </Link>
+                          </td>
+                          <td><b>{row.appearances}</b></td>
+                          <td>{row.starts}</td>
+                          <td>{row.substitute_appearances}</td>
+                          <td>{row.minutes_played}</td>
+                          <td className="statisticsAccentCell">{row.goals}</td>
+                          <td className="statisticsAccentCell">{row.assists}</td>
+                          <td><b>{row.goals + row.assists}</b></td>
+                          <td>{row.yellow_cards}</td>
+                          <td>{row.red_cards}</td>
+                          <td>{row.player.position === "goalkeeper" ? row.clean_sheets : "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+
+            <div className="statisticsCalculationNote">
+              <strong>Правило расчёта:</strong>
+              <span>черновики исключены; учитываются только finished-матчи со статусом статистики complete.</span>
+            </div>
           </section>
 
           <div className="statisticsFoundationGrid">
@@ -348,7 +628,7 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
                 <p className="eyebrow blue">МАТЧИ</p>
                 <h2>Готовность статистики</h2>
                 <p>
-                  Открой завершённый матч, отметь сыгравших футболистов и внеси их показатели. Черновик можно сохранить и продолжить позже.
+                  В сезонную таблицу выше попадают только матчи со статусом «Готово». Черновики можно менять сколько угодно — итоги сезона от них не меняются.
                 </p>
               </div>
               <span className="statisticsCount">{enrichedMatches.length}</span>
@@ -398,13 +678,13 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
           </section>
 
           <section className="statisticsArchitecture">
-            <p className="eyebrow blue">АРХИТЕКТУРА v2.2.0</p>
-            <h2>Итоги больше не вводятся вручную</h2>
+            <p className="eyebrow blue">АРХИТЕКТУРА v2.2.2</p>
+            <h2>Матч изменился — сезон пересчитался</h2>
             <p>
-              Базовой записью становится «игрок + конкретный матч». Сезонные матчи, минуты, голы, передачи и карточки будут автоматически суммироваться из этих записей. Это исключает расхождения между профилем игрока и историей матчей.
+              Сезонная таблица не хранит отдельные ручные цифры. Она строится непосредственно из завершённой матчевой статистики. Поэтому гол, ассист или исправленная минута в матче автоматически меняет итог футболиста.
             </p>
             <div className="statisticsArchitectureFlow">
-              <span>Сезон</span><b>→</b><span>Турнир</span><b>→</b><span>Матч</span><b>→</b><span>Игрок</span><b>→</b><span>Итоги</span>
+              <span>Матч</span><b>→</b><span>Статус «Готово»</span><b>→</b><span>Игроки</span><b>→</b><span>Суммирование</span><b>→</b><span>Сезон</span>
             </div>
           </section>
         </div>
@@ -413,11 +693,43 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, value }: { label: string; value: number | string }) {
   return (
     <article className="adminStat">
       <strong>{value}</strong>
       <span>{label}</span>
+    </article>
+  );
+}
+
+function LeaderCard({
+  title,
+  row,
+  metric,
+  suffix,
+}: {
+  title: string;
+  row: PlayerSummary | null;
+  metric: keyof SummaryNumbers;
+  suffix: string;
+}) {
+  if (!row) return null;
+  return (
+    <article className="statisticsLeaderCard">
+      <span className="statisticsLeaderLabel">{title}</span>
+      <div className="statisticsLeaderPlayer">
+        <span className="statisticsLeaderPhoto">
+          {row.player.photo_url ? <img src={row.player.photo_url} alt="" /> : <b>{row.player.shirt_number ?? "FC"}</b>}
+        </span>
+        <span>
+          <strong>{row.player.first_name} {row.player.last_name}</strong>
+          <small>{positionLabels[row.player.position] ?? row.player.position}</small>
+        </span>
+      </div>
+      <div className="statisticsLeaderValue">
+        <strong>{numberValue(row[metric])}</strong>
+        <span>{suffix}</span>
+      </div>
     </article>
   );
 }
@@ -439,10 +751,40 @@ function StatisticsMigrationRequired({ message }: { message: string }) {
         <div className="container">
           <div className="statisticsSetupCard">
             <span className="statisticsSetupIcon">DB</span>
-            <p className="eyebrow blue">ОДИН РАЗ</p>
-            <h2>Примени миграцию 034</h2>
+            <p className="eyebrow blue">БАЗА</p>
+            <h2>Проверь миграции 034–035</h2>
             <p>
-              В Supabase → SQL Editor открой файл <code>database/034_player_statistics_foundation.sql</code>, вставь его целиком и нажми Run. После этого обнови эту страницу.
+              Базовые таблицы статистики ещё недоступны. Проверь, что в Supabase уже выполнены <code>034_player_statistics_foundation.sql</code> и <code>035_player_statistics_entry.sql</code>.
+            </p>
+            <small>Ответ базы: {message}</small>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function StatisticsAggregationRequired({ message }: { message: string }) {
+  return (
+    <main className="adminPage statisticsAdminPage">
+      <section className="adminHero compactAdminHero">
+        <div className="container adminHeroInner">
+          <div>
+            <p className="eyebrow">FC EDINEȚ • v2.2.2</p>
+            <h1>Автоматические итоги сезона</h1>
+            <p>Код обновлён, но базе нужна последняя миграция агрегирования.</p>
+          </div>
+          <Link href="/admin" className="adminBack">← Админка</Link>
+        </div>
+      </section>
+      <section className="section adminSurface">
+        <div className="container">
+          <div className="statisticsSetupCard">
+            <span className="statisticsSetupIcon">036</span>
+            <p className="eyebrow blue">ОДИН РАЗ</p>
+            <h2>Примени миграцию 036</h2>
+            <p>
+              В Supabase → SQL Editor открой <code>database/036_player_season_aggregation.sql</code>, вставь файл целиком и нажми Run. После этого обнови страницу.
             </p>
             <small>Ответ базы: {message}</small>
           </div>

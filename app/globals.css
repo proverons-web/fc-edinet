@@ -1779,3 +1779,56 @@ h1,h2,h3{font-family:var(--ds-font-heading);font-weight:var(--ds-heading-weight)
   .statisticsSaveActions{display:grid;grid-template-columns:1fr 1fr}
   .statisticsSaveActions button{width:100%;justify-content:center;text-align:center}
 }
+
+/* ============================================================
+   FC EDINEȚ v2.2.2 — automatic player season aggregation
+   ============================================================ */
+.statisticsFiltersV222{grid-template-columns:minmax(170px,1fr) minmax(200px,1fr) minmax(160px,.8fr) auto}
+.statisticsSeasonSummaryPanel{margin-top:18px}
+.statisticsCompletionBadge{display:grid;justify-items:end;gap:2px;padding:10px 13px;border-radius:14px;background:#f0f6ff;border:1px solid #d9e7fb;color:#164f91;white-space:nowrap}
+.statisticsCompletionBadge strong{font-size:22px;line-height:1}
+.statisticsCompletionBadge span{font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.04em;color:#5d7898}
+.statisticsSummaryEmpty{display:grid;gap:6px;border:1px dashed #ccd7e4;border-radius:16px;padding:24px;background:#f8fafc;text-align:center;color:#607187}
+.statisticsSummaryEmpty strong{font-size:18px;color:#18385f}
+.statisticsLeaderGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.statisticsLeaderGrid:has(> :nth-child(5)){grid-template-columns:repeat(5,minmax(0,1fr))}
+.statisticsLeaderCard{display:grid;grid-template-columns:1fr auto;gap:10px 12px;align-items:center;min-width:0;border:1px solid #dfe7f1;border-radius:16px;padding:13px;background:linear-gradient(145deg,#fff,#f8fbff)}
+.statisticsLeaderLabel{grid-column:1/-1;font-size:10px;font-weight:900;color:#57708e;text-transform:uppercase;letter-spacing:.055em}
+.statisticsLeaderPlayer{display:grid;grid-template-columns:42px minmax(0,1fr);gap:9px;align-items:center;min-width:0}
+.statisticsLeaderPhoto{width:42px;height:42px;border-radius:11px;overflow:hidden;background:#e8eef6;display:grid;place-items:center;color:#315a89;font-size:10px;font-weight:900}
+.statisticsLeaderPhoto img{width:100%;height:100%;object-fit:cover}
+.statisticsLeaderPlayer>span:last-child{display:grid;gap:2px;min-width:0}
+.statisticsLeaderPlayer strong{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#15365e}
+.statisticsLeaderPlayer small{font-size:10px;color:#7b899a}
+.statisticsLeaderValue{display:grid;justify-items:end;align-self:center}
+.statisticsLeaderValue strong{font-size:25px;line-height:1;color:#0d62c7}
+.statisticsLeaderValue span{font-size:9px;font-weight:850;text-transform:uppercase;color:#7d8998}
+.statisticsSeasonTableWrap{overflow:auto;border:1px solid #e1e7ef;border-radius:16px;background:#fff}
+.statisticsSeasonTable{width:100%;min-width:920px;border-collapse:collapse}
+.statisticsSeasonTable th,.statisticsSeasonTable td{padding:10px 11px;border-bottom:1px solid #edf1f5;text-align:center;font-size:12px;white-space:nowrap}
+.statisticsSeasonTable th{position:sticky;top:0;z-index:2;background:#f6f8fb;color:#617288;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.035em}
+.statisticsSeasonTable th:nth-child(2),.statisticsSeasonTable td:nth-child(2){text-align:left}
+.statisticsSeasonTable tbody tr:last-child td{border-bottom:0}
+.statisticsSeasonTable tbody tr:hover{background:#f9fbfe}
+.statisticsRankCell{width:42px;color:#8a98aa;font-weight:900}
+.statisticsSummaryPlayer{display:grid;grid-template-columns:38px minmax(0,1fr);gap:9px;align-items:center;min-width:190px;color:inherit;text-decoration:none}
+.statisticsSummaryPlayerPhoto{width:38px;height:38px;border-radius:10px;overflow:hidden;background:#e8eef6;display:grid;place-items:center;color:#315a89;font-size:10px;font-weight:900}
+.statisticsSummaryPlayerPhoto img{width:100%;height:100%;object-fit:cover}
+.statisticsSummaryPlayer>span:last-child{display:grid;gap:2px;min-width:0}
+.statisticsSummaryPlayer strong{font-size:13px;color:#17395f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.statisticsSummaryPlayer small{font-size:10px;color:#8290a1}
+.statisticsAccentCell{font-size:14px!important;font-weight:900;color:#0d62c7}
+.statisticsCalculationNote{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:12px;padding:10px 12px;border-radius:12px;background:#f4f7fa;color:#6f7f92;font-size:11px}
+.statisticsCalculationNote strong{color:#375470}
+
+@media(max-width:1180px){
+  .statisticsLeaderGrid,.statisticsLeaderGrid:has(> :nth-child(5)){grid-template-columns:repeat(2,minmax(0,1fr))}
+  .statisticsFiltersV222{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .statisticsFiltersV222 .primaryButton{align-self:end}
+}
+@media(max-width:680px){
+  .statisticsLeaderGrid,.statisticsLeaderGrid:has(> :nth-child(5)){grid-template-columns:1fr}
+  .statisticsFiltersV222{grid-template-columns:1fr}
+  .statisticsCompletionBadge{justify-items:start}
+  .statisticsSeasonTableWrap{margin-inline:-4px}
+}

@@ -1,0 +1,18 @@
+FC EDINEȚ v2.2.2 — DEPLOY
+========================
+
+1. ОДИН РАЗ в Supabase SQL Editor выполни:
+   database/036_player_season_aggregation.sql
+
+2. Убедись, что .env.local содержит Supabase URL / publishable key.
+
+3. Запусти из корня проекта:
+   DEPLOY_FC_EDINET.bat
+
+4. После Vercel deployment проверь:
+   https://fc-edinet.vercel.app/api/version
+
+   Ожидается version: 2.2.2
+
+5. Затем:
+   https://fc-edinet.vercel.app/admin/statistics

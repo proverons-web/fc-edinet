@@ -146,7 +146,7 @@ export default async function MatchStatisticsPage({
               <section className="statisticsPanel statisticsEntryIntro">
                 <div className="statisticsPanelHead">
                   <div>
-                    <p className="eyebrow blue">v2.2.1 • ВВОД ПО МАТЧУ</p>
+                    <p className="eyebrow blue">v2.2.2 • ВВОД ПО МАТЧУ</p>
                     <h2>Кто играл и что сделал</h2>
                     <p>
                       Включи «Играл» только у участников матча. Для них укажи старт/замену, минуты и показатели. Игроки без отметки в сезонную статистику не попадут.
