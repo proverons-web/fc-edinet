@@ -37,7 +37,7 @@ const entityLabels: Record<string, string> = {
   homepage_hero: "Hero главной",
   homepage_sections: "Блоки главной",
   homepage_settings: "Настройки главной",
-  site_global_designs: "Global Header / Footer",
+  site_global_designs: "Design System / Header / Footer",
   homepage_blocks: "Block Library",
   site_page_designs: "Visual Editor страниц",
   partners: "Партнёры",

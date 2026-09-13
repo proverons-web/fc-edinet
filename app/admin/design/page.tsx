@@ -2,6 +2,7 @@ import Link from "next/link";
 import VisualPageEditor from "@/app/components/VisualPageEditor";
 import SitePageVisualEditor from "@/app/components/SitePageVisualEditor";
 import GlobalDesignEditor from "@/app/components/GlobalDesignEditor";
+import DesignSystemEditor from "@/app/components/DesignSystemEditor";
 import { requireEditor } from "@/lib/editorial";
 import {
   defaultSitePageDesign,
@@ -13,6 +14,7 @@ import { defaultHeroLayerConfig, homeHeroLayerDefinitions, normalizeHeroLayerCon
 import { defaultHomepageSectionDesignMap, normalizeHomepageSectionDesignMap } from "@/lib/section-builder";
 import { normalizeHomepageBlock, normalizeHomepageBlocks, normalizeHomepageLayoutOrder } from "@/lib/block-library";
 import { defaultFooterDesign, defaultHeaderDesign, normalizeFooterDesign, normalizeHeaderDesign } from "@/lib/global-design";
+import { defaultDesignSystem, normalizeDesignSystem } from "@/lib/design-system";
 import type {
   HomepageDesignDraft,
   HomepageDesignSnapshot,
@@ -39,12 +41,12 @@ export const dynamic = "force-dynamic";
 type PageProps = { searchParams?: Promise<Record<string, string | string[] | undefined>> };
 const keys: HomepageSectionKey[] = ["matches", "standings", "news", "players", "media", "partners"];
 const validSiteKeys = new Set(sitePageDesignCatalog.map((item) => item.key));
-type DesignSelection = "home" | "global_header" | "global_footer" | SitePageDesignKey;
+type DesignSelection = "home" | "global_header" | "global_footer" | "global_design_system" | SitePageDesignKey;
 
 export default async function AdminDesignPage({ searchParams }: PageProps) {
   const query = searchParams ? await searchParams : {};
   const rawPage = first(query.page);
-  const selected: DesignSelection = rawPage === "global_header" || rawPage === "global_footer"
+  const selected: DesignSelection = rawPage === "global_header" || rawPage === "global_footer" || rawPage === "global_design_system"
     ? rawPage
     : rawPage && validSiteKeys.has(rawPage as SitePageDesignKey) ? rawPage as SitePageDesignKey : "home";
 
@@ -55,7 +57,7 @@ export default async function AdminDesignPage({ searchParams }: PageProps) {
           <div>
             <p className="eyebrow">FC EDINEȚ • SITE-WIDE VISUAL EDITOR</p>
             <h1>Визуальный редактор</h1>
-            <p>Visual Editor управляет глобальными Header/Footer, Hero, секциями и Block Library. Глобальные элементы имеют отдельный черновик и историю версий и применяются ко всем публичным страницам только после публикации.</p>
+            <p>Visual Editor управляет Design System, глобальными Header/Footer, Hero, секциями и Block Library. Глобальные элементы имеют отдельный черновик и историю версий и применяются ко всем публичным страницам только после публикации.</p>
           </div>
           <div className="adminHeroActions">
             <Link href="/admin" className="adminBack">← Админка</Link>
@@ -68,7 +70,7 @@ export default async function AdminDesignPage({ searchParams }: PageProps) {
       <section className="section adminSurface visualEditorPage">
         <div className="container">
           <DesignNavigation selected={selected} />
-          {selected === "home" ? <HomeEditor /> : selected === "global_header" ? <GlobalEditor componentKey="header" /> : selected === "global_footer" ? <GlobalEditor componentKey="footer" /> : <GenericEditor pageKey={selected} />}
+          {selected === "home" ? <HomeEditor /> : selected === "global_header" ? <GlobalEditor componentKey="header" /> : selected === "global_footer" ? <GlobalEditor componentKey="footer" /> : selected === "global_design_system" ? <DesignSystemGlobalEditor /> : <GenericEditor pageKey={selected} />}
         </div>
       </section>
     </main>
@@ -149,11 +151,31 @@ async function GlobalEditor({ componentKey }: { componentKey: "header" | "footer
   </>;
 }
 
+async function DesignSystemGlobalEditor() {
+  const { supabase } = await requireEditor();
+  const [rowResult, draftResult, versionsResult] = await Promise.all([
+    supabase.from("site_global_designs").select("*").eq("component_key", "design_system").maybeSingle(),
+    supabase.from("site_global_design_drafts").select("*").eq("component_key", "design_system").maybeSingle(),
+    supabase.from("site_global_design_versions").select("*").eq("component_key", "design_system").order("created_at", { ascending: false }).limit(20),
+  ]);
+  const row = rowResult.data as { config?: unknown } | null;
+  const draftRow = draftResult.data as { config?: unknown } | null;
+  const hasDraft = Boolean(draftRow?.config);
+  const published = normalizeDesignSystem(row?.config, defaultDesignSystem);
+  const initial = normalizeDesignSystem(draftRow?.config, published);
+  const versions = (versionsResult.data ?? []) as { id: string | number; label: string | null; created_at: string; snapshot: unknown }[];
+  return <>
+    <div className="visualEditorIntro"><div><span className={`visualStatus ${hasDraft ? "draft" : "published"}`}>{hasDraft ? "Черновик: Design System" : "Опубликовано: Design System"}</span><p>Глобальные design tokens управляют цветами, типографикой, шириной контейнера, радиусами, тенями и базовой геометрией всего сайта.</p></div>{hasDraft && <form action={resetGlobalDesignDraft}><input type="hidden" name="component_key" value="design_system"/><button type="submit" className="rowAction danger">Сбросить черновик</button></form>}</div>
+    <DesignSystemEditor initial={initial} />
+    <section className="visualHistory"><div className="sectionHeading"><div><p className="eyebrow blue">ИСТОРИЯ</p><h2>Версии Design System</h2><p>Восстановление сначала помещает выбранную дизайн-систему в черновик.</p></div></div>{versions.length ? <div className="visualHistoryList">{versions.map((version) => <article className="visualHistoryRow" key={version.id}><div><strong>{version.label || `Версия #${version.id}`}</strong><span>{formatDate(version.created_at)}</span></div><form action={restoreGlobalDesignVersion}><input type="hidden" name="component_key" value="design_system"/><input type="hidden" name="version_id" value={String(version.id)}/><button className="rowAction" type="submit">Восстановить в черновик</button></form></article>)}</div> : <div className="adminEmpty">История появится после первой публикации.</div>}</section>
+  </>;
+}
+
 function DesignNavigation({ selected }: { selected: DesignSelection }) {
   const sections = sitePageDesignCatalog.filter((item) => item.group === "sections");
   const templates = sitePageDesignCatalog.filter((item) => item.group === "templates");
   return <nav className="designPageNav" aria-label="Страницы Visual Editor">
-    <div><span>ГЛОБАЛЬНЫЕ</span><Link className={selected === "global_header" ? "active" : ""} href="/admin/design?page=global_header">Header</Link><Link className={selected === "global_footer" ? "active" : ""} href="/admin/design?page=global_footer">Footer</Link></div>
+    <div><span>ГЛОБАЛЬНЫЕ</span><Link className={selected === "global_design_system" ? "active" : ""} href="/admin/design?page=global_design_system">Design System</Link><Link className={selected === "global_header" ? "active" : ""} href="/admin/design?page=global_header">Header</Link><Link className={selected === "global_footer" ? "active" : ""} href="/admin/design?page=global_footer">Footer</Link></div>
     <div><span>ОБЩИЕ</span><Link className={selected === "home" ? "active" : ""} href="/admin/design?page=home">Главная</Link></div>
     <div><span>РАЗДЕЛЫ</span>{sections.map((item) => <Link className={selected === item.key ? "active" : ""} href={`/admin/design?page=${item.key}`} key={item.key}>{item.label}</Link>)}</div>
     <div><span>ШАБЛОНЫ</span>{templates.map((item) => <Link className={selected === item.key ? "active" : ""} href={`/admin/design?page=${item.key}`} key={item.key}>{item.label}</Link>)}</div>

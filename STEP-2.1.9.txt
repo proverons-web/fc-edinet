@@ -1,0 +1,15 @@
+FC EDINEȚ v2.1.9 — DESIGN SYSTEM
+
+Что добавлено:
+- Global -> Design System в Visual Editor.
+- Управление клубными цветами и neutral palette.
+- Body / Heading font presets без внешних зависимостей.
+- Базовый размер текста, line-height, weight/letter-spacing заголовков.
+- Глобальная ширина container и desktop/mobile gutters.
+- Radius S/M/L, тень карточек и высота основных кнопок.
+- Базовая единица spacing для дальнейшего Section/Block Builder.
+- Live preview Design System.
+- Черновик, публикация, история и восстановление через общую global-design систему.
+- Публичный RootLayout читает только опубликованную конфигурацию и прокидывает CSS variables на весь сайт.
+
+Миграция production: database/031_design_system.sql
