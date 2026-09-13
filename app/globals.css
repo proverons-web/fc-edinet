@@ -1832,3 +1832,90 @@ h1,h2,h3{font-family:var(--ds-font-heading);font-weight:var(--ds-heading-weight)
   .statisticsCompletionBadge{justify-items:start}
   .statisticsSeasonTableWrap{margin-inline:-4px}
 }
+
+/* ============================================================
+   FC EDINEȚ v2.2.3 — public player season statistics
+   ============================================================ */
+.playerStatsSection{background:#fff;padding:70px 0 66px;border-bottom:1px solid var(--line)}
+.playerStatsContainer{display:grid;gap:22px}
+.playerStatsHeader{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
+.playerStatsHeader h2{margin:5px 0 0;font-size:clamp(34px,4.4vw,58px);line-height:.98;letter-spacing:-.04em;color:#0b294e}
+.playerStatsHeader h2 span{display:block;margin-top:6px;color:#0d6efd;font-size:.52em;line-height:1.1;letter-spacing:-.02em}
+.playerSeasonNav{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.playerSeasonNav a{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 13px;border:1px solid #dbe3ee;border-radius:999px;background:#fff;color:#5d6d81;font-size:12px;font-weight:850;text-decoration:none;transition:.16s ease}
+.playerSeasonNav a:hover{border-color:#9dbce5;color:#0d61c7}
+.playerSeasonNav a.active{border-color:#0d6efd;background:#0d6efd;color:#fff;box-shadow:0 8px 22px rgba(13,110,253,.18)}
+.playerStatsEmpty{display:grid;gap:7px;border:1px dashed #c7d4e3;border-radius:18px;padding:30px;background:#f8fafc;color:#6d7c8e;text-align:center}
+.playerStatsEmpty strong{font-size:18px;color:#17395f}
+.playerStatsEmpty span{font-size:13px;line-height:1.55}
+.playerStatsError{border-style:solid;border-color:#ffd5dc;background:#fff7f8;color:#9a3f52}
+.playerStatsError strong{color:#8d253b}
+.playerStatsKpiGrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.playerStatsKpi{min-height:120px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;border:1px solid #e0e7f0;border-radius:17px;padding:17px;background:linear-gradient(150deg,#fff,#f8fafc)}
+.playerStatsKpi strong{font-size:clamp(30px,3vw,44px);line-height:1;color:#102f56;letter-spacing:-.04em}
+.playerStatsKpi span{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.055em;color:#738296}
+.playerStatsKpi.accent{border-color:#cfe0f9;background:linear-gradient(145deg,#f7fbff,#eef5ff)}
+.playerStatsKpi.accent strong{color:#0d66cf}
+.playerStatsSecondaryGrid{display:flex;align-items:stretch;gap:9px;flex-wrap:wrap}
+.playerStatsMini{min-width:125px;display:flex;align-items:center;justify-content:space-between;gap:15px;border:1px solid #e2e8f0;border-radius:13px;padding:10px 12px;background:#fff}
+.playerStatsMini span{font-size:10px;font-weight:850;color:#6d7d91;text-transform:uppercase;letter-spacing:.035em}
+.playerStatsMini strong{font-size:18px;color:#14385f}
+.playerStatsBlock{border:1px solid #e0e7ef;border-radius:19px;background:#fff;overflow:hidden}
+.playerStatsBlockHead{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;border-bottom:1px solid #e9eef4;background:#fafbfd}
+.playerStatsBlockHead h3{margin:0;font-size:22px;letter-spacing:-.025em;color:#17395f}
+.playerStatsBlockHead>span{display:inline-grid;place-items:center;min-width:31px;height:31px;border-radius:999px;background:#eaf3ff;color:#1762b6;font-size:11px;font-weight:900}
+.playerCompetitionStatsWrap{overflow-x:auto}
+.playerCompetitionStats{width:100%;min-width:710px;border-collapse:collapse}
+.playerCompetitionStats th,.playerCompetitionStats td{padding:13px 14px;border-bottom:1px solid #edf1f5;text-align:center;white-space:nowrap}
+.playerCompetitionStats th{background:#f7f9fc;color:#65768c;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.055em}
+.playerCompetitionStats th:first-child,.playerCompetitionStats td:first-child{text-align:left}
+.playerCompetitionStats tbody tr:last-child td{border-bottom:0}
+.playerCompetitionStats td{font-size:13px;color:#41536a}
+.playerCompetitionStats td strong{color:#163a62}
+.playerCompetitionStats td.accent{font-size:15px;font-weight:900;color:#0d65cb}
+.playerRecentMatches{display:grid}
+.playerRecentMatch{display:grid;grid-template-columns:155px minmax(270px,1.35fr) minmax(145px,.8fr) minmax(220px,1fr);gap:16px;align-items:center;padding:14px 18px;border-bottom:1px solid #edf1f5}
+.playerRecentMatch:last-child{border-bottom:0}
+.playerRecentDate,.playerRecentRole{display:grid;gap:4px}
+.playerRecentDate strong,.playerRecentRole strong{font-size:12px;color:#183b63}
+.playerRecentDate span,.playerRecentRole span{font-size:10px;color:#7b899a;line-height:1.35}
+.playerRecentOpponent{display:grid;grid-template-columns:30px 42px minmax(0,1fr);gap:9px;align-items:center;min-width:0}
+.playerMatchResult{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;font-size:11px;font-weight:950}
+.playerMatchResult.w{background:#e6f7ed;color:#16824a}
+.playerMatchResult.d{background:#fff2d7;color:#8a6200}
+.playerMatchResult.l{background:#ffeaee;color:#b13950}
+.playerRecentOpponent>img,.playerRecentOpponentLogo{width:42px;height:42px;border-radius:10px;object-fit:contain;background:#f1f4f8;padding:4px}
+.playerRecentOpponentLogo{display:grid;place-items:center;color:#5f7289;font-size:10px;font-weight:900}
+.playerRecentOpponent>div{display:grid;gap:3px;min-width:0}
+.playerRecentOpponent strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#17395f;font-size:13px}
+.playerRecentOpponent div span{font-size:12px;font-weight:900;color:#65768b}
+.playerRecentNumbers{display:flex;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+.playerRecentNumbers>span{min-width:62px;display:grid;justify-items:center;gap:2px;border-radius:11px;background:#f5f8fc;padding:7px 8px;color:#738297;font-size:8px;font-weight:850;text-transform:uppercase;letter-spacing:.03em}
+.playerRecentNumbers b{font-size:17px;line-height:1;color:#0d62c7}
+
+@media(max-width:1180px){
+  .playerStatsKpiGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .playerRecentMatch{grid-template-columns:130px minmax(240px,1.2fr) minmax(130px,.7fr);}
+  .playerRecentNumbers{grid-column:1/-1;justify-content:flex-start;padding-left:146px}
+}
+@media(max-width:820px){
+  .playerStatsSection{padding:52px 0}
+  .playerStatsHeader{align-items:flex-start;flex-direction:column}
+  .playerSeasonNav{justify-content:flex-start}
+  .playerRecentMatch{grid-template-columns:1fr 1fr;gap:12px}
+  .playerRecentOpponent{grid-column:1/-1;grid-row:1}
+  .playerRecentNumbers{grid-column:1/-1;padding-left:0;justify-content:flex-start}
+}
+@media(max-width:620px){
+  .playerStatsKpiGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .playerStatsKpi{min-height:104px;padding:14px}
+  .playerStatsSecondaryGrid{display:grid;grid-template-columns:1fr 1fr}
+  .playerStatsMini{min-width:0}
+  .playerStatsHeader h2{font-size:38px}
+  .playerSeasonNav{width:100%;overflow-x:auto;flex-wrap:nowrap;padding-bottom:3px}
+  .playerSeasonNav a{white-space:nowrap}
+  .playerStatsBlockHead{padding:15px}
+  .playerRecentMatch{grid-template-columns:1fr;padding:14px}
+  .playerRecentOpponent,.playerRecentNumbers{grid-column:auto;grid-row:auto}
+  .playerRecentNumbers{justify-content:flex-start}
+}

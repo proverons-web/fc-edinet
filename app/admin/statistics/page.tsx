@@ -348,7 +348,7 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
       <section className="adminHero compactAdminHero">
         <div className="container adminHeroInner">
           <div>
-            <p className="eyebrow">FC EDINEȚ • v2.2.2</p>
+            <p className="eyebrow">FC EDINEȚ • v2.2.3</p>
             <h1>Статистика игроков</h1>
             <p>
               Матчи — источник данных. Сезонные итоги, лидеры и турнирные срезы считаются автоматически.
