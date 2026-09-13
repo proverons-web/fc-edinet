@@ -26,6 +26,7 @@ export const publicText = {
     nav: {
       news: "Новости",
       team: "Команда",
+      statistics: "Статистика",
       matches: "Матчи",
       standings: "Таблица",
       club: "Клуб",
@@ -49,7 +50,7 @@ export const publicText = {
       news: "Новости",
       photos: "Фото",
       videos: "Видео",
-      version: "Версия 2.2.4",
+      version: "Версия 2.2.5",
     },
     home: {
       heroEyebrow: "ЕДИНЕЦ • МОЛДОВА",
@@ -293,6 +294,7 @@ export const publicText = {
     nav: {
       news: "Știri",
       team: "Echipa",
+      statistics: "Statistici",
       matches: "Meciuri",
       standings: "Clasament",
       club: "Club",
@@ -316,7 +318,7 @@ export const publicText = {
       news: "Știri",
       photos: "Foto",
       videos: "Video",
-      version: "Versiunea 2.2.4",
+      version: "Versiunea 2.2.5",
     },
     home: {
       heroEyebrow: "EDINEȚ • MOLDOVA",

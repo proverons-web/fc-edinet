@@ -1954,3 +1954,78 @@ h1,h2,h3{font-family:var(--ds-font-heading);font-weight:var(--ds-heading-weight)
   .statisticsNotesGroup .statisticsNotesField{grid-template-columns:1fr}
   .playerStatsAdvancedGrid{grid-template-columns:repeat(2,minmax(0,1fr));padding:11px}
 }
+
+/* ============================================================
+   FC EDINEȚ v2.2.5 — public team statistics and leaderboards
+   ============================================================ */
+.teamStatisticsHero{background:linear-gradient(115deg,#041226,#0a2c5a 72%,#0f63ff)}
+.teamStatisticsSection{padding:64px 0 90px;background:#f5f8fc}
+.teamStatisticsContainer{display:grid;gap:30px}
+.teamStatisticsFilters{display:grid;grid-template-columns:1fr 1.4fr;gap:18px;border:1px solid #dde6f0;border-radius:20px;background:#fff;padding:18px 20px;box-shadow:0 12px 36px rgba(6,22,46,.05)}
+.teamStatisticsFilterBlock{display:grid;gap:10px;min-width:0}
+.teamStatisticsFilterBlock>span{font-size:10px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;color:#708197}
+.teamStatisticsPills{display:flex;gap:7px;flex-wrap:wrap}
+.teamStatisticsPills a{display:inline-flex;align-items:center;min-height:36px;padding:0 12px;border:1px solid #dbe4ee;border-radius:999px;background:#fff;color:#53677f;font-size:11px;font-weight:850;transition:.16s ease}
+.teamStatisticsPills a:hover{border-color:#9ebfe9;color:#0e61c8}
+.teamStatisticsPills a.active{border-color:#0f63ff;background:#0f63ff;color:#fff;box-shadow:0 8px 20px rgba(15,99,255,.16)}
+.teamStatisticsScoreboard{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:10px}
+.teamStatisticsMetric{min-height:112px;display:flex;flex-direction:column;justify-content:space-between;gap:15px;padding:17px;border:1px solid #dfe7f0;border-radius:17px;background:#fff}
+.teamStatisticsMetric strong{font-size:clamp(28px,3vw,42px);line-height:1;letter-spacing:-.045em;color:#15395f}
+.teamStatisticsMetric span{font-size:9px;line-height:1.25;font-weight:900;letter-spacing:.055em;text-transform:uppercase;color:#718197}
+.teamStatisticsMetric.is-good{background:#f5fcf8;border-color:#d3eadc}.teamStatisticsMetric.is-good strong{color:#18824c}
+.teamStatisticsMetric.is-bad{background:#fff8f9;border-color:#f0dce0}.teamStatisticsMetric.is-bad strong{color:#b34056}
+.teamStatisticsMetric.is-blue{background:#f5f9ff;border-color:#d4e2f7}.teamStatisticsMetric.is-blue strong{color:#0f63c7}
+.teamStatisticsEmpty{display:grid;gap:7px;place-items:center;text-align:center;padding:38px 24px;border:1px dashed #c4d2e2;border-radius:20px;background:#fff;color:#708095}
+.teamStatisticsEmpty strong{font-size:19px;color:#173a61}.teamStatisticsEmpty span{max-width:700px;font-size:13px;line-height:1.55}
+.teamStatisticsLeadersSection,.teamStatisticsTableSection{display:grid;gap:18px}
+.teamStatisticsHeading{display:flex;justify-content:space-between;align-items:end;gap:24px}
+.teamStatisticsHeading h2{margin:0;font-size:clamp(34px,4vw,52px);letter-spacing:-.04em;line-height:1;color:#102f55}
+.teamStatisticsHeading>span{font-size:12px;font-weight:850;color:#63758c}
+.teamStatisticsLeaderboards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.teamStatisticsLeaderboard{overflow:hidden;border:1px solid #dde6ef;border-radius:18px;background:#fff;box-shadow:0 9px 30px rgba(6,22,46,.04)}
+.teamStatisticsLeaderboard h3{margin:0;padding:15px 16px;border-bottom:1px solid #e9eef4;background:linear-gradient(145deg,#fbfdff,#f6f9fc);font-size:15px;color:#173a61}
+.teamStatisticsLeaderboardRows{display:grid}
+.teamStatisticsLeaderboardRow{display:grid;grid-template-columns:22px 34px minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid #edf1f5;transition:.15s ease}
+.teamStatisticsLeaderboardRow:last-child{border-bottom:0}.teamStatisticsLeaderboardRow:hover{background:#f7faff}
+.teamStatisticsLeaderboardRow>b{font-size:10px;color:#8694a5;text-align:center}
+.teamStatisticsLeaderboardRow img,.teamStatisticsLeaderboardAvatar{width:34px;height:34px;border-radius:10px;background:#eaf1f8;object-fit:cover;object-position:center top}
+.teamStatisticsLeaderboardAvatar{display:grid;place-items:center;color:#44627f;font-size:9px;font-weight:900}
+.teamStatisticsLeaderboardName{display:grid;gap:1px;min-width:0}.teamStatisticsLeaderboardName strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;color:#17395f}.teamStatisticsLeaderboardName small{font-size:9px;color:#8a98a9}
+.teamStatisticsLeaderboardValue{font-size:19px;color:#0f63cc;letter-spacing:-.03em}
+.teamStatisticsLeaderboardEmpty{padding:24px 14px;color:#8997a8;font-size:11px;text-align:center}
+.teamStatisticsTableHeading{align-items:flex-end}
+.teamStatisticsSort{display:grid;justify-items:end;gap:7px;max-width:620px}.teamStatisticsSort>span{font-size:9px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#718198}.teamStatisticsSort>div{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}.teamStatisticsSort a{padding:7px 10px;border:1px solid #dce4ed;border-radius:999px;background:#fff;color:#607188;font-size:10px;font-weight:850}.teamStatisticsSort a.active{border-color:#0f63ff;background:#0f63ff;color:#fff}
+.teamStatisticsTableWrap{overflow:auto;border:1px solid #dce5ef;border-radius:20px;background:#fff;box-shadow:0 10px 34px rgba(6,22,46,.045)}
+.teamStatisticsTable{width:100%;min-width:1180px;border-collapse:collapse}
+.teamStatisticsTable th,.teamStatisticsTable td{padding:13px 12px;border-bottom:1px solid #edf1f5;text-align:center;white-space:nowrap}
+.teamStatisticsTable th{position:sticky;top:0;z-index:1;background:#f8fafc;color:#6b7b90;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.05em}
+.teamStatisticsTable th:nth-child(2),.teamStatisticsTable td:nth-child(2),.teamStatisticsTable th:nth-child(3),.teamStatisticsTable td:nth-child(3),.teamStatisticsTable th:last-child,.teamStatisticsTable td:last-child{text-align:left}
+.teamStatisticsTable tbody tr:last-child td{border-bottom:0}.teamStatisticsTable tbody tr:hover{background:#fafcff}
+.teamStatisticsRank{font-size:11px;font-weight:900;color:#8493a5}
+.teamStatisticsPlayer{display:grid;grid-template-columns:42px minmax(0,1fr);gap:10px;align-items:center;min-width:210px}
+.teamStatisticsPlayer>img,.teamStatisticsPlayer>span:first-child{width:42px;height:42px;border-radius:11px;background:#eaf1f8;object-fit:cover;object-position:center top}
+.teamStatisticsPlayer>span:first-child{display:grid;place-items:center;font-size:9px;font-weight:900;color:#46637f}
+.teamStatisticsPlayer>span:last-child{display:grid;gap:2px;min-width:0}.teamStatisticsPlayer strong{font-size:12px;color:#17395f}.teamStatisticsPlayer small{font-size:9px;color:#8593a4}
+.teamStatisticsTable td{font-size:12px;color:#52657c}.teamStatisticsTable td>strong{color:#163a62}.teamStatisticsTable td.accent strong{font-size:16px;color:#0d62c7}.teamStatisticsTable td.accentBlue strong{font-size:16px;color:#17395f}
+.teamStatisticsExtended{max-width:260px;white-space:normal!important;font-size:10px!important;line-height:1.4;color:#6a7b90!important}
+
+@media(max-width:1280px){
+  .teamStatisticsScoreboard{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .teamStatisticsLeaderboards{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:900px){
+  .teamStatisticsSection{padding:52px 0 70px}
+  .teamStatisticsFilters{grid-template-columns:1fr}
+  .teamStatisticsLeaderboards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .teamStatisticsHeading,.teamStatisticsTableHeading{align-items:flex-start;flex-direction:column}
+  .teamStatisticsSort{justify-items:start;max-width:none}.teamStatisticsSort>div{justify-content:flex-start}
+}
+@media(max-width:620px){
+  .teamStatisticsSection{padding-top:38px}
+  .teamStatisticsFilters{padding:14px;border-radius:16px}
+  .teamStatisticsPills{flex-wrap:nowrap;overflow-x:auto;padding-bottom:3px}.teamStatisticsPills a{white-space:nowrap}
+  .teamStatisticsScoreboard{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .teamStatisticsMetric{min-height:96px;padding:14px}
+  .teamStatisticsLeaderboards{grid-template-columns:1fr}
+  .teamStatisticsHeading h2{font-size:36px}
+}

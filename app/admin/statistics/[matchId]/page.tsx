@@ -146,7 +146,7 @@ export default async function MatchStatisticsPage({
               <section className="statisticsPanel statisticsEntryIntro">
                 <div className="statisticsPanelHead">
                   <div>
-                    <p className="eyebrow blue">v2.2.4 • ВВОД ПО МАТЧУ</p>
+                    <p className="eyebrow blue">v2.2.5 • ВВОД ПО МАТЧУ</p>
                     <h2>Кто играл и что сделал</h2>
                     <p>
                       Включи «Играл» только у участников матча. Базовые показатели всегда на виду, а расширенный набор автоматически меняется по позиции игрока.

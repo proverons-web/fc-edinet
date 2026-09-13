@@ -406,7 +406,7 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
       <section className="adminHero compactAdminHero">
         <div className="container adminHeroInner">
           <div>
-            <p className="eyebrow">FC EDINEȚ • v2.2.4</p>
+            <p className="eyebrow">FC EDINEȚ • v2.2.5</p>
             <h1>Статистика игроков</h1>
             <p>
               Матчи — источник данных. Итоги и расширенные показатели по позициям считаются автоматически.
@@ -738,7 +738,7 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
           </section>
 
           <section className="statisticsArchitecture">
-            <p className="eyebrow blue">АРХИТЕКТУРА v2.2.4</p>
+            <p className="eyebrow blue">АРХИТЕКТУРА v2.2.5</p>
             <h2>Матч изменился — сезон пересчитался</h2>
             <p>
               Сезонная таблица не хранит отдельные ручные цифры. Она строится непосредственно из завершённой матчевой статистики. Поэтому гол, ассист или исправленная минута в матче автоматически меняет итог футболиста.
@@ -830,7 +830,7 @@ function StatisticsAggregationRequired({ message }: { message: string }) {
       <section className="adminHero compactAdminHero">
         <div className="container adminHeroInner">
           <div>
-            <p className="eyebrow">FC EDINEȚ • v2.2.4</p>
+            <p className="eyebrow">FC EDINEȚ • v2.2.5</p>
             <h1>Автоматические итоги сезона</h1>
             <p>Код обновлён, но базе нужна последняя миграция агрегирования.</p>
           </div>

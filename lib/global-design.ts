@@ -1,6 +1,6 @@
 import type { Locale } from "@/lib/i18n";
 
-export type HeaderNavKey = "news" | "team" | "matches" | "standings" | "club" | "media";
+export type HeaderNavKey = "news" | "team" | "statistics" | "matches" | "standings" | "club" | "media";
 export type HeaderBackground = "solid" | "glass" | "transparent";
 export type FooterBackground = "dark" | "blue" | "light";
 
@@ -64,7 +64,7 @@ export type FooterDesignConfig = {
   padding_bottom: number;
 };
 
-export const headerNavKeys: HeaderNavKey[] = ["news", "team", "matches", "standings", "club", "media"];
+export const headerNavKeys: HeaderNavKey[] = ["news", "team", "statistics", "matches", "standings", "club", "media"];
 
 export const defaultHeaderDesign: HeaderDesignConfig = {
   topbar_enabled: true,
@@ -117,6 +117,7 @@ export const defaultFooterDesign: FooterDesignConfig = {
       visible: true,
       links: [
         { id: "players", label_ru: "Игроки", label_ro: "Jucători", href: "/team" },
+        { id: "statistics", label_ru: "Статистика", label_ro: "Statistici", href: "/statistics" },
         { id: "matches", label_ru: "Матчи", label_ro: "Meciuri", href: "/matches" },
       ],
     },
@@ -239,6 +240,12 @@ function normalizeFooterLink(value: unknown, fallback: FooterLinkConfig): Footer
 function uniqueHeaderKeys(value: unknown, fallback: HeaderNavKey[]) {
   if (!Array.isArray(value)) return [...fallback];
   const valid = value.map(String).filter((item, index, array): item is HeaderNavKey => headerNavKeys.includes(item as HeaderNavKey) && array.indexOf(item) === index);
+  // v2.2.5: existing published headers do not know about the new Statistics item.
+  // Insert it next to Team instead of silently pushing it to the far right.
+  if (!valid.includes("statistics")) {
+    const teamIndex = valid.indexOf("team");
+    valid.splice(teamIndex >= 0 ? teamIndex + 1 : valid.length, 0, "statistics");
+  }
   for (const key of headerNavKeys) if (!valid.includes(key)) valid.push(key);
   return valid;
 }

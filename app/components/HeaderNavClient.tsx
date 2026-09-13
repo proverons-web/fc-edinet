@@ -38,6 +38,7 @@ export default function HeaderNavClient({
   const linkMap: Record<HeaderNavKey, { href: string; label: string }> = {
     news: { href: "/news", label: text.news },
     team: { href: "/team", label: text.team },
+    statistics: { href: "/statistics", label: text.statistics },
     matches: { href: "/matches", label: text.matches },
     standings: { href: "/standings", label: text.standings },
     club: { href: "/club", label: text.club },

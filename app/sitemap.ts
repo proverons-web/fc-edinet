@@ -12,6 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     route(base, "", 1, "daily"),
     route(base, "/news", 0.9, "daily"),
     route(base, "/team", 0.9, "weekly"),
+    route(base, "/statistics", 0.85, "daily"),
     route(base, "/matches", 0.9, "daily"),
     route(base, "/standings", 0.8, "daily"),
     route(base, "/club", 0.8, "monthly"),

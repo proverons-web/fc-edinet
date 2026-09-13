@@ -15,7 +15,7 @@ import {
 import type { DesignMediaAsset } from "@/lib/types";
 
 const initialState: { success?: string; error?: string } = {};
-const navLabels: Record<HeaderNavKey, string> = { news: "Новости", team: "Команда", matches: "Матчи", standings: "Таблица", club: "Клуб", media: "Медиа" };
+const navLabels: Record<HeaderNavKey, string> = { news: "Новости", team: "Команда", statistics: "Статистика", matches: "Матчи", standings: "Таблица", club: "Клуб", media: "Медиа" };
 
 export default function GlobalDesignEditor({
   componentKey,
