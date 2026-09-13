@@ -13,6 +13,9 @@ type LegacyInput = {
   show_match_card?: boolean | null;
 };
 
+export const HOMEPAGE_POSITION_MIN = -200;
+export const HOMEPAGE_POSITION_MAX = 300;
+
 export function defaultHomepageCanvas(input: LegacyInput = {}): HomepageCanvasConfig {
   const desktopBgX = clampInt(input.desktop_position_x, 0, 100, 50);
   const desktopBgY = clampInt(input.desktop_position_y, 0, 100, 50);
@@ -102,10 +105,10 @@ function normalizeViewport(value: unknown, fallback: HomepageCanvasViewport): Ho
     background_y: clampInt(value.background_y, 0, 100, fallback.background_y),
     background_zoom: clampInt(value.background_zoom, 100, 300, fallback.background_zoom),
     hero_height: clampInt(value.hero_height, 320, 950, fallback.hero_height),
-    text_x: clampInt(value.text_x, 0, 100, fallback.text_x),
-    text_y: clampInt(value.text_y, 0, 100, fallback.text_y),
-    match_x: clampInt(value.match_x, 0, 100, fallback.match_x),
-    match_y: clampInt(value.match_y, 0, 100, fallback.match_y),
+    text_x: clampInt(value.text_x, HOMEPAGE_POSITION_MIN, HOMEPAGE_POSITION_MAX, fallback.text_x),
+    text_y: clampInt(value.text_y, HOMEPAGE_POSITION_MIN, HOMEPAGE_POSITION_MAX, fallback.text_y),
+    match_x: clampInt(value.match_x, HOMEPAGE_POSITION_MIN, HOMEPAGE_POSITION_MAX, fallback.match_x),
+    match_y: clampInt(value.match_y, HOMEPAGE_POSITION_MIN, HOMEPAGE_POSITION_MAX, fallback.match_y),
     match_width: clampInt(value.match_width, 240, 520, fallback.match_width),
     match_visible: typeof value.match_visible === "boolean" ? value.match_visible : fallback.match_visible,
     safe_top: clampInt(value.safe_top, 0, 30, fallback.safe_top),

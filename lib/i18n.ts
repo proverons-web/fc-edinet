@@ -49,7 +49,7 @@ export const publicText = {
       news: "Новости",
       photos: "Фото",
       videos: "Видео",
-      version: "Версия 2.1.11",
+      version: "Версия 2.1.12",
     },
     home: {
       heroEyebrow: "ЕДИНЕЦ • МОЛДОВА",
@@ -277,7 +277,7 @@ export const publicText = {
       news: "Știri",
       photos: "Foto",
       videos: "Video",
-      version: "Versiunea 2.1.11",
+      version: "Versiunea 2.1.12",
     },
     home: {
       heroEyebrow: "EDINEȚ • MOLDOVA",

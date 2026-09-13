@@ -1,0 +1,33 @@
+FC EDINET v2.1.12 — DEPLOY
+
+1. Распакуй папку в:
+   E:\Projects\FC Edinet\fc-edinet-v2.1.12
+
+2. PowerShell:
+
+cd "E:\Projects\FC Edinet\fc-edinet-v2.1.12"
+
+npm install
+npm run deploy:check
+
+Если всё успешно:
+
+git init
+git remote add origin https://github.com/proverons-web/fc-edinet.git
+git fetch origin
+git checkout -b main
+git reset origin/main
+
+git status
+git add .
+git commit -m "FC Edinet v2.1.12 Full Page Canvas and visual polish"
+git push -u origin main
+
+После Vercel deployment:
+https://fc-edinet.vercel.app/api/version
+
+Должно быть:
+"version": "2.1.12"
+
+Затем:
+/admin/design?page=home

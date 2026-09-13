@@ -1623,3 +1623,6 @@ h1,h2,h3{font-family:var(--ds-font-heading);font-weight:var(--ds-heading-weight)
 .publishingPreviewViewport.tablet .draftHomeIntro{width:min(650px,78%)}
 .publishingPreviewViewport.tablet .draftMatchCard{width:min(var(--preview-match-tablet-width,350px),72%)}
 .publishingPreviewViewport.mobile .draftHomeIntro{width:min(520px,88%)}
+
+
+/* ===== v2.1.12 FULL PAGE PREVIEW / FREE POSITIONING ===== */

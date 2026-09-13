@@ -157,21 +157,29 @@ function fitHomepageViewport(
 }
 
 /**
- * Safe Zone lock controls whether objects are clamped to the safe rectangle.
- * Even with the lock disabled, objects are clamped to the visible Hero bounds
- * so text/card can never disappear completely outside the canvas.
+ * Safe Zone is advisory when Lock is disabled. Objects may intentionally
+ * leave the safe rectangle and even the visible Hero. When Lock is enabled
+ * the previous safe-clamping behaviour is preserved.
  */
 export function repairHomepageCanvas(
   canvas: HomepageCanvasConfig,
   fallback: HomepageCanvasConfig = canvas,
   layers?: HeroLayerConfig,
 ): HomepageCanvasConfig {
-  const fitter = canvas.lock_safe_zone ? fitHomepageViewportToSafeZone : fitHomepageViewportToVisibleBounds;
+  if (!canvas.lock_safe_zone) {
+    return {
+      ...canvas,
+      desktop: { ...canvas.desktop },
+      tablet: { ...canvas.tablet },
+      mobile: { ...canvas.mobile },
+    };
+  }
+
   return {
     ...canvas,
-    desktop: fitter(canvas.desktop, "desktop", layers, fallback.desktop),
-    tablet: fitter(canvas.tablet, "tablet", layers, fallback.tablet),
-    mobile: fitter(canvas.mobile, "mobile", layers, fallback.mobile),
+    desktop: fitHomepageViewportToSafeZone(canvas.desktop, "desktop", layers, fallback.desktop),
+    tablet: fitHomepageViewportToSafeZone(canvas.tablet, "tablet", layers, fallback.tablet),
+    mobile: fitHomepageViewportToSafeZone(canvas.mobile, "mobile", layers, fallback.mobile),
   };
 }
 

@@ -9,6 +9,7 @@ import { homepagePublishingChecks } from "@/lib/publishing";
 import VisualImageField from "@/app/components/VisualImageField";
 import HeroLayerPanel from "@/app/components/HeroLayerPanel";
 import HomepageBlockLibrary from "@/app/components/HomepageBlockLibrary";
+import HomepageCanvasPreviewFrame from "@/app/components/HomepageCanvasPreviewFrame";
 import {
   homepageSectionLabels,
   type HomepageCanvasConfig,
@@ -32,6 +33,8 @@ import {
 const initialState: VisualEditorState = {};
 type ViewMode = "desktop" | "tablet" | "mobile";
 type CanvasObject = "text" | "match";
+const POSITION_MIN = -200;
+const POSITION_MAX = 300;
 
 const descriptions: Record<HomepageSectionKey, string> = {
   matches: "Последний и следующий матч",
@@ -77,7 +80,6 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
   const backgroundVisible = heroLayerVisible(layerConfig, "background");
   const introVisible = heroLayerVisible(layerConfig, "intro");
   const matchLayerVisible = heroLayerVisible(layerConfig, "match_card");
-  const previewHeight = mode === "desktop" ? Math.min(viewport.hero_height, 650) : mode === "tablet" ? Math.min(viewport.hero_height, 680) : Math.min(viewport.hero_height, 760);
   const anyMatchVisible = matchLayerVisible && (canvas.desktop.match_visible || canvas.tablet.match_visible || canvas.mobile.match_visible);
   const activeSectionConfig = sectionConfig[selectedSection];
   const activeSectionCapabilities = homepageSectionCapabilities(selectedSection);
@@ -168,17 +170,25 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
       let x = ((pointer.clientX - rect.left) / rect.width) * 100;
       let y = ((pointer.clientY - rect.top) / rect.height) * 100;
       const v = canvas[mode];
-      const rangeViewport = canvas.lock_safe_zone ? v : { ...v, safe_top: 0, safe_right: 0, safe_bottom: 0, safe_left: 0 };
-      const range = homepageObjectSafeRange(rangeViewport, mode, object);
-      const minX = range.fitsHorizontally ? range.minX : 50;
-      const maxX = range.fitsHorizontally ? range.maxX : 50;
-      const minY = range.fitsVertically ? range.minY : 50;
-      const maxY = range.fitsVertically ? range.maxY : 50;
-      x = clamp(x, minX, maxX);
-      y = clamp(y, minY, maxY);
-      if (canvas.snap_enabled) {
-        x = snap(x, [50, minX, maxX]);
-        y = snap(y, [50, minY, maxY]);
+      if (canvas.lock_safe_zone) {
+        const range = homepageObjectSafeRange(v, mode, object);
+        const minX = range.fitsHorizontally ? range.minX : 50;
+        const maxX = range.fitsHorizontally ? range.maxX : 50;
+        const minY = range.fitsVertically ? range.minY : 50;
+        const maxY = range.fitsVertically ? range.maxY : 50;
+        x = clamp(x, minX, maxX);
+        y = clamp(y, minY, maxY);
+        if (canvas.snap_enabled) {
+          x = snap(x, [50, minX, maxX]);
+          y = snap(y, [50, minY, maxY]);
+        }
+      } else {
+        x = clamp(x, POSITION_MIN, POSITION_MAX);
+        y = clamp(y, POSITION_MIN, POSITION_MAX);
+        if (canvas.snap_enabled) {
+          x = snap(x, [0, 50, 100]);
+          y = snap(y, [0, 50, 100]);
+        }
       }
       updateViewport(object === "text" ? { text_x: Math.round(x), text_y: Math.round(y) } : { match_x: Math.round(x), match_y: Math.round(y) });
     };
@@ -193,8 +203,8 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
   function nudge(object: CanvasObject, dx: number, dy: number) {
     const v = canvas[mode];
     updateViewport(object === "text"
-      ? { text_x: clampInt(v.text_x + dx, 0, 100), text_y: clampInt(v.text_y + dy, 0, 100) }
-      : { match_x: clampInt(v.match_x + dx, 0, 100), match_y: clampInt(v.match_y + dy, 0, 100) });
+      ? { text_x: clampInt(v.text_x + dx, POSITION_MIN, POSITION_MAX), text_y: clampInt(v.text_y + dy, POSITION_MIN, POSITION_MAX) }
+      : { match_x: clampInt(v.match_x + dx, POSITION_MIN, POSITION_MAX), match_y: clampInt(v.match_y + dy, POSITION_MIN, POSITION_MAX) });
   }
 
   function alignObject(object: CanvasObject, horizontal: "left" | "center" | "right") {
@@ -250,8 +260,14 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
           </div>
         </div>
 
-        <div className={`visualPreviewStage canvas2Stage ${mode}`}>
-          <div ref={stageRef} className="visualHeroPreview canvas2Preview" style={{ height: previewHeight }}>
+        <HomepageCanvasPreviewFrame
+          mode={mode}
+          layoutOrder={layoutOrder}
+          sectionVisibility={visible}
+          sectionConfig={sectionConfig}
+          customBlocks={customBlocks}
+        >
+          <div ref={stageRef} className="visualHeroPreview canvas2Preview" style={{ height: viewport.hero_height }}>
             {backgroundVisible && currentImage ? <img className={`visualHeroImage heroBuilderSelectable ${selectedLayer === "background" ? "selected" : ""}`} onClick={() => setSelectedLayer("background")} src={currentImage} alt="" style={{ objectPosition: `${viewport.background_x}% ${viewport.background_y}%`, transform: `scale(${viewport.background_zoom / 100})`, transformOrigin: `${viewport.background_x}% ${viewport.background_y}%` }} /> : <div className={`visualHeroFallback heroBuilderSelectable ${selectedLayer === "background" ? "selected" : ""}`} onClick={() => setSelectedLayer("background")} />}
             <div className="visualHeroOverlay" style={{ opacity: overlay / 100 }} />
             {safeZoneVisible && <div className="canvasSafeZone" style={{ top: `${viewport.safe_top}%`, right: `${viewport.safe_right}%`, bottom: `${viewport.safe_bottom}%`, left: `${viewport.safe_left}%` }}><span>SAFE ZONE</span></div>}
@@ -281,7 +297,7 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
             </div>}
             <div className="heroBuilderSelectedBadge">Выбран: {homeHeroLayerDefinitions.find((layer) => layer.key === selectedLayer)?.label ?? selectedLayer}{heroLayerState(layerConfig, selectedLayer).locked ? " • 🔒" : ""}</div>
           </div>
-        </div>
+        </HomepageCanvasPreviewFrame>
 
         <div className="canvasStatusBar">
           <label><input type="checkbox" checked={safeZoneVisible} onChange={(e) => setSafeZoneVisible(e.target.checked)} /> Safe Zone</label>
@@ -300,7 +316,8 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
           <div className={`heroLayerStatus ${heroLayerState(layerConfig, selected === "text" ? "intro" : "match_card").locked ? "locked" : "editable"}`}><strong>{heroLayerState(layerConfig, selected === "text" ? "intro" : "match_card").locked ? "🔒 Объект заблокирован" : "Объект можно перемещать"}</strong><span>{heroLayerState(layerConfig, selected === "text" ? "intro" : "match_card").locked ? "Разблокируй слой выше, чтобы drag & drop и точные настройки снова работали." : "Позиция независима для Desktop / Tablet / Mobile."}</span></div><div className="canvasObjectTabs"><button type="button" className={selected === "text" ? "active" : ""} onClick={() => { setSelected("text"); setSelectedLayer("intro"); }}>Текст Hero</button><button type="button" className={selected === "match" ? "active" : ""} onClick={() => { setSelected("match"); setSelectedLayer("match_card"); }}>Карточка матча</button></div>
           <fieldset className="heroObjectFieldset" disabled={heroLayerState(layerConfig, selected === "text" ? "intro" : "match_card").locked}>
           <div className="canvasPresetButtons"><button type="button" onClick={() => alignObject(selected, "left")}>Слева</button><button type="button" onClick={() => alignObject(selected, "center")}>По центру</button><button type="button" onClick={() => alignObject(selected, "right")}>Справа</button><button type="button" onClick={() => centerSafe(selected)}>Центр Safe Zone</button></div>
-          <div className="canvasCoords"><label>X <input type="number" min="0" max="100" value={selected === "text" ? viewport.text_x : viewport.match_x} onFocus={(e)=>e.currentTarget.select()} onChange={(e) => { const value=e.currentTarget.valueAsNumber; if (!Number.isFinite(value)) return; updateViewport(selected === "text" ? { text_x: clampInt(value,0,100) } : { match_x: clampInt(value,0,100) }); }}/><span>%</span></label><label>Y <input type="number" min="0" max="100" value={selected === "text" ? viewport.text_y : viewport.match_y} onFocus={(e)=>e.currentTarget.select()} onChange={(e) => { const value=e.currentTarget.valueAsNumber; if (!Number.isFinite(value)) return; updateViewport(selected === "text" ? { text_y: clampInt(value,0,100) } : { match_y: clampInt(value,0,100) }); }}/><span>%</span></label></div>
+          <div className="canvasCoords"><label>X <input type="number" step="1" value={selected === "text" ? viewport.text_x : viewport.match_x} onFocus={(e)=>e.currentTarget.select()} onChange={(e) => { const value=e.currentTarget.valueAsNumber; if (!Number.isFinite(value)) return; updateViewport(selected === "text" ? { text_x: clampInt(value,POSITION_MIN,POSITION_MAX) } : { match_x: clampInt(value,POSITION_MIN,POSITION_MAX) }); }}/><span>%</span></label><label>Y <input type="number" step="1" value={selected === "text" ? viewport.text_y : viewport.match_y} onFocus={(e)=>e.currentTarget.select()} onChange={(e) => { const value=e.currentTarget.valueAsNumber; if (!Number.isFinite(value)) return; updateViewport(selected === "text" ? { text_y: clampInt(value,POSITION_MIN,POSITION_MAX) } : { match_y: clampInt(value,POSITION_MIN,POSITION_MAX) }); }}/><span>%</span></label></div>
+          <small className="canvasCoordHint">Свободный диапазон: −200…300%. При выключенном Lock Safe Zone только предупреждает и не возвращает объект обратно.</small>
           <div className="canvasNudge"><button type="button" onClick={() => nudge(selected,0,-1)}>↑</button><button type="button" onClick={() => nudge(selected,-1,0)}>←</button><button type="button" onClick={() => nudge(selected,1,0)}>→</button><button type="button" onClick={() => nudge(selected,0,1)}>↓</button></div>
           {selected === "match" && <><Range label="Ширина карточки" min={240} max={520} step={10} value={viewport.match_width} setValue={(value) => updateViewport({ match_width: value })} suffix=" px"/><label className="checkRow"><input type="checkbox" checked={viewport.match_visible} onChange={(e) => updateViewport({ match_visible: e.target.checked })}/><span><strong>Показывать на этом устройстве</strong><small>Можно скрыть только на Mobile, не затрагивая Desktop/Tablet.</small></span></label></>}
           {selected === "text" && <div className="fieldGroup"><label>Выравнивание текста</label><select value={alignment} onChange={(e) => setAlignment(e.target.value as "left"|"center"|"right")}><option value="left">Слева</option><option value="center">По центру</option><option value="right">Справа</option></select></div>}
@@ -309,7 +326,7 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
         </section>
 
         <section className="clubAdminSection visualControlCard">
-          <div className="formSectionTitle"><p className="eyebrow blue">SAFE ZONE 3.0</p><h2>Безопасные отступы</h2><p>Проверяется весь объект, а не только его центр. При включённом Lock координаты, drag & drop, ширина карточки и изменение границ автоматически остаются внутри зоны.</p></div>
+          <div className="formSectionTitle"><p className="eyebrow blue">SAFE ZONE 3.0</p><h2>Безопасные отступы</h2><p>Safe Zone всегда показывает предупреждение, но ограничивает координаты только при включённом Lock. С выключенным Lock объект можно свободно уводить в отрицательные X/Y и за 100%.</p></div>
           <div className="canvasSafeInputs">
             {(["safe_top","safe_right","safe_bottom","safe_left"] as const).map((key) => <label key={key}><span>{{safe_top:"Сверху",safe_right:"Справа",safe_bottom:"Снизу",safe_left:"Слева"}[key]}</span><input type="number" min="0" max="30" value={viewport[key]} onFocus={(e)=>e.currentTarget.select()} onChange={(e) => { const value=e.currentTarget.valueAsNumber; if (!Number.isFinite(value)) return; updateViewport({ [key]: clampInt(value,0,30) }); }}/><b>%</b></label>)}
           </div>
