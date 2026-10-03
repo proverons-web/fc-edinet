@@ -1,14 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import PageHeroShell from "@/app/components/PageHeroShell";
+import ClubRichContent from "@/app/components/ClubRichContent";
 import type { ClubAchievement, ClubLeader, ClubProfile, SitePageDesignSnapshot } from "@/lib/types";
 import type { Locale } from "@/lib/i18n";
 import { localized } from "@/lib/i18n";
 import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
+import { mergeTranslatedTextIntoRichContent } from "@/lib/club-rich-content";
 import {
   frameCssVariables,
+  imageFocusCssVariables,
   normalizeClubPageLayout,
   sectionClass,
   sectionStyle,
@@ -81,6 +84,20 @@ export default function ClubPageCanvas({
     if (builderMode) window.parent.postMessage({type:"fc-club-builder-frame", sectionKey, elementKey, breakpoint, frame:next}, window.location.origin);
   };
 
+  const patchImageFocus = (sectionKey: string, next: {x:number;y:number}) => {
+    setLayout((prev) => ({
+      ...prev,
+      sections: prev.sections.map((section) => section.key === sectionKey ? {
+        ...section,
+        image_focus: {
+          ...(section.image_focus ?? {desktop:{x:50,y:52},tablet:{x:50,y:52},mobile:{x:50,y:52}}),
+          [breakpoint]: next,
+        },
+      } : section),
+    }));
+    if (builderMode) window.parent.postMessage({type:"fc-club-builder-image-focus", sectionKey, breakpoint, focus:next}, window.location.origin);
+  };
+
   const selectElement = (sectionKey:string, elementKey:string) => {
     if (!builderMode) return;
     setSelected({sectionKey,elementKey});
@@ -95,6 +112,11 @@ export default function ClubPageCanvas({
   const stadiumName = localized(profile?.stadium_name, profile?.stadium_name_ro, locale) || "Stadionul Edineț";
   const stadiumAddress = localized(profile?.stadium_address, profile?.stadium_address_ro, locale);
   const stadiumDescription = localized(profile?.stadium_description, profile?.stadium_description_ro, locale) || text.stadiumDescriptionEmpty;
+  const aboutRich = locale === "ro" ? (profile?.about_rich_content_ro ?? mergeTranslatedTextIntoRichContent(profile?.about_rich_content, profile?.about_text_ro)) : profile?.about_rich_content;
+  const historyRich = locale === "ro" ? (profile?.history_rich_content_ro ?? mergeTranslatedTextIntoRichContent(profile?.history_rich_content, profile?.history_text_ro)) : profile?.history_rich_content;
+  const stadiumRich = locale === "ro" ? (profile?.stadium_rich_content_ro ?? mergeTranslatedTextIntoRichContent(profile?.stadium_rich_content, profile?.stadium_description_ro)) : profile?.stadium_rich_content;
+  const aboutFallback = localized(profile?.about_text, profile?.about_text_ro, locale) || text.aboutEmpty;
+  const historyFallback = localized(profile?.history_text, profile?.history_text_ro, locale) || text.historyEmpty;
 
   const renderSection = (section: ClubSectionConfig) => {
     if (!section.visible) return null;
@@ -105,26 +127,27 @@ export default function ClubPageCanvas({
         <BuilderInner manual>
           {section.key === "about" && <>
             <ManualFrame section={section} elementKey="about-copy" breakpoint={breakpoint} builderMode={builderMode} selected={selected} onSelect={selectElement} onChange={patchFrame}>
-              <div className="clubAboutCopy"><p className="eyebrow blue">{text.about}</p><h2>{clubName}</h2><RichText value={localized(profile?.about_text, profile?.about_text_ro, locale) || text.aboutEmpty}/></div>
+              <div className="clubAboutCopy"><p className="eyebrow blue">{text.about}</p><h2>{clubName}</h2><ClubRichContent content={aboutRich} fallbackText={aboutFallback}/></div>
             </ManualFrame>
             <ManualFrame section={section} elementKey="about-contact" breakpoint={breakpoint} builderMode={builderMode} selected={selected} onSelect={selectElement} onChange={patchFrame}>
               <aside className="clubContactCard"><p className="eyebrow blue">{text.contacts}</p><h3>{text.contactTitle}</h3><Contact label="Email" value={profile?.email}/><Contact label={text.phone} value={profile?.phone}/><Contact label={text.address} value={address}/></aside>
             </ManualFrame>
           </>}
           {section.key === "history" && <ManualFrame section={section} elementKey="history-copy" breakpoint={breakpoint} builderMode={builderMode} selected={selected} onSelect={selectElement} onChange={patchFrame}>
-            <div className="clubHistoryContent"><p className="eyebrow blue">{text.historyEyebrow}</p><h2>{text.history}</h2><RichText value={localized(profile?.history_text, profile?.history_text_ro, locale) || text.historyEmpty}/></div>
+            <div className="clubHistoryContent"><p className="eyebrow blue">{text.historyEyebrow}</p><h2>{text.history}</h2><ClubRichContent content={historyRich} fallbackText={historyFallback}/></div>
           </ManualFrame>}
           {section.key === "stadium" && <>
             <ManualFrame section={section} elementKey="stadium-heading" breakpoint={breakpoint} builderMode={builderMode} selected={selected} onSelect={selectElement} onChange={patchFrame}>
               <div className="sectionHeading clubBuilderLooseHeading"><div><p className="eyebrow">{text.arena}</p><h2>{stadiumName}</h2></div></div>
             </ManualFrame>
             <ManualFrame section={section} elementKey="stadium-image" breakpoint={breakpoint} builderMode={builderMode} selected={selected} onSelect={selectElement} onChange={patchFrame} image>
-              <div className="clubStadiumImage clubBuilderManualImage" style={{"--stadium-focus-x":`${section.image_position_x ?? 50}%`,"--stadium-focus-y":`${section.image_position_y ?? 52}%`,"--stadium-radius":`${section.image_radius ?? 28}px`,"--stadium-fit":section.image_fit ?? "cover"} as CSSProperties}>
+              <div className="clubStadiumImage clubBuilderManualImage" style={{...imageFocusCssVariables(section),"--stadium-radius":`${section.image_radius ?? 28}px`,"--stadium-fit":section.image_fit ?? "cover"} as CSSProperties}>
                 {profile?.stadium_image_url ? <img src={profile.stadium_image_url} alt={stadiumName}/> : <span>{text.stadiumPhoto}</span>}
+                <PhotoFocusDrag builderMode={builderMode} active={selected?.sectionKey==="stadium"&&selected.elementKey==="stadium-image"} focus={section.image_focus?.[breakpoint]??{x:50,y:52}} onChange={(next)=>patchImageFocus("stadium",next)}/>
               </div>
             </ManualFrame>
             <ManualFrame section={section} elementKey="stadium-info" breakpoint={breakpoint} builderMode={builderMode} selected={selected} onSelect={selectElement} onChange={patchFrame}>
-              <div className="clubStadiumInfo"><div className="clubStadiumFacts"><Fact label={text.capacity} value={profile?.stadium_capacity ? profile.stadium_capacity.toLocaleString(locale === "ro" ? "ro-RO" : "ru-RU") : "—"}/><Fact label={text.address} value={stadiumAddress || "—"}/></div><RichText value={stadiumDescription}/></div>
+              <div className="clubStadiumInfo"><div className="clubStadiumFacts"><Fact label={text.capacity} value={profile?.stadium_capacity ? profile.stadium_capacity.toLocaleString(locale === "ro" ? "ro-RO" : "ru-RU") : "—"}/><Fact label={text.address} value={stadiumAddress || "—"}/></div><ClubRichContent content={stadiumRich} fallbackText={stadiumDescription}/></div>
             </ManualFrame>
           </>}
           {section.key === "leadership" && <>
@@ -151,19 +174,19 @@ export default function ClubPageCanvas({
       case "about":
         return <section {...common} className={`${common.className} clubAboutSection`}><BuilderInner>
           <div className={`clubStoryGrid clubAboutVariant-${section.variant}`}>
-            <Selectable builderMode={builderMode} selected={selected} sectionKey="about" elementKey="about-copy" onSelect={selectElement}><div className="clubAboutCopy"><p className="eyebrow blue">{text.about}</p><h2>{clubName}</h2><RichText value={localized(profile?.about_text, profile?.about_text_ro, locale) || text.aboutEmpty}/></div></Selectable>
+            <Selectable builderMode={builderMode} selected={selected} sectionKey="about" elementKey="about-copy" onSelect={selectElement}><div className="clubAboutCopy"><p className="eyebrow blue">{text.about}</p><h2>{clubName}</h2><ClubRichContent content={aboutRich} fallbackText={aboutFallback}/></div></Selectable>
             <Selectable builderMode={builderMode} selected={selected} sectionKey="about" elementKey="about-contact" onSelect={selectElement}><aside className="clubContactCard"><p className="eyebrow blue">{text.contacts}</p><h3>{text.contactTitle}</h3><Contact label="Email" value={profile?.email}/><Contact label={text.phone} value={profile?.phone}/><Contact label={text.address} value={address}/></aside></Selectable>
           </div>
         </BuilderInner></section>;
       case "history":
-        return <section {...common} className={`${common.className} clubHistorySection`}><BuilderInner><Selectable builderMode={builderMode} selected={selected} sectionKey="history" elementKey="history-copy" onSelect={selectElement}><div className={`clubHistoryContent clubHistoryVariant-${section.variant}`}><p className="eyebrow blue">{text.historyEyebrow}</p><h2>{text.history}</h2><RichText value={localized(profile?.history_text, profile?.history_text_ro, locale) || text.historyEmpty}/></div></Selectable></BuilderInner></section>;
+        return <section {...common} className={`${common.className} clubHistorySection`}><BuilderInner><Selectable builderMode={builderMode} selected={selected} sectionKey="history" elementKey="history-copy" onSelect={selectElement}><div className={`clubHistoryContent clubHistoryVariant-${section.variant}`}><p className="eyebrow blue">{text.historyEyebrow}</p><h2>{text.history}</h2><ClubRichContent content={historyRich} fallbackText={historyFallback}/></div></Selectable></BuilderInner></section>;
       case "stadium": {
-        const photoStyle = {"--stadium-focus-x":`${section.image_position_x ?? 50}%`,"--stadium-focus-y":`${section.image_position_y ?? 52}%`,"--stadium-image-height":"520px","--stadium-radius":`${section.image_radius ?? 28}px`,"--stadium-fit":section.image_fit ?? "cover"} as CSSProperties;
+        const photoStyle = {...imageFocusCssVariables(section),"--stadium-image-height":"520px","--stadium-radius":`${section.image_radius ?? 28}px`,"--stadium-fit":section.image_fit ?? "cover"} as CSSProperties;
         return <section {...common} className={`${common.className} clubStadiumSection`}><BuilderInner>
           <Selectable builderMode={builderMode} selected={selected} sectionKey="stadium" elementKey="stadium-heading" onSelect={selectElement}><div className="sectionHeading"><div><p className="eyebrow">{text.arena}</p><h2>{stadiumName}</h2></div></div></Selectable>
           <div className={`clubStadiumBuilder clubStadiumVariant-${section.variant}`} style={photoStyle}>
-            <Selectable builderMode={builderMode} selected={selected} sectionKey="stadium" elementKey="stadium-image" onSelect={selectElement}><div className="clubStadiumImage">{profile?.stadium_image_url ? <img src={profile.stadium_image_url} alt={stadiumName}/> : <span>{text.stadiumPhoto}</span>}</div></Selectable>
-            <Selectable builderMode={builderMode} selected={selected} sectionKey="stadium" elementKey="stadium-info" onSelect={selectElement}><div className="clubStadiumInfo"><div className="clubStadiumFacts"><Fact label={text.capacity} value={profile?.stadium_capacity ? profile.stadium_capacity.toLocaleString(locale === "ro" ? "ro-RO" : "ru-RU") : "—"}/><Fact label={text.address} value={stadiumAddress || "—"}/></div><RichText value={stadiumDescription}/></div></Selectable>
+            <Selectable builderMode={builderMode} selected={selected} sectionKey="stadium" elementKey="stadium-image" onSelect={selectElement}><div className="clubStadiumImage">{profile?.stadium_image_url ? <img src={profile.stadium_image_url} alt={stadiumName}/> : <span>{text.stadiumPhoto}</span>}<PhotoFocusDrag builderMode={builderMode} active={selected?.sectionKey==="stadium"&&selected.elementKey==="stadium-image"} focus={section.image_focus?.[breakpoint]??{x:50,y:52}} onChange={(next)=>patchImageFocus("stadium",next)}/></div></Selectable>
+            <Selectable builderMode={builderMode} selected={selected} sectionKey="stadium" elementKey="stadium-info" onSelect={selectElement}><div className="clubStadiumInfo"><div className="clubStadiumFacts"><Fact label={text.capacity} value={profile?.stadium_capacity ? profile.stadium_capacity.toLocaleString(locale === "ro" ? "ro-RO" : "ru-RU") : "—"}/><Fact label={text.address} value={stadiumAddress || "—"}/></div><ClubRichContent content={stadiumRich} fallbackText={stadiumDescription}/></div></Selectable>
           </div>
         </BuilderInner></section>;
       }
@@ -229,5 +252,13 @@ function LeaderCard({leader,locale}:{leader:ClubLeader;locale:Locale}) { return 
 function AchievementList({items,locale,variant}:{items:ClubAchievement[];locale:Locale;variant:string}) { return <div className={`clubTimeline clubAchievementsVariant-${variant}`}>{items.map((item)=><article key={item.id}><div className="clubTimelineYear">{item.year || "—"}</div><div><h3>{localized(item.title,item.title_ro,locale)}</h3>{localized(item.description,item.description_ro,locale)&&<p>{localized(item.description,item.description_ro,locale)}</p>}</div></article>)}</div>; }
 function Fact({label,value}:{label:string;value:string}) { return <div className="clubFact"><span>{label}</span><strong>{value}</strong></div>; }
 function Contact({label,value}:{label:string;value:string|null|undefined}) { return <div className="clubContactRow"><span>{label}</span><strong>{value || "—"}</strong></div>; }
-function RichText({value}:{value:string}) { const paragraphs=useMemo(()=>value.split(/\n\s*\n/g).map((item)=>item.trim()).filter(Boolean),[value]); return <div className="clubRichText">{paragraphs.map((p,i)=><p key={`${i}-${p.slice(0,20)}`}>{p}</p>)}</div>; }
+function PhotoFocusDrag({builderMode,active,focus,onChange}:{builderMode:boolean;active:boolean;focus:{x:number;y:number};onChange:(next:{x:number;y:number})=>void}) {
+  const interaction=useRef<{startX:number;startY:number;focus:{x:number;y:number};width:number;height:number}|null>(null);
+  if(!builderMode||!active)return null;
+  const begin=(event:ReactPointerEvent<HTMLButtonElement>)=>{event.preventDefault();event.stopPropagation();const host=event.currentTarget.parentElement;const rect=host?.getBoundingClientRect();interaction.current={startX:event.clientX,startY:event.clientY,focus:{...focus},width:Math.max(1,rect?.width??1),height:Math.max(1,rect?.height??1)};event.currentTarget.setPointerCapture(event.pointerId);};
+  const move=(event:ReactPointerEvent<HTMLButtonElement>)=>{const state=interaction.current;if(!state)return;event.preventDefault();event.stopPropagation();const dx=event.clientX-state.startX;const dy=event.clientY-state.startY;onChange({x:clamp(Math.round(state.focus.x-(dx/state.width)*100),0,100),y:clamp(Math.round(state.focus.y-(dy/state.height)*100),0,100)});};
+  const end=(event:ReactPointerEvent<HTMLButtonElement>)=>{interaction.current=null;try{event.currentTarget.releasePointerCapture(event.pointerId);}catch{}};
+  return <button type="button" className="clubBuilderImageFocusDrag" onPointerDown={begin} onPointerMove={move} onPointerUp={end} title="Тяни фото внутри рамки"><span>✥ ФОКУС ФОТО</span><small>X {focus.x}% · Y {focus.y}%</small></button>;
+}
+function clamp(value:number,min:number,max:number){return Math.max(min,Math.min(max,value));}
 function round1(value:number){return Math.round(value*10)/10;}

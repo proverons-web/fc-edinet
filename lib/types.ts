@@ -237,8 +237,12 @@ export type ClubProfile = {
   motto_ro?: string | null;
   about_text: string | null;
   about_text_ro?: string | null;
+  about_rich_content?: unknown | null;
+  about_rich_content_ro?: unknown | null;
   history_text: string | null;
   history_text_ro?: string | null;
+  history_rich_content?: unknown | null;
+  history_rich_content_ro?: unknown | null;
   email: string | null;
   phone: string | null;
   address: string | null;
@@ -250,6 +254,8 @@ export type ClubProfile = {
   stadium_address_ro?: string | null;
   stadium_description: string | null;
   stadium_description_ro?: string | null;
+  stadium_rich_content?: unknown | null;
+  stadium_rich_content_ro?: unknown | null;
   ro_translation_locked?: boolean;
   ro_translation_source_hash?: string | null;
   ro_translation_updated_at?: string | null;

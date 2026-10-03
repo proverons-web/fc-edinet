@@ -13,7 +13,7 @@ export default async function PageBuilderIndex() {
     </div></section>
     <section className="section adminSurface"><div className="container">
       <div className="pageBuilderCatalog">
-        <Link href="/admin/page-builder/club" className="pageBuilderCatalogCard active"><span>ДОСТУПНО • v2.3.3</span><h2>Клуб</h2><p>О клубе, история, стадион, руководство и достижения.</p><b>Открыть конструктор →</b></Link>
+        <Link href="/admin/page-builder/club" className="pageBuilderCatalogCard active"><span>ДОСТУПНО • v2.3.4</span><h2>Клуб</h2><p>Два дизайн-пресета, свободная раскладка, точный фокус фото и визуальная верстка контента.</p><b>Открыть конструктор →</b></Link>
         <article className="pageBuilderCatalogCard"><span>СЛЕДУЮЩИЙ ЭТАП</span><h2>Медиа</h2><p>Шаблоны галерей, обложек и блоков фото/видео.</p><b>Архитектура готова</b></article>
         <article className="pageBuilderCatalogCard"><span>СЛЕДУЮЩИЙ ЭТАП</span><h2>Партнёры / Академия</h2><p>Эти страницы смогут использовать тот же движок секций без отдельного конструктора.</p><b>Архитектура готова</b></article>
       </div>

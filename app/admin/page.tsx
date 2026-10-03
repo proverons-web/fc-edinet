@@ -178,7 +178,7 @@ export default async function AdminPage() {
               text="Page Builder 2.0: реальное Live Preview, ручное позиционирование фото и текста, отдельные Desktop / Tablet / Mobile."
               badge={
                 profile.role === "editor" || profile.role === "admin"
-                  ? "v2.3.3"
+                  ? "v2.3.4"
                   : "Editor/Admin"
               }
               href={

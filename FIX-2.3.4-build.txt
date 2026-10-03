@@ -1,0 +1,9 @@
+FC Edinet v2.3.4 build fix
+
+Fixed TypeScript name collision in app/components/ClubRichEditor.tsx:
+- React component import ClubRichContent renamed to ClubRichContentView
+- ClubRichContent type keeps its original type name
+
+This resolves TS2300 / TS2749 and the secondary implicit-any callback errors shown during next build.
+
+No new Supabase migration is required. Do not rerun 043 if it already completed successfully.

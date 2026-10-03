@@ -30,6 +30,7 @@ export type ClubElementFrame = {
 
 export type ClubResponsiveFrames = Record<BuilderBreakpoint, Record<string, ClubElementFrame>>;
 export type ClubResponsiveNumber = Record<BuilderBreakpoint, number>;
+export type ClubImageFocus = Record<BuilderBreakpoint, { x: number; y: number }>;
 
 export type ClubSectionConfig = {
   key: ClubSectionKey;
@@ -42,6 +43,8 @@ export type ClubSectionConfig = {
   layout_mode: "template" | "manual";
   canvas_height: ClubResponsiveNumber;
   frames: ClubResponsiveFrames;
+  image_focus?: ClubImageFocus;
+  /** legacy v2 values kept for backwards compatibility */
   image_position_x?: number;
   image_position_y?: number;
   image_fit?: "cover" | "contain";
@@ -50,13 +53,16 @@ export type ClubSectionConfig = {
 };
 
 export type ClubPageLayoutConfig = {
-  version: 2;
+  version: 3;
+  preset?: ClubPagePresetKey;
   sections: ClubSectionConfig[];
 };
 
-const frame = (x:number,y:number,width:number,height:number=0,z:number=1,padding:number=0,font_scale:number=100,text_align:ClubElementFrame["text_align"]="left"):ClubElementFrame => ({x,y,width,height,z,padding,font_scale,text_align});
+export type ClubPagePresetKey = "cinematic-blue" | "heritage-editorial";
 
+const frame = (x:number,y:number,width:number,height:number=0,z:number=1,padding:number=0,font_scale:number=100,text_align:ClubElementFrame["text_align"]="left"):ClubElementFrame => ({x,y,width,height,z,padding,font_scale,text_align});
 const emptyResponsiveFrames = (): ClubResponsiveFrames => ({ desktop:{}, tablet:{}, mobile:{} });
+const defaultImageFocus = (): ClubImageFocus => ({ desktop:{x:50,y:52}, tablet:{x:50,y:52}, mobile:{x:50,y:52} });
 
 function sectionDefaults(key: ClubSectionKey): ClubSectionConfig {
   const frames = emptyResponsiveFrames();
@@ -82,18 +88,18 @@ function sectionDefaults(key: ClubSectionKey): ClubSectionConfig {
     return { ...common, variant:"contact-right", canvas_height:{desktop:560,tablet:760,mobile:940} };
   }
   if (key === "history") {
-    frames.desktop["history-copy"] = frame(14,0,72,0,1,0,100,"left");
-    frames.tablet["history-copy"] = frame(6,0,88,0);
+    frames.desktop["history-copy"] = frame(10,0,80,0,1,0,100,"left");
+    frames.tablet["history-copy"] = frame(4,0,92,0);
     frames.mobile["history-copy"] = frame(0,0,100,0);
-    return { ...common, background:"surface", variant:"readable", canvas_height:{desktop:680,tablet:760,mobile:920} };
+    return { ...common, background:"surface", variant:"readable", canvas_height:{desktop:720,tablet:820,mobile:980} };
   }
   if (key === "stadium") {
     frames.desktop["stadium-heading"] = frame(0,0,100,0,3);
-    frames.desktop["stadium-image"] = frame(0,100,100,510,1);
-    frames.desktop["stadium-info"] = frame(9,535,82,0,4,0,100,"left");
+    frames.desktop["stadium-image"] = frame(0,100,100,520,1);
+    frames.desktop["stadium-info"] = frame(53,470,43,0,4,0,100,"left");
     frames.tablet["stadium-heading"] = frame(0,0,100,0,3);
     frames.tablet["stadium-image"] = frame(0,100,100,430,1);
-    frames.tablet["stadium-info"] = frame(4,470,92,0,4);
+    frames.tablet["stadium-info"] = frame(5,470,90,0,4);
     frames.mobile["stadium-heading"] = frame(0,0,100,0,3);
     frames.mobile["stadium-image"] = frame(0,90,100,320,1);
     frames.mobile["stadium-info"] = frame(0,390,100,0,4);
@@ -103,7 +109,8 @@ function sectionDefaults(key: ClubSectionKey): ClubSectionConfig {
       background:"dark",
       variant:"cinematic",
       layout_mode:"manual",
-      canvas_height:{desktop:760,tablet:760,mobile:760},
+      canvas_height:{desktop:760,tablet:780,mobile:790},
+      image_focus:defaultImageFocus(),
       image_position_x:50,
       image_position_y:52,
       image_fit:"cover",
@@ -128,13 +135,34 @@ function sectionDefaults(key: ClubSectionKey): ClubSectionConfig {
   return { ...common, background:"dark", variant:"timeline", canvas_height:{desktop:700,tablet:850,mobile:1100} };
 }
 
-const defaults: ClubPageLayoutConfig = {
-  version: 2,
-  sections: [sectionDefaults("about"), sectionDefaults("stadium"), sectionDefaults("history"), sectionDefaults("leadership"), sectionDefaults("achievements")],
-};
+function cinematicPreset(): ClubPageLayoutConfig {
+  const sections = [sectionDefaults("about"), sectionDefaults("stadium"), sectionDefaults("history"), sectionDefaults("leadership"), sectionDefaults("achievements")];
+  sections[0] = {...sections[0], background:"light", padding_top:96, padding_bottom:92, variant:"contact-right"};
+  sections[1] = {...sections[1], background:"dark", width:"wide", variant:"cinematic", layout_mode:"manual"};
+  sections[2] = {...sections[2], background:"surface", width:"container", variant:"readable"};
+  sections[3] = {...sections[3], background:"light", variant:"cards", columns:3};
+  sections[4] = {...sections[4], background:"brand", width:"wide", variant:"cards"};
+  return {version:3,preset:"cinematic-blue",sections};
+}
 
-export function defaultClubPageLayout(): ClubPageLayoutConfig {
-  return JSON.parse(JSON.stringify(defaults)) as ClubPageLayoutConfig;
+function heritagePreset(): ClubPageLayoutConfig {
+  const about = {...sectionDefaults("about"), background:"surface" as ContentPageBackground, variant:"contact-left", padding_top:80, padding_bottom:80};
+  const history = {...sectionDefaults("history"), background:"light" as ContentPageBackground, width:"wide" as ContentPageWidth, variant:"columns", padding_top:96, padding_bottom:96};
+  const stadium = {...sectionDefaults("stadium"), background:"dark" as ContentPageBackground, width:"wide" as ContentPageWidth, variant:"split-right", layout_mode:"template" as const, padding_top:88, padding_bottom:88};
+  const achievements = {...sectionDefaults("achievements"), background:"dark" as ContentPageBackground, width:"container" as ContentPageWidth, variant:"timeline"};
+  const leadership = {...sectionDefaults("leadership"), background:"surface" as ContentPageBackground, variant:"compact", columns:1};
+  return {version:3,preset:"heritage-editorial",sections:[about,history,stadium,achievements,leadership]};
+}
+
+const defaults = cinematicPreset();
+
+export function defaultClubPageLayout(): ClubPageLayoutConfig { return clone(defaults); }
+export function clubPagePreset(key: ClubPagePresetKey): ClubPageLayoutConfig { return clone(key === "heritage-editorial" ? heritagePreset() : cinematicPreset()); }
+export function clubPagePresetOptions(): {key:ClubPagePresetKey;label:string;description:string}[] {
+  return [
+    {key:"cinematic-blue",label:"Cinematic Blue",description:"Большой стадион, синие акценты, карточки поверх фото — современный клубный стиль."},
+    {key:"heritage-editorial",label:"Heritage Editorial",description:"История на первом плане, журнальная верстка, стадион 50/50 и более классическая подача."},
+  ];
 }
 
 export function clubSectionElements(key: ClubSectionKey): ClubElementKey[] {
@@ -147,149 +175,83 @@ export function clubSectionElements(key: ClubSectionKey): ClubElementKey[] {
 
 export function normalizeClubPageLayout(raw: unknown): ClubPageLayoutConfig {
   const fallback = defaultClubPageLayout();
-  const source = isRecord(raw) && Array.isArray(raw.sections) ? raw.sections : [];
+  const root = isRecord(raw) ? raw : {};
+  const source = Array.isArray(root.sections) ? root.sections : [];
   const byKey = new Map<string, unknown>();
   for (const item of source) if (isRecord(item) && typeof item.key === "string") byKey.set(item.key, item);
-
   const normalized = fallback.sections.map((base) => normalizeSection(base, byKey.get(base.key)));
-  const requestedOrder = source
-    .filter(isRecord)
-    .map((item) => String(item.key ?? ""))
-    .filter((key): key is ClubSectionKey => normalized.some((section) => section.key === key));
+  const requestedOrder = source.filter(isRecord).map((item) => String(item.key ?? "")).filter((key): key is ClubSectionKey => normalized.some((section) => section.key === key));
   const order = [...new Set([...requestedOrder, ...normalized.map((section) => section.key)])];
-  return { version: 2, sections: order.map((key) => normalized.find((section) => section.key === key)!) };
+  const preset = root.preset === "heritage-editorial" || root.preset === "cinematic-blue" ? root.preset : undefined;
+  return { version:3, preset, sections:order.map((key) => normalized.find((section) => section.key === key)!) };
 }
 
 export async function getPublishedClubPageLayout(supabase: SupabaseClient): Promise<ClubPageLayoutConfig> {
-  const { data, error } = await supabase
-    .from("content_page_published")
-    .select("published_config")
-    .eq("page_key", "club")
-    .maybeSingle();
+  const { data, error } = await supabase.from("content_page_published").select("published_config").eq("page_key", "club").maybeSingle();
   if (error || !data) return defaultClubPageLayout();
   return normalizeClubPageLayout(data.published_config);
 }
-
 export async function getDraftClubPageLayout(supabase: SupabaseClient): Promise<ClubPageLayoutConfig> {
-  const { data, error } = await supabase
-    .from("content_page_layouts")
-    .select("draft_config,published_config")
-    .eq("page_key", "club")
-    .maybeSingle();
+  const { data, error } = await supabase.from("content_page_layouts").select("draft_config,published_config").eq("page_key", "club").maybeSingle();
   if (error || !data) return defaultClubPageLayout();
   return normalizeClubPageLayout(data.draft_config ?? data.published_config);
 }
 
 export function sectionClass(section: ClubSectionConfig) {
-  return [
-    "contentBuilderSection",
-    `contentBuilderBg-${section.background}`,
-    `contentBuilderWidth-${section.width}`,
-    `contentBuilderVariant-${section.variant}`,
-    section.layout_mode === "manual" ? "contentBuilderManual" : "contentBuilderTemplate",
-  ].join(" ");
+  return ["contentBuilderSection",`contentBuilderBg-${section.background}`,`contentBuilderWidth-${section.width}`,`contentBuilderVariant-${section.variant}`,section.layout_mode === "manual" ? "contentBuilderManual" : "contentBuilderTemplate"].join(" ");
 }
-
 export function sectionStyle(section: ClubSectionConfig) {
-  return {
-    "--content-pad-top": `${section.padding_top}px`,
-    "--content-pad-bottom": `${section.padding_bottom}px`,
-    "--club-canvas-desktop": `${section.canvas_height.desktop}px`,
-    "--club-canvas-tablet": `${section.canvas_height.tablet}px`,
-    "--club-canvas-mobile": `${section.canvas_height.mobile}px`,
-  } as CSSProperties;
+  return {"--content-pad-top":`${section.padding_top}px`,"--content-pad-bottom":`${section.padding_bottom}px`,"--club-canvas-desktop":`${section.canvas_height.desktop}px`,"--club-canvas-tablet":`${section.canvas_height.tablet}px`,"--club-canvas-mobile":`${section.canvas_height.mobile}px`} as CSSProperties;
 }
-
 export function frameCssVariables(frames: ClubResponsiveFrames, elementKey: string): CSSProperties {
-  const d = frames.desktop[elementKey] ?? frame(0,0,100);
-  const t = frames.tablet[elementKey] ?? d;
-  const m = frames.mobile[elementKey] ?? t;
-  return {
-    "--f-d-x": `${d.x}%`, "--f-d-y": `${d.y}px`, "--f-d-w": `${d.width}%`, "--f-d-h": `${d.height}px`, "--f-d-z": d.z, "--f-d-p": `${d.padding}px`, "--f-d-font": d.font_scale / 100, "--f-d-align": d.text_align,
-    "--f-t-x": `${t.x}%`, "--f-t-y": `${t.y}px`, "--f-t-w": `${t.width}%`, "--f-t-h": `${t.height}px`, "--f-t-z": t.z, "--f-t-p": `${t.padding}px`, "--f-t-font": t.font_scale / 100, "--f-t-align": t.text_align,
-    "--f-m-x": `${m.x}%`, "--f-m-y": `${m.y}px`, "--f-m-w": `${m.width}%`, "--f-m-h": `${m.height}px`, "--f-m-z": m.z, "--f-m-p": `${m.padding}px`, "--f-m-font": m.font_scale / 100, "--f-m-align": m.text_align,
-  } as CSSProperties;
+  const d = frames.desktop[elementKey] ?? frame(0,0,100); const t = frames.tablet[elementKey] ?? d; const m = frames.mobile[elementKey] ?? t;
+  return {"--f-d-x":`${d.x}%`,"--f-d-y":`${d.y}px`,"--f-d-w":`${d.width}%`,"--f-d-h":`${d.height}px`,"--f-d-z":d.z,"--f-d-p":`${d.padding}px`,"--f-d-font":d.font_scale/100,"--f-d-align":d.text_align,"--f-t-x":`${t.x}%`,"--f-t-y":`${t.y}px`,"--f-t-w":`${t.width}%`,"--f-t-h":`${t.height}px`,"--f-t-z":t.z,"--f-t-p":`${t.padding}px`,"--f-t-font":t.font_scale/100,"--f-t-align":t.text_align,"--f-m-x":`${m.x}%`,"--f-m-y":`${m.y}px`,"--f-m-w":`${m.width}%`,"--f-m-h":`${m.height}px`,"--f-m-z":m.z,"--f-m-p":`${m.padding}px`,"--f-m-font":m.font_scale/100,"--f-m-align":m.text_align} as CSSProperties;
+}
+export function imageFocusCssVariables(section: ClubSectionConfig): CSSProperties {
+  const focus = section.image_focus ?? defaultImageFocus();
+  return {"--stadium-focus-d-x":`${focus.desktop.x}%`,"--stadium-focus-d-y":`${focus.desktop.y}%`,"--stadium-focus-t-x":`${focus.tablet.x}%`,"--stadium-focus-t-y":`${focus.tablet.y}%`,"--stadium-focus-m-x":`${focus.mobile.x}%`,"--stadium-focus-m-y":`${focus.mobile.y}%`} as CSSProperties;
 }
 
 function normalizeSection(base: ClubSectionConfig, raw: unknown): ClubSectionConfig {
   const value = isRecord(raw) ? raw : {};
   const layoutMode = value.layout_mode === "manual" || value.layout_mode === "template" ? value.layout_mode : base.layout_mode;
+  const legacyX = integer(value.image_position_x,0,100,base.image_position_x ?? 50);
+  const legacyY = integer(value.image_position_y,0,100,base.image_position_y ?? 52);
+  const focusFallback = base.image_focus ?? {desktop:{x:legacyX,y:legacyY},tablet:{x:legacyX,y:legacyY},mobile:{x:legacyX,y:legacyY}};
   return {
-    key: base.key,
-    visible: typeof value.visible === "boolean" ? value.visible : base.visible,
-    width: width(value.width, base.width),
-    background: background(value.background, base.background),
-    padding_top: integer(value.padding_top, 0, 220, base.padding_top),
-    padding_bottom: integer(value.padding_bottom, 0, 220, base.padding_bottom),
-    variant: variant(base.key, value.variant, base.variant),
-    layout_mode: layoutMode,
-    canvas_height: normalizeResponsiveNumber(value.canvas_height, base.canvas_height, 260, 1800),
-    frames: normalizeFrames(value.frames, base.frames, base.key),
-    image_position_x: base.key === "stadium" ? integer(value.image_position_x, 0, 100, base.image_position_x ?? 50) : undefined,
-    image_position_y: base.key === "stadium" ? integer(value.image_position_y, 0, 100, base.image_position_y ?? 50) : undefined,
-    image_fit: base.key === "stadium" && (value.image_fit === "contain" || value.image_fit === "cover") ? value.image_fit : base.image_fit,
-    image_radius: base.key === "stadium" ? integer(value.image_radius, 0, 60, base.image_radius ?? 28) : undefined,
-    columns: base.key === "leadership" ? integer(value.columns, 1, 4, base.columns ?? 3) : undefined,
+    key:base.key,
+    visible:typeof value.visible === "boolean" ? value.visible : base.visible,
+    width:width(value.width,base.width),
+    background:background(value.background,base.background),
+    padding_top:integer(value.padding_top,0,220,base.padding_top),
+    padding_bottom:integer(value.padding_bottom,0,220,base.padding_bottom),
+    variant:variant(base.key,value.variant,base.variant),
+    layout_mode:layoutMode,
+    canvas_height:normalizeResponsiveNumber(value.canvas_height,base.canvas_height,260,1800),
+    frames:normalizeFrames(value.frames,base.frames,base.key),
+    image_focus:base.key === "stadium" ? normalizeImageFocus(value.image_focus,focusFallback,legacyX,legacyY) : undefined,
+    image_position_x:base.key === "stadium" ? legacyX : undefined,
+    image_position_y:base.key === "stadium" ? legacyY : undefined,
+    image_fit:base.key === "stadium" && (value.image_fit === "contain" || value.image_fit === "cover") ? value.image_fit : base.image_fit,
+    image_radius:base.key === "stadium" ? integer(value.image_radius,0,60,base.image_radius ?? 28) : undefined,
+    columns:base.key === "leadership" ? integer(value.columns,1,4,base.columns ?? 3) : undefined,
   };
 }
-
+function normalizeImageFocus(raw: unknown, fallback: ClubImageFocus, legacyX:number, legacyY:number): ClubImageFocus {
+  if (!isRecord(raw)) return {desktop:{x:legacyX,y:legacyY},tablet:{x:legacyX,y:legacyY},mobile:{x:legacyX,y:legacyY}};
+  const read=(bp:BuilderBreakpoint)=>{const value=isRecord(raw[bp])?raw[bp] as Record<string,unknown>:{};return{x:integer(value.x,0,100,fallback[bp].x),y:integer(value.y,0,100,fallback[bp].y)}};
+  return {desktop:read("desktop"),tablet:read("tablet"),mobile:read("mobile")};
+}
 function normalizeFrames(raw: unknown, fallback: ClubResponsiveFrames, sectionKey: ClubSectionKey): ClubResponsiveFrames {
-  const result: ClubResponsiveFrames = JSON.parse(JSON.stringify(fallback));
-  if (!isRecord(raw)) return result;
-  for (const bp of ["desktop","tablet","mobile"] as BuilderBreakpoint[]) {
-    const group = isRecord(raw[bp]) ? raw[bp] as Record<string, unknown> : {};
-    for (const element of clubSectionElements(sectionKey)) {
-      const base = result[bp][element] ?? frame(0,0,100);
-      const candidate = isRecord(group[element]) ? group[element] as Record<string, unknown> : {};
-      result[bp][element] = {
-        x: number(candidate.x, -50, 150, base.x),
-        y: integer(candidate.y, -400, 1800, base.y),
-        width: number(candidate.width, 5, 180, base.width),
-        height: integer(candidate.height, 0, 1400, base.height),
-        z: integer(candidate.z, 0, 50, base.z),
-        padding: integer(candidate.padding, 0, 100, base.padding),
-        font_scale: integer(candidate.font_scale, 50, 180, base.font_scale),
-        text_align: candidate.text_align === "center" || candidate.text_align === "right" || candidate.text_align === "left" ? candidate.text_align : base.text_align,
-      };
-    }
-  }
+  const result: ClubResponsiveFrames = clone(fallback); if (!isRecord(raw)) return result;
+  for (const bp of ["desktop","tablet","mobile"] as BuilderBreakpoint[]) { const group=isRecord(raw[bp])?raw[bp] as Record<string,unknown>:{}; for(const element of clubSectionElements(sectionKey)){const base=result[bp][element]??frame(0,0,100);const candidate=isRecord(group[element])?group[element] as Record<string,unknown>:{};result[bp][element]={x:number(candidate.x,-50,150,base.x),y:integer(candidate.y,-400,1800,base.y),width:number(candidate.width,5,180,base.width),height:integer(candidate.height,0,1400,base.height),z:integer(candidate.z,0,50,base.z),padding:integer(candidate.padding,0,100,base.padding),font_scale:integer(candidate.font_scale,50,180,base.font_scale),text_align:candidate.text_align === "center" || candidate.text_align === "right" || candidate.text_align === "left" ? candidate.text_align : base.text_align};}}
   return result;
 }
-
-function normalizeResponsiveNumber(raw: unknown, fallback: ClubResponsiveNumber, min: number, max: number): ClubResponsiveNumber {
-  const value = isRecord(raw) ? raw : {};
-  return {
-    desktop: integer(value.desktop, min, max, fallback.desktop),
-    tablet: integer(value.tablet, min, max, fallback.tablet),
-    mobile: integer(value.mobile, min, max, fallback.mobile),
-  };
-}
-
-function variant(key: ClubSectionKey, value: unknown, fallback: string) {
-  const allowed: Record<ClubSectionKey, string[]> = {
-    about: ["contact-right", "contact-left", "stacked"],
-    history: ["readable", "columns", "card"],
-    stadium: ["cinematic", "split-left", "split-right", "full-photo"],
-    leadership: ["cards", "compact"],
-    achievements: ["timeline", "cards"],
-  };
-  return typeof value === "string" && allowed[key].includes(value) ? value : fallback;
-}
-
-function width(value: unknown, fallback: ContentPageWidth): ContentPageWidth {
-  return value === "container" || value === "wide" || value === "full" ? value : fallback;
-}
-function background(value: unknown, fallback: ContentPageBackground): ContentPageBackground {
-  return value === "inherit" || value === "light" || value === "surface" || value === "dark" || value === "brand" ? value : fallback;
-}
-function integer(value: unknown, min: number, max: number, fallback: number) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? Math.max(min, Math.min(max, Math.round(parsed))) : fallback;
-}
-function number(value: unknown, min: number, max: number, fallback: number) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? Math.max(min, Math.min(max, Math.round(parsed * 10) / 10)) : fallback;
-}
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
+function normalizeResponsiveNumber(raw: unknown, fallback: ClubResponsiveNumber, min: number, max: number): ClubResponsiveNumber {const value=isRecord(raw)?raw:{};return{desktop:integer(value.desktop,min,max,fallback.desktop),tablet:integer(value.tablet,min,max,fallback.tablet),mobile:integer(value.mobile,min,max,fallback.mobile)}};
+function variant(key:ClubSectionKey,value:unknown,fallback:string){const allowed:Record<ClubSectionKey,string[]>={about:["contact-right","contact-left","stacked"],history:["readable","columns","card"],stadium:["cinematic","split-left","split-right","full-photo"],leadership:["cards","compact"],achievements:["timeline","cards"]};return typeof value === "string" && allowed[key].includes(value) ? value : fallback;}
+function width(value:unknown,fallback:ContentPageWidth):ContentPageWidth{return value === "container" || value === "wide" || value === "full" ? value : fallback;}
+function background(value:unknown,fallback:ContentPageBackground):ContentPageBackground{return value === "inherit" || value === "light" || value === "surface" || value === "dark" || value === "brand" ? value : fallback;}
+function integer(value:unknown,min:number,max:number,fallback:number){const parsed=Number(value);return Number.isFinite(parsed)?Math.max(min,Math.min(max,Math.round(parsed))):fallback;}
+function number(value:unknown,min:number,max:number,fallback:number){const parsed=Number(value);return Number.isFinite(parsed)?Math.max(min,Math.min(max,Math.round(parsed*10)/10)):fallback;}
+function isRecord(value:unknown):value is Record<string,unknown>{return typeof value === "object" && value !== null && !Array.isArray(value);}
+function clone<T>(value:T):T{return JSON.parse(JSON.stringify(value)) as T;}

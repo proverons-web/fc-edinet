@@ -4,11 +4,14 @@ import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import {
   clubSectionElements,
+  clubPagePreset,
+  clubPagePresetOptions,
   defaultClubPageLayout,
   type BuilderBreakpoint,
   type ClubElementFrame,
   type ClubElementKey,
   type ClubPageLayoutConfig,
+  type ClubPagePresetKey,
   type ClubSectionConfig,
   type ClubSectionKey,
 } from "@/lib/content-page-builder";
@@ -59,16 +62,19 @@ export default function ClubPageBuilder({initial,action}:{initial:ClubPageLayout
   useEffect(()=>{
     const onMessage=(event:MessageEvent)=>{
       if(event.origin!==window.location.origin)return;
-      const data=event.data as {type?:string;sectionKey?:ClubSectionKey;elementKey?:ClubElementKey;breakpoint?:BuilderBreakpoint;frame?:ClubElementFrame};
+      const data=event.data as {type?:string;sectionKey?:ClubSectionKey;elementKey?:ClubElementKey;breakpoint?:BuilderBreakpoint;frame?:ClubElementFrame;focus?:{x:number;y:number}};
       if(data?.type==="fc-club-builder-ready"){sendPreview();return;}
       if(data?.type==="fc-club-builder-select"&&data.sectionKey&&data.elementKey){setSelected({sectionKey:data.sectionKey,elementKey:data.elementKey});return;}
-      if(data?.type==="fc-club-builder-frame"&&data.sectionKey&&data.elementKey&&data.breakpoint&&data.frame){patchFrame(data.sectionKey,data.elementKey,data.breakpoint,data.frame);}
+      if(data?.type==="fc-club-builder-frame"&&data.sectionKey&&data.elementKey&&data.breakpoint&&data.frame){patchFrame(data.sectionKey,data.elementKey,data.breakpoint,data.frame);return;}
+      if(data?.type==="fc-club-builder-image-focus"&&data.sectionKey==="stadium"&&data.breakpoint&&data.focus){patchImageFocus(data.breakpoint,data.focus.x,data.focus.y);}
     };
     window.addEventListener("message",onMessage);return()=>window.removeEventListener("message",onMessage);
   });
 
-  function patchSection(key:ClubSectionKey,patch:Partial<ClubSectionConfig>){setLayout(prev=>({...prev,sections:prev.sections.map(item=>item.key===key?{...item,...patch}:item)}));}
-  function patchFrame(sectionKey:ClubSectionKey,elementKey:ClubElementKey,bp:BuilderBreakpoint,patch:Partial<ClubElementFrame>){setLayout(prev=>({...prev,sections:prev.sections.map(section=>section.key===sectionKey?{...section,frames:{...section.frames,[bp]:{...section.frames[bp],[elementKey]:{...section.frames[bp][elementKey],...patch}}}}:section)}));}
+  function patchSection(key:ClubSectionKey,patch:Partial<ClubSectionConfig>){setLayout(prev=>({...prev,preset:undefined,sections:prev.sections.map(item=>item.key===key?{...item,...patch}:item)}));}
+  function patchFrame(sectionKey:ClubSectionKey,elementKey:ClubElementKey,bp:BuilderBreakpoint,patch:Partial<ClubElementFrame>){setLayout(prev=>({...prev,preset:undefined,sections:prev.sections.map(section=>section.key===sectionKey?{...section,frames:{...section.frames,[bp]:{...section.frames[bp],[elementKey]:{...section.frames[bp][elementKey],...patch}}}}:section)}));}
+  function patchImageFocus(bp:BuilderBreakpoint,x:number,y:number){setLayout(prev=>({...prev,preset:undefined,sections:prev.sections.map(section=>section.key==="stadium"?{...section,image_focus:{...(section.image_focus??{desktop:{x:50,y:52},tablet:{x:50,y:52},mobile:{x:50,y:52}}),[bp]:{x:Math.max(0,Math.min(100,Math.round(x))),y:Math.max(0,Math.min(100,Math.round(y)))}}}:section)}));}
+  function applyPreset(key:ClubPagePresetKey){if(!window.confirm("Применить дизайн-пресет ко всей странице? Текущая несохранённая раскладка будет заменена."))return;const next=clubPagePreset(key);setLayout(next);const first=next.sections[0];setSelected({sectionKey:first.key,elementKey:clubSectionElements(first.key)[0]});}
   function moveSection(key:ClubSectionKey,delta:number){setLayout(prev=>{const list=[...prev.sections];const index=list.findIndex(x=>x.key===key);const next=index+delta;if(index<0||next<0||next>=list.length)return prev;[list[index],list[next]]=[list[next],list[index]];return{...prev,sections:list};});}
   function selectSection(key:ClubSectionKey){setSelected({sectionKey:key,elementKey:clubSectionElements(key)[0]});}
   function resetSection(key:ClubSectionKey){const base=defaultClubPageLayout().sections.find(s=>s.key===key);if(!base)return;setLayout(prev=>({...prev,sections:prev.sections.map(s=>s.key===key?base:s)}));setSelected({sectionKey:key,elementKey:clubSectionElements(key)[0]});}
@@ -78,9 +84,14 @@ export default function ClubPageBuilder({initial,action}:{initial:ClubPageLayout
   return <form action={formAction} className="pageBuilder2Form">
     <input type="hidden" name="layout_json" value={json}/>
     <div className="pageBuilder2Topbar">
-      <div><strong>Page Builder 2.0</strong><span>Превью = реальная страница. Перетаскивай элементы прямо в окне просмотра или вводи точные значения справа.</span></div>
+      <div><strong>Page Builder 3.0</strong><span>Превью = реальная страница. Два дизайн-пресета, свободная раскладка и отдельное позиционирование изображения внутри рамки.</span></div>
       <div className="pageBuilder2DeviceTabs">{(Object.keys(deviceSpec) as BuilderBreakpoint[]).map(bp=><button type="button" key={bp} className={breakpoint===bp?"active":""} onClick={()=>setBreakpoint(bp)}>{deviceSpec[bp].label}</button>)}</div>
       <div className="pageBuilder2Zoom"><span>Zoom</span><select value={zoom} onChange={e=>setZoom(e.target.value==="auto"?"auto":Number(e.target.value) as Zoom)}><option value="auto">Auto</option>{[25,33,50,67,100].map(v=><option key={v} value={v}>{v}%</option>)}</select></div>
+    </div>
+
+    <div className="pageBuilderPresetBar">
+      <div><span>ГОТОВЫЕ ДИЗАЙНЫ</span><strong>Стартуй с варианта, потом дорабатывай вручную</strong></div>
+      <div className="pageBuilderPresetCards">{clubPagePresetOptions().map(option=><button type="button" key={option.key} className={layout.preset===option.key?"active":""} onClick={()=>applyPreset(option.key)}><b>{option.label}</b><small>{option.description}</small></button>)}</div>
     </div>
 
     <div className="pageBuilder2Workspace">
@@ -127,13 +138,13 @@ export default function ClubPageBuilder({initial,action}:{initial:ClubPageLayout
           </>}
         </>}
 
-        {current.key==="stadium"&&selected.elementKey==="stadium-image"&&<><div className="pageBuilder2Divider"><span>ФОТО СТАДИОНА</span></div><div className="pageBuilder2Grid2"><NumberControl label="Фокус X" value={current.image_position_x??50} min={0} max={100} suffix="%" onChange={v=>patchSection(current.key,{image_position_x:v})}/><NumberControl label="Фокус Y" value={current.image_position_y??50} min={0} max={100} suffix="%" onChange={v=>patchSection(current.key,{image_position_y:v})}/></div><div className="pageBuilder2Grid2"><Field label="Масштаб фото"><select value={current.image_fit??"cover"} onChange={e=>patchSection(current.key,{image_fit:e.target.value as "cover"|"contain"})}><option value="cover">Cover — заполнить</option><option value="contain">Contain — показать целиком</option></select></Field><NumberControl label="Скругление" value={current.image_radius??28} min={0} max={60} suffix="px" onChange={v=>patchSection(current.key,{image_radius:v})}/></div></>}
+        {current.key==="stadium"&&selected.elementKey==="stadium-image"&&<><div className="pageBuilder2Divider"><span>ФОТО СТАДИОНА • {deviceSpec[breakpoint].label}</span></div><p className="pageBuilderImageHint">В превью потяни само фото мышью за метку <b>ФОКУС ФОТО</b>. Это двигает изображение внутри рамки, а не саму рамку.</p><div className="pageBuilder2Grid2"><NumberControl label="Фокус X" value={current.image_focus?.[breakpoint].x??50} min={0} max={100} suffix="%" onChange={v=>patchImageFocus(breakpoint,v,current.image_focus?.[breakpoint].y??52)}/><NumberControl label="Фокус Y" value={current.image_focus?.[breakpoint].y??52} min={0} max={100} suffix="%" onChange={v=>patchImageFocus(breakpoint,current.image_focus?.[breakpoint].x??50,v)}/></div><div className="pageBuilder2Grid2"><Field label="Масштаб фото"><select value={current.image_fit??"cover"} onChange={e=>patchSection(current.key,{image_fit:e.target.value as "cover"|"contain"})}><option value="cover">Cover — заполнить</option><option value="contain">Contain — показать целиком</option></select></Field><NumberControl label="Скругление" value={current.image_radius??28} min={0} max={60} suffix="px" onChange={v=>patchSection(current.key,{image_radius:v})}/></div></>}
         {current.key==="leadership"&&<Field label="Колонок на Desktop"><select value={current.columns??3} onChange={e=>patchSection(current.key,{columns:Number(e.target.value)})}><option value={1}>1</option><option value={2}>2</option><option value={3}>3</option><option value={4}>4</option></select></Field>}
         <button type="button" className="pageBuilder2ResetSection" onClick={()=>resetSection(current.key)}>Сбросить всю секцию</button>
       </aside>}
     </div>
 
-    <div className="pageBuilder2Publish"><div><strong>Сохранение Page Builder 2.0</strong><span>Черновик не меняет /club. «Опубликовать» применяет точно тот макет, который виден в Live Preview.</span></div><div><a href="/admin/club" className="secondaryAdminButton">Редактировать тексты/фото</a><button className="secondaryAdminButton" type="submit" name="intent" value="draft" disabled={pending}>{pending?"Сохраняем…":"Сохранить черновик"}</button><button className="primaryButton" type="submit" name="intent" value="publish" disabled={pending}>{pending?"Публикуем…":"Опубликовать"}</button></div></div>
+    <div className="pageBuilder2Publish"><div><strong>Сохранение Page Builder 3.0</strong><span>Черновик не меняет /club. «Опубликовать» применяет точно тот макет, который виден в Live Preview.</span></div><div><a href="/admin/club" className="secondaryAdminButton">Редактировать тексты/фото</a><button className="secondaryAdminButton" type="submit" name="intent" value="draft" disabled={pending}>{pending?"Сохраняем…":"Сохранить черновик"}</button><button className="primaryButton" type="submit" name="intent" value="publish" disabled={pending}>{pending?"Публикуем…":"Опубликовать"}</button></div></div>
     {state.error&&<div className="formError">{state.error}</div>}{state.success&&<div className="formSuccess">{state.success}</div>}
   </form>;
 }

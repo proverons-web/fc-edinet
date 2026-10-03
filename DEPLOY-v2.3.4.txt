@@ -1,0 +1,12 @@
+FC EDINET v2.3.4 DEPLOY
+
+ОДИН РАЗ ДО DEPLOY:
+Supabase -> SQL Editor -> выполнить database/043_club_rich_content.sql
+
+Затем:
+1. Скопировать рабочий .env.local в папку v2.3.4.
+2. Запустить DEPLOY_FC_EDINET.bat.
+3. Проверить /api/version -> 2.3.4.
+4. Открыть /admin/club и проверить Visual Text Composer.
+5. Открыть /admin/page-builder/club, применить один из пресетов и проверить
+   перемещение фото стадиона внутри рамки по X/Y.

@@ -2242,7 +2242,7 @@ h1,h2,h3{font-family:var(--ds-font-heading);font-weight:var(--ds-heading-weight)
 
 .clubStadiumBuilder{position:relative}
 .clubStadiumBuilder .clubStadiumImage{height:var(--stadium-image-height,520px);min-height:0}
-.clubStadiumBuilder .clubStadiumImage img{object-position:var(--stadium-focus-x,50%) var(--stadium-focus-y,52%)}
+.clubStadiumBuilder .clubStadiumImage img{object-position:var(--stadium-focus-d-x,50%) var(--stadium-focus-d-y,52%)}
 .clubStadiumVariant-cinematic{display:grid;grid-template-columns:minmax(0,1fr);gap:0}
 .clubStadiumVariant-cinematic .clubStadiumImage{border-radius:28px;box-shadow:0 24px 70px rgba(0,0,0,.22)}
 .clubStadiumVariant-cinematic .clubStadiumInfo{position:relative;width:min(760px,calc(100% - 48px));margin:-92px 24px 0 auto;z-index:2;border:1px solid rgba(255,255,255,.13);box-shadow:0 24px 70px rgba(0,0,0,.24)}
@@ -2285,7 +2285,7 @@ h1,h2,h3{font-family:var(--ds-font-heading);font-weight:var(--ds-heading-weight)
 .clubManualFrame.is-image{height:var(--f-d-h);min-height:80px}
 .clubManualFrame:not(.is-image)>:not(.clubBuilderDragHandle):not(.clubBuilderResizeHandle){zoom:var(--f-d-font)}
 .clubManualFrame .clubStadiumImage,.clubBuilderManualImage{width:100%;height:100%;min-height:80px;border-radius:var(--stadium-radius,28px);overflow:hidden}
-.clubManualFrame .clubStadiumImage img,.clubBuilderManualImage img{width:100%;height:100%;object-fit:var(--stadium-fit,cover);object-position:var(--stadium-focus-x,50%) var(--stadium-focus-y,52%);display:block}
+.clubManualFrame .clubStadiumImage img,.clubBuilderManualImage img{width:100%;height:100%;object-fit:var(--stadium-fit,cover);object-position:var(--stadium-focus-d-x,50%) var(--stadium-focus-d-y,52%);display:block}
 .clubBuilderLooseHeading{margin:0}
 .clubManualFrame .clubStadiumInfo{position:relative;width:100%;margin:0;padding:28px;border-radius:22px;background:rgba(255,255,255,.97);box-shadow:0 18px 45px rgba(0,0,0,.18);color:#173451}
 .contentBuilderBg-dark .clubManualFrame .clubStadiumInfo h3,.contentBuilderBg-brand .clubManualFrame .clubStadiumInfo h3{color:#173451}
@@ -2346,3 +2346,39 @@ h1,h2,h3{font-family:var(--ds-font-heading);font-weight:var(--ds-heading-weight)
 .clubTemplateSelectable{display:contents}
 .clubTemplateSelectable:hover>*{outline:1px dashed rgba(25,113,214,.55);outline-offset:4px;cursor:pointer}
 .clubTemplateSelectable.is-selected>*{outline:3px solid #1683ff;outline-offset:4px}
+
+/* ===== v2.3.4 CLUB PAGE BUILDER 3.0 + RICH CONTENT ===== */
+.clubRichComposer{display:block;color:inherit;font-size:16px;line-height:1.78}
+.clubRichComposer:after,.clubRichClear{content:"";display:block;clear:both}
+.clubRichParagraph{margin:0 0 16px;color:#53657d;white-space:pre-line}
+.clubRichHeading{margin:28px 0 12px;font-size:clamp(24px,3vw,38px);line-height:1.08;color:#173451}
+.clubRichSubheading{margin:22px 0 10px;font-size:20px;line-height:1.2;color:#173451}
+.clubRichQuote{margin:24px 0;padding:18px 22px;border-left:4px solid #0f63c8;background:rgba(15,99,200,.07);border-radius:0 14px 14px 0;color:#284964;font-weight:700}
+.clubRichDivider{clear:both;border:0;border-top:1px solid rgba(108,132,157,.24);margin:28px 0}
+.clubRichImage{width:var(--rich-image-width,100%);margin:24px 0;max-width:100%}
+.clubRichImage img{display:block;width:100%;height:auto;border-radius:var(--rich-image-radius,18px);box-shadow:0 14px 38px rgba(16,42,72,.12)}
+.clubRichImage figcaption{margin-top:8px;color:#7a8ca1;font-size:11px;line-height:1.45}
+.clubRichImage.align-center{margin-left:auto;margin-right:auto}.clubRichImage.align-right{margin-left:auto}
+.clubRichImage-left{float:left;margin:6px 28px 18px 0}.clubRichImage-right{float:right;margin:6px 0 18px 28px}
+.clubRichComposer .align-center{text-align:center}.clubRichComposer .align-right{text-align:right}.clubRichComposer .align-left{text-align:left}
+.contentBuilderBg-dark .clubRichParagraph,.contentBuilderBg-brand .clubRichParagraph{color:#c0cede}
+.contentBuilderBg-dark .clubRichHeading,.contentBuilderBg-brand .clubRichHeading,.contentBuilderBg-dark .clubRichSubheading,.contentBuilderBg-brand .clubRichSubheading{color:#fff}
+.contentBuilderBg-dark .clubRichQuote,.contentBuilderBg-brand .clubRichQuote{color:#e5effc;background:rgba(255,255,255,.08);border-left-color:#78adff}
+.clubStadiumInfo .clubRichParagraph{color:#b7c8dc}.clubStadiumInfo .clubRichHeading,.clubStadiumInfo .clubRichSubheading{color:#fff}
+
+.clubRichEditor{margin:20px 0 28px;border:1px solid #d8e3ee;border-radius:18px;background:#f8fbfe;overflow:hidden}
+.clubRichEditorHead{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:18px;border-bottom:1px solid #e2e9f0;background:#fff}
+.clubRichEditorHead span{font-size:8px;font-weight:950;letter-spacing:.11em;color:#0f63c8}.clubRichEditorHead h3{margin:4px 0 3px;color:#173451;font-size:20px}.clubRichEditorHead p{margin:0;max-width:720px;color:#73869a;font-size:10px;line-height:1.5}
+.clubRichAddBar{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}.clubRichAddBar button,.clubRichInsertAfter button{border:1px solid #cfdceb;border-radius:8px;background:#fff;color:#245070;font-size:9px;font-weight:900;padding:8px 10px;cursor:pointer}.clubRichAddBar button:hover,.clubRichInsertAfter button:hover{border-color:#83b5ed;color:#0f63c8}
+.clubRichHiddenFile{display:none}.clubRichEditorWorkspace{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);gap:14px;padding:14px}.clubRichBlockList{display:grid;gap:10px}.clubRichLivePreview{position:sticky;top:80px;align-self:start;max-height:70vh;overflow:auto;padding:18px;border:1px solid #d9e3ed;border-radius:14px;background:#fff}.clubRichLivePreviewHead{display:flex;justify-content:space-between;gap:10px;margin-bottom:16px;padding-bottom:9px;border-bottom:1px solid #edf1f5}.clubRichLivePreviewHead span{font-size:8px;font-weight:950;letter-spacing:.1em;color:#0f63c8}.clubRichLivePreviewHead b{font-size:9px;color:#75879a}
+.clubRichEditBlock{border:1px solid #d9e3ed;border-radius:13px;background:#fff;padding:11px}.clubRichEditBlock[draggable=true]{cursor:grab}.clubRichEditBlockTop{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:9px}.clubRichEditBlockTop>div{display:flex;gap:6px;align-items:center}.clubRichEditBlockTop b{font-size:10px;color:#1e3e5f}.clubRichEditBlockTop small{font-size:8px;color:#8a9aab}.clubRichDrag{color:#91a4b8}.clubRichEditBlockTop button{min-width:28px;height:28px;border:1px solid #dae3ec;border-radius:7px;background:#fff;color:#3e5973;font-size:9px;font-weight:850;cursor:pointer}.clubRichEditBlockTop button.danger{color:#a14b5c}.clubRichEditBlock textarea{width:100%;resize:vertical;border:1px solid #d5e0eb;border-radius:9px;padding:10px;font:inherit;font-size:12px;line-height:1.55}.clubRichAlignButtons{display:flex;align-items:center;gap:5px;margin-top:7px}.clubRichAlignButtons>span{margin-right:auto;font-size:8px;font-weight:850;color:#70849a}.clubRichAlignButtons button{min-width:34px;height:28px;border:1px solid #d6e0ea;border-radius:7px;background:#fff;color:#61778e;cursor:pointer}.clubRichAlignButtons button.active{background:#0f63c8;color:#fff;border-color:#0f63c8}.clubRichInsertAfter{display:flex;gap:5px;margin-top:8px;padding-top:8px;border-top:1px dashed #e1e8ef}.clubRichInsertAfter button{padding:5px 8px;font-size:8px}
+.clubRichImageEdit{display:grid;grid-template-columns:180px minmax(0,1fr);gap:12px}.clubRichImageThumb{height:130px;border-radius:10px;overflow:hidden;background:#102c52}.clubRichImageThumb img{width:100%;height:100%;object-fit:cover}.clubRichImageControls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.clubRichImageControls label{display:grid;gap:4px}.clubRichImageControls label>span{font-size:8px;font-weight:850;color:#6c8197}.clubRichImageControls input,.clubRichImageControls select{width:100%;height:34px;border:1px solid #d4dfeb;border-radius:7px;padding:0 7px;background:#fff;color:#294765;font-size:10px}.clubRichImageControls .clubRichAlignButtons{grid-column:1/-1}.clubRichEmpty{padding:28px;border:1px dashed #cddae7;border-radius:12px;text-align:center;display:grid;gap:4px}.clubRichEmpty strong{color:#284866}.clubRichEmpty span{font-size:10px;color:#7d8fa1}.clubRichEditor.compact .clubRichEditorWorkspace{grid-template-columns:1fr}.clubRichEditor.compact .clubRichLivePreview{display:none}
+
+.pageBuilderPresetBar{display:grid;grid-template-columns:240px minmax(0,1fr);gap:14px;align-items:stretch;padding:12px;border:1px solid #d8e3ee;border-radius:14px;background:#fff}.pageBuilderPresetBar>div:first-child{display:grid;align-content:center;gap:4px;padding:8px}.pageBuilderPresetBar>div:first-child span{font-size:8px;font-weight:950;letter-spacing:.1em;color:#0f63c8}.pageBuilderPresetBar>div:first-child strong{font-size:12px;line-height:1.35;color:#173451}.pageBuilderPresetCards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.pageBuilderPresetCards button{display:grid;gap:4px;text-align:left;padding:12px;border:1px solid #d7e2ed;border-radius:11px;background:#f8fbfe;cursor:pointer}.pageBuilderPresetCards button:hover,.pageBuilderPresetCards button.active{border-color:#7fb0e7;background:#eef6ff;box-shadow:inset 0 0 0 1px #b6d4f4}.pageBuilderPresetCards b{font-size:11px;color:#173451}.pageBuilderPresetCards small{font-size:8px;line-height:1.45;color:#6f8398}.pageBuilderImageHint{margin:0;padding:8px 9px;border-radius:8px;background:#eef6ff;color:#496b8a;font-size:8px;line-height:1.45}
+
+.clubBuilderImageFocusDrag{position:absolute;inset:0;z-index:40;border:0;background:linear-gradient(rgba(15,99,200,.03),rgba(15,99,200,.03));cursor:move;display:flex;align-items:flex-start;justify-content:flex-start;padding:12px;touch-action:none}.clubBuilderImageFocusDrag span{display:inline-flex;padding:7px 9px;border-radius:999px;background:#0f63c8;color:#fff;font-size:9px;font-weight:950;letter-spacing:.06em;box-shadow:0 7px 20px rgba(0,0,0,.18)}.clubBuilderImageFocusDrag small{margin:3px 0 0 7px;padding:5px 7px;border-radius:999px;background:rgba(7,26,54,.78);color:#fff;font-size:8px}.clubStadiumImage{position:relative}
+.clubStadiumBuilder .clubStadiumImage img,.clubManualFrame .clubStadiumImage img,.clubBuilderManualImage img{object-position:var(--stadium-focus-d-x,50%) var(--stadium-focus-d-y,52%)}
+@media(max-width:1100px){.clubStadiumBuilder .clubStadiumImage img,.clubManualFrame .clubStadiumImage img,.clubBuilderManualImage img{object-position:var(--stadium-focus-t-x,50%) var(--stadium-focus-t-y,52%)}}
+@media(max-width:680px){.clubStadiumBuilder .clubStadiumImage img,.clubManualFrame .clubStadiumImage img,.clubBuilderManualImage img{object-position:var(--stadium-focus-m-x,50%) var(--stadium-focus-m-y,52%)}.clubRichImage-left,.clubRichImage-right{float:none;width:100%!important;margin:18px 0}.clubRichEditorWorkspace{grid-template-columns:1fr}.clubRichLivePreview{position:static;max-height:none}.clubRichEditorHead{flex-direction:column}.clubRichAddBar{justify-content:flex-start}.clubRichImageEdit{grid-template-columns:1fr}.clubRichImageControls{grid-template-columns:1fr}.pageBuilderPresetBar{grid-template-columns:1fr}.pageBuilderPresetCards{grid-template-columns:1fr}}
+.clubStadiumBuilder .clubStadiumImage img{object-fit:var(--stadium-fit,cover)}
+.clubManualFrame .clubStadiumInfo .clubRichParagraph{color:#5d6e82}.clubManualFrame .clubStadiumInfo .clubRichHeading,.clubManualFrame .clubStadiumInfo .clubRichSubheading{color:#173451}

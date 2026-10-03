@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireEditor } from "@/lib/editorial";
 import { resolveRomanianTranslation } from "@/lib/auto-translation";
+import { clubRichContentToPlainText, normalizeClubRichContent } from "@/lib/club-rich-content";
 
 export type ClubFormState = {
   error?: string;
@@ -33,10 +34,14 @@ export async function saveClubProfile(
   const clubColorsRo = nullableText(formData.get("club_colors_ro"));
   const motto = nullableText(formData.get("motto"));
   const mottoRo = nullableText(formData.get("motto_ro"));
-  const aboutText = nullableText(formData.get("about_text"));
-  const aboutTextRo = nullableText(formData.get("about_text_ro"));
-  const historyText = nullableText(formData.get("history_text"));
-  const historyTextRo = nullableText(formData.get("history_text_ro"));
+  const aboutRichContent = normalizeClubRichContent(formData.get("about_rich_content"));
+  const aboutRichContentRo = normalizeClubRichContent(formData.get("about_rich_content_ro"));
+  const historyRichContent = normalizeClubRichContent(formData.get("history_rich_content"));
+  const historyRichContentRo = normalizeClubRichContent(formData.get("history_rich_content_ro"));
+  const aboutText = clubRichContentToPlainText(aboutRichContent);
+  const aboutTextRo = clubRichContentToPlainText(aboutRichContentRo);
+  const historyText = clubRichContentToPlainText(historyRichContent);
+  const historyTextRo = clubRichContentToPlainText(historyRichContentRo);
   const email = nullableText(formData.get("email"));
   const phone = nullableText(formData.get("phone"));
   const address = nullableText(formData.get("address"));
@@ -50,11 +55,11 @@ export async function saveClubProfile(
   const stadiumAddress = nullableText(
     formData.get("stadium_address")
   );
-  const stadiumDescription = nullableText(
-    formData.get("stadium_description")
-  );
+  const stadiumRichContent = normalizeClubRichContent(formData.get("stadium_rich_content"));
+  const stadiumRichContentRo = normalizeClubRichContent(formData.get("stadium_rich_content_ro"));
+  const stadiumDescription = clubRichContentToPlainText(stadiumRichContent);
   const stadiumAddressRo = nullableText(formData.get("stadium_address_ro"));
-  const stadiumDescriptionRo = nullableText(formData.get("stadium_description_ro"));
+  const stadiumDescriptionRo = clubRichContentToPlainText(stadiumRichContentRo);
 
   if (
     foundedYear !== null &&
@@ -160,8 +165,12 @@ export async function saveClubProfile(
         motto_ro: translation.values.motto || null,
         about_text: aboutText,
         about_text_ro: translation.values.about_text || null,
+        about_rich_content: aboutRichContent,
+        about_rich_content_ro: translationLocked && aboutRichContentRo?.blocks.length ? aboutRichContentRo : null,
         history_text: historyText,
         history_text_ro: translation.values.history_text || null,
+        history_rich_content: historyRichContent,
+        history_rich_content_ro: translationLocked && historyRichContentRo?.blocks.length ? historyRichContentRo : null,
         email,
         phone,
         address,
@@ -173,6 +182,8 @@ export async function saveClubProfile(
         stadium_address_ro: translation.values.stadium_address || null,
         stadium_description: stadiumDescription,
         stadium_description_ro: translation.values.stadium_description || null,
+        stadium_rich_content: stadiumRichContent,
+        stadium_rich_content_ro: translationLocked && stadiumRichContentRo?.blocks.length ? stadiumRichContentRo : null,
         ro_translation_locked: translationLocked,
         ro_translation_source_hash: translation.sourceHash,
         ro_translation_updated_at:
