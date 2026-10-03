@@ -86,7 +86,7 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
       <section className="adminHero compactAdminHero">
         <div className="container adminHeroInner">
           <div>
-            <p className="eyebrow">FC EDINEȚ • MATCH CENTER v2.3.0</p>
+            <p className="eyebrow">FC EDINEȚ • MATCH CENTER v2.3.1</p>
             <h1>Статистика матчей</h1>
             <p>Единая точка для отчёта, событий, составов, командных цифр и связи со статистикой игроков.</p>
           </div>
@@ -109,12 +109,11 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
           <section className="statisticsPanel matchCenterIntro">
             <div className="statisticsPanelHead">
               <div>
-                <p className="eyebrow blue">v2.3.0 • ФУНДАМЕНТ</p>
+                <p className="eyebrow blue">v2.3.1 • ТАЙМЛАЙН СОБЫТИЙ</p>
                 <h2>Матч теперь отдельный информационный объект</h2>
                 <p>
-                  Внутри каждого матча уже подготовлены основа отчёта, две строки командной статистики,
-                  таблица событий и связь с завершённой статистикой игроков. Следующие версии будут
-                  включать эти слои по одному, не меняя архитектуру заново.
+                  Внутри каждого матча работает редактируемый таймлайн событий: голы, карточки, замены, пенальти, VAR и другие эпизоды.
+                  Основа отчёта и связь со статистикой игроков остаются на месте; следующие версии подключат составы и командные цифры.
                 </p>
               </div>
               <span className="matchCenterVersionBadge">MATCH CENTER</span>
@@ -236,7 +235,7 @@ function MatchCenterMigrationRequired({ message }: { message: string }) {
           <div>
             <p className="eyebrow">FC EDINEȚ • MATCH CENTER</p>
             <h1>Нужна миграция 041</h1>
-            <p>Код v2.3.0 уже установлен, но таблицы статистики матча ещё не созданы.</p>
+            <p>Код v2.3.1 уже установлен, но таблицы статистики матча из migration 041 ещё не созданы.</p>
           </div>
           <Link href="/admin" className="adminBack">← Админка</Link>
         </div>

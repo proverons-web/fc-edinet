@@ -136,7 +136,7 @@ export default async function AdminPage() {
               text="Отчёт матча, события, составы, командная статистика и связь со статистикой игроков."
               badge={
                 profile.role === "editor" || profile.role === "admin"
-                  ? "v2.3.0"
+                  ? "v2.3.1"
                   : "Editor/Admin"
               }
               href={
@@ -170,6 +170,20 @@ export default async function AdminPage() {
               href={
                 profile.role === "editor" || profile.role === "admin"
                   ? "/admin/standings"
+                  : undefined
+              }
+            />
+            <AdminModule
+              title="Page Builder"
+              text="Конструктор информационных страниц: порядок секций, варианты отображения, фото, ширина и фон."
+              badge={
+                profile.role === "editor" || profile.role === "admin"
+                  ? "v2.3.2"
+                  : "Editor/Admin"
+              }
+              href={
+                profile.role === "editor" || profile.role === "admin"
+                  ? "/admin/page-builder"
                   : undefined
               }
             />

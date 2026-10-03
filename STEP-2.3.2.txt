@@ -1,0 +1,23 @@
+FC EDINET v2.3.2 — CONTENT PAGE BUILDER 1.0
+
+Что добавлено:
+- /admin/page-builder — каталог конструктора страниц.
+- /admin/page-builder/club — первый рабочий конструктор.
+- Порядок и видимость секций /club.
+- Width: container / wide / full.
+- Background: default / light / surface / dark / brand.
+- Верхние и нижние отступы каждой секции.
+- Варианты блоков About / History / Stadium / Leadership / Achievements.
+- Для стадиона: Cinematic, split-left, split-right, full-photo.
+- Настройка высоты и focus X/Y фото стадиона.
+- Preview использует реальное stadium_image_url.
+- Draft / Publish разделены.
+- По умолчанию стадион перенесён сразу после блока «О клубе» и использует Cinematic layout.
+
+DB:
+- database/042_content_page_builder.sql
+- content_page_layouts — редакторский черновик/снимок публикации.
+- content_page_published — только публичная конфигурация, без утечки draft.
+
+Следующий шаг после v2.3.2:
+- вернуть roadmap матчей и сделать стартовые составы / замены как v2.3.3.

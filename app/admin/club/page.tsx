@@ -31,7 +31,7 @@ export default async function AdminClubPage() {
       <section className="adminHero compactAdminHero">
         <div className="container adminHeroInner">
           <div><p className="eyebrow">FC EDINEȚ • КЛУБ</p><h1>Раздел клуба</h1><p>История, стадион, контакты, руководство, достижения и переводы RU/RO.</p></div>
-          <div className="adminHeroActions"><Link href="/admin" className="adminBack">← Админка</Link><Link href="/club" className="rowAction muted">Открыть на сайте ↗</Link></div>
+          <div className="adminHeroActions"><Link href="/admin" className="adminBack">← Админка</Link><Link href="/admin/page-builder/club" className="rowAction">Конструктор страницы</Link><Link href="/club" className="rowAction muted">Открыть на сайте ↗</Link></div>
         </div>
       </section>
 

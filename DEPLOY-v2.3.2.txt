@@ -1,0 +1,9 @@
+FC EDINET v2.3.2 — Content Page Builder 1.0
+
+1. Copy .env.local from the previous working version.
+2. Supabase -> SQL Editor -> run database/042_content_page_builder.sql once.
+3. Run DEPLOY_FC_EDINET.bat.
+4. Check /api/version -> 2.3.2.
+5. Open /admin/page-builder/club and /club.
+
+Default stadium layout: Cinematic, wide image, adjustable height and X/Y focus.

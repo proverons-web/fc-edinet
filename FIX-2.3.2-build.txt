@@ -1,0 +1,12 @@
+FC Edinet v2.3.2 build fix
+
+Fixed TypeScript build error in:
+app/admin/page-builder/club/actions.ts
+
+Cause:
+Draft and publish payloads were stored in one conditional union object. Supabase upsert type inference treated published_at as required for both branches.
+
+Fix:
+Draft and publish upserts are now executed in separate typed branches.
+
+Database migration 042 does NOT need to be rerun if it was already applied successfully.
