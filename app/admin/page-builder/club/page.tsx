@@ -4,21 +4,17 @@ import { getDraftClubPageLayout } from "@/lib/content-page-builder";
 import ClubPageBuilder from "@/app/components/ClubPageBuilder";
 import { saveClubPageLayout } from "./actions";
 
-export const metadata = { title: "Конструктор страницы клуба — Admin" };
+export const metadata = { title: "Page Builder 2.0 — Клуб — Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function ClubPageBuilderPage() {
   const { supabase } = await requireEditor();
-  const [layout, profileResult] = await Promise.all([
-    getDraftClubPageLayout(supabase),
-    supabase.from("club_profile").select("stadium_image_url").eq("id", 1).maybeSingle(),
-  ]);
-  const stadiumImageUrl = profileResult.data?.stadium_image_url ?? null;
-  return <main className="adminPage">
+  const layout = await getDraftClubPageLayout(supabase);
+  return <main className="adminPage pageBuilder2Page">
     <section className="adminHero compactAdminHero"><div className="container adminHeroInner">
-      <div><p className="eyebrow">FC EDINEȚ • PAGE BUILDER</p><h1>Конструктор страницы «Клуб»</h1><p>Порядок секций, варианты подачи, ширина, фон, отступы и кадрирование фото стадиона.</p></div>
-      <div className="adminHeroActions"><Link href="/admin/club" className="adminBack">← Клуб</Link><Link href="/club" className="rowAction muted">Открыть страницу ↗</Link></div>
+      <div><p className="eyebrow">FC EDINEȚ • PAGE BUILDER 2.0</p><h1>Конструктор страницы «Клуб»</h1><p>Реальное Live Preview, ручное позиционирование фото и текста, отдельные настройки Desktop / Tablet / Mobile.</p></div>
+      <div className="adminHeroActions"><Link href="/admin/club" className="adminBack">← Контент клуба</Link><Link href="/club" target="_blank" className="rowAction muted">Открыть /club ↗</Link></div>
     </div></section>
-    <section className="section adminSurface"><div className="container"><ClubPageBuilder initial={layout} action={saveClubPageLayout} stadiumImageUrl={stadiumImageUrl}/></div></section>
+    <section className="section adminSurface pageBuilder2Surface"><div className="pageBuilder2Container"><ClubPageBuilder initial={layout} action={saveClubPageLayout}/></div></section>
   </main>;
 }

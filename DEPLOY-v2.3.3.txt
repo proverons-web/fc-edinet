@@ -1,0 +1,8 @@
+FC EDINET v2.3.3 — Page Builder 2.0
+
+1. SQL не нужен, если 042 уже применён.
+2. Скопировать .env.local из рабочей версии.
+3. Запустить DEPLOY_FC_EDINET.bat.
+4. Проверить /api/version -> 2.3.3.
+5. Открыть /admin/page-builder/club и проверить Desktop / Tablet / Mobile.
+6. Опубликовать макет и сравнить /club — результат должен совпадать с Live Preview.

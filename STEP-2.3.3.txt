@@ -1,0 +1,15 @@
+FC EDINET v2.3.3 — CONTENT PAGE BUILDER 2.0
+
+Главное:
+- Live Preview использует тот же ClubPageCanvas, что и публичный /club.
+- Отдельные реальные viewport: Desktop 1920x1080, Tablet 1024x1366, Mobile 390x844.
+- Свободный режим для каждой секции.
+- Фото и текст можно перетаскивать прямо в preview.
+- Точные X/Y, ширина, высота, Z-index, padding, font scale, text align.
+- Отдельные координаты на Desktop / Tablet / Mobile.
+- Фото стадиона: focus X/Y, cover/contain, radius.
+- Template mode сохранён для быстрых раскладок.
+- Draft / Publish сохранены.
+- Новая SQL миграция не нужна: используется JSONB из 042.
+
+Следующий матчевый этап: v2.3.4 — стартовые составы и замены.

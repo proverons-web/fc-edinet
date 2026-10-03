@@ -4,6 +4,32 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 export type ContentPageWidth = "container" | "wide" | "full";
 export type ContentPageBackground = "inherit" | "light" | "surface" | "dark" | "brand";
 export type ClubSectionKey = "about" | "history" | "stadium" | "leadership" | "achievements";
+export type BuilderBreakpoint = "desktop" | "tablet" | "mobile";
+export type ClubElementKey =
+  | "about-copy"
+  | "about-contact"
+  | "history-copy"
+  | "stadium-heading"
+  | "stadium-image"
+  | "stadium-info"
+  | "leadership-heading"
+  | "leadership-grid"
+  | "achievements-heading"
+  | "achievements-list";
+
+export type ClubElementFrame = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  z: number;
+  padding: number;
+  font_scale: number;
+  text_align: "left" | "center" | "right";
+};
+
+export type ClubResponsiveFrames = Record<BuilderBreakpoint, Record<string, ClubElementFrame>>;
+export type ClubResponsiveNumber = Record<BuilderBreakpoint, number>;
 
 export type ClubSectionConfig = {
   key: ClubSectionKey;
@@ -13,30 +39,110 @@ export type ClubSectionConfig = {
   padding_top: number;
   padding_bottom: number;
   variant: string;
+  layout_mode: "template" | "manual";
+  canvas_height: ClubResponsiveNumber;
+  frames: ClubResponsiveFrames;
   image_position_x?: number;
   image_position_y?: number;
-  image_height?: number;
+  image_fit?: "cover" | "contain";
+  image_radius?: number;
   columns?: number;
 };
 
 export type ClubPageLayoutConfig = {
-  version: 1;
+  version: 2;
   sections: ClubSectionConfig[];
 };
 
+const frame = (x:number,y:number,width:number,height:number=0,z:number=1,padding:number=0,font_scale:number=100,text_align:ClubElementFrame["text_align"]="left"):ClubElementFrame => ({x,y,width,height,z,padding,font_scale,text_align});
+
+const emptyResponsiveFrames = (): ClubResponsiveFrames => ({ desktop:{}, tablet:{}, mobile:{} });
+
+function sectionDefaults(key: ClubSectionKey): ClubSectionConfig {
+  const frames = emptyResponsiveFrames();
+  const common = {
+    key,
+    visible: true,
+    width: "container" as ContentPageWidth,
+    background: "inherit" as ContentPageBackground,
+    padding_top: 88,
+    padding_bottom: 88,
+    layout_mode: "template" as const,
+    canvas_height: { desktop: 620, tablet: 700, mobile: 820 },
+    frames,
+  };
+
+  if (key === "about") {
+    frames.desktop["about-copy"] = frame(0,0,64,0,1,0,100,"left");
+    frames.desktop["about-contact"] = frame(69,0,31,0,2,0,100,"left");
+    frames.tablet["about-copy"] = frame(0,0,100,0);
+    frames.tablet["about-contact"] = frame(0,360,100,0);
+    frames.mobile["about-copy"] = frame(0,0,100,0);
+    frames.mobile["about-contact"] = frame(0,430,100,0);
+    return { ...common, variant:"contact-right", canvas_height:{desktop:560,tablet:760,mobile:940} };
+  }
+  if (key === "history") {
+    frames.desktop["history-copy"] = frame(14,0,72,0,1,0,100,"left");
+    frames.tablet["history-copy"] = frame(6,0,88,0);
+    frames.mobile["history-copy"] = frame(0,0,100,0);
+    return { ...common, background:"surface", variant:"readable", canvas_height:{desktop:680,tablet:760,mobile:920} };
+  }
+  if (key === "stadium") {
+    frames.desktop["stadium-heading"] = frame(0,0,100,0,3);
+    frames.desktop["stadium-image"] = frame(0,100,100,510,1);
+    frames.desktop["stadium-info"] = frame(9,535,82,0,4,0,100,"left");
+    frames.tablet["stadium-heading"] = frame(0,0,100,0,3);
+    frames.tablet["stadium-image"] = frame(0,100,100,430,1);
+    frames.tablet["stadium-info"] = frame(4,470,92,0,4);
+    frames.mobile["stadium-heading"] = frame(0,0,100,0,3);
+    frames.mobile["stadium-image"] = frame(0,90,100,320,1);
+    frames.mobile["stadium-info"] = frame(0,390,100,0,4);
+    return {
+      ...common,
+      width:"wide",
+      background:"dark",
+      variant:"cinematic",
+      layout_mode:"manual",
+      canvas_height:{desktop:760,tablet:760,mobile:760},
+      image_position_x:50,
+      image_position_y:52,
+      image_fit:"cover",
+      image_radius:28,
+    };
+  }
+  if (key === "leadership") {
+    frames.desktop["leadership-heading"] = frame(0,0,100,0,2);
+    frames.desktop["leadership-grid"] = frame(0,110,100,0,1);
+    frames.tablet["leadership-heading"] = frame(0,0,100,0,2);
+    frames.tablet["leadership-grid"] = frame(0,100,100,0,1);
+    frames.mobile["leadership-heading"] = frame(0,0,100,0,2);
+    frames.mobile["leadership-grid"] = frame(0,90,100,0,1);
+    return { ...common, variant:"cards", columns:3, canvas_height:{desktop:720,tablet:900,mobile:1280} };
+  }
+  frames.desktop["achievements-heading"] = frame(0,0,100,0,2);
+  frames.desktop["achievements-list"] = frame(0,110,100,0,1);
+  frames.tablet["achievements-heading"] = frame(0,0,100,0,2);
+  frames.tablet["achievements-list"] = frame(0,100,100,0,1);
+  frames.mobile["achievements-heading"] = frame(0,0,100,0,2);
+  frames.mobile["achievements-list"] = frame(0,90,100,0,1);
+  return { ...common, background:"dark", variant:"timeline", canvas_height:{desktop:700,tablet:850,mobile:1100} };
+}
+
 const defaults: ClubPageLayoutConfig = {
-  version: 1,
-  sections: [
-    { key: "about", visible: true, width: "container", background: "inherit", padding_top: 88, padding_bottom: 88, variant: "contact-right" },
-    { key: "stadium", visible: true, width: "wide", background: "dark", padding_top: 88, padding_bottom: 88, variant: "cinematic", image_position_x: 50, image_position_y: 52, image_height: 520 },
-    { key: "history", visible: true, width: "container", background: "surface", padding_top: 88, padding_bottom: 88, variant: "readable" },
-    { key: "leadership", visible: true, width: "container", background: "inherit", padding_top: 88, padding_bottom: 88, variant: "cards", columns: 3 },
-    { key: "achievements", visible: true, width: "container", background: "dark", padding_top: 88, padding_bottom: 88, variant: "timeline" },
-  ],
+  version: 2,
+  sections: [sectionDefaults("about"), sectionDefaults("stadium"), sectionDefaults("history"), sectionDefaults("leadership"), sectionDefaults("achievements")],
 };
 
 export function defaultClubPageLayout(): ClubPageLayoutConfig {
   return JSON.parse(JSON.stringify(defaults)) as ClubPageLayoutConfig;
+}
+
+export function clubSectionElements(key: ClubSectionKey): ClubElementKey[] {
+  if (key === "about") return ["about-copy","about-contact"];
+  if (key === "history") return ["history-copy"];
+  if (key === "stadium") return ["stadium-heading","stadium-image","stadium-info"];
+  if (key === "leadership") return ["leadership-heading","leadership-grid"];
+  return ["achievements-heading","achievements-list"];
 }
 
 export function normalizeClubPageLayout(raw: unknown): ClubPageLayoutConfig {
@@ -51,7 +157,7 @@ export function normalizeClubPageLayout(raw: unknown): ClubPageLayoutConfig {
     .map((item) => String(item.key ?? ""))
     .filter((key): key is ClubSectionKey => normalized.some((section) => section.key === key));
   const order = [...new Set([...requestedOrder, ...normalized.map((section) => section.key)])];
-  return { version: 1, sections: order.map((key) => normalized.find((section) => section.key === key)!) };
+  return { version: 2, sections: order.map((key) => normalized.find((section) => section.key === key)!) };
 }
 
 export async function getPublishedClubPageLayout(supabase: SupabaseClient): Promise<ClubPageLayoutConfig> {
@@ -80,6 +186,7 @@ export function sectionClass(section: ClubSectionConfig) {
     `contentBuilderBg-${section.background}`,
     `contentBuilderWidth-${section.width}`,
     `contentBuilderVariant-${section.variant}`,
+    section.layout_mode === "manual" ? "contentBuilderManual" : "contentBuilderTemplate",
   ].join(" ");
 }
 
@@ -87,23 +194,74 @@ export function sectionStyle(section: ClubSectionConfig) {
   return {
     "--content-pad-top": `${section.padding_top}px`,
     "--content-pad-bottom": `${section.padding_bottom}px`,
+    "--club-canvas-desktop": `${section.canvas_height.desktop}px`,
+    "--club-canvas-tablet": `${section.canvas_height.tablet}px`,
+    "--club-canvas-mobile": `${section.canvas_height.mobile}px`,
+  } as CSSProperties;
+}
+
+export function frameCssVariables(frames: ClubResponsiveFrames, elementKey: string): CSSProperties {
+  const d = frames.desktop[elementKey] ?? frame(0,0,100);
+  const t = frames.tablet[elementKey] ?? d;
+  const m = frames.mobile[elementKey] ?? t;
+  return {
+    "--f-d-x": `${d.x}%`, "--f-d-y": `${d.y}px`, "--f-d-w": `${d.width}%`, "--f-d-h": `${d.height}px`, "--f-d-z": d.z, "--f-d-p": `${d.padding}px`, "--f-d-font": d.font_scale / 100, "--f-d-align": d.text_align,
+    "--f-t-x": `${t.x}%`, "--f-t-y": `${t.y}px`, "--f-t-w": `${t.width}%`, "--f-t-h": `${t.height}px`, "--f-t-z": t.z, "--f-t-p": `${t.padding}px`, "--f-t-font": t.font_scale / 100, "--f-t-align": t.text_align,
+    "--f-m-x": `${m.x}%`, "--f-m-y": `${m.y}px`, "--f-m-w": `${m.width}%`, "--f-m-h": `${m.height}px`, "--f-m-z": m.z, "--f-m-p": `${m.padding}px`, "--f-m-font": m.font_scale / 100, "--f-m-align": m.text_align,
   } as CSSProperties;
 }
 
 function normalizeSection(base: ClubSectionConfig, raw: unknown): ClubSectionConfig {
   const value = isRecord(raw) ? raw : {};
+  const layoutMode = value.layout_mode === "manual" || value.layout_mode === "template" ? value.layout_mode : base.layout_mode;
   return {
     key: base.key,
     visible: typeof value.visible === "boolean" ? value.visible : base.visible,
     width: width(value.width, base.width),
     background: background(value.background, base.background),
-    padding_top: integer(value.padding_top, 0, 180, base.padding_top),
-    padding_bottom: integer(value.padding_bottom, 0, 180, base.padding_bottom),
+    padding_top: integer(value.padding_top, 0, 220, base.padding_top),
+    padding_bottom: integer(value.padding_bottom, 0, 220, base.padding_bottom),
     variant: variant(base.key, value.variant, base.variant),
+    layout_mode: layoutMode,
+    canvas_height: normalizeResponsiveNumber(value.canvas_height, base.canvas_height, 260, 1800),
+    frames: normalizeFrames(value.frames, base.frames, base.key),
     image_position_x: base.key === "stadium" ? integer(value.image_position_x, 0, 100, base.image_position_x ?? 50) : undefined,
     image_position_y: base.key === "stadium" ? integer(value.image_position_y, 0, 100, base.image_position_y ?? 50) : undefined,
-    image_height: base.key === "stadium" ? integer(value.image_height, 280, 760, base.image_height ?? 520) : undefined,
-    columns: base.key === "leadership" ? integer(value.columns, 2, 4, base.columns ?? 3) : undefined,
+    image_fit: base.key === "stadium" && (value.image_fit === "contain" || value.image_fit === "cover") ? value.image_fit : base.image_fit,
+    image_radius: base.key === "stadium" ? integer(value.image_radius, 0, 60, base.image_radius ?? 28) : undefined,
+    columns: base.key === "leadership" ? integer(value.columns, 1, 4, base.columns ?? 3) : undefined,
+  };
+}
+
+function normalizeFrames(raw: unknown, fallback: ClubResponsiveFrames, sectionKey: ClubSectionKey): ClubResponsiveFrames {
+  const result: ClubResponsiveFrames = JSON.parse(JSON.stringify(fallback));
+  if (!isRecord(raw)) return result;
+  for (const bp of ["desktop","tablet","mobile"] as BuilderBreakpoint[]) {
+    const group = isRecord(raw[bp]) ? raw[bp] as Record<string, unknown> : {};
+    for (const element of clubSectionElements(sectionKey)) {
+      const base = result[bp][element] ?? frame(0,0,100);
+      const candidate = isRecord(group[element]) ? group[element] as Record<string, unknown> : {};
+      result[bp][element] = {
+        x: number(candidate.x, -50, 150, base.x),
+        y: integer(candidate.y, -400, 1800, base.y),
+        width: number(candidate.width, 5, 180, base.width),
+        height: integer(candidate.height, 0, 1400, base.height),
+        z: integer(candidate.z, 0, 50, base.z),
+        padding: integer(candidate.padding, 0, 100, base.padding),
+        font_scale: integer(candidate.font_scale, 50, 180, base.font_scale),
+        text_align: candidate.text_align === "center" || candidate.text_align === "right" || candidate.text_align === "left" ? candidate.text_align : base.text_align,
+      };
+    }
+  }
+  return result;
+}
+
+function normalizeResponsiveNumber(raw: unknown, fallback: ClubResponsiveNumber, min: number, max: number): ClubResponsiveNumber {
+  const value = isRecord(raw) ? raw : {};
+  return {
+    desktop: integer(value.desktop, min, max, fallback.desktop),
+    tablet: integer(value.tablet, min, max, fallback.tablet),
+    mobile: integer(value.mobile, min, max, fallback.mobile),
   };
 }
 
@@ -125,8 +283,12 @@ function background(value: unknown, fallback: ContentPageBackground): ContentPag
   return value === "inherit" || value === "light" || value === "surface" || value === "dark" || value === "brand" ? value : fallback;
 }
 function integer(value: unknown, min: number, max: number, fallback: number) {
-  const number = Number(value);
-  return Number.isFinite(number) ? Math.max(min, Math.min(max, Math.round(number))) : fallback;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.max(min, Math.min(max, Math.round(parsed))) : fallback;
+}
+function number(value: unknown, min: number, max: number, fallback: number) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.max(min, Math.min(max, Math.round(parsed * 10) / 10)) : fallback;
 }
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

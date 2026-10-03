@@ -314,16 +314,16 @@ export default async function MatchCenterMatchPage({
                   />
                 </div>
                 <p className="matchCenterHelp">
-                  В v2.3.3 сюда подключим владение, удары, угловые, фолы, офсайды, передачи, сейвы и xG.
+                  В v2.3.5 сюда подключим владение, удары, угловые, фолы, офсайды, передачи, сейвы и xG.
                 </p>
               </section>
 
               <section className="statisticsPanel matchCenterRoadmap">
                 <p className="eyebrow blue">ВЕТКА v2.3</p>
                 <RoadmapStep version="v2.3.1" title="События / таймлайн ✓" />
-                <RoadmapStep version="v2.3.2" title="Составы и замены" />
-                <RoadmapStep version="v2.3.3" title="Командная статистика" />
-                <RoadmapStep version="v2.3.4" title="Публичная страница матча" />
+                <RoadmapStep version="v2.3.4" title="Составы и замены" />
+                <RoadmapStep version="v2.3.5" title="Командная статистика" />
+                <RoadmapStep version="v2.3.6" title="Публичная страница матча" />
               </section>
 
               <section className="statisticsPanel">
