@@ -1,0 +1,19 @@
+FC EDINEȚ v2.3.0 — DEPLOY
+==========================
+
+ОДИН РАЗ ПЕРЕД DEPLOY:
+Supabase -> SQL Editor -> выполнить:
+  database/041_match_statistics_foundation.sql
+
+Затем в папке проекта просто запустить:
+  DEPLOY_FC_EDINET.bat
+
+BAT автоматически выполняет npm install, npm run deploy:check, Git commit и push.
+
+После Vercel проверить:
+  https://fc-edinet.vercel.app/api/version
+Ожидаем:
+  version = 2.3.0
+
+Проверка Match Center:
+  https://fc-edinet.vercel.app/admin/match-center

@@ -132,6 +132,20 @@ export default async function AdminPage() {
               }
             />
             <AdminModule
+              title="Матч-центр"
+              text="Отчёт матча, события, составы, командная статистика и связь со статистикой игроков."
+              badge={
+                profile.role === "editor" || profile.role === "admin"
+                  ? "v2.3.0"
+                  : "Editor/Admin"
+              }
+              href={
+                profile.role === "editor" || profile.role === "admin"
+                  ? "/admin/match-center"
+                  : undefined
+              }
+            />
+            <AdminModule
               title="Матчи"
               text="Календарь, соперники, результаты и блоки на главной."
               badge={

@@ -812,6 +812,90 @@ export type MatchStatisticsState = {
   updated_at?: string;
 };
 
+export type MatchReportStatus = "draft" | "complete";
+
+export type MatchReport = {
+  match_id: string | number;
+  status: MatchReportStatus;
+  referee: string | null;
+  attendance: number | null;
+  weather: string | null;
+  pitch_condition: string | null;
+  summary: string | null;
+  man_of_match_player_id: string | null;
+  completed_at: string | null;
+  completed_by: string | null;
+  created_by: string | null;
+  updated_by: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type MatchTeamStatistic = {
+  id: string | number;
+  match_id: string | number;
+  team_id: string | number;
+  side: "home" | "away";
+  possession_percent: number | null;
+  shots: number | null;
+  shots_on_target: number | null;
+  corners: number | null;
+  fouls: number | null;
+  offsides: number | null;
+  yellow_cards: number | null;
+  red_cards: number | null;
+  passes_attempted: number | null;
+  passes_completed: number | null;
+  saves: number | null;
+  expected_goals: number | null;
+  notes: string | null;
+  created_by?: string | null;
+  updated_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type MatchEventType =
+  | "goal"
+  | "own_goal"
+  | "penalty_goal"
+  | "penalty_miss"
+  | "yellow_card"
+  | "red_card"
+  | "substitution"
+  | "var"
+  | "injury"
+  | "other";
+
+export type MatchEvent = {
+  id: string | number;
+  match_id: string | number;
+  team_id: string | number | null;
+  player_id: string | null;
+  player_name: string | null;
+  related_player_id: string | null;
+  related_player_name: string | null;
+  event_type: MatchEventType;
+  minute: number;
+  stoppage_minute: number;
+  description: string | null;
+  sort_order: number;
+  created_by?: string | null;
+  updated_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type MatchCenterProgress = {
+  match_id: string | number;
+  report_status: "empty" | MatchReportStatus;
+  player_stats_status: "empty" | MatchStatisticsStatus;
+  team_rows: number;
+  team_stats_filled: number;
+  events_count: number;
+  report_has_metadata: boolean;
+};
+
 export type PlayerSeasonStatistics = {
   player_id: string | number;
   season_id: string | number | null;

@@ -122,6 +122,7 @@ export default async function MatchStatisticsPage({
           </div>
           <div className="adminHeroActions">
             <Link href="/admin/statistics" className="adminBack">← Статистика</Link>
+            <Link href={`/admin/match-center/${match.id}`} className="rowAction muted">Матч-центр</Link>
             <Link href={`/admin/matches/${match.id}/edit`} className="rowAction muted">Открыть матч</Link>
           </div>
         </div>

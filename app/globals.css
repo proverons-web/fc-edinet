@@ -2129,3 +2129,65 @@ h1,h2,h3{font-family:var(--ds-font-heading);font-weight:var(--ds-heading-weight)
   .statisticsSaveBar>div:first-child span{line-height:1.45}
   .playerCompetitionStatsWrap,.playerRecentMatchesWrap,.teamStatisticsTableWrap,.teamStatisticsHistoryTableWrap,.statisticsSeasonTableWrap{-webkit-overflow-scrolling:touch}
 }
+
+/* ============================================================
+   FC EDINEȚ v2.3.0 — Match Center foundation
+   ============================================================ */
+.matchCenterPage .adminSurface{padding-top:34px}
+.matchCenterContainer{display:grid;gap:18px}
+.matchCenterSummary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.matchCenterSummaryCard{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;min-height:92px;padding:17px 18px;border:1px solid #dce5ef;border-radius:18px;background:linear-gradient(145deg,#fff,#f8fbff);box-shadow:0 10px 30px rgba(6,22,46,.04)}
+.matchCenterSummaryCard span{max-width:130px;font-size:10px;font-weight:900;letter-spacing:.055em;text-transform:uppercase;color:#75869a;line-height:1.35}
+.matchCenterSummaryCard strong{font-size:34px;line-height:1;color:#0d61c8;letter-spacing:-.045em}
+.matchCenterIntro{margin:0}.matchCenterIntro .statisticsPanelHead{align-items:center}
+.matchCenterVersionBadge{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 14px;border-radius:999px;background:#eaf3ff;color:#0d61c8;font-size:10px;font-weight:950;letter-spacing:.08em}
+.matchCenterFilters{margin:0}
+.matchCenterList{display:grid;gap:10px}
+.matchCenterRow{display:grid;grid-template-columns:110px minmax(260px,1.15fr) minmax(360px,.95fr) auto;gap:18px;align-items:center;padding:15px 16px;border:1px solid #dfe7f0;border-radius:17px;background:#fff;box-shadow:0 8px 28px rgba(7,27,55,.035)}
+.matchCenterRow:hover{border-color:#c7d8ea;box-shadow:0 12px 34px rgba(7,27,55,.06)}
+.matchCenterDate{display:grid;gap:3px}.matchCenterDate strong{font-size:12px;color:#17395f}.matchCenterDate span{font-size:11px;color:#7e8da0}
+.matchCenterMatchMain{min-width:0}.matchCenterMatchMain h2{margin:5px 0 3px;font-size:19px;line-height:1.2;color:#17395f;letter-spacing:-.025em}.matchCenterMatchMain h2 b{color:#0d61c8}.matchCenterMatchMain p{margin:0;color:#7a8a9c;font-size:10px}
+.matchCenterWorkflow{display:grid;grid-template-columns:repeat(4,minmax(74px,1fr));gap:6px}
+.matchCenterWorkflowChip{display:grid;gap:2px;min-height:58px;padding:8px 9px;border:1px solid #e4e9ef;border-radius:11px;background:#f8fafc}
+.matchCenterWorkflowChip span{font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:#8a97a7}.matchCenterWorkflowChip strong{font-size:11px;color:#5d7088;white-space:nowrap}
+.matchCenterWorkflowChip.ready{border-color:#cee7d8;background:#f4fbf7}.matchCenterWorkflowChip.ready strong{color:#167043}
+.matchCenterWorkflowChip.draft{border-color:#d6e5f7;background:#f4f8fd}.matchCenterWorkflowChip.draft strong{color:#0d61c8}
+.matchCenterRowActions{display:grid;gap:7px;justify-items:stretch}.matchCenterRowActions .primaryButton,.matchCenterRowActions .rowAction{white-space:nowrap;text-align:center}
+.matchCenterNotice{margin:0}
+.matchCenterHero h1 b{color:#3f8ae0}
+.matchCenterProgressGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.matchCenterProgressCard{display:grid;gap:5px;min-height:108px;padding:15px 16px;border:1px solid #e2e8ef;border-radius:16px;background:#fff}
+.matchCenterProgressCard>span{font-size:9px;font-weight:950;letter-spacing:.055em;text-transform:uppercase;color:#8090a3}.matchCenterProgressCard strong{font-size:23px;letter-spacing:-.035em;color:#4f647d}.matchCenterProgressCard small{font-size:9px;color:#8a98aa}
+.matchCenterProgressCard.ready{border-color:#cee6d7;background:#f7fcf9}.matchCenterProgressCard.ready strong{color:#167043}.matchCenterProgressCard.draft{border-color:#d4e4f7;background:#f6faff}.matchCenterProgressCard.draft strong{color:#0d61c8}
+.matchCenterLayout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,.6fr);gap:16px;align-items:start}
+.matchCenterForm{margin:0;display:grid;gap:18px}.matchCenterForm .statisticsPanelHead{align-items:flex-start}
+.matchCenterFieldGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.matchCenterFieldGrid .fieldGroup{margin:0}.matchCenterFieldGrid .fieldGroup>span{display:block;margin-bottom:7px;font-size:10px;font-weight:850;color:#526b86}.matchCenterWideField{grid-column:1/-1}
+.matchCenterFormFooter{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-top:16px;border-top:1px solid #e7edf3}.matchCenterFormFooter p{max-width:620px;margin:0;color:#718297;font-size:10px;line-height:1.5}
+.matchCenterSidebar{display:grid;gap:14px}.matchCenterSidebar .statisticsPanel{margin:0}.matchCenterSidebar h3{margin:5px 0 12px;font-size:20px;color:#17395f}
+.matchCenterTeams{display:grid;gap:8px}.matchCenterTeamRow{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px;border:1px solid #e2e8ef;border-radius:12px;background:#fafcff}
+.matchCenterTeamLogo{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:#fff;border:1px solid #e4e9ef;overflow:hidden}.matchCenterTeamLogo img{width:31px;height:31px;object-fit:contain}.matchCenterTeamLogo span{font-size:9px;font-weight:950;color:#6f8196}
+.matchCenterTeamRow>div:nth-child(2){display:grid;gap:2px;min-width:0}.matchCenterTeamRow small{font-size:8px;font-weight:950;letter-spacing:.07em;color:#8a98a8}.matchCenterTeamRow strong{font-size:11px;color:#294765;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.matchCenterFoundationState{display:inline-flex;align-items:center;min-height:24px;padding:0 8px;border-radius:999px;font-size:8px;font-weight:950;text-transform:uppercase}.matchCenterFoundationState.ready{background:#e7f6ed;color:#167043}.matchCenterFoundationState.missing{background:#fff0f2;color:#a2364c}
+.matchCenterHelp{margin:12px 0;color:#74859a;font-size:10px;line-height:1.55}
+.matchCenterRoadmap{display:grid;gap:8px}.matchCenterRoadmap>.eyebrow{margin-bottom:4px}.matchCenterRoadmapRow{display:grid;grid-template-columns:64px minmax(0,1fr);gap:9px;align-items:center;padding:8px 9px;border-radius:10px;background:#f7f9fc;border:1px solid #e5eaf0}.matchCenterRoadmapRow span{font-size:9px;font-weight:950;color:#0e63c8}.matchCenterRoadmapRow strong{font-size:10px;color:#526980}
+
+@media(max-width:1280px){
+  .matchCenterRow{grid-template-columns:90px minmax(240px,1fr) minmax(300px,.9fr)}
+  .matchCenterRowActions{grid-column:2/-1;display:flex;justify-content:flex-end}
+}
+@media(max-width:980px){
+  .matchCenterSummary,.matchCenterProgressGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .matchCenterRow{grid-template-columns:88px minmax(0,1fr)}
+  .matchCenterWorkflow,.matchCenterRowActions{grid-column:2}
+  .matchCenterLayout{grid-template-columns:1fr}
+  .matchCenterSidebar{grid-template-columns:repeat(2,minmax(0,1fr))}.matchCenterSidebar>section:last-child{grid-column:1/-1}
+}
+@media(max-width:620px){
+  .matchCenterPage .adminSurface{padding-top:24px}
+  .matchCenterSummary,.matchCenterProgressGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .matchCenterSummaryCard{min-height:78px;padding:13px}.matchCenterSummaryCard strong{font-size:28px}
+  .matchCenterRow{grid-template-columns:1fr;gap:10px;padding:13px}.matchCenterDate{display:flex;gap:8px;align-items:center}.matchCenterWorkflow,.matchCenterRowActions{grid-column:1}.matchCenterWorkflow{grid-template-columns:repeat(2,minmax(0,1fr))}.matchCenterRowActions{display:grid;grid-template-columns:1fr}
+  .matchCenterFieldGrid{grid-template-columns:1fr}.matchCenterWideField{grid-column:auto}.matchCenterFormFooter{align-items:stretch;flex-direction:column}.matchCenterFormFooter .primaryButton{width:100%}
+  .matchCenterSidebar{grid-template-columns:1fr}.matchCenterSidebar>section:last-child{grid-column:auto}
+}

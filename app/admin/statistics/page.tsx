@@ -784,7 +784,7 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
                         <small>{match.stats_rows ?? 0} игроков</small>
                       </div>
                       <div className="statisticsMatchActions">
-                        <Link href={`/admin/matches/${match.id}/edit`} className="rowAction muted">Матч</Link>
+                        <Link href={`/admin/match-center/${match.id}`} className="rowAction muted">Матч-центр</Link>
                         <Link href={`/admin/statistics/${match.id}`} className="rowAction statisticsEntryLink">
                           {state === "complete" ? "Редактировать" : state === "draft" ? "Продолжить" : "Ввести статистику"}
                         </Link>

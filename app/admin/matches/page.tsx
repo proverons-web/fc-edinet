@@ -130,6 +130,12 @@ export default async function AdminMatchesPage({
 
                   <div className="adminNewsActions">
                     <Link
+                      href={`/admin/match-center/${match.id}`}
+                      className="rowAction muted"
+                    >
+                      Матч-центр
+                    </Link>
+                    <Link
                       href={`/admin/matches/${match.id}/edit`}
                       className="rowAction"
                     >
