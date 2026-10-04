@@ -1,7 +1,5 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
-import PlayerCard from "@/app/components/PlayerCard";
-import NewsCard from "@/app/components/NewsCard";
 import StandingsTable from "@/app/components/StandingsTable";
 import { createClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/locale";
@@ -9,18 +7,12 @@ import { dateLocale, localized, publicText, type Locale } from "@/lib/i18n";
 import { defaultHomepageCanvas, normalizeHomepageCanvas } from "@/lib/homepage-canvas";
 import { repairHomepageCanvas } from "@/lib/homepage-safe-zone";
 import { defaultHeroLayerConfig, heroLayerState, heroLayerVisible, homeHeroLayerDefinitions, normalizeHeroLayerConfig } from "@/lib/hero-builder";
-import { defaultHomepageSectionDesignMap, normalizeHomepageSectionDesignMap } from "@/lib/section-builder";
-import { normalizeHomepageBlock } from "@/lib/block-library";
 import type {
   ClubMatch,
   Competition,
   HomepageHero,
   HomepageSection,
-  HomepageSectionKey,
   HomepageSettings,
-  HomepagePublishedBlock,
-  MediaAlbum,
-  MediaVideo,
   NewsArticle,
   Partner,
   Player,
@@ -29,14 +21,7 @@ import type {
 
 export const dynamic = "force-dynamic";
 
-const defaultSectionOrder: HomepageSection[] = [
-  { section_key: "matches", is_enabled: true, display_order: 10, design_config: null, updated_at: "" },
-  { section_key: "standings", is_enabled: true, display_order: 20, design_config: null, updated_at: "" },
-  { section_key: "news", is_enabled: true, display_order: 30, design_config: null, updated_at: "" },
-  { section_key: "players", is_enabled: true, display_order: 40, design_config: null, updated_at: "" },
-  { section_key: "media", is_enabled: true, display_order: 50, design_config: null, updated_at: "" },
-  { section_key: "partners", is_enabled: true, display_order: 60, design_config: null, updated_at: "" },
-];
+const CLUB_LOGO = "/brand/fc-edinet-crest.png";
 
 export default async function Home() {
   const locale = await getLocale();
@@ -44,61 +29,24 @@ export default async function Home() {
   const supabase = await createClient();
   const now = new Date().toISOString();
 
-  const [heroResult, settingsResult, sectionsResult, blocksResult] = await Promise.all([
-    supabase
-      .from("homepage_hero")
-      .select("*")
-      .eq("id", 1)
-      .maybeSingle(),
-    supabase
-      .from("homepage_settings")
-      .select("*")
-      .eq("id", 1)
-      .maybeSingle(),
-    supabase
-      .from("homepage_sections")
-      .select("*")
-      .order("display_order", { ascending: true }),
-    supabase
-      .from("homepage_blocks")
-      .select("*")
-      .order("display_order", { ascending: true }),
+  const [heroResult, settingsResult, sectionsResult] = await Promise.all([
+    supabase.from("homepage_hero").select("*").eq("id", 1).maybeSingle(),
+    supabase.from("homepage_settings").select("*").eq("id", 1).maybeSingle(),
+    supabase.from("homepage_sections").select("*").order("display_order", { ascending: true }),
   ]);
 
+  const hero = heroResult.data as HomepageHero | null;
   const settings = settingsResult.data as HomepageSettings | null;
-  const storedSections = (sectionsResult.data ?? []) as HomepageSection[];
-  const sectionMap = new Map(
-    storedSections.map((section) => [section.section_key, section])
-  );
-  const sections = defaultSectionOrder
-    .map((fallback) => sectionMap.get(fallback.section_key) ?? fallback)
-    .sort((a, b) => a.display_order - b.display_order);
-  const sectionConfig = normalizeHomepageSectionDesignMap(
-    Object.fromEntries(sections.map((section) => [section.section_key, section.design_config ?? {}])),
-    defaultHomepageSectionDesignMap()
-  );
-  const customBlocks = (blocksResult.data ?? []).map((row: Record<string, unknown>) => {
-    const block = normalizeHomepageBlock({ id: row.id, type: row.block_type, enabled: row.is_enabled, content: row.content, design: row.design_config });
-    return block ? { ...block, display_order: Number(row.display_order ?? 100) } as HomepagePublishedBlock : null;
-  }).filter((block): block is HomepagePublishedBlock => Boolean(block));
+  const sectionRows = (sectionsResult.data ?? []) as HomepageSection[];
+  const sectionEnabled = (key: string) => sectionRows.find((row) => row.section_key === key)?.is_enabled !== false;
 
-  const [
-    playersResult,
-    newsResult,
-    nextMatchResult,
-    lastMatchResult,
-    competitionResult,
-    partnersResult,
-    albumsResult,
-    videosResult,
-    pinnedNewsResult,
-  ] = await Promise.all([
+  const [playersResult, newsResult, nextMatchResult, lastMatchResult, competitionResult, partnersResult, pinnedNewsResult] = await Promise.all([
     supabase
       .from("players")
       .select("*")
       .eq("is_active", true)
       .order("display_order", { ascending: true })
-      .limit(12),
+      .limit(8),
     supabase
       .from("news")
       .select(`
@@ -110,7 +58,7 @@ export default async function Home() {
       .lte("published_at", now)
       .order("is_featured", { ascending: false })
       .order("published_at", { ascending: false })
-      .limit(12),
+      .limit(8),
     supabase
       .from("matches")
       .select(matchSelect())
@@ -140,21 +88,7 @@ export default async function Home() {
       .eq("show_on_homepage", true)
       .order("display_order")
       .order("name")
-      .limit(24),
-    supabase
-      .from("media_albums")
-      .select("*")
-      .eq("is_published", true)
-      .order("event_date", { ascending: false, nullsFirst: false })
-      .order("display_order", { ascending: true })
-      .limit(12),
-    supabase
-      .from("media_videos")
-      .select("*")
-      .eq("is_published", true)
-      .order("published_at", { ascending: false, nullsFirst: false })
-      .order("display_order", { ascending: true })
-      .limit(12),
+      .limit(20),
     settings?.show_pinned_news && settings.pinned_news_id
       ? supabase
           .from("news")
@@ -170,36 +104,39 @@ export default async function Home() {
       : Promise.resolve({ data: null, error: null }),
   ]);
 
-  const allPlayers = (playersResult.data ?? []) as Player[];
-  const players = allPlayers.slice(0, sectionConfig.players.item_limit);
+  const players = (playersResult.data ?? []) as Player[];
   const allNews = (newsResult.data ?? []) as unknown as NewsArticle[];
   const pinnedNews = pinnedNewsResult.data as unknown as NewsArticle | null;
-  const news = allNews
-    .filter((article) => String(article.id) !== String(pinnedNews?.id ?? ""))
-    .slice(0, sectionConfig.news.item_limit);
   const nextMatch = nextMatchResult.data as unknown as ClubMatch | null;
   const lastMatch = lastMatchResult.data as unknown as ClubMatch | null;
-  const competition =
-    (nextMatch?.competition ||
-      lastMatch?.competition ||
-      competitionResult.data) as Competition | null;
+  const competition = (nextMatch?.competition || lastMatch?.competition || competitionResult.data) as Competition | null;
+  const partners = (partnersResult.data ?? []) as Partner[];
 
-  const hero = heroResult.data as HomepageHero | null;
-  const allPartners = (partnersResult.data ?? []) as Partner[];
-  const partners = allPartners.slice(0, sectionConfig.partners.item_limit);
-  const albums = (albumsResult.data ?? []) as MediaAlbum[];
-  const videos = (videosResult.data ?? []) as MediaVideo[];
-  const mediaCards: Array<{ kind: "album"; item: MediaAlbum } | { kind: "video"; item: MediaVideo }> = [];
-  for (let index = 0; mediaCards.length < sectionConfig.media.item_limit && (index < albums.length || index < videos.length); index += 1) {
-    if (albums[index] && mediaCards.length < sectionConfig.media.item_limit) mediaCards.push({ kind: "album", item: albums[index] });
-    if (videos[index] && mediaCards.length < sectionConfig.media.item_limit) mediaCards.push({ kind: "video", item: videos[index] });
+  const leadNews = pinnedNews || allNews[0] || null;
+  const latestNews = allNews.filter((article) => String(article.id) !== String(leadNews?.id ?? "")).slice(0, 3);
+
+  let standings: StandingEntry[] = [];
+  if (competition) {
+    const { data } = await supabase
+      .from("standings")
+      .select(`
+        id,competition_id,team_id,wins,draws,losses,goals_for,goals_against,
+        points_adjustment,played,goal_difference,points,
+        team:teams!standings_team_id_fkey(
+          id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active
+        )
+      `)
+      .eq("competition_id", competition.id)
+      .order("points", { ascending: false })
+      .order("goal_difference", { ascending: false })
+      .order("goals_for", { ascending: false });
+    standings = (data ?? []) as unknown as StandingEntry[];
   }
 
-  const heroEyebrow = localized(hero?.eyebrow, hero?.eyebrow_ro, locale) || text.heroEyebrow;
-  const heroTitleMain = localized(hero?.title_main, hero?.title_main_ro, locale) || text.heroMain;
-  const heroTitleAccent = localized(hero?.title_accent, hero?.title_accent_ro, locale) || text.heroAccent;
-  const heroDescription = localized(hero?.description, hero?.description_ro, locale) || text.heroDescription;
-  const heroOverlay = Math.max(0, Math.min(95, hero?.overlay_opacity ?? 72)) / 100;
+  const heroTitleMain = localized(hero?.title_main, hero?.title_main_ro, locale) || (locale === "ro" ? "UN ORAȘ. O ECHIPĂ." : "ОДИН ГОРОД. ОДНА КОМАНДА.");
+  const heroTitleAccent = localized(hero?.title_accent, hero?.title_accent_ro, locale) || (locale === "ro" ? "ȚINTE MAI MARI" : "БОЛЬШИЕ ЦЕЛИ");
+  const heroDescription = localized(hero?.description, hero?.description_ro, locale) || (locale === "ro" ? "FC Edineț — forța Nordului. Împreună spre noi victorii!" : "FC Edineț — сила Севера. Вместе к новым победам!");
+  const heroOverlay = Math.max(0, Math.min(95, hero?.overlay_opacity ?? 42)) / 100;
   const legacyHeroPosition = legacyHeroCoordinates(hero?.background_position);
   const canvasFallback = defaultHomepageCanvas({
     desktop_position_x: hero?.desktop_position_x ?? legacyHeroPosition.x,
@@ -215,10 +152,9 @@ export default async function Home() {
   });
   const heroLayers = normalizeHeroLayerConfig(hero?.hero_layer_config, homeHeroLayerDefinitions, defaultHeroLayerConfig(homeHeroLayerDefinitions));
   const heroCanvas = repairHomepageCanvas(normalizeHomepageCanvas(hero?.canvas_config, canvasFallback), canvasFallback, heroLayers);
-  const heroTextAlignment = hero?.text_alignment ?? "left";
   const showHeroIntro = heroLayerVisible(heroLayers, "intro");
   const showHeroBackground = heroLayerVisible(heroLayers, "background");
-  const showHeroMatchCard = heroLayerVisible(heroLayers, "match_card") && (heroCanvas.desktop.match_visible || heroCanvas.tablet.match_visible || heroCanvas.mobile.match_visible);
+  const showHeroMatchCard = sectionEnabled("matches") && heroLayerVisible(heroLayers, "match_card") && (heroCanvas.desktop.match_visible || heroCanvas.tablet.match_visible || heroCanvas.mobile.match_visible);
   const heroBaseImage = hero?.background_image_url || hero?.tablet_background_image_url || hero?.mobile_background_image_url || null;
   const heroStyle = {
     "--hero-desktop-x": `${heroCanvas.desktop.background_x}%`,
@@ -233,7 +169,6 @@ export default async function Home() {
     "--hero-height-desktop": `${heroCanvas.desktop.hero_height}px`,
     "--hero-height-tablet": `${heroCanvas.tablet.hero_height}px`,
     "--hero-height-mobile": `${heroCanvas.mobile.hero_height}px`,
-    "--hero-overlay": heroOverlay,
     "--hero-text-desktop-x": `${heroCanvas.desktop.text_x}%`,
     "--hero-text-desktop-y": `${heroCanvas.desktop.text_y}%`,
     "--hero-text-tablet-x": `${heroCanvas.tablet.text_x}%`,
@@ -249,493 +184,130 @@ export default async function Home() {
     "--hero-match-mobile-x": `${heroCanvas.mobile.match_x}%`,
     "--hero-match-mobile-y": `${heroCanvas.mobile.match_y}%`,
     "--hero-match-mobile-width": `${heroCanvas.mobile.match_width}px`,
+    "--hero-overlay": heroOverlay,
   } as CSSProperties;
-  const matchVisibilityClasses = [
-    heroCanvas.desktop.match_visible ? "" : "heroMatchDesktopOff",
-    heroCanvas.tablet.match_visible ? "" : "heroMatchTabletOff",
-    heroCanvas.mobile.match_visible ? "" : "heroMatchMobileOff",
-  ].filter(Boolean).join(" ");
-
-  let standings: StandingEntry[] = [];
-
-  if (competition) {
-    const { data } = await supabase
-      .from("standings")
-      .select(`
-        id,competition_id,team_id,wins,draws,losses,goals_for,goals_against,
-        points_adjustment,played,goal_difference,points,
-        team:teams!standings_team_id_fkey(
-          id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active
-        )
-      `)
-      .eq("competition_id", competition.id)
-      .order("points", { ascending: false })
-      .order("goal_difference", { ascending: false })
-      .order("goals_for", { ascending: false });
-
-    standings = (data ?? []) as unknown as StandingEntry[];
-  }
-
-  const sectionOuterStyle = (key: HomepageSectionKey) => ({
-    "--section-pad-top": `${sectionConfig[key].padding_top}px`,
-    "--section-pad-bottom": `${sectionConfig[key].padding_bottom}px`,
-    "--section-cols-desktop": sectionConfig[key].columns_desktop,
-    "--section-cols-tablet": sectionConfig[key].columns_tablet,
-    "--section-cols-mobile": sectionConfig[key].columns_mobile,
-    display: sections.find((section) => section.section_key === key)?.is_enabled === false ? "none" : undefined,
-  } as CSSProperties);
-  const sectionOuterClass = (key: HomepageSectionKey, base: string) => `${base} sectionBuilderPublic sectionBg-${sectionConfig[key].background}`;
-  const sectionInnerClass = (key: HomepageSectionKey, extra = "") => `${sectionConfig[key].width === "container" ? "container" : sectionConfig[key].width === "wide" ? "sectionBuilderWide" : "sectionBuilderFull"} ${extra}`.trim();
-  const sectionHeadingClass = (key: HomepageSectionKey, defaultDark = false) => {
-    const background = sectionConfig[key].background;
-    const dark = background === "dark" || background === "brand" || (background === "inherit" && defaultDark);
-    return `sectionHeading${dark ? " light" : ""}`;
-  };
-
-  const renderSection = (key: HomepageSectionKey) => {
-    switch (key) {
-      case "matches":
-        return (
-          <section className={sectionOuterClass(key, "matchStrip")} style={sectionOuterStyle(key)} key={key} data-home-layout-item={`section:${key}`} data-home-section={key}>
-            <div className={sectionInnerClass(key, "matchGrid sectionBuilderGrid")}>
-              <article>
-                <span className="sectionLabel">{text.lastMatch}</span>
-                {lastMatch ? (
-                  <>
-                    <HomeStripMatch match={lastMatch} type="finished" />
-                    <p>{formatMatchDate(lastMatch.kickoff, locale)}</p>
-                    <p className="homeMatchStadium">
-                      {lastMatch.stadium || text.stadiumUnknown}
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <h3>{text.noResults}</h3>
-                    <p>{text.noResultsHint}</p>
-                  </>
-                )}
-              </article>
-
-              <article>
-                <span className="sectionLabel">{text.nextMatch}</span>
-                {nextMatch ? (
-                  <>
-                    <HomeStripMatch match={nextMatch} type="next" />
-                    <p>{formatMatchDate(nextMatch.kickoff, locale)}</p>
-                    <p className="homeMatchStadium">
-                      {nextMatch.stadium || text.stadiumUnknown}
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <h3>{text.noNextMatch}</h3>
-                    <p>{text.noNextMatchHint}</p>
-                  </>
-                )}
-              </article>
-
-              <article>
-                <span className="sectionLabel">{text.tournament}</span>
-                <h3>
-                  {nextMatch?.competition?.name ||
-                    lastMatch?.competition?.name ||
-                    "Liga 2"}
-                </h3>
-                <Link href="/matches">{text.calendarResults}</Link>
-              </article>
-            </div>
-          </section>
-        );
-
-      case "standings":
-        return (
-          <section className={sectionOuterClass(key, "section homeStandingsSection")} style={sectionOuterStyle(key)} key={key} data-home-layout-item={`section:${key}`} data-home-section={key}>
-            <div className={sectionInnerClass(key)}>
-              {(sectionConfig[key].show_heading || sectionConfig[key].show_action) && <div className={sectionHeadingClass(key)}>
-                {sectionConfig[key].show_heading && <div>
-                  <p className="eyebrow blue">{text.standingsEyebrow}</p>
-                  <h2>{text.standingsTitle}</h2>
-                </div>}
-                {sectionConfig[key].show_action && <Link href="/standings">{text.fullStandings}</Link>}
-              </div>}
-
-              {standings.length > 0 ? (
-                <StandingsTable entries={standings} compact limit={sectionConfig[key].item_limit} locale={locale} />
-              ) : (
-                <div className="adminEmpty">{text.standingsEmpty}</div>
-              )}
-            </div>
-          </section>
-        );
-
-      case "news":
-        return (
-          <section className={sectionOuterClass(key, "section homeNewsSection")} style={sectionOuterStyle(key)} key={key} data-home-layout-item={`section:${key}`} data-home-section={key}>
-            <div className={sectionInnerClass(key)}>
-              {(sectionConfig[key].show_heading || sectionConfig[key].show_action) && <div className={sectionHeadingClass(key)}>
-                {sectionConfig[key].show_heading && <div>
-                  <p className="eyebrow blue">{text.newsEyebrow}</p>
-                  <h2>{text.newsTitle}</h2>
-                </div>}
-                {sectionConfig[key].show_action && <Link href="/news">{text.allNews}</Link>}
-              </div>}
-
-              {pinnedNews && (
-                <Link
-                  href={`/news/${pinnedNews.slug}`}
-                  className="homePinnedNews"
-                >
-                  <div className="homePinnedNewsImage">
-                    {pinnedNews.cover_image_url ? (
-                      <img src={pinnedNews.cover_image_url} alt="" />
-                    ) : (
-                      <div className="homePinnedNewsFallback">FC EDINEȚ</div>
-                    )}
-                  </div>
-                  <div className="homePinnedNewsBody">
-                    <span className="moduleBadge">{text.pinned}</span>
-                    <h3>{localized(pinnedNews.title, pinnedNews.title_ro, locale)}</h3>
-                    {localized(pinnedNews.excerpt, pinnedNews.excerpt_ro, locale) && (
-                      <p>{localized(pinnedNews.excerpt, pinnedNews.excerpt_ro, locale)}</p>
-                    )}
-                    <b>{text.read}</b>
-                  </div>
-                </Link>
-              )}
-
-              {news.length > 0 ? (
-                <div className="homeNewsDbGrid sectionBuilderGrid">
-                  {news.map((article) => (
-                    <NewsCard key={article.id} article={article} locale={locale} />
-                  ))}
-                </div>
-              ) : pinnedNews ? null : (
-                <div className="homeNewsPlaceholder">
-                  <div>{locale === "ro" ? "Publică prima știre și va apărea aici." : "Опубликуй первую новость — она появится здесь."}</div>
-                </div>
-              )}
-            </div>
-          </section>
-        );
-
-      case "players":
-        return (
-          <section className={sectionOuterClass(key, "section darkSection")} style={sectionOuterStyle(key)} key={key} data-home-layout-item={`section:${key}`} data-home-section={key}>
-            <div className={sectionInnerClass(key)}>
-              {(sectionConfig[key].show_heading || sectionConfig[key].show_action) && <div className={sectionHeadingClass(key, true)}>
-                {sectionConfig[key].show_heading && <div>
-                  <p className="eyebrow">{text.teamEyebrow}</p>
-                  <h2>{text.teamTitle}</h2>
-                </div>}
-                {sectionConfig[key].show_action && <Link href="/team">{text.allPlayers}</Link>}
-              </div>}
-
-              {players.length > 0 ? (
-                <div className="players sectionBuilderGrid">
-                  {players.map((player) => (
-                    <PlayerCard key={player.id} player={player} locale={locale} />
-                  ))}
-                </div>
-              ) : (
-                <div className="emptyBox">{locale === "ro" ? "Adaugă jucători și vor apărea aici." : "Добавь игроков — они появятся здесь."}</div>
-              )}
-            </div>
-          </section>
-        );
-
-      case "media":
-        return (
-          <section className={sectionOuterClass(key, "section homeMediaSection")} style={sectionOuterStyle(key)} key={key} data-home-layout-item={`section:${key}`} data-home-section={key}>
-            <div className={sectionInnerClass(key)}>
-              {(sectionConfig[key].show_heading || sectionConfig[key].show_action) && <div className={sectionHeadingClass(key)}>
-                {sectionConfig[key].show_heading && <div>
-                  <p className="eyebrow blue">{text.mediaEyebrow}</p>
-                  <h2>{text.mediaTitle}</h2>
-                </div>}
-                {sectionConfig[key].show_action && <Link href="/media">{text.allMedia}</Link>}
-              </div>}
-
-              {mediaCards.length > 0 ? (
-                <div className="homeMediaGrid sectionBuilderGrid">
-                  {mediaCards.map((entry) => entry.kind === "album" ? (
-                    <Link href={`/media/${entry.item.slug}`} className="homeMediaCard" key={`album-${entry.item.id}`}>
-                      <div className="homeMediaImage">
-                        {entry.item.cover_image_url ? <img src={entry.item.cover_image_url} alt="" /> : <div className="homeMediaFallback">{text.album}</div>}
-                      </div>
-                      <div><span>{text.album.toUpperCase()}</span><h3>{entry.item.title}</h3></div>
-                    </Link>
-                  ) : (
-                    <a href={entry.item.youtube_url} target="_blank" rel="noopener noreferrer" className="homeMediaCard" key={`video-${entry.item.id}`}>
-                      <div className="homeMediaImage"><img src={`https://img.youtube.com/vi/${entry.item.youtube_id}/hqdefault.jpg`} alt="" /><span className="homeMediaPlay">▶</span></div>
-                      <div><span>{text.video.toUpperCase()}</span><h3>{entry.item.title}</h3></div>
-                    </a>
-                  ))}
-                </div>
-              ) : (
-                <div className="adminEmpty">
-                  {locale === "ro" ? "Publică un album foto sau un video și va apărea aici." : "Опубликуй фотоальбом или видео — они появятся здесь."}
-                </div>
-              )}
-            </div>
-          </section>
-        );
-
-      case "partners":
-        if (partners.length === 0) return null;
-
-        return (
-          <section className={sectionOuterClass(key, "section homePartnersSection")} style={sectionOuterStyle(key)} key={key} data-home-layout-item={`section:${key}`} data-home-section={key}>
-            <div className={sectionInnerClass(key)}>
-              {(sectionConfig[key].show_heading || sectionConfig[key].show_action) && <div className={sectionHeadingClass(key)}>
-                {sectionConfig[key].show_heading && <div>
-                  <p className="eyebrow blue">{text.partnersEyebrow}</p>
-                  <h2>{text.partnersTitle}</h2>
-                </div>}
-                {sectionConfig[key].show_action && <Link href="/partners">{text.allPartners}</Link>}
-              </div>}
-
-              <div className="homePartnersGrid sectionBuilderGrid">
-                {partners.map((partner) => {
-                  const logo = (
-                    <div className="homePartnerLogo">
-                      <img src={partner.logo_url} alt={partner.name} />
-                    </div>
-                  );
-
-                  return partner.website_url ? (
-                    <a
-                      className="homePartnerCard"
-                      href={partner.website_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      key={partner.id}
-                      title={partner.name}
-                    >
-                      {logo}
-                    </a>
-                  ) : (
-                    <div
-                      className="homePartnerCard"
-                      key={partner.id}
-                      title={partner.name}
-                    >
-                      {logo}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </section>
-        );
-    }
-  };
-
-  const renderCustomBlock = (block: HomepagePublishedBlock) => {
-    const design = block.design;
-    const content = block.content;
-    const outerStyle = {
-      "--section-pad-top": `${design.padding_top}px`,
-      "--section-pad-bottom": `${design.padding_bottom}px`,
-      "--section-cols-desktop": design.columns_desktop,
-      "--section-cols-tablet": design.columns_tablet,
-      "--section-cols-mobile": design.columns_mobile,
-      display: block.enabled ? undefined : "none",
-    } as CSSProperties;
-    const innerClass = design.width === "container" ? "container" : design.width === "wide" ? "sectionBuilderWide" : "sectionBuilderFull";
-    const dark = design.background === "dark" || design.background === "brand";
-    const title = localized(content.title_ru, content.title_ro, locale);
-    const eyebrowText = localized(content.eyebrow_ru, content.eyebrow_ro, locale);
-    const body = localized(content.text_ru, content.text_ro, locale);
-    const buttonText = localized(content.button_text_ru, content.button_text_ro, locale);
-    const blockClass = `section customHomeBlock customBlock-${block.type} sectionBuilderPublic sectionBg-${design.background} textAlign-${design.text_align}`;
-    const heading = (title || eyebrowText) ? <div className={`sectionHeading ${dark ? "light" : ""}`}><div>{eyebrowText && <p className="eyebrow blue">{eyebrowText}</p>}{title && <h2>{title}</h2>}</div></div> : null;
-
-    if (block.type === "text") return <section className={blockClass} style={outerStyle} key={`block-${block.id}`} data-home-layout-item={`block:${block.id}`} data-home-block={block.id}><div className={innerClass}>{heading}{body && <div className="customBlockRichText"><p>{body}</p></div>}</div></section>;
-    if (block.type === "image") return <section className={blockClass} style={outerStyle} key={`block-${block.id}`} data-home-layout-item={`block:${block.id}`} data-home-block={block.id}><div className={innerClass}>{heading}{content.image_url ? <img className="customBlockImage" src={content.image_url} alt={localized(content.image_alt_ru, content.image_alt_ro, locale)} /> : <div className="adminEmpty">{locale === "ro" ? "Selectează o imagine în Visual Editor." : "Выбери изображение в Visual Editor."}</div>}</div></section>;
-    if (block.type === "text_image") return <section className={blockClass} style={outerStyle} key={`block-${block.id}`} data-home-layout-item={`block:${block.id}`} data-home-block={block.id}><div className={`${innerClass} customTextImage ${design.image_position === "left" ? "imageLeft" : "imageRight"}`}><div className="customTextImageCopy">{heading}{body && <p>{body}</p>}{buttonText && content.button_href && <Link className="primaryButton" href={content.button_href}>{buttonText}</Link>}</div><div className="customTextImageMedia">{content.image_url ? <img src={content.image_url} alt={localized(content.image_alt_ru, content.image_alt_ro, locale)} /> : <span>FC EDINEȚ</span>}</div></div></section>;
-    if (block.type === "cta") return <section className={blockClass} style={{...outerStyle, ...(content.image_url ? { backgroundImage:`linear-gradient(rgba(4,18,40,.72),rgba(4,18,40,.72)),url("${content.image_url}")` } : {})}} key={`block-${block.id}`}><div className={`${innerClass} customCtaInner`}><div>{eyebrowText && <p className="eyebrow">{eyebrowText}</p>}{title && <h2>{title}</h2>}{body && <p>{body}</p>}</div>{buttonText && content.button_href && <Link className="primaryButton" href={content.button_href}>{buttonText}</Link>}</div></section>;
-    if (block.type === "news") return <section className={blockClass} style={outerStyle} key={`block-${block.id}`} data-home-layout-item={`block:${block.id}`} data-home-block={block.id}><div className={innerClass}>{heading}<div className="homeNewsDbGrid sectionBuilderGrid">{allNews.slice(0, design.item_limit).map((article)=><NewsCard key={article.id} article={article} locale={locale}/>)}</div></div></section>;
-    if (block.type === "players") return <section className={blockClass} style={outerStyle} key={`block-${block.id}`} data-home-layout-item={`block:${block.id}`} data-home-block={block.id}><div className={innerClass}>{heading}<div className="players sectionBuilderGrid">{allPlayers.slice(0, design.item_limit).map((player)=><PlayerCard key={player.id} player={player} locale={locale}/>)}</div></div></section>;
-    if (block.type === "media") {
-      const cards: Array<{ kind:"album"; item:MediaAlbum }|{ kind:"video"; item:MediaVideo }> = [];
-      for (let i=0; cards.length < design.item_limit && (i<albums.length || i<videos.length); i+=1) { if (albums[i] && cards.length<design.item_limit) cards.push({kind:"album",item:albums[i]}); if (videos[i] && cards.length<design.item_limit) cards.push({kind:"video",item:videos[i]}); }
-      return <section className={blockClass} style={outerStyle} key={`block-${block.id}`} data-home-layout-item={`block:${block.id}`} data-home-block={block.id}><div className={innerClass}>{heading}<div className="homeMediaGrid sectionBuilderGrid">{cards.map((entry)=>entry.kind === "album" ? <Link href={`/media/${entry.item.slug}`} className="homeMediaCard" key={`cb-a-${entry.item.id}`}><div className="homeMediaImage">{entry.item.cover_image_url ? <img src={entry.item.cover_image_url} alt=""/> : <div className="homeMediaFallback">{text.album}</div>}</div><div><span>{text.album.toUpperCase()}</span><h3>{entry.item.title}</h3></div></Link> : <a href={entry.item.youtube_url} target="_blank" rel="noopener noreferrer" className="homeMediaCard" key={`cb-v-${entry.item.id}`}><div className="homeMediaImage"><img src={`https://img.youtube.com/vi/${entry.item.youtube_id}/hqdefault.jpg`} alt=""/><span className="homeMediaPlay">▶</span></div><div><span>{text.video.toUpperCase()}</span><h3>{entry.item.title}</h3></div></a>)}</div></div></section>;
-    }
-    if (block.type === "partners") return <section className={blockClass} style={outerStyle} key={`block-${block.id}`} data-home-layout-item={`block:${block.id}`} data-home-block={block.id}><div className={innerClass}>{heading}<div className="homePartnersGrid sectionBuilderGrid">{allPartners.slice(0, design.item_limit).map((partner)=>partner.website_url ? <a className="homePartnerCard" href={partner.website_url} target="_blank" rel="noopener noreferrer" key={`cb-p-${partner.id}`}><div className="homePartnerLogo"><img src={partner.logo_url} alt={partner.name}/></div></a> : <div className="homePartnerCard" key={`cb-p-${partner.id}`}><div className="homePartnerLogo"><img src={partner.logo_url} alt={partner.name}/></div></div>)}</div></div></section>;
-    if (block.type === "next_match") return <section className={blockClass} style={outerStyle} key={`block-${block.id}`} data-home-layout-item={`block:${block.id}`} data-home-block={block.id}><div className={innerClass}>{heading}<div className="customNextMatch">{nextMatch ? <><p>{nextMatch.competition?.name ?? "Матч"}</p><HomeStripMatch match={nextMatch} type="next"/><strong>{formatMatchDate(nextMatch.kickoff, locale)}</strong><span>{nextMatch.stadium || text.stadiumUnknown}</span><Link href="/matches">{publicText[locale].matches.title} →</Link></> : <div className="adminEmpty">{locale === "ro" ? "Următorul meci nu a fost încă adăugat." : "Следующий матч пока не добавлен."}</div>}</div></div></section>;
-    if (block.type === "standings") return <section className={blockClass} style={outerStyle} key={`block-${block.id}`} data-home-layout-item={`block:${block.id}`} data-home-block={block.id}><div className={innerClass}>{heading}{standings.length ? <StandingsTable entries={standings} compact limit={design.item_limit} locale={locale}/> : <div className="adminEmpty">{text.standingsEmpty}</div>}</div></section>;
-    return null;
-  };
-
-  const homepageLayout = [
-    ...sections.map((section) => ({ kind: "section" as const, order: section.display_order, section })),
-    ...customBlocks.map((block) => ({ kind: "block" as const, order: block.display_order, block })),
-  ].sort((a, b) => a.order - b.order);
 
   return (
-    <main>
-      <section
-        className={`hero visualHero canvasPublicHero heroTextAlign-${heroTextAlignment} ${showHeroMatchCard ? "" : "heroWithoutMatch"} ${matchVisibilityClasses}`}
-        style={heroStyle}
-      >
-        {heroBaseImage && (
-          <div className="heroVisualMedia" aria-hidden="true" style={{ display: showHeroBackground ? undefined : "none" }}>
+    <main className="fcRefHome">
+      <section className="fcRefHero" style={heroStyle}>
+        <div className="fcRefHeroMedia" aria-hidden="true" style={{ display: showHeroBackground ? undefined : "none" }}>
+          {heroBaseImage ? (
             <picture>
-              {hero?.mobile_background_image_url && (
-                <source media="(max-width: 680px)" srcSet={hero.mobile_background_image_url} />
-              )}
-              {hero?.tablet_background_image_url && (
-                <source media="(max-width: 980px)" srcSet={hero.tablet_background_image_url} />
-              )}
+              {hero?.mobile_background_image_url && <source media="(max-width: 680px)" srcSet={hero.mobile_background_image_url} />}
+              {hero?.tablet_background_image_url && <source media="(max-width: 980px)" srcSet={hero.tablet_background_image_url} />}
               <img src={heroBaseImage} alt="" />
             </picture>
-            <span className="heroVisualOverlay" />
-          </div>
-        )}
+          ) : (
+            <div className="fcRefHeroFallback"><img src={CLUB_LOGO} alt="" /></div>
+          )}
+          <span className="fcRefHeroOverlay" />
+        </div>
 
-        <div className={`container heroContent canvasPublicHeroContent ${showHeroMatchCard ? "" : "heroContentSingle"}`}>
-          <div className="heroIntro" data-hero-layer="intro" style={{ zIndex: heroLayerState(heroLayers, "intro").order, display: showHeroIntro ? undefined : "none" }}>
-            <p className="eyebrow">{heroEyebrow}</p>
-            <h1>
-              {heroTitleMain}
-              <span>{heroTitleAccent}</span>
-            </h1>
-            <p className="heroText">{heroDescription}</p>
-
-            <div className="heroActions">
-              {(hero?.show_primary_button ?? true) && (
-                <Link className="primaryButton" href={hero?.primary_button_href || "/matches"}>
-                  {localized(hero?.primary_button_text, hero?.primary_button_text_ro, locale) || (locale === "ro" ? "Vezi meciurile" : "Смотреть матчи")}
-                </Link>
-              )}
-
-              {(hero?.show_secondary_button ?? true) && (
-                <Link className="secondaryButton" href={hero?.secondary_button_href || "/news"}>
-                  {localized(hero?.secondary_button_text, hero?.secondary_button_text_ro, locale) || (locale === "ro" ? "Ultimele știri" : "Последние новости")}
-                </Link>
-              )}
+        <div className="container fcRefHeroGrid">
+          <div className="fcRefHeroCopy" data-hero-layer="intro" style={{ zIndex: heroLayerState(heroLayers, "intro").order, display: showHeroIntro ? undefined : "none" }}>
+            <div className="fcRefHeroKicker">FC EDINEȚ • MOLDOVA</div>
+            <h1>{heroTitleMain}<span>{heroTitleAccent}</span></h1>
+            <p>{heroDescription}</p>
+            <div className="fcRefHeroActions">
+              <Link className="fcYellowButton" href={hero?.primary_button_href || "/club"}>
+                {localized(hero?.primary_button_text, hero?.primary_button_text_ro, locale) || (locale === "ro" ? "DRUMUL NOSTRU" : "НАШ ПУТЬ")} <span>→</span>
+              </Link>
+              {(hero?.show_secondary_button ?? false) && <Link className="fcGhostButton" href={hero?.secondary_button_href || "/news"}>{localized(hero?.secondary_button_text, hero?.secondary_button_text_ro, locale) || text.allNews}</Link>}
             </div>
           </div>
 
-          <aside className="heroMatchCard" data-hero-layer="match_card" style={{ zIndex: heroLayerState(heroLayers, "match_card").order, display: showHeroMatchCard ? undefined : "none" }}>
-              <span className="matchTag">{text.nextMatch}</span>
-              {nextMatch ? (
-                <>
-                  <p className="competition">
-                    {nextMatch.competition?.name ?? "Матч"}
-                    {nextMatch.round ? ` • ${nextMatch.round}` : ""}
-                  </p>
+          <aside className="fcRefNextMatch" data-hero-layer="match_card" style={{ zIndex: heroLayerState(heroLayers, "match_card").order, display: showHeroMatchCard ? undefined : "none" }}>
+            <div className="fcRefMatchHead"><strong>{locale === "ro" ? "URMĂTORUL MECI" : "СЛЕДУЮЩИЙ МАТЧ"}</strong><Link href="/matches">{locale === "ro" ? "TOATE MECIURILE" : "ВСЕ МАТЧИ"} →</Link></div>
+            {nextMatch ? <>
+              <div className="fcRefCompetition">{nextMatch.competition?.name || competition?.name || "Liga 2"}{nextMatch.round ? <span>{nextMatch.round}</span> : null}</div>
+              <div className="fcRefMatchTeams">
+                <ReferenceTeam team={nextMatch.home} />
+                <div className="fcRefVs">VS</div>
+                <ReferenceTeam team={nextMatch.away} />
+              </div>
+              <div className="fcRefMatchFacts">
+                <span><b>▣</b>{formatMatchDay(nextMatch.kickoff, locale)}</span>
+                <span><b>◷</b>{formatMatchTime(nextMatch.kickoff, locale)}</span>
+                <span><b>⌖</b>{nextMatch.stadium || text.stadiumUnknown}</span>
+              </div>
+              <Link href="/matches" className="fcYellowButton fcRefMatchButton">{locale === "ro" ? "DETALII MECI" : "ПОДРОБНЕЕ О МАТЧЕ"} <span>→</span></Link>
+            </> : <div className="fcRefNoMatch">{locale === "ro" ? "Următorul meci nu a fost încă programat." : "Следующий матч пока не назначен."}</div>}
+          </aside>
+        </div>
 
-                  <div className="heroTeams">
-                    <HeroTeam team={nextMatch.home} />
-                    <b>VS</b>
-                    <HeroTeam team={nextMatch.away} />
-                  </div>
-
-                  <div className="matchMeta">
-                    <span>{formatMatchDate(nextMatch.kickoff, locale)}</span>
-                    <span>{nextMatch.stadium || text.stadiumUnknown}</span>
-                  </div>
-                </>
-              ) : (
-                <div className="noNextMatch">
-                  {locale === "ro" ? "Următorul meci nu a fost încă adăugat." : "Следующий матч пока не добавлен в админке."}
-                </div>
-              )}
-              <Link href="/matches">{publicText[locale].matches.title} →</Link>
-            </aside>
+        <div className="container fcRefHeroBottom">
+          <span>TRADIȚIE</span><i>•</i><span>UNITATE</span><i>•</i><span>VICTORIE</span>
+          <strong>EDINEȚ<br/>ALWAYS FORWARD</strong>
         </div>
       </section>
 
-      {settings?.banner_enabled && (
-        <section
-          className={`homeSpecialBanner ${settings.banner_image_url ? "withImage" : ""}`}
-          style={
-            settings.banner_image_url
-              ? {
-                  backgroundImage: `linear-gradient(rgba(4,18,40,${Math.max(0, Math.min(95, settings.banner_overlay_opacity)) / 100}),rgba(4,18,40,${Math.max(0, Math.min(95, settings.banner_overlay_opacity)) / 100})),url("${settings.banner_image_url}")`,
-                  backgroundPosition: settings.banner_background_position,
-                }
-              : undefined
-          }
-        >
-          <div className="container homeSpecialBannerInner">
-            <div>
-              <p className="eyebrow">{localized(settings.banner_eyebrow, settings.banner_eyebrow_ro, locale)}</p>
-              <h2>{localized(settings.banner_title, settings.banner_title_ro, locale)}</h2>
-              {localized(settings.banner_text, settings.banner_text_ro, locale) && <p>{localized(settings.banner_text, settings.banner_text_ro, locale)}</p>}
-            </div>
-            <Link className="primaryButton" href={settings.banner_button_href || "/club"}>
-              {localized(settings.banner_button_text, settings.banner_button_text_ro, locale) || text.more}
-            </Link>
-          </div>
-        </section>
-      )}
+      {settings?.banner_enabled && <section className="fcRefAnnouncement"><div className="container fcRefAnnouncementInner"><div><small>{localized(settings.banner_eyebrow, settings.banner_eyebrow_ro, locale)}</small><strong>{localized(settings.banner_title, settings.banner_title_ro, locale)}</strong></div><Link href={settings.banner_button_href || "/club"}>{localized(settings.banner_button_text, settings.banner_button_text_ro, locale) || text.more} →</Link></div></section>}
 
-      {homepageLayout.map((item) => item.kind === "section" ? renderSection(item.section.section_key) : renderCustomBlock(item.block))}
+      {(sectionEnabled("news") || sectionEnabled("standings")) && <section className="fcRefDashboardSection">
+        <div className="container fcRefDashboard">
+          {sectionEnabled("news") && <>
+            <div className="fcRefLeadColumn">
+              {leadNews ? <Link href={`/news/${leadNews.slug}`} className="fcRefLeadNews">
+                <div className="fcRefLeadNewsMedia">{leadNews.cover_image_url ? <img src={leadNews.cover_image_url} alt="" /> : <div className="fcRefNewsFallback">FC EDINEȚ</div>}<span>{locale === "ro" ? "ȘTIREA PRINCIPALĂ" : "ГЛАВНАЯ НОВОСТЬ"}</span></div>
+                <div className="fcRefLeadNewsBody"><time>{formatNewsDate(leadNews.published_at, locale)}</time><h2>{localized(leadNews.title, leadNews.title_ro, locale)}</h2>{localized(leadNews.excerpt, leadNews.excerpt_ro, locale) && <p>{localized(leadNews.excerpt, leadNews.excerpt_ro, locale)}</p>}<b>{locale === "ro" ? "CITEȘTE" : "ЧИТАТЬ ДАЛЬШЕ"} →</b></div>
+              </Link> : <div className="fcRefEmptyCard">{locale === "ro" ? "Publică prima știre." : "Опубликуй первую новость."}</div>}
+            </div>
+
+            <div className="fcRefLatestColumn">
+              <div className="fcRefPanelTitle"><h2>{locale === "ro" ? "ULTIMELE ȘTIRI" : "ПОСЛЕДНИЕ НОВОСТИ"}</h2><Link href="/news">{locale === "ro" ? "TOATE ȘTIRILE" : "ВСЕ НОВОСТИ"} →</Link></div>
+              <div className="fcRefNewsList">{latestNews.length ? latestNews.map((article) => <Link key={article.id} href={`/news/${article.slug}`} className="fcRefNewsRow"><div>{article.cover_image_url ? <img src={article.cover_image_url} alt="" /> : <span>FCE</span>}</div><section><time>{formatNewsDate(article.published_at, locale)}</time><h3>{localized(article.title, article.title_ro, locale)}</h3></section></Link>) : <div className="fcRefEmptyCard compact">{locale === "ro" ? "Nu sunt alte știri." : "Других новостей пока нет."}</div>}</div>
+            </div>
+          </>}
+
+          {sectionEnabled("standings") && <div className="fcRefTableColumn">
+            <div className="fcRefPanelTitle"><h2>{locale === "ro" ? "CLASAMENT" : "ТУРНИРНАЯ ТАБЛИЦА"}</h2><Link href="/standings">{locale === "ro" ? "TOT CLASAMENTUL" : "ВСЯ ТАБЛИЦА"} →</Link></div>
+            {standings.length ? <StandingsTable entries={standings} compact limit={8} locale={locale} /> : <div className="fcRefEmptyCard compact">{text.standingsEmpty}</div>}
+          </div>}
+        </div>
+      </section>}
+
+      {sectionEnabled("players") && <section className="fcRefTeamSection">
+        <div className="container">
+          <div className="fcRefTeamHead"><div><h2>{locale === "ro" ? "ECHIPA NOASTRĂ" : "НАША КОМАНДА"}</h2><p>{locale === "ro" ? "TALENT. CARACTER. UNITATE." : "ТАЛАНТ. ХАРАКТЕР. ЕДИНСТВО."}</p></div><Link href="/team" className="fcOutlineButton">{locale === "ro" ? "TOT LOTUL" : "ВЕСЬ СОСТАВ"} →</Link></div>
+          <div className="fcRefPlayers">{players.slice(0,4).map((player) => <ReferencePlayer key={player.id} player={player} locale={locale} />)}</div>
+          <div className="fcRefSignature">Edineț<br/><span>{locale === "ro" ? "în inima noastră!" : "в нашем сердце!"}</span></div>
+        </div>
+      </section>}
+
+      {sectionEnabled("partners") && <section className="fcRefPartnersStrip"><div className="container fcRefPartnersInner"><strong>{locale === "ro" ? "PARTENERII NOȘTRI" : "НАШИ ПАРТНЁРЫ"}</strong><div className="fcRefPartnerLogos">{partners.map((partner) => partner.website_url ? <a key={partner.id} href={partner.website_url} target="_blank" rel="noreferrer"><img src={partner.logo_url} alt={partner.name}/></a> : <span key={partner.id}><img src={partner.logo_url} alt={partner.name}/></span>)}</div><Link href="/partners">{locale === "ro" ? "ÎMPREUNĂ CONSTRUIM MAI MULT" : "ВМЕСТЕ СТРОИМ БОЛЬШЕ"}</Link></div></section>}
     </main>
   );
 }
 
-function HomeStripMatch({ match, type }: { match: ClubMatch; type: "finished" | "next" }) {
-  return (
-    <div className="homeStripMatch">
-      <StripTeam team={match.home} />
-      <div className="homeStripCenter">
-        <b>
-          {type === "finished"
-            ? `${match.home_score ?? 0} : ${match.away_score ?? 0}`
-            : "VS"}
-        </b>
-      </div>
-      <StripTeam team={match.away} />
-    </div>
-  );
+function ReferenceTeam({ team }: { team: ClubMatch["home"] }) {
+  const logo = team?.logo_url || (team?.is_club ? CLUB_LOGO : null);
+  return <div className="fcRefTeamBadge">{logo ? <img src={logo} alt="" /> : <span>{(team?.short_name || team?.name || "FC").slice(0,3).toUpperCase()}</span>}<strong>{team?.short_name || team?.name || "Команда"}</strong></div>;
 }
 
-function StripTeam({ team }: { team: ClubMatch["home"] }) {
-  return (
-    <div className="homeStripTeam">
-      {team?.logo_url ? (
-        <img className="homeStripLogo" src={team.logo_url} alt="" />
-      ) : (
-        <div className={`homeStripFallback ${team?.is_club ? "club" : ""}`}>
-          {(team?.short_name || team?.name || "FC").slice(0, 3).toUpperCase()}
-        </div>
-      )}
-      <span>{team?.short_name || team?.name || "Команда"}</span>
-    </div>
-  );
+function ReferencePlayer({ player, locale }: { player: Player; locale: Locale }) {
+  const fullName = `${player.first_name} ${player.last_name}`.trim();
+  const positionMap = locale === "ro"
+    ? { goalkeeper: "PORTAR", defender: "FUNDAȘ", midfielder: "MIJLOCAȘ", forward: "ATACANT" }
+    : { goalkeeper: "ВРАТАРЬ", defender: "ЗАЩИТНИК", midfielder: "ПОЛУЗАЩИТНИК", forward: "НАПАДАЮЩИЙ" };
+  return <Link href={`/team/${player.slug}`} className="fcRefPlayerCard">
+    <div className="fcRefPlayerPhoto">{player.photo_url ? <img src={player.photo_url} alt={fullName}/> : <span>FC EDINEȚ</span>}</div>
+    <div className="fcRefPlayerShade"/>
+    <div className="fcRefPlayerNumber">{player.shirt_number ?? "—"}</div>
+    <div className="fcRefPlayerMeta"><strong>{fullName}</strong><span>{positionMap[player.position as keyof typeof positionMap] ?? player.position}</span></div>
+  </Link>;
 }
 
-function HeroTeam({ team }: { team: ClubMatch["home"] }) {
-  return (
-    <div>
-      {team?.logo_url ? (
-        <img className="miniCrestImage" src={team.logo_url} alt="" />
-      ) : (
-        <div className={`miniCrest ${team?.is_club ? "" : "muted"}`}>
-          {(team?.short_name || team?.name || "FC").slice(0, 3).toUpperCase()}
-        </div>
-      )}
-      <strong>{team?.short_name || team?.name || "Команда"}</strong>
-    </div>
-  );
+function formatNewsDate(value: string | null, locale: Locale) {
+  if (!value) return "";
+  return new Intl.DateTimeFormat(dateLocale(locale), { day: "2-digit", month: "long", year: "numeric" }).format(new Date(value));
 }
 
-function formatMatchDate(value: string, locale: Locale) {
-  const date = new Date(value);
-  const day = new Intl.DateTimeFormat(dateLocale(locale), {
-    day: "2-digit",
-    month: "long",
-    timeZone: "Europe/Chisinau",
-  }).format(date);
-  const time = new Intl.DateTimeFormat(dateLocale(locale), {
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: "Europe/Chisinau",
-  }).format(date);
-  return `${day} • ${time}`;
+function formatMatchDay(value: string, locale: Locale) {
+  return new Intl.DateTimeFormat(dateLocale(locale), { weekday: "short", day: "2-digit", month: "long", timeZone: "Europe/Chisinau" }).format(new Date(value));
+}
+
+function formatMatchTime(value: string, locale: Locale) {
+  return new Intl.DateTimeFormat(dateLocale(locale), { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Chisinau" }).format(new Date(value));
 }
 
 function legacyHeroCoordinates(position?: HomepageHero["background_position"] | null) {

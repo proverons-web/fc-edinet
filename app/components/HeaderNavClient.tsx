@@ -50,13 +50,14 @@ export default function HeaderNavClient({
   return (
     <>
       <nav className="menu">
+        <Link href="/">{locale === "ro" ? "Acasă" : "Главная"}</Link>
         {links.map((link) => <Link key={link.href} href={link.href}>{link.label}</Link>)}
         {showAdminLink && isStaff && <Link href="/admin">{text.admin}</Link>}
       </nav>
 
       <div className="navActions">
         {showLanguageMobile && <div className="headerMobileLanguage"><LanguageSwitcher locale={locale}/></div>}
-        {showSearch && <button className="searchButton" aria-label="Search">⌕</button>}
+        {showSearch && <button className="searchButton" aria-label={locale === "ro" ? "Căutare" : "Поиск"}><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg></button>}
         {showAccount && (isAuthenticated ? (
           <div className="accountMenuWrap">
             <button className="accountMenuButton" type="button" onClick={() => setAccountOpen(!accountOpen)} aria-expanded={accountOpen}>
@@ -73,10 +74,12 @@ export default function HeaderNavClient({
             </div>}
           </div>
         ) : <Link className="login" href="/login">{text.login}</Link>)}
+        <Link className="headerTicketButton" href="/matches">{locale === "ro" ? "BILETE" : "БИЛЕТЫ"} <span>→</span></Link>
         <button className="menuToggle" onClick={() => setMenuOpen(!menuOpen)} aria-label={text.openMenu}>{menuOpen ? "✕" : "☰"}</button>
       </div>
 
       {menuOpen && <div className="mobileMenu mobileMenuAbsolute"><div className="container mobileMenuInner">
+        <Link href="/" onClick={() => setMenuOpen(false)}>{locale === "ro" ? "Acasă" : "Главная"}</Link>
         {links.map((link) => <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)}>{link.label}</Link>)}
         {showAdminLink && isStaff && <Link href="/admin" onClick={() => setMenuOpen(false)}>{text.admin}</Link>}
         {showAccount && (isAuthenticated ? <>

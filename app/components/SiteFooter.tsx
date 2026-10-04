@@ -20,7 +20,7 @@ export default async function SiteFooter() {
       <div className="container footerGrid globalFooterGrid" style={{ "--footer-columns": String(Math.max(1, visibleColumns.length)) } as React.CSSProperties}>
         <div className="globalFooterBrand">
           <Link className="brand" href="/">
-            {config.logo_mode === "image" && config.logo_url ? <img className="globalBrandLogo" src={config.logo_url} alt="FC Edineț" style={{ width: config.logo_width }} /> : <span className="crest" style={{ width: config.logo_width, height: Math.round(config.logo_width * 1.17) }}>FCE</span>}
+            <img className="globalBrandLogo" src={config.logo_mode === "image" && config.logo_url ? config.logo_url : "/brand/fc-edinet-crest.png"} alt="FC Edineț" style={{ width: Math.max(config.logo_width, 54) }} />
             <span className="brandText"><strong>{config.brand_name}</strong><small>{config.brand_subtitle}</small></span>
           </Link>
           {config.show_about && <p>{localizedValue(config.about_ru, config.about_ro, locale) || fallbackText.about}</p>}

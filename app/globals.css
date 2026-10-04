@@ -2428,3 +2428,119 @@ h1,h2,h3{font-family:var(--ds-font-heading);font-weight:var(--ds-heading-weight)
 
 @media(max-width:1000px){.practicalCoreFields{grid-template-columns:repeat(4,minmax(0,1fr))}.publicMatchProtocolGrid{grid-template-columns:1fr}.publicMatchLineupsPanel{grid-column:auto}.publicMatchProtocolSide{grid-row:auto}.publicMatchScoreBoard{gap:16px}.publicMatchDetailTeam img,.publicMatchDetailTeam>span{width:72px;height:72px}.publicMatchLineupGrid{grid-template-columns:1fr}}
 @media(max-width:680px){.practicalStatsBanner{align-items:flex-start;flex-direction:column}.practicalStatsSummary{grid-template-columns:repeat(2,1fr)}.practicalCoreFields{grid-template-columns:repeat(2,minmax(0,1fr))}.publicMatchDetailHero{padding:28px 0 38px}.publicMatchScoreBoard{grid-template-columns:1fr auto 1fr;gap:8px}.publicMatchDetailTeam{flex-direction:column!important;text-align:center!important;gap:9px}.publicMatchDetailTeam img,.publicMatchDetailTeam>span{width:56px;height:56px;border-radius:15px}.publicMatchDetailTeam strong{font-size:15px}.publicMatchBigScore b{font-size:38px}.publicMatchProtocolSection{padding-top:18px}.publicMatchPanel{padding:18px;border-radius:18px}.publicMatchEvent{grid-template-columns:44px 30px minmax(0,1fr);gap:8px}.publicMatchEventIcon{width:28px;height:28px}.publicMatchFacts{grid-template-columns:1fr}.publicMatchFacts dd{text-align:left;margin-top:-7px}.matchFavoriteAction{justify-content:center}}
+
+/* ===== v2.3.9 FC EDINET REFERENCE THEME ===== */
+:root{
+  --fc-ref-navy:#021a3b;
+  --fc-ref-navy-2:#062a58;
+  --fc-ref-blue:#0950a5;
+  --fc-ref-blue-bright:#1674d4;
+  --fc-ref-yellow:#ffd329;
+  --fc-ref-yellow-dark:#e7b900;
+  --fc-ref-paper:#f8fafc;
+}
+
+/* Global header aligned with the supplied FC Edinet reference */
+.topbar.globalTopbar{background:#01132d;color:#91a7c4;border-bottom:1px solid rgba(255,255,255,.05)}
+.globalHeader{background:linear-gradient(90deg,#031a3b 0%,#052b5d 55%,#021a3b 100%)!important;border-bottom:1px solid rgba(255,255,255,.09);box-shadow:0 8px 24px rgba(0,17,43,.14)}
+.globalHeader .nav{min-height:76px;gap:18px}
+.globalHeader .brand{min-width:max-content;gap:10px}
+.globalHeader .globalBrandLogo{width:auto!important;height:58px!important;max-height:58px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.18))}
+.globalHeader .brandText strong{font-family:Impact,"Arial Narrow",Arial,sans-serif;font-size:23px;letter-spacing:.035em;line-height:1;color:#fff}
+.globalHeader .brandText small{margin-top:4px;color:#9cb0ca;opacity:1;font-size:8px;font-weight:800;letter-spacing:.17em;text-transform:uppercase}
+.globalHeader .menu{gap:21px;font-family:"Arial Narrow",Arial,sans-serif;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.025em}
+.globalHeader .menu a{position:relative;display:flex;min-height:76px;align-items:center;opacity:.9;transition:.18s ease}
+.globalHeader .menu a:after{content:"";position:absolute;left:50%;right:50%;bottom:0;height:3px;background:var(--fc-ref-yellow);transition:.18s ease}
+.globalHeader .menu a:hover{color:#fff;opacity:1}.globalHeader .menu a:hover:after{left:0;right:0}
+.globalHeader .navActions{gap:8px}
+.globalHeader .searchButton{border:0;width:38px;height:38px;border-radius:0;color:#fff;display:grid;place-items:center}
+.globalHeader .searchButton svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.globalHeader .login{min-height:38px;background:transparent;border:1px solid rgba(255,255,255,.2);border-radius:2px;font-size:10px;text-transform:uppercase;padding:0 12px}
+.headerTicketButton{min-height:42px;padding:0 18px;display:inline-flex;align-items:center;gap:10px;background:var(--fc-ref-yellow);color:#071b34!important;border:1px solid #ffe373;border-radius:2px;font-size:10px;font-weight:950;text-transform:uppercase;letter-spacing:.025em;box-shadow:0 7px 22px rgba(255,211,41,.17);white-space:nowrap}
+.headerTicketButton:hover{background:#ffe15b}.headerTicketButton span{font-size:14px}
+
+/* Home hero */
+.fcRefHome{background:#fff;overflow:hidden}
+.fcRefHero{position:relative;min-height:var(--hero-height-desktop,620px);color:#fff;background:#041b3b;overflow:hidden}
+.fcRefHeroMedia{position:absolute;inset:0;z-index:0;overflow:hidden}
+.fcRefHeroMedia picture,.fcRefHeroMedia picture img{display:block;width:100%;height:100%}
+.fcRefHeroMedia picture img{object-fit:cover;object-position:var(--hero-desktop-x,50%) var(--hero-desktop-y,50%);transform:scale(var(--hero-desktop-zoom,1));transform-origin:var(--hero-desktop-x,50%) var(--hero-desktop-y,50%)}
+.fcRefHeroFallback{width:100%;height:100%;background:radial-gradient(circle at 38% 45%,#0d4d99 0,#062a59 28%,#021a3b 68%);display:grid;place-items:center}
+.fcRefHeroFallback img{width:min(300px,30vw);height:auto;opacity:.14;filter:grayscale(1) brightness(2)}
+.fcRefHeroOverlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,18,46,.88) 0%,rgba(2,27,59,.43) 48%,rgba(0,17,42,.55) 100%);box-shadow:inset 0 -160px 130px rgba(0,21,51,.33);opacity:var(--hero-overlay,.55)}
+.fcRefHeroGrid{position:relative;z-index:2;height:var(--hero-height-desktop,620px);min-height:var(--hero-height-desktop,620px);display:block;padding:0}
+.fcRefHeroCopy{position:absolute;left:var(--hero-text-desktop-x,28%);top:var(--hero-text-desktop-y,50%);transform:translate(-50%,-50%);width:min(720px,54vw);max-width:720px;padding-left:14px;border-left:3px solid var(--fc-ref-yellow)}
+.fcRefHeroKicker{margin-bottom:16px;color:#dfeaff;font-size:10px;font-weight:900;letter-spacing:.18em}
+.fcRefHeroCopy h1{margin:0;font-family:Impact,"Arial Narrow",Arial,sans-serif;font-size:clamp(54px,6vw,88px);line-height:.9;letter-spacing:.01em;text-transform:uppercase;text-shadow:0 5px 28px rgba(0,0,0,.34)}
+.fcRefHeroCopy h1 span{display:block;color:#fff}
+.fcRefHeroCopy p{max-width:540px;margin:20px 0 0;color:#e3ecf8;font-size:17px;line-height:1.5;font-weight:600;text-shadow:0 2px 10px rgba(0,0,0,.3)}
+.fcRefHeroActions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.fcYellowButton{min-height:46px;padding:0 24px;display:inline-flex;align-items:center;justify-content:center;gap:16px;background:var(--fc-ref-yellow);border:1px solid #ffe988;color:#061a34!important;font-size:11px;font-weight:950;text-transform:uppercase;letter-spacing:.035em;box-shadow:0 9px 24px rgba(255,211,41,.15);transition:.18s ease}
+.fcYellowButton:hover{transform:translateY(-2px);background:#ffe158}.fcYellowButton span{font-size:16px}
+.fcGhostButton{min-height:46px;padding:0 22px;display:inline-flex;align-items:center;border:1px solid rgba(255,255,255,.45);color:#fff;font-size:11px;font-weight:900;text-transform:uppercase}
+
+.fcRefNextMatch{position:absolute;left:var(--hero-match-desktop-x,79%);top:var(--hero-match-desktop-y,50%);transform:translate(-50%,-50%);width:min(var(--hero-match-desktop-width,380px),42vw);padding:25px 28px 24px;background:linear-gradient(145deg,rgba(2,24,56,.93),rgba(7,49,96,.88));border:1px solid rgba(130,180,234,.28);box-shadow:0 25px 70px rgba(0,17,40,.35);backdrop-filter:blur(12px)}
+.fcRefMatchHead{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:15px;border-bottom:1px solid rgba(255,255,255,.16)}
+.fcRefMatchHead strong{font-family:"Arial Narrow",Arial,sans-serif;font-size:18px;font-weight:950;text-transform:uppercase}.fcRefMatchHead a{font-size:8px;font-weight:950;letter-spacing:.05em;color:#d7e6fa}
+.fcRefCompetition{padding:18px 0 14px;text-align:center;color:#cbd9ec;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.05em}.fcRefCompetition span{display:block;margin-top:4px;color:#fff}
+.fcRefMatchTeams{display:grid;grid-template-columns:1fr 42px 1fr;align-items:center;gap:14px;padding:6px 0 18px}
+.fcRefTeamBadge{display:grid;justify-items:center;gap:10px;text-align:center;min-width:0}.fcRefTeamBadge img{width:70px;height:82px;object-fit:contain;filter:drop-shadow(0 5px 8px rgba(0,0,0,.3))}.fcRefTeamBadge>span{width:70px;height:70px;display:grid;place-items:center;background:#0d4f98;border:1px solid rgba(255,255,255,.25);border-radius:50%;font-weight:950}.fcRefTeamBadge strong{font-size:12px;text-transform:uppercase;line-height:1.15}.fcRefVs{font-family:Impact,"Arial Narrow",Arial,sans-serif;font-size:18px;color:#fff;text-align:center}
+.fcRefMatchFacts{display:grid;gap:9px;padding:14px 2px;border-top:1px solid rgba(255,255,255,.13);color:#d2deed;font-size:11px}.fcRefMatchFacts span{display:flex;gap:11px;align-items:center}.fcRefMatchFacts b{width:16px;text-align:center;color:#fff}.fcRefMatchButton{margin-top:8px;width:100%}
+.fcRefNoMatch{padding:30px 0;color:#d4e0ef;text-align:center}
+.fcRefHeroBottom{position:absolute;z-index:3;left:50%;bottom:18px;transform:translateX(-50%);display:flex;align-items:center;gap:22px;color:#d8e2ef;font-size:10px;font-weight:900;letter-spacing:.2em}.fcRefHeroBottom i{color:var(--fc-ref-yellow);font-style:normal}.fcRefHeroBottom strong{margin-left:auto;text-align:right;color:#fff;font-size:10px;line-height:1.2;font-style:italic;letter-spacing:.08em}
+
+/* Optional announcement */
+.fcRefAnnouncement{background:var(--fc-ref-yellow);color:#061a34}.fcRefAnnouncementInner{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:24px}.fcRefAnnouncementInner div{display:grid}.fcRefAnnouncementInner small{font-size:9px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.fcRefAnnouncementInner strong{font-size:16px}.fcRefAnnouncementInner a{font-size:10px;font-weight:950;text-transform:uppercase}
+
+/* News + table dashboard */
+.fcRefDashboardSection{padding:18px 0 22px;background:#fff}.fcRefDashboard{display:grid;grid-template-columns:1.1fr .92fr .92fr;gap:0;border-top:1px solid #dfe6ef;border-bottom:1px solid #dfe6ef}
+.fcRefLeadColumn,.fcRefLatestColumn,.fcRefTableColumn{min-width:0;padding:16px 18px}.fcRefLatestColumn,.fcRefTableColumn{border-left:1px solid #e2e8f0}
+.fcRefLeadNews{display:block;min-height:420px;background:#061c3e;color:#fff;overflow:hidden}.fcRefLeadNewsMedia{position:relative;height:230px;background:#0b315f;overflow:hidden}.fcRefLeadNewsMedia img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease}.fcRefLeadNews:hover .fcRefLeadNewsMedia img{transform:scale(1.035)}.fcRefLeadNewsMedia:after{content:"";position:absolute;inset:auto 0 0;height:45%;background:linear-gradient(transparent,rgba(2,16,37,.78))}.fcRefLeadNewsMedia>span{position:absolute;left:18px;bottom:14px;z-index:2;padding:8px 12px;background:var(--fc-ref-yellow);color:#071b35;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.04em}.fcRefNewsFallback{height:100%;display:grid;place-items:center;font-family:Impact,"Arial Narrow",Arial,sans-serif;font-size:28px;letter-spacing:.08em;color:rgba(255,255,255,.5)}
+.fcRefLeadNewsBody{padding:18px 20px 20px}.fcRefLeadNewsBody time{font-size:9px;color:#aebed2;text-transform:uppercase}.fcRefLeadNewsBody h2{margin:8px 0 10px;font-size:23px;line-height:1.08}.fcRefLeadNewsBody p{margin:0 0 13px;color:#d1dbea;font-size:12px;line-height:1.45}.fcRefLeadNewsBody b{color:var(--fc-ref-yellow);font-size:9px;text-transform:uppercase;letter-spacing:.06em}
+.fcRefPanelTitle{min-height:46px;display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:2px solid #0a3c78}.fcRefPanelTitle h2{margin:0;font-family:"Arial Narrow",Arial,sans-serif;font-size:17px;font-weight:950;text-transform:uppercase;color:#0a356b}.fcRefPanelTitle a{color:#0a57ad;font-size:8px;font-weight:950;text-transform:uppercase;white-space:nowrap}
+.fcRefNewsList{display:grid}.fcRefNewsRow{display:grid;grid-template-columns:115px minmax(0,1fr);gap:14px;padding:14px 0;border-bottom:1px solid #e2e7ed;min-height:102px}.fcRefNewsRow>div{height:76px;overflow:hidden;background:#e8eef5}.fcRefNewsRow>div img{width:100%;height:100%;display:block;object-fit:cover}.fcRefNewsRow>div span{height:100%;display:grid;place-items:center;background:#0b315f;color:#fff;font-size:10px;font-weight:950}.fcRefNewsRow section{min-width:0}.fcRefNewsRow time{color:#7b8797;font-size:8px}.fcRefNewsRow h3{margin:6px 0 0;color:#142d4c;font-size:13px;line-height:1.25}.fcRefNewsRow:hover h3{color:#0c59ad}
+.fcRefTableColumn .standingsTableWrap{border:0;border-radius:0;box-shadow:none}.fcRefTableColumn .standingsTable{font-size:10px}.fcRefTableColumn .standingsTable th{padding:10px 7px;background:#f8fafc;color:#617287;font-size:8px}.fcRefTableColumn .standingsTable td{padding:9px 7px}.fcRefTableColumn .standingsTable th:nth-child(4),.fcRefTableColumn .standingsTable th:nth-child(5),.fcRefTableColumn .standingsTable th:nth-child(6),.fcRefTableColumn .standingsTable td:nth-child(4),.fcRefTableColumn .standingsTable td:nth-child(5),.fcRefTableColumn .standingsTable td:nth-child(6){display:none}.fcRefTableColumn .standingTeam{gap:7px}.fcRefTableColumn .standingLogo,.fcRefTableColumn .standingLogoFallback{width:24px;height:24px}.fcRefTableColumn .standingsTable tr.club td{background:#0b4b98!important;color:#fff}.fcRefTableColumn .standingsTable tr.club .standingPoints{color:#fff}.fcRefTableColumn .standingsTable tr.club .standingTeam strong{color:#fff}
+.fcRefEmptyCard{min-height:260px;display:grid;place-items:center;padding:30px;background:#f6f8fb;color:#758398;text-align:center}.fcRefEmptyCard.compact{min-height:140px}
+
+/* Team band */
+.fcRefTeamSection{position:relative;padding:26px 0 30px;background:linear-gradient(110deg,#021936 0%,#062b58 68%,#031a3a 100%);color:#fff;overflow:hidden}.fcRefTeamSection:after{content:"";position:absolute;right:-70px;bottom:-150px;width:360px;height:440px;background:url('/brand/fc-edinet-crest.png') center/contain no-repeat;opacity:.035;filter:grayscale(1)}
+.fcRefTeamHead{display:flex;align-items:flex-end;justify-content:space-between;gap:22px;margin-bottom:18px;position:relative;z-index:1}.fcRefTeamHead h2{margin:0;font-family:"Arial Narrow",Arial,sans-serif;font-size:25px;font-weight:950;text-transform:uppercase}.fcRefTeamHead p{margin:5px 0 0;color:#c0cfe2;font-size:10px;font-weight:800;letter-spacing:.07em}.fcOutlineButton{min-height:37px;padding:0 17px;border:1px solid var(--fc-ref-yellow);display:inline-flex;align-items:center;color:var(--fc-ref-yellow);font-size:9px;font-weight:950;text-transform:uppercase}
+.fcRefPlayers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;width:76%;position:relative;z-index:1}.fcRefPlayerCard{position:relative;height:260px;overflow:hidden;background:linear-gradient(150deg,#123f78,#071d3e);border:1px solid rgba(255,255,255,.08)}.fcRefPlayerPhoto{position:absolute;inset:0;display:grid;place-items:center;color:#91a8c4;font-size:10px;font-weight:900}.fcRefPlayerPhoto img{width:100%;height:100%;display:block;object-fit:cover;object-position:center top}.fcRefPlayerShade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 38%,rgba(1,14,35,.88) 100%)}.fcRefPlayerNumber{position:absolute;left:12px;bottom:41px;font-family:Impact,"Arial Narrow",Arial,sans-serif;font-size:34px;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.4)}.fcRefPlayerMeta{position:absolute;left:12px;right:10px;bottom:10px;display:grid}.fcRefPlayerMeta strong{font-size:13px;line-height:1.05}.fcRefPlayerMeta span{margin-top:4px;color:#b9c8db;font-size:8px;font-weight:900;text-transform:uppercase}.fcRefPlayerCard:hover .fcRefPlayerPhoto img{transform:scale(1.025);transition:.25s}
+.fcRefSignature{position:absolute;right:max(30px,calc((100vw - 1200px)/2));top:45%;transform:translateY(-50%) rotate(-6deg);font-family:cursive;font-size:46px;line-height:.9;color:#fff;text-align:center;opacity:.92}.fcRefSignature span{font-size:25px}
+
+/* Partner strip */
+.fcRefPartnersStrip{padding:18px 0;background:#fff;border-bottom:1px solid #dde5ee}.fcRefPartnersInner{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:28px;align-items:center}.fcRefPartnersInner>strong{font-size:9px;color:#173b68;text-transform:uppercase;white-space:nowrap}.fcRefPartnerLogos{display:flex;align-items:center;justify-content:center;gap:30px;overflow:hidden}.fcRefPartnerLogos a,.fcRefPartnerLogos span{display:grid;place-items:center;height:48px;min-width:76px}.fcRefPartnerLogos img{max-width:115px;max-height:42px;object-fit:contain;filter:saturate(.9)}.fcRefPartnersInner>a{padding-left:18px;border-left:2px solid #d6e0ec;color:#34567d;font-size:8px;font-weight:950;text-transform:uppercase;white-space:nowrap}
+
+/* Footer refinements */
+.globalFooter{position:relative;overflow:hidden;background:linear-gradient(110deg,#021934 0%,#06264d 60%,#031a39 100%)!important;border-top:1px solid rgba(255,255,255,.07)}
+.globalFooter:after{content:"";position:absolute;right:-90px;bottom:-140px;width:520px;height:540px;background:url('/brand/fc-edinet-crest.png') center/contain no-repeat;opacity:.03;filter:grayscale(1)}
+.globalFooter .container{position:relative;z-index:1}.globalFooterGrid{align-items:start}.globalFooter .globalBrandLogo{width:auto!important;height:84px!important;max-height:84px}.globalFooter .brandText strong{font-family:Impact,"Arial Narrow",Arial,sans-serif;font-size:25px;letter-spacing:.04em}.globalFooter .brandText small{font-size:8px;color:#849bb6;opacity:1}.globalFooterBrand p{max-width:300px;font-size:12px;line-height:1.55}.globalFooterColumn strong{color:#fff;text-transform:uppercase;font-size:11px}.globalFooterColumn a{font-size:11px}.globalFooter .footerBottom{font-size:10px}
+
+@media(max-width:1180px){
+  .globalHeader .menu{gap:13px;font-size:9px}.headerTicketButton{padding:0 12px}.globalHeader .brandText{display:none}
+  .fcRefHeroCopy h1{font-size:clamp(50px,6vw,72px)}
+  .fcRefDashboard{grid-template-columns:1fr 1fr}.fcRefLeadColumn{grid-row:span 2}.fcRefTableColumn{grid-column:2}.fcRefLatestColumn,.fcRefTableColumn{border-left:1px solid #e2e8f0}.fcRefTableColumn{border-top:1px solid #e2e8f0}
+  .fcRefPlayers{width:82%}.fcRefSignature{font-size:34px;right:24px}
+}
+@media(max-width:980px){
+  .headerTicketButton{display:none}.globalHeader .nav{min-height:68px}.globalHeader .globalBrandLogo{height:52px!important}.globalHeader .menuToggle{display:block}
+  .fcRefHero{min-height:var(--hero-height-tablet,720px)}.fcRefHeroGrid{height:var(--hero-height-tablet,720px);min-height:var(--hero-height-tablet,720px)}.fcRefHeroCopy{left:var(--hero-text-tablet-x,34%);top:var(--hero-text-tablet-y,34%);width:min(650px,72vw)}.fcRefNextMatch{left:var(--hero-match-tablet-x,70%);top:var(--hero-match-tablet-y,72%);width:min(var(--hero-match-tablet-width,520px),72vw)}.fcRefHeroBottom{bottom:15px}.fcRefHeroBottom strong{display:none}
+  .fcRefDashboard{grid-template-columns:1fr}.fcRefLeadColumn{grid-row:auto}.fcRefLatestColumn,.fcRefTableColumn{border-left:0;border-top:1px solid #e2e8f0}.fcRefLatestColumn{display:grid;grid-template-columns:1fr}.fcRefNewsRow{grid-template-columns:130px 1fr}
+  .fcRefPlayers{width:100%;grid-template-columns:repeat(4,minmax(0,1fr))}.fcRefSignature{display:none}.fcRefPlayerCard{height:230px}
+  .fcRefPartnersInner{grid-template-columns:1fr}.fcRefPartnersInner>strong,.fcRefPartnersInner>a{text-align:center}.fcRefPartnersInner>a{border-left:0;padding-left:0}.fcRefPartnerLogos{flex-wrap:wrap}
+}
+@media(max-width:680px){
+  .topbar.globalTopbar{display:none}.globalHeader .nav{min-height:62px}.globalHeader .globalBrandLogo{height:46px!important}.globalHeader .brandText{display:block}.globalHeader .brandText strong{font-size:18px}.globalHeader .brandText small{font-size:6px}.globalHeader .login{display:none}.globalHeader .searchButton{width:34px}.headerMobileLanguage{display:none!important}
+  .fcRefHero{min-height:var(--hero-height-mobile,680px)}.fcRefHeroGrid{height:var(--hero-height-mobile,680px);min-height:var(--hero-height-mobile,680px)}.fcRefHeroCopy{left:var(--hero-text-mobile-x,50%);top:var(--hero-text-mobile-y,30%);width:min(92vw,560px);padding-left:10px}.fcRefHeroKicker{font-size:8px}.fcRefHeroCopy h1{font-size:45px;line-height:.92}.fcRefHeroCopy p{font-size:14px;margin-top:14px}.fcRefHeroActions{margin-top:20px}.fcYellowButton,.fcGhostButton{min-height:42px;padding:0 16px;font-size:9px}
+  .fcRefNextMatch{left:var(--hero-match-mobile-x,50%);top:var(--hero-match-mobile-y,74%);width:min(var(--hero-match-mobile-width,360px),92vw);padding:18px 16px}.fcRefMatchHead strong{font-size:15px}.fcRefMatchHead a{font-size:7px}.fcRefTeamBadge img{width:52px;height:62px}.fcRefTeamBadge>span{width:54px;height:54px}.fcRefTeamBadge strong{font-size:10px}.fcRefMatchFacts{font-size:9px}.fcRefHeroBottom{gap:10px;font-size:7px;letter-spacing:.12em}
+  .fcRefDashboardSection{padding:10px 0}.fcRefLeadColumn,.fcRefLatestColumn,.fcRefTableColumn{padding:10px}.fcRefLeadNews{min-height:0}.fcRefLeadNewsMedia{height:210px}.fcRefLeadNewsBody h2{font-size:20px}.fcRefNewsRow{grid-template-columns:92px 1fr;gap:10px}.fcRefNewsRow>div{height:68px}.fcRefNewsRow h3{font-size:12px}.fcRefPanelTitle h2{font-size:14px}.fcRefTableColumn .standingsTable{font-size:9px}.fcRefTableColumn .standingsTable th,.fcRefTableColumn .standingsTable td{padding:8px 4px}.fcRefTableColumn .standingLogo,.fcRefTableColumn .standingLogoFallback{width:20px;height:20px}
+  .fcRefTeamSection{padding:22px 0}.fcRefTeamHead{align-items:flex-start}.fcRefTeamHead h2{font-size:21px}.fcOutlineButton{min-height:34px;padding:0 10px;font-size:8px}.fcRefPlayers{grid-template-columns:repeat(2,1fr)}.fcRefPlayerCard{height:220px}.fcRefPlayerNumber{font-size:28px}.fcRefPlayerMeta strong{font-size:12px}
+  .fcRefPartnersStrip{padding:15px 0}.fcRefPartnerLogos{gap:16px}.fcRefPartnerLogos img{max-width:90px;max-height:34px}
+  .globalFooterGrid{grid-template-columns:1fr!important}.globalFooter .globalBrandLogo{height:72px!important}
+}
+@media(max-width:980px){
+  .fcRefHeroMedia picture img{object-position:var(--hero-tablet-x,50%) var(--hero-tablet-y,50%);transform:scale(var(--hero-tablet-zoom,1));transform-origin:var(--hero-tablet-x,50%) var(--hero-tablet-y,50%)}
+}
+@media(max-width:680px){
+  .fcRefHeroMedia picture img{object-position:var(--hero-mobile-x,50%) var(--hero-mobile-y,50%);transform:scale(var(--hero-mobile-zoom,1));transform-origin:var(--hero-mobile-x,50%) var(--hero-mobile-y,50%)}
+}

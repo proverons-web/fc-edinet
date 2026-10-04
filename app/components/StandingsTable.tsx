@@ -53,5 +53,6 @@ export default function StandingsTable({
 function TeamLogo({ entry }: { entry: StandingEntry }) {
   const team = entry.team;
   if (team?.logo_url) return <img className="standingLogo" src={team.logo_url} alt="" />;
-  return <span className={`standingLogoFallback ${team?.is_club ? "club" : ""}`}>{(team?.short_name || team?.name || "FC").slice(0, 3).toUpperCase()}</span>;
+  if (team?.is_club) return <img className="standingLogo" src="/brand/fc-edinet-crest.png" alt="FC Edineț" />;
+  return <span className="standingLogoFallback">{(team?.short_name || team?.name || "FC").slice(0, 3).toUpperCase()}</span>;
 }
