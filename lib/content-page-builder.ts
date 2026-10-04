@@ -44,6 +44,7 @@ export type ClubSectionConfig = {
   canvas_height: ClubResponsiveNumber;
   frames: ClubResponsiveFrames;
   image_focus?: ClubImageFocus;
+  image_zoom?: ClubResponsiveNumber;
   /** legacy v2 values kept for backwards compatibility */
   image_position_x?: number;
   image_position_y?: number;
@@ -111,6 +112,7 @@ function sectionDefaults(key: ClubSectionKey): ClubSectionConfig {
       layout_mode:"manual",
       canvas_height:{desktop:760,tablet:780,mobile:790},
       image_focus:defaultImageFocus(),
+      image_zoom:{desktop:115,tablet:115,mobile:120},
       image_position_x:50,
       image_position_y:52,
       image_fit:"cover",
@@ -209,7 +211,13 @@ export function frameCssVariables(frames: ClubResponsiveFrames, elementKey: stri
 }
 export function imageFocusCssVariables(section: ClubSectionConfig): CSSProperties {
   const focus = section.image_focus ?? defaultImageFocus();
-  return {"--stadium-focus-d-x":`${focus.desktop.x}%`,"--stadium-focus-d-y":`${focus.desktop.y}%`,"--stadium-focus-t-x":`${focus.tablet.x}%`,"--stadium-focus-t-y":`${focus.tablet.y}%`,"--stadium-focus-m-x":`${focus.mobile.x}%`,"--stadium-focus-m-y":`${focus.mobile.y}%`} as CSSProperties;
+  const zoom = section.image_zoom ?? {desktop:115,tablet:115,mobile:120};
+  return {
+    "--stadium-focus-d-x":`${focus.desktop.x}%`,"--stadium-focus-d-y":`${focus.desktop.y}%`,
+    "--stadium-focus-t-x":`${focus.tablet.x}%`,"--stadium-focus-t-y":`${focus.tablet.y}%`,
+    "--stadium-focus-m-x":`${focus.mobile.x}%`,"--stadium-focus-m-y":`${focus.mobile.y}%`,
+    "--stadium-zoom-d":zoom.desktop/100,"--stadium-zoom-t":zoom.tablet/100,"--stadium-zoom-m":zoom.mobile/100,
+  } as CSSProperties;
 }
 
 function normalizeSection(base: ClubSectionConfig, raw: unknown): ClubSectionConfig {
@@ -230,6 +238,7 @@ function normalizeSection(base: ClubSectionConfig, raw: unknown): ClubSectionCon
     canvas_height:normalizeResponsiveNumber(value.canvas_height,base.canvas_height,260,1800),
     frames:normalizeFrames(value.frames,base.frames,base.key),
     image_focus:base.key === "stadium" ? normalizeImageFocus(value.image_focus,focusFallback,legacyX,legacyY) : undefined,
+    image_zoom:base.key === "stadium" ? normalizeResponsiveNumber(value.image_zoom, base.image_zoom ?? {desktop:115,tablet:115,mobile:120}, 100, 200) : undefined,
     image_position_x:base.key === "stadium" ? legacyX : undefined,
     image_position_y:base.key === "stadium" ? legacyY : undefined,
     image_fit:base.key === "stadium" && (value.image_fit === "contain" || value.image_fit === "cover") ? value.image_fit : base.image_fit,

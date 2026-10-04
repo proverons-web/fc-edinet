@@ -175,10 +175,10 @@ export default async function AdminPage() {
             />
             <AdminModule
               title="Page Builder"
-              text="Page Builder 2.0: реальное Live Preview, ручное позиционирование фото и текста, отдельные Desktop / Tablet / Mobile."
+              text="Page Builder 3.1: реальное Live Preview, ручное позиционирование, Focus X/Y и Zoom кадра отдельно для Desktop / Tablet / Mobile."
               badge={
                 profile.role === "editor" || profile.role === "admin"
-                  ? "v2.3.4"
+                  ? "v2.3.5"
                   : "Editor/Admin"
               }
               href={

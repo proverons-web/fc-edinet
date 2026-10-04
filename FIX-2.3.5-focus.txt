@@ -1,0 +1,7 @@
+FC Edinet v2.3.5 — Stadium image focus fix
+
+- Focus X/Y now combines object-position with transform-origin.
+- Added per-device image_zoom (100–200%).
+- Defaults: desktop/tablet 115%, mobile 120%.
+- Added Center image action.
+- No database migration required: values are stored in the existing JSON page-builder config.
