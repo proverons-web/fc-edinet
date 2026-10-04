@@ -7,7 +7,7 @@ import { dateLocale, localized, publicText, type Locale } from "@/lib/i18n";
 import { newsCoverStyle } from "@/lib/news-cover";
 import { defaultHomepageCanvas, normalizeHomepageCanvas } from "@/lib/homepage-canvas";
 import { repairHomepageCanvas } from "@/lib/homepage-safe-zone";
-import { defaultHeroLayerConfig, heroLayerState, heroLayerVisible, homeHeroLayerDefinitions, normalizeHeroLayerConfig } from "@/lib/hero-builder";
+import { defaultHeroLayerConfig, heroLayerState, heroLayerStyle, heroLayerVisible, homeHeroLayerDefinitions, normalizeHeroLayerConfig } from "@/lib/hero-builder";
 import type {
   ClubMatch,
   Competition,
@@ -206,9 +206,9 @@ export default async function Home() {
 
         <div className="container fcRefHeroGrid">
           <div className="fcRefHeroCopy" data-hero-layer="intro" style={{ zIndex: heroLayerState(heroLayers, "intro").order, display: showHeroIntro ? undefined : "none" }}>
-            <div className="fcRefHeroKicker">FC EDINEȚ • MOLDOVA</div>
-            <h1>{heroTitleMain}<span>{heroTitleAccent}</span></h1>
-            <p>{heroDescription}</p>
+            <div className="fcRefHeroKicker" style={heroLayerStyle(heroLayers, "intro")}>FC EDINEȚ • MOLDOVA</div>
+            <h1 style={heroLayerStyle(heroLayers, "intro")}>{heroTitleMain}<span>{heroTitleAccent}</span></h1>
+            <p style={heroLayerStyle(heroLayers, "intro")}>{heroDescription}</p>
             <div className="fcRefHeroActions">
               <Link className="fcYellowButton" href={hero?.primary_button_href || "/club"}>
                 {localized(hero?.primary_button_text, hero?.primary_button_text_ro, locale) || (locale === "ro" ? "DRUMUL NOSTRU" : "НАШ ПУТЬ")} <span>→</span>

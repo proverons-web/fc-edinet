@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useCallback, useMemo, useState } from "react";
+import { useActionState, useCallback, useEffect, useMemo, useState } from "react";
 import { autosaveSitePageDesign, saveSitePageVisualEditor, type VisualEditorState } from "@/app/admin/design/actions";
 import Publishing2Bar from "@/app/components/Publishing2Bar";
 import { useDraftAutosave, useEditorHistory } from "@/app/components/usePublishing2";
@@ -112,7 +112,10 @@ export default function SitePageVisualEditor({
   }, []);
   const history = useEditorHistory(editorSnapshot, applySnapshot);
   const autosaveAction = useCallback((value: SitePageDesignSnapshot) => autosaveSitePageDesign(pageKey, value), [pageKey]);
-  const autosave = useDraftAutosave(editorSnapshot, autosaveAction);
+  const autosave = useDraftAutosave(editorSnapshot, autosaveAction, 500);
+  useEffect(() => {
+    if (autosave.state === "saved" && window.parent !== window) window.parent.postMessage({ type: "fc-site-builder-refresh", pageKey, savedAt: autosave.savedAt }, window.location.origin);
+  }, [autosave.state, autosave.savedAt, pageKey]);
   const checks = useMemo(() => sitePagePublishingChecks(editorSnapshot, item.supportsContentImage), [editorSnapshot, item.supportsContentImage]);
   const hasBlockingChecks = checks.some((check) => check.level === "error");
   const hasPendingMedia = [editorSnapshot.desktop_image_url, editorSnapshot.tablet_image_url, editorSnapshot.mobile_image_url].some((url) => Boolean(url?.startsWith("blob:")));
@@ -246,7 +249,7 @@ export default function SitePageVisualEditor({
           {mode === "mobile" && <VisualImageField device="mobile" fileName="mobile_image" assetFieldName="mobile_image_asset_id" currentUrl={customMobile} assets={assets} onPreviewChange={(url) => { setMobileImage(url); setBackgroundMode("custom"); }} onClearChange={setClearMobile} clear={clearMobile} onActivate={() => { setMode("mobile"); setBackgroundMode("custom"); }} />}
           <Range label="Фокус X" min={0} max={100} value={preview.x} setValue={setFocusX} suffix="%" />
           <Range label="Фокус Y" min={0} max={100} value={preview.y} setValue={setFocusY} suffix="%" />
-          <Range label="Дополнительный масштаб" min={100} max={300} value={preview.zoom} setValue={setZoom} suffix="%" />
+          <ZoomRange value={preview.zoom} setValue={setZoom} />
           <Range label="Высота Hero" min={180} max={950} step={10} value={preview.height} setValue={setHeight} suffix=" px" />
         </section>
 
@@ -285,6 +288,11 @@ export default function SitePageVisualEditor({
   );
 }
 
+
+function ZoomRange({ value, setValue }: { value: number; setValue: (value: number) => void }) {
+  const correction = value - 100;
+  return <div className="visualRange zoomCorrectionRange"><div><label htmlFor="zoom-correction">Zoom</label><strong>{correction > 0 ? `+${correction}` : correction}%</strong></div><input id="zoom-correction" type="range" min={-50} max={200} step={1} value={correction} onChange={(e) => setValue(Number(e.target.value) + 100)} /><small>0% = исходный размер • отрицательные значения отдаляют фото • положительные приближают.</small></div>;
+}
 function Range({ label, name, min, max, step = 1, value, setValue, suffix }: { label: string; name?: string; min: number; max: number; step?: number; value: number; setValue: (value: number) => void; suffix: string }) {
   const id = name || `range-${label.replace(/\s+/g,"-").toLowerCase()}`;
   return <div className="visualRange"><div><label htmlFor={id}>{label}</label><strong>{value}{suffix}</strong></div><input id={id} name={name} type="range" min={min} max={max} step={step} value={value} onChange={(e) => setValue(Number(e.target.value))} /></div>;

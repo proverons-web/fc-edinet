@@ -19,10 +19,10 @@ export const HOMEPAGE_POSITION_MAX = 300;
 export function defaultHomepageCanvas(input: LegacyInput = {}): HomepageCanvasConfig {
   const desktopBgX = clampInt(input.desktop_position_x, 0, 100, 50);
   const desktopBgY = clampInt(input.desktop_position_y, 0, 100, 50);
-  const desktopZoom = clampInt(input.desktop_zoom_percent, 100, 240, 100);
+  const desktopZoom = clampInt(input.desktop_zoom_percent, 50, 240, 100);
   const mobileBgX = clampInt(input.mobile_position_x, 0, 100, desktopBgX);
   const mobileBgY = clampInt(input.mobile_position_y, 0, 100, desktopBgY);
-  const mobileZoom = clampInt(input.mobile_zoom_percent, 100, 300, desktopZoom);
+  const mobileZoom = clampInt(input.mobile_zoom_percent, 50, 300, desktopZoom);
   const desktopHeight = clampInt(input.hero_height_desktop, 420, 900, 650);
   const mobileHeight = clampInt(input.hero_height_mobile, 360, 850, 620);
   const alignment = input.text_alignment ?? "left";
@@ -103,7 +103,7 @@ function normalizeViewport(value: unknown, fallback: HomepageCanvasViewport): Ho
   return viewport({
     background_x: clampInt(value.background_x, 0, 100, fallback.background_x),
     background_y: clampInt(value.background_y, 0, 100, fallback.background_y),
-    background_zoom: clampInt(value.background_zoom, 100, 300, fallback.background_zoom),
+    background_zoom: clampInt(value.background_zoom, 50, 300, fallback.background_zoom),
     hero_height: clampInt(value.hero_height, 320, 950, fallback.hero_height),
     text_x: clampInt(value.text_x, HOMEPAGE_POSITION_MIN, HOMEPAGE_POSITION_MAX, fallback.text_x),
     text_y: clampInt(value.text_y, HOMEPAGE_POSITION_MIN, HOMEPAGE_POSITION_MAX, fallback.text_y),

@@ -346,10 +346,25 @@ export type MediaVideo = {
 
 
 
+export type HeroLayerFontFamily = "inherit" | "arial" | "arial-black" | "verdana" | "tahoma" | "trebuchet" | "georgia" | "times";
+export type HeroLayerTextTransform = "none" | "uppercase" | "lowercase" | "capitalize";
+
 export type HeroLayerState = {
   visible: boolean;
   locked: boolean;
   order: number;
+  font_family?: HeroLayerFontFamily;
+  font_size?: number;
+  font_weight?: number;
+  color?: string;
+  stroke_width?: number;
+  stroke_color?: string;
+  letter_spacing?: number;
+  line_height?: number;
+  text_transform?: HeroLayerTextTransform;
+  italic?: boolean;
+  underline?: boolean;
+  shadow_strength?: number;
 };
 
 export type HeroLayerConfig = Record<string, HeroLayerState>;

@@ -2,6 +2,8 @@ import type { CSSProperties } from "react";
 import type {
   HeroLayerConfig,
   HeroLayerState,
+  HeroLayerFontFamily,
+  HeroLayerTextTransform,
   SitePageDesignKey,
 } from "@/lib/types";
 
@@ -86,6 +88,18 @@ export function normalizeHeroLayerConfig(
       visible: typeof current.visible === "boolean" ? current.visible : fallbackState.visible,
       locked: typeof current.locked === "boolean" ? current.locked : fallbackState.locked,
       order: integer(current.order, 0, 1000, fallbackState.order),
+      font_family: fontFamily(current.font_family, fallbackState.font_family),
+      font_size: optionalInteger(current.font_size, 8, 220, fallbackState.font_size),
+      font_weight: optionalInteger(current.font_weight, 100, 950, fallbackState.font_weight),
+      color: optionalColor(current.color, fallbackState.color),
+      stroke_width: optionalNumber(current.stroke_width, 0, 8, fallbackState.stroke_width),
+      stroke_color: optionalColor(current.stroke_color, fallbackState.stroke_color),
+      letter_spacing: optionalNumber(current.letter_spacing, -12, 24, fallbackState.letter_spacing),
+      line_height: optionalNumber(current.line_height, 0.7, 2.4, fallbackState.line_height),
+      text_transform: textTransform(current.text_transform, fallbackState.text_transform),
+      italic: typeof current.italic === "boolean" ? current.italic : fallbackState.italic,
+      underline: typeof current.underline === "boolean" ? current.underline : fallbackState.underline,
+      shadow_strength: optionalInteger(current.shadow_strength, 0, 100, fallbackState.shadow_strength),
     };
   }
   return normalizeOrders(normalized, definitions);
@@ -101,7 +115,38 @@ export function heroLayerVisible(config: HeroLayerConfig | null | undefined, key
 }
 
 export function heroLayerStyle(config: HeroLayerConfig | null | undefined, key: string): CSSProperties {
-  return { order: heroLayerState(config, key).order };
+  const state = heroLayerState(config, key);
+  const style: CSSProperties & Record<string, string | number | undefined> = { order: state.order };
+  if (state.font_family && state.font_family !== "inherit") style.fontFamily = heroFontStack(state.font_family);
+  if (state.font_size) style.fontSize = `${state.font_size}px`;
+  if (state.font_weight) style.fontWeight = state.font_weight;
+  if (state.color) style.color = state.color;
+  if (state.stroke_width && state.stroke_width > 0) {
+    style.WebkitTextStrokeWidth = `${state.stroke_width}px`;
+    style.WebkitTextStrokeColor = state.stroke_color || "#000000";
+    style.paintOrder = "stroke fill";
+  }
+  if (state.letter_spacing != null) style.letterSpacing = `${state.letter_spacing}px`;
+  if (state.line_height != null) style.lineHeight = state.line_height;
+  if (state.text_transform && state.text_transform !== "none") style.textTransform = state.text_transform;
+  if (state.italic) style.fontStyle = "italic";
+  if (state.underline) style.textDecoration = "underline";
+  if (state.shadow_strength && state.shadow_strength > 0) {
+    const a = Math.min(.9, state.shadow_strength / 100);
+    style.textShadow = `0 2px 8px rgba(0,0,0,${a.toFixed(2)})`;
+  }
+  return style as CSSProperties;
+}
+
+export function heroFontStack(preset: HeroLayerFontFamily) {
+  if (preset === "arial-black") return '"Arial Black",Arial,Helvetica,sans-serif';
+  if (preset === "verdana") return 'Verdana,Geneva,sans-serif';
+  if (preset === "tahoma") return 'Tahoma,Verdana,sans-serif';
+  if (preset === "trebuchet") return '"Trebuchet MS",Arial,sans-serif';
+  if (preset === "georgia") return 'Georgia,"Times New Roman",serif';
+  if (preset === "times") return '"Times New Roman",Times,serif';
+  if (preset === "arial") return 'Arial,Helvetica,sans-serif';
+  return 'inherit';
 }
 
 export function updateHeroLayer(
@@ -148,6 +193,32 @@ function normalizeOrders(config: HeroLayerConfig, definitions: HeroLayerDefiniti
     result[item.definition.key] = { ...item.state, order: (index + 1) * 10 };
   });
   return result;
+}
+
+
+function optionalInteger(value: unknown, min: number, max: number, fallback?: number) {
+  if (value === undefined || value === null || value === "") return fallback;
+  const number = Number(value);
+  return Number.isFinite(number) ? Math.min(max, Math.max(min, Math.round(number))) : fallback;
+}
+function optionalNumber(value: unknown, min: number, max: number, fallback?: number) {
+  if (value === undefined || value === null || value === "") return fallback;
+  const number = Number(value);
+  return Number.isFinite(number) ? Math.min(max, Math.max(min, Math.round(number * 100) / 100)) : fallback;
+}
+function optionalColor(value: unknown, fallback?: string) {
+  if (value === undefined || value === null || value === "") return fallback;
+  if (typeof value !== "string") return fallback;
+  const candidate = value.trim();
+  return /^#[0-9a-f]{6}$/i.test(candidate) ? candidate.toLowerCase() : fallback;
+}
+function fontFamily(value: unknown, fallback?: HeroLayerFontFamily): HeroLayerFontFamily | undefined {
+  const values: HeroLayerFontFamily[] = ["inherit","arial","arial-black","verdana","tahoma","trebuchet","georgia","times"];
+  return typeof value === "string" && values.includes(value as HeroLayerFontFamily) ? value as HeroLayerFontFamily : fallback;
+}
+function textTransform(value: unknown, fallback?: HeroLayerTextTransform): HeroLayerTextTransform | undefined {
+  const values: HeroLayerTextTransform[] = ["none","uppercase","lowercase","capitalize"];
+  return typeof value === "string" && values.includes(value as HeroLayerTextTransform) ? value as HeroLayerTextTransform : fallback;
 }
 
 function integer(value: unknown, min: number, max: number, fallback: number) {

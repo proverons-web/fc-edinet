@@ -1,0 +1,15 @@
+FC EDINEȚ v2.4.1 — Unified Site Builder 2.0
+
+- Full typography controls for Hero text layers: font, size, weight, color, outline, spacing, line-height, case, italic, underline, shadow.
+- Page Builder Pro section typography controls.
+- Club free-layout text typography controls.
+- LIVE PAGE in Unified Site Builder refreshes automatically after draft autosave and mirrors Page Builder layouts by postMessage.
+- Hero Zoom shown as a relative slider from -50% to +200% (internally 50–300%).
+- Team page contrast fixed; player cards have a subtle FC Edineț crest watermark behind name/position.
+- Browser typography normalized: removed dependency on Impact/Arial Narrow in core public theme and uses stable web-safe stacks.
+- Expanded global font choices.
+
+Recommended home Hero source image:
+- Optimal source: 2560×1440 (16:9)
+- Minimum: 1920×1080
+- Keep important subjects inside the central ~1600×900 safe area.

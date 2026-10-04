@@ -26,6 +26,16 @@ export type ClubElementFrame = {
   padding: number;
   font_scale: number;
   text_align: "left" | "center" | "right";
+  font_family: "inherit" | "arial" | "arial-black" | "verdana" | "tahoma" | "trebuchet" | "georgia" | "times";
+  color: string;
+  stroke_width: number;
+  stroke_color: string;
+  font_weight: number;
+  letter_spacing: number;
+  line_height: number;
+  text_transform: "none" | "uppercase" | "lowercase" | "capitalize";
+  italic: boolean;
+  underline: boolean;
 };
 
 export type ClubResponsiveFrames = Record<BuilderBreakpoint, Record<string, ClubElementFrame>>;
@@ -61,7 +71,7 @@ export type ClubPageLayoutConfig = {
 
 export type ClubPagePresetKey = "cinematic-blue" | "heritage-editorial";
 
-const frame = (x:number,y:number,width:number,height:number=0,z:number=1,padding:number=0,font_scale:number=100,text_align:ClubElementFrame["text_align"]="left"):ClubElementFrame => ({x,y,width,height,z,padding,font_scale,text_align});
+const frame = (x:number,y:number,width:number,height:number=0,z:number=1,padding:number=0,font_scale:number=100,text_align:ClubElementFrame["text_align"]="left"):ClubElementFrame => ({x,y,width,height,z,padding,font_scale,text_align,font_family:"inherit",color:"",stroke_width:0,stroke_color:"#000000",font_weight:0,letter_spacing:0,line_height:0,text_transform:"none",italic:false,underline:false});
 const emptyResponsiveFrames = (): ClubResponsiveFrames => ({ desktop:{}, tablet:{}, mobile:{} });
 const defaultImageFocus = (): ClubImageFocus => ({ desktop:{x:50,y:52}, tablet:{x:50,y:52}, mobile:{x:50,y:52} });
 
@@ -207,8 +217,13 @@ export function sectionStyle(section: ClubSectionConfig) {
 }
 export function frameCssVariables(frames: ClubResponsiveFrames, elementKey: string): CSSProperties {
   const d = frames.desktop[elementKey] ?? frame(0,0,100); const t = frames.tablet[elementKey] ?? d; const m = frames.mobile[elementKey] ?? t;
-  return {"--f-d-x":`${d.x}%`,"--f-d-y":`${d.y}px`,"--f-d-w":`${d.width}%`,"--f-d-h":`${d.height}px`,"--f-d-z":d.z,"--f-d-p":`${d.padding}px`,"--f-d-font":d.font_scale/100,"--f-d-align":d.text_align,"--f-t-x":`${t.x}%`,"--f-t-y":`${t.y}px`,"--f-t-w":`${t.width}%`,"--f-t-h":`${t.height}px`,"--f-t-z":t.z,"--f-t-p":`${t.padding}px`,"--f-t-font":t.font_scale/100,"--f-t-align":t.text_align,"--f-m-x":`${m.x}%`,"--f-m-y":`${m.y}px`,"--f-m-w":`${m.width}%`,"--f-m-h":`${m.height}px`,"--f-m-z":m.z,"--f-m-p":`${m.padding}px`,"--f-m-font":m.font_scale/100,"--f-m-align":m.text_align} as CSSProperties;
+  const vars=(prefix:string,f:ClubElementFrame)=>({
+    [`--f-${prefix}-x`]:`${f.x}%`,[`--f-${prefix}-y`]:`${f.y}px`,[`--f-${prefix}-w`]:`${f.width}%`,[`--f-${prefix}-h`]:`${f.height}px`,[`--f-${prefix}-z`]:f.z,[`--f-${prefix}-p`]:`${f.padding}px`,[`--f-${prefix}-font`]:f.font_scale/100,[`--f-${prefix}-align`]:f.text_align,
+    [`--f-${prefix}-family`]:clubFontStack(f.font_family),[`--f-${prefix}-color`]:f.color||"inherit",[`--f-${prefix}-stroke`]:`${f.stroke_width}px`,[`--f-${prefix}-stroke-color`]:f.stroke_color,[`--f-${prefix}-weight`]:f.font_weight||"inherit",[`--f-${prefix}-letter`]:`${f.letter_spacing}px`,[`--f-${prefix}-line`]:f.line_height||"inherit",[`--f-${prefix}-transform`]:f.text_transform,[`--f-${prefix}-style`]:f.italic?"italic":"normal",[`--f-${prefix}-decoration`]:f.underline?"underline":"none"
+  });
+  return {...vars("d",d),...vars("t",t),...vars("m",m)} as CSSProperties;
 }
+function clubFontStack(value:ClubElementFrame["font_family"]){if(value==="arial-black")return '"Arial Black",Arial,Helvetica,sans-serif';if(value==="verdana")return 'Verdana,Geneva,sans-serif';if(value==="tahoma")return 'Tahoma,Verdana,sans-serif';if(value==="trebuchet")return '"Trebuchet MS",Arial,sans-serif';if(value==="georgia")return 'Georgia,"Times New Roman",serif';if(value==="times")return '"Times New Roman",Times,serif';if(value==="arial")return 'Arial,Helvetica,sans-serif';return 'inherit';}
 export function imageFocusCssVariables(section: ClubSectionConfig): CSSProperties {
   const focus = section.image_focus ?? defaultImageFocus();
   const zoom = section.image_zoom ?? {desktop:115,tablet:115,mobile:120};
@@ -253,11 +268,14 @@ function normalizeImageFocus(raw: unknown, fallback: ClubImageFocus, legacyX:num
 }
 function normalizeFrames(raw: unknown, fallback: ClubResponsiveFrames, sectionKey: ClubSectionKey): ClubResponsiveFrames {
   const result: ClubResponsiveFrames = clone(fallback); if (!isRecord(raw)) return result;
-  for (const bp of ["desktop","tablet","mobile"] as BuilderBreakpoint[]) { const group=isRecord(raw[bp])?raw[bp] as Record<string,unknown>:{}; for(const element of clubSectionElements(sectionKey)){const base=result[bp][element]??frame(0,0,100);const candidate=isRecord(group[element])?group[element] as Record<string,unknown>:{};result[bp][element]={x:number(candidate.x,-50,150,base.x),y:integer(candidate.y,-400,1800,base.y),width:number(candidate.width,5,180,base.width),height:integer(candidate.height,0,1400,base.height),z:integer(candidate.z,0,50,base.z),padding:integer(candidate.padding,0,100,base.padding),font_scale:integer(candidate.font_scale,50,180,base.font_scale),text_align:candidate.text_align === "center" || candidate.text_align === "right" || candidate.text_align === "left" ? candidate.text_align : base.text_align};}}
+  for (const bp of ["desktop","tablet","mobile"] as BuilderBreakpoint[]) { const group=isRecord(raw[bp])?raw[bp] as Record<string,unknown>:{}; for(const element of clubSectionElements(sectionKey)){const base=result[bp][element]??frame(0,0,100);const candidate=isRecord(group[element])?group[element] as Record<string,unknown>:{};result[bp][element]={x:number(candidate.x,-50,150,base.x),y:integer(candidate.y,-400,1800,base.y),width:number(candidate.width,5,180,base.width),height:integer(candidate.height,0,1400,base.height),z:integer(candidate.z,0,50,base.z),padding:integer(candidate.padding,0,100,base.padding),font_scale:integer(candidate.font_scale,50,180,base.font_scale),text_align:candidate.text_align === "center" || candidate.text_align === "right" || candidate.text_align === "left" ? candidate.text_align : base.text_align,font_family:fontFamily(candidate.font_family,base.font_family),color:colorValue(candidate.color,base.color),stroke_width:number(candidate.stroke_width,0,8,base.stroke_width),stroke_color:colorValue(candidate.stroke_color,base.stroke_color),font_weight:integer(candidate.font_weight,0,950,base.font_weight),letter_spacing:number(candidate.letter_spacing,-12,24,base.letter_spacing),line_height:number(candidate.line_height,0,2.4,base.line_height),text_transform:textTransform(candidate.text_transform,base.text_transform),italic:typeof candidate.italic === "boolean"?candidate.italic:base.italic,underline:typeof candidate.underline === "boolean"?candidate.underline:base.underline};}}
   return result;
 }
 function normalizeResponsiveNumber(raw: unknown, fallback: ClubResponsiveNumber, min: number, max: number): ClubResponsiveNumber {const value=isRecord(raw)?raw:{};return{desktop:integer(value.desktop,min,max,fallback.desktop),tablet:integer(value.tablet,min,max,fallback.tablet),mobile:integer(value.mobile,min,max,fallback.mobile)}};
 function variant(key:ClubSectionKey,value:unknown,fallback:string){const allowed:Record<ClubSectionKey,string[]>={about:["contact-right","contact-left","stacked"],history:["readable","columns","card"],stadium:["cinematic","split-left","split-right","full-photo"],leadership:["cards","compact"],achievements:["timeline","cards"]};return typeof value === "string" && allowed[key].includes(value) ? value : fallback;}
+function fontFamily(value:unknown,fallback:ClubElementFrame["font_family"]):ClubElementFrame["font_family"]{const allowed=["inherit","arial","arial-black","verdana","tahoma","trebuchet","georgia","times"];return typeof value === "string"&&allowed.includes(value)?value as ClubElementFrame["font_family"]:fallback;}
+function textTransform(value:unknown,fallback:ClubElementFrame["text_transform"]):ClubElementFrame["text_transform"]{const allowed=["none","uppercase","lowercase","capitalize"];return typeof value === "string"&&allowed.includes(value)?value as ClubElementFrame["text_transform"]:fallback;}
+function colorValue(value:unknown,fallback:string){if(value === "")return "";return typeof value === "string"&&/^#[0-9a-f]{6}$/i.test(value.trim())?value.trim().toLowerCase():fallback;}
 function width(value:unknown,fallback:ContentPageWidth):ContentPageWidth{return value === "container" || value === "wide" || value === "full" ? value : fallback;}
 function background(value:unknown,fallback:ContentPageBackground):ContentPageBackground{return value === "inherit" || value === "light" || value === "surface" || value === "dark" || value === "brand" ? value : fallback;}
 function integer(value:unknown,min:number,max:number,fallback:number){const parsed=Number(value);return Number.isFinite(parsed)?Math.max(min,Math.min(max,Math.round(parsed))):fallback;}

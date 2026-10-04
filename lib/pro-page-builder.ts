@@ -23,6 +23,18 @@ export type ProSectionConfig = {
   offset_x: ProResponsiveNumber;
   offset_y: ProResponsiveNumber;
   scale: ProResponsiveNumber;
+  text_font: "inherit" | "arial" | "arial-black" | "verdana" | "tahoma" | "trebuchet" | "georgia" | "times";
+  text_color: string;
+  heading_size: number;
+  body_size: number;
+  font_weight: number;
+  stroke_width: number;
+  stroke_color: string;
+  letter_spacing: number;
+  line_height: number;
+  text_transform: "none" | "uppercase" | "lowercase" | "capitalize";
+  italic: boolean;
+  underline: boolean;
 };
 
 export type AcademyContent = {
@@ -84,6 +96,18 @@ function section(
     offset_x: responsive(0, 0, 0),
     offset_y: responsive(0, 0, 0),
     scale: responsive(100, 100, 100),
+    text_font: "inherit",
+    text_color: "",
+    heading_size: 0,
+    body_size: 0,
+    font_weight: 0,
+    stroke_width: 0,
+    stroke_color: "#000000",
+    letter_spacing: 0,
+    line_height: 0,
+    text_transform: "none",
+    italic: false,
+    underline: false,
     ...options,
   };
 }
@@ -302,6 +326,18 @@ export function proSectionStyle(section: ProSectionConfig): CSSProperties {
     "--pro-scale-d": section.scale.desktop / 100,
     "--pro-scale-t": section.scale.tablet / 100,
     "--pro-scale-m": section.scale.mobile / 100,
+    "--pro-font-family": proFontStack(section.text_font),
+    "--pro-text-color": section.text_color || "inherit",
+    "--pro-heading-size": section.heading_size > 0 ? `${section.heading_size}px` : "inherit",
+    "--pro-body-size": section.body_size > 0 ? `${section.body_size}px` : "inherit",
+    "--pro-font-weight": section.font_weight > 0 ? String(section.font_weight) : "inherit",
+    "--pro-letter-spacing": `${section.letter_spacing}px`,
+    "--pro-line-height": section.line_height > 0 ? String(section.line_height) : "inherit",
+    "--pro-text-transform": section.text_transform,
+    "--pro-font-style": section.italic ? "italic" : "normal",
+    "--pro-text-decoration": section.underline ? "underline" : "none",
+    "--pro-text-stroke-width": `${section.stroke_width}px`,
+    "--pro-text-stroke-color": section.stroke_color,
   } as CSSProperties;
 }
 
@@ -332,6 +368,18 @@ function normalizeSection(value: Record<string, unknown>, base: ProSectionConfig
     offset_x: normalizeResponsive(value.offset_x, base.offset_x, -300, 300),
     offset_y: normalizeResponsive(value.offset_y, base.offset_y, -300, 300),
     scale: normalizeResponsive(value.scale, base.scale, 70, 130),
+    text_font: fontPreset(value.text_font, base.text_font),
+    text_color: color(value.text_color, base.text_color),
+    heading_size: integer(value.heading_size, 0, 160, base.heading_size),
+    body_size: integer(value.body_size, 0, 72, base.body_size),
+    font_weight: integer(value.font_weight, 0, 950, base.font_weight),
+    stroke_width: numberValue(value.stroke_width, 0, 8, base.stroke_width),
+    stroke_color: color(value.stroke_color, base.stroke_color),
+    letter_spacing: numberValue(value.letter_spacing, -12, 24, base.letter_spacing),
+    line_height: numberValue(value.line_height, 0, 2.4, base.line_height),
+    text_transform: textTransform(value.text_transform, base.text_transform),
+    italic: typeof value.italic === "boolean" ? value.italic : base.italic,
+    underline: typeof value.underline === "boolean" ? value.underline : base.underline,
   };
 }
 
@@ -348,6 +396,21 @@ function normalizeResponsive(raw: unknown, fallback: ProResponsiveNumber, min: n
     mobile: integer(value.mobile, min, max, fallback.mobile),
   };
 }
+function proFontStack(value: ProSectionConfig["text_font"]) {
+  if (value === "arial-black") return '"Arial Black",Arial,Helvetica,sans-serif';
+  if (value === "verdana") return 'Verdana,Geneva,sans-serif';
+  if (value === "tahoma") return 'Tahoma,Verdana,sans-serif';
+  if (value === "trebuchet") return '"Trebuchet MS",Arial,sans-serif';
+  if (value === "georgia") return 'Georgia,"Times New Roman",serif';
+  if (value === "times") return '"Times New Roman",Times,serif';
+  if (value === "arial") return 'Arial,Helvetica,sans-serif';
+  return 'inherit';
+}
+function fontPreset(value: unknown, fallback: ProSectionConfig["text_font"]): ProSectionConfig["text_font"] { const allowed=["inherit","arial","arial-black","verdana","tahoma","trebuchet","georgia","times"]; return typeof value === "string" && allowed.includes(value) ? value as ProSectionConfig["text_font"] : fallback; }
+function textTransform(value: unknown, fallback: ProSectionConfig["text_transform"]): ProSectionConfig["text_transform"] { const allowed=["none","uppercase","lowercase","capitalize"]; return typeof value === "string" && allowed.includes(value) ? value as ProSectionConfig["text_transform"] : fallback; }
+function color(value: unknown, fallback: string){ if(value === "") return ""; return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value.trim()) ? value.trim().toLowerCase() : fallback; }
+function numberValue(value: unknown,min:number,max:number,fallback:number){ const n=Number(value); return Number.isFinite(n)?Math.min(max,Math.max(min,Math.round(n*100)/100)):fallback; }
+
 function integer(value: unknown, min: number, max: number, fallback: number) {
   const n = Number(value);
   return Number.isFinite(n) ? Math.min(max, Math.max(min, Math.round(n))) : fallback;

@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-export type SiteFontPreset = "arial" | "system" | "trebuchet" | "georgia";
+export type SiteFontPreset = "arial" | "arial-black" | "system" | "verdana" | "tahoma" | "trebuchet" | "georgia" | "times";
 export type SiteShadowPreset = "none" | "soft" | "medium" | "strong";
 
 export type DesignSystemConfig = {
@@ -75,8 +75,8 @@ export function normalizeDesignSystem(value: unknown, fallback: DesignSystemConf
     surface: colorValue(raw.surface, fallback.surface),
     line: colorValue(raw.line, fallback.line),
     white: colorValue(raw.white, fallback.white),
-    font_body: enumValue(raw.font_body, ["arial", "system", "trebuchet", "georgia"] as const, fallback.font_body),
-    font_heading: enumValue(raw.font_heading, ["arial", "system", "trebuchet", "georgia"] as const, fallback.font_heading),
+    font_body: enumValue(raw.font_body, ["arial", "arial-black", "system", "verdana", "tahoma", "trebuchet", "georgia", "times"] as const, fallback.font_body),
+    font_heading: enumValue(raw.font_heading, ["arial", "arial-black", "system", "verdana", "tahoma", "trebuchet", "georgia", "times"] as const, fallback.font_heading),
     body_size: numberValue(raw.body_size, 14, 20, fallback.body_size),
     body_line_height: decimalValue(raw.body_line_height, 1.3, 2, fallback.body_line_height),
     heading_weight: numberValue(raw.heading_weight, 600, 950, fallback.heading_weight),
@@ -140,8 +140,12 @@ export function designSystemCssVariables(config: DesignSystemConfig): CSSPropert
 
 export function fontStack(preset: SiteFontPreset) {
   if (preset === "system") return "-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif";
+  if (preset === "arial-black") return "\"Arial Black\",Arial,Helvetica,sans-serif";
+  if (preset === "verdana") return "Verdana,Geneva,sans-serif";
+  if (preset === "tahoma") return "Tahoma,Verdana,sans-serif";
   if (preset === "trebuchet") return "\"Trebuchet MS\",Arial,sans-serif";
   if (preset === "georgia") return "Georgia,\"Times New Roman\",serif";
+  if (preset === "times") return "\"Times New Roman\",Times,serif";
   return "Arial,Helvetica,sans-serif";
 }
 

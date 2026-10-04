@@ -4,7 +4,7 @@ import { requireEditor } from "@/lib/editorial";
 import { defaultSitePageDesign, normalizeSitePageDesign, sitePageDesignCatalog } from "@/lib/page-design";
 import { defaultHomepageCanvas, normalizeHomepageCanvas } from "@/lib/homepage-canvas";
 import { repairHomepageCanvas } from "@/lib/homepage-safe-zone";
-import { defaultHeroLayerConfig, heroLayerVisible, homeHeroLayerDefinitions, normalizeHeroLayerConfig } from "@/lib/hero-builder";
+import { defaultHeroLayerConfig, heroLayerStyle, heroLayerVisible, homeHeroLayerDefinitions, normalizeHeroLayerConfig } from "@/lib/hero-builder";
 import { defaultHomepageSectionDesignMap, normalizeHomepageSectionDesignMap } from "@/lib/section-builder";
 import { normalizeHomepageBlock, normalizeHomepageBlocks, normalizeHomepageLayoutOrder } from "@/lib/block-library";
 import { defaultHeaderDesign, defaultFooterDesign, normalizeHeaderDesign, normalizeFooterDesign, type HeaderDesignConfig, type FooterDesignConfig } from "@/lib/global-design";
@@ -22,6 +22,7 @@ export default async function DesignPreviewPage({ searchParams }: Props) {
   const query = searchParams ? await searchParams : {};
   const rawPage = first(query.page) || "home";
   const device = parseDevice(first(query.device));
+  const embedded = first(query.embedded) === "1";
   const { supabase } = await requireEditor();
 
   const [{ data: headerPublished }, { data: headerDraft }, { data: footerPublished }, { data: footerDraft }, { data: dsPublished }, { data: dsDraft }] = await Promise.all([
@@ -37,7 +38,7 @@ export default async function DesignPreviewPage({ searchParams }: Props) {
   const designSystem = normalizeDesignSystem(dsDraft?.config, normalizeDesignSystem(dsPublished?.config, defaultDesignSystem));
 
   return <main className="publishingPreviewRoot" style={designSystemCssVariables(designSystem)}>
-    <PreviewToolbar page={rawPage} device={device} />
+    {!embedded && <PreviewToolbar page={rawPage} device={device} />}
     <div className={`publishingPreviewViewport ${device}`}>
       <div className="publishingPreviewSite">
         <PreviewHeader config={header} device={device} />
@@ -90,7 +91,7 @@ async function HomeDraftPreview({ supabase }: { supabase: any }) {
       {heroLayerVisible(layers, "background") && tabletHeroImage && <img className="draftHeroImage tablet" src={tabletHeroImage} alt="" />}
       {heroLayerVisible(layers, "background") && mobileHeroImage && <img className="draftHeroImage mobile" src={mobileHeroImage} alt="" />}
       <div className="draftHomeOverlay" />
-      {heroLayerVisible(layers, "intro") && <div className={`draftHomeIntro align-${snapshot.text_alignment}`}><p>ЕДИНЕЦ • МОЛДОВА</p><h1>{hero?.title_main || "ВМЕСТЕ"}<br/><span>{hero?.title_accent || "ЗА ЕДИНЕЦ"}</span></h1><small>{hero?.description || "Официальный сайт футбольного клуба FC Edineț."}</small><div><button>Смотреть матчи</button><button>Последние новости</button></div></div>}
+      {heroLayerVisible(layers, "intro") && <div className={`draftHomeIntro align-${snapshot.text_alignment}`}><p style={heroLayerStyle(layers,"intro")}>ЕДИНЕЦ • МОЛДОВА</p><h1 style={heroLayerStyle(layers,"intro")}>{hero?.title_main || "ВМЕСТЕ"}<br/><span>{hero?.title_accent || "ЗА ЕДИНЕЦ"}</span></h1><small style={heroLayerStyle(layers,"intro")}>{hero?.description || "Официальный сайт футбольного клуба FC Edineț."}</small><div><button>Смотреть матчи</button><button>Последние новости</button></div></div>}
       {heroLayerVisible(layers, "match_card") && (canvas.desktop.match_visible || canvas.tablet.match_visible || canvas.mobile.match_visible) && <article className={`draftMatchCard ${canvas.desktop.match_visible ? "showDesktop" : ""} ${canvas.tablet.match_visible ? "showTablet" : ""} ${canvas.mobile.match_visible ? "showMobile" : ""}`}><span>СЛЕДУЮЩИЙ МАТЧ</span><strong>FC EDINEȚ — СОПЕРНИК</strong><small>14 сентября • 17:00</small></article>}
     </section>
     <div className="draftLayoutPreview">{snapshot.layout_order.map((entry) => {
@@ -121,9 +122,9 @@ async function SiteHeroDraftPreview({ pageKey, supabase }: { pageKey: SitePageDe
   return <>
     <PageHeroShell design={design} className="pageHero publishingDraftPageHero">
       <div className="publishingDraftHeroText">
-        {showEyebrow && <p className="eyebrow">{design.eyebrow_ru || item.preview.eyebrow}</p>}
-        {showTitle && <h1>{design.title_ru || item.preview.title}</h1>}
-        {showDescription && <p>{design.description_ru || item.preview.description}</p>}
+        {showEyebrow && <p className="eyebrow" style={heroLayerStyle(design.layer_config,"eyebrow")}>{design.eyebrow_ru || item.preview.eyebrow}</p>}
+        {showTitle && <h1 style={heroLayerStyle(design.layer_config,"title")}>{design.title_ru || item.preview.title}</h1>}
+        {showDescription && <p style={heroLayerStyle(design.layer_config,"description")}>{design.description_ru || item.preview.description}</p>}
       </div>
     </PageHeroShell>
     <div className="draftPageBody"><p className="eyebrow blue">FULL SCREEN PREVIEW</p><h2>{item.label}</h2><p>Ниже Hero показан нейтральный макет содержимого страницы. После публикации реальный контент страницы остаётся прежним.</p><div className="draftSkeletonGrid"><span/><span/><span/></div></div>

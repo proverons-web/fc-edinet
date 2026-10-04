@@ -10,7 +10,7 @@ import type {
   HomepageSectionDesignMap,
   HomepageSectionKey,
 } from "@/lib/types";
-import { heroLayerState } from "@/lib/hero-builder";
+import { heroLayerState, heroLayerStyle } from "@/lib/hero-builder";
 
 type ViewMode = "desktop" | "tablet" | "mobile";
 type PreviewMode = "page" | "hero";
@@ -153,6 +153,10 @@ export default function HomepageCanvasPreviewFrame({
       intro.style.zIndex = String(heroLayerState(layerConfig, "intro").order);
       intro.classList.toggle("visualEditorFrameSelected", selectedLayer === "intro");
       intro.dataset.visualEditorLabel = "ТЕКСТ HERO";
+      const typography = heroLayerStyle(layerConfig, "intro") as Record<string, string | number>;
+      intro.querySelectorAll<HTMLElement>(".fcRefHeroKicker,h1,p").forEach((node) => {
+        Object.entries(typography).forEach(([key, value]) => { if (key !== "order" && value != null) (node.style as any)[key] = String(value); });
+      });
     }
     if (match) {
       const activeMatchVisible = matchVisible && canvas[mode].match_visible;

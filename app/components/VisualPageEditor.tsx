@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useCallback, useMemo, useState } from "react";
+import { useActionState, useCallback, useEffect, useMemo, useState } from "react";
 import { autosaveHomepageDesign, saveVisualEditor, type VisualEditorState } from "@/app/admin/design/actions";
 import Publishing2Bar from "@/app/components/Publishing2Bar";
 import { useDraftAutosave, useEditorHistory } from "@/app/components/usePublishing2";
@@ -121,7 +121,10 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
   }, []);
   const history = useEditorHistory(editorSnapshot, applySnapshot);
   const autosaveAction = useCallback((value: HomepageDesignSnapshot) => autosaveHomepageDesign(value), []);
-  const autosave = useDraftAutosave(editorSnapshot, autosaveAction);
+  const autosave = useDraftAutosave(editorSnapshot, autosaveAction, 500);
+  useEffect(() => {
+    if (autosave.state === "saved" && window.parent !== window) window.parent.postMessage({ type: "fc-site-builder-refresh", pageKey: "home", savedAt: autosave.savedAt }, window.location.origin);
+  }, [autosave.state, autosave.savedAt]);
   const checks = useMemo(() => homepagePublishingChecks(editorSnapshot), [editorSnapshot]);
   const hasPendingMedia = [desktopImage, tabletImage, mobileImage].some((url) => url.startsWith("blob:"));
 
@@ -314,7 +317,7 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
           {mode === "mobile" && <VisualImageField device="mobile" fileName="mobile_background_image" assetFieldName="mobile_background_image_asset_id" currentUrl={clearMobile ? "" : mobileImage} assets={assets} onPreviewChange={setMobileImage} onClearChange={setClearMobile} clear={clearMobile} onActivate={() => setMode("mobile")} />}
           <Range label="Фокус по горизонтали" min={0} max={100} value={viewport.background_x} setValue={(value) => updateViewport({ background_x:value })} suffix="%"/>
           <Range label="Фокус по вертикали" min={0} max={100} value={viewport.background_y} setValue={(value) => updateViewport({ background_y:value })} suffix="%"/>
-          <Range label="Дополнительный масштаб" min={100} max={300} value={viewport.background_zoom} setValue={(value) => updateViewport({ background_zoom:value })} suffix="%"/>
+          <ZoomRange value={viewport.background_zoom} setValue={(value) => updateViewport({ background_zoom:value })}/>
           <Range label="Высота Hero" min={320} max={950} step={10} value={viewport.hero_height} setValue={(value) => updateViewport({ hero_height:value })} suffix=" px"/>
           <div className="adminNotice">Crop сохраняется как оптимизированный WebP. Focus/Zoom остаются неразрушающими настройками и позволяют чуть подправить уже готовый кадр без повторной загрузки.</div>
         </section>
@@ -372,6 +375,10 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
   );
 }
 
+function ZoomRange({ value, setValue }: { value: number; setValue: (value: number) => void }) {
+  const correction = value - 100;
+  return <div className="visualRange zoomCorrectionRange"><div><label htmlFor="home-zoom-correction">Zoom</label><strong>{correction > 0 ? `+${correction}` : correction}%</strong></div><input id="home-zoom-correction" type="range" min={-50} max={200} step={1} value={correction} onChange={(e) => setValue(Number(e.target.value) + 100)} /><small>0% = исходный размер • отрицательные значения отдаляют фото.</small></div>;
+}
 function Range({ label, name, min, max, step=1, value, setValue, suffix }: { label:string; name?:string; min:number; max:number; step?:number; value:number; setValue:(value:number)=>void; suffix:string }) {
   const id = name || `range-${label.replace(/\s+/g,"-").toLowerCase()}`;
   return <div className="visualRange"><div><label htmlFor={id}>{label}</label><strong>{value}{suffix}</strong></div><input id={id} name={name} type="range" min={min} max={max} step={step} value={value} onChange={(e)=>setValue(Number(e.target.value))}/></div>;
