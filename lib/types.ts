@@ -893,6 +893,40 @@ export type MatchEvent = {
   updated_at?: string;
 };
 
+export type MatchLineupRole = "starter" | "substitute";
+
+export type MatchLineupSetting = {
+  id: string | number;
+  match_id: string | number;
+  team_id: string | number;
+  side: "home" | "away";
+  formation: string | null;
+  coach_name: string | null;
+  created_by?: string | null;
+  updated_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type MatchLineupEntry = {
+  id: string | number;
+  match_id: string | number;
+  team_id: string | number;
+  side: "home" | "away";
+  lineup_role: MatchLineupRole;
+  slot_number: number;
+  player_id: string | null;
+  player_name: string | null;
+  shirt_number: number | null;
+  position: string | null;
+  is_captain: boolean;
+  sort_order: number;
+  created_by?: string | null;
+  updated_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type MatchCenterProgress = {
   match_id: string | number;
   report_status: "empty" | MatchReportStatus;
@@ -900,6 +934,10 @@ export type MatchCenterProgress = {
   team_rows: number;
   team_stats_filled: number;
   events_count: number;
+  home_starters?: number;
+  away_starters?: number;
+  home_substitutes?: number;
+  away_substitutes?: number;
   report_has_metadata: boolean;
 };
 

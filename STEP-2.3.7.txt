@@ -1,0 +1,9 @@
+FC Edineț v2.3.7 — Match Lineups
+
+1. Supabase -> SQL Editor.
+2. Run database/045_match_lineups.sql once.
+3. Copy .env.local from the previous working version.
+4. Run DEPLOY_FC_EDINET.bat.
+5. Check /api/version -> 2.3.7.
+6. Open /admin/match-center and select a match.
+7. Fill HOME/AWAY lineups or import FC Edineț from player statistics.

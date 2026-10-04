@@ -1,0 +1,17 @@
+FC Edineț v2.3.7
+
+BEFORE DEPLOY:
+- Run database/045_match_lineups.sql in Supabase SQL Editor once.
+- Do NOT rerun old migrations.
+- Copy your working .env.local into this folder.
+
+DEPLOY:
+- Double-click DEPLOY_FC_EDINET.bat
+- Wait for SUCCESS.
+
+VERIFY:
+https://fc-edinet.vercel.app/api/version
+Expected version: 2.3.7
+
+Then open:
+https://fc-edinet.vercel.app/admin/match-center

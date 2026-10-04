@@ -86,7 +86,7 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
       <section className="adminHero compactAdminHero">
         <div className="container adminHeroInner">
           <div>
-            <p className="eyebrow">FC EDINEȚ • MATCH CENTER v2.3.1</p>
+            <p className="eyebrow">FC EDINEȚ • MATCH CENTER v2.3.7</p>
             <h1>Статистика матчей</h1>
             <p>Единая точка для отчёта, событий, составов, командных цифр и связи со статистикой игроков.</p>
           </div>
@@ -109,11 +109,11 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
           <section className="statisticsPanel matchCenterIntro">
             <div className="statisticsPanelHead">
               <div>
-                <p className="eyebrow blue">v2.3.1 • ТАЙМЛАЙН СОБЫТИЙ</p>
-                <h2>Матч теперь отдельный информационный объект</h2>
+                <p className="eyebrow blue">v2.3.7 • СОСТАВЫ + ТАЙМЛАЙН</p>
+                <h2>Матч-центр собирает матч целиком</h2>
                 <p>
-                  Внутри каждого матча работает редактируемый таймлайн событий: голы, карточки, замены, пенальти, VAR и другие эпизоды.
-                  Основа отчёта и связь со статистикой игроков остаются на месте; следующие версии подключат составы и командные цифры.
+                  Внутри матча теперь есть стартовые составы и запасные для HOME/AWAY, схема, капитан и отметки реальных замен из таймлайна.
+                  Для FC Edineț состав можно импортировать из уже заполненной статистики игроков одной кнопкой.
                 </p>
               </div>
               <span className="matchCenterVersionBadge">MATCH CENTER</span>
@@ -178,6 +178,11 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
                         value={String(progress?.events_count ?? 0)}
                         tone={(progress?.events_count ?? 0) > 0 ? "draft" : "empty"}
                       />
+                      <WorkflowChip
+                        label="Составы"
+                        value={`${progress?.home_starters ?? 0}/11 • ${progress?.away_starters ?? 0}/11`}
+                        tone={(progress?.home_starters ?? 0) === 11 && (progress?.away_starters ?? 0) === 11 ? "ready" : ((progress?.home_starters ?? 0) + (progress?.away_starters ?? 0)) > 0 ? "draft" : "empty"}
+                      />
                     </div>
 
                     <div className="matchCenterRowActions">
@@ -234,8 +239,8 @@ function MatchCenterMigrationRequired({ message }: { message: string }) {
         <div className="container adminHeroInner">
           <div>
             <p className="eyebrow">FC EDINEȚ • MATCH CENTER</p>
-            <h1>Нужна миграция 041</h1>
-            <p>Код v2.3.1 уже установлен, но таблицы статистики матча из migration 041 ещё не созданы.</p>
+            <h1>Нужна миграция 045</h1>
+            <p>Код v2.3.7 уже установлен, но таблицы составов из migration 045 ещё не созданы.</p>
           </div>
           <Link href="/admin" className="adminBack">← Админка</Link>
         </div>
@@ -244,8 +249,8 @@ function MatchCenterMigrationRequired({ message }: { message: string }) {
         <div className="container">
           <div className="statisticsMigrationCard">
             <p className="eyebrow blue">DB • ОДИН РАЗ</p>
-            <h2>Примени migration 041</h2>
-            <p>В Supabase → SQL Editor выполни целиком файл <code>database/041_match_statistics_foundation.sql</code>, затем обнови страницу.</p>
+            <h2>Примени migration 045</h2>
+            <p>В Supabase → SQL Editor выполни целиком файл <code>database/045_match_lineups.sql</code>, затем обнови страницу.</p>
             <p className="formError">Ответ базы: {message}</p>
           </div>
         </div>

@@ -6,6 +6,8 @@ import type {
   MatchCenterProgress,
   MatchEvent,
   MatchEventType,
+  MatchLineupEntry,
+  MatchLineupSetting,
   MatchReport,
   MatchTeamStatistic,
   Player,
@@ -16,6 +18,7 @@ import {
   saveMatchReportFoundation,
   updateMatchEvent,
 } from "./actions";
+import LineupEditor from "./LineupEditor";
 
 export const metadata = { title: "Матч-центр — Админ" };
 export const dynamic = "force-dynamic";
@@ -112,7 +115,7 @@ export default async function MatchCenterMatchPage({
   if (matchError || !matchData) notFound();
   const match = matchData as unknown as ClubMatch;
 
-  const [reportResult, teamStatsResult, progressResult, playersResult, eventsResult] = await Promise.all([
+  const [reportResult, teamStatsResult, progressResult, playersResult, eventsResult, lineupSettingsResult, lineupEntriesResult] = await Promise.all([
     supabase.from("match_reports").select("*").eq("match_id", matchId).maybeSingle(),
     supabase
       .from("match_team_statistics")
@@ -137,10 +140,22 @@ export default async function MatchCenterMatchPage({
       .order("stoppage_minute", { ascending: true })
       .order("sort_order", { ascending: true })
       .order("id", { ascending: true }),
+    supabase
+      .from("match_lineup_settings")
+      .select("*")
+      .eq("match_id", matchId)
+      .order("side"),
+    supabase
+      .from("match_lineup_entries")
+      .select("*")
+      .eq("match_id", matchId)
+      .order("side")
+      .order("lineup_role")
+      .order("slot_number"),
   ]);
 
   const loadError =
-    reportResult.error || teamStatsResult.error || progressResult.error || playersResult.error || eventsResult.error;
+    reportResult.error || teamStatsResult.error || progressResult.error || playersResult.error || eventsResult.error || lineupSettingsResult.error || lineupEntriesResult.error;
   if (loadError) {
     return <MatchCenterMigrationRequired message={loadError.message} />;
   }
@@ -150,6 +165,8 @@ export default async function MatchCenterMatchPage({
   const progress = (progressResult.data as MatchCenterProgress | null) ?? null;
   const players = (playersResult.data ?? []) as Player[];
   const events = (eventsResult.data ?? []) as MatchEvent[];
+  const lineupSettings = (lineupSettingsResult.data ?? []) as MatchLineupSetting[];
+  const lineupEntries = (lineupEntriesResult.data ?? []) as MatchLineupEntry[];
 
   const homeFoundation = teamStats.find((row) => row.side === "home") ?? null;
   const awayFoundation = teamStats.find((row) => row.side === "away") ?? null;
@@ -172,7 +189,7 @@ export default async function MatchCenterMatchPage({
       <section className="adminHero compactAdminHero matchCenterHero">
         <div className="container adminHeroInner">
           <div>
-            <p className="eyebrow">FC EDINEȚ • MATCH CENTER v2.3.1</p>
+            <p className="eyebrow">FC EDINEȚ • MATCH CENTER v2.3.7</p>
             <h1>
               {match.home?.name ?? "—"}{" "}
               <b>
@@ -202,6 +219,9 @@ export default async function MatchCenterMatchPage({
           {saved === "event" && <div className="statisticsSuccess matchCenterNotice">Событие добавлено в таймлайн.</div>}
           {saved === "event-updated" && <div className="statisticsSuccess matchCenterNotice">Событие изменено.</div>}
           {saved === "event-deleted" && <div className="statisticsSuccess matchCenterNotice">Событие удалено.</div>}
+          {saved === "lineup-home" && <div className="statisticsSuccess matchCenterNotice">Состав хозяев сохранён.</div>}
+          {saved === "lineup-away" && <div className="statisticsSuccess matchCenterNotice">Состав гостей сохранён.</div>}
+          {saved === "lineup-imported" && <div className="statisticsSuccess matchCenterNotice">Состав FC Edineț импортирован из статистики игроков.</div>}
 
           {!timelineMatchesScore && (
             <div className="matchCenterTimelineWarning">
@@ -230,13 +250,19 @@ export default async function MatchCenterMatchPage({
               label="Командная статистика"
               value={`${progress?.team_stats_filled ?? 0}/2`}
               tone={(progress?.team_stats_filled ?? 0) === 2 ? "ready" : "empty"}
-              detail={foundationReady ? "2 команды подготовлены" : "Нужна миграция 041"}
+              detail={foundationReady ? "2 команды подготовлены" : "Нужна миграция 045"}
             />
             <ProgressCard
               label="События"
               value={String(events.length)}
               tone={events.length > 0 ? "draft" : "empty"}
               detail={timelineMatchesScore ? "Таймлайн активен" : "Проверь голы"}
+            />
+            <ProgressCard
+              label="Составы"
+              value={`${progress?.home_starters ?? lineupEntries.filter((row) => row.side === "home" && row.lineup_role === "starter").length}/11 • ${progress?.away_starters ?? lineupEntries.filter((row) => row.side === "away" && row.lineup_role === "starter").length}/11`}
+              tone={(progress?.home_starters ?? 0) === 11 && (progress?.away_starters ?? 0) === 11 ? "ready" : lineupEntries.length > 0 ? "draft" : "empty"}
+              detail="HOME • AWAY"
             />
           </section>
 
@@ -314,15 +340,15 @@ export default async function MatchCenterMatchPage({
                   />
                 </div>
                 <p className="matchCenterHelp">
-                  После завершения Page Builder сюда подключим владение, удары, угловые, фолы, офсайды, передачи, сейвы и xG.
+                  Следующий матчевый этап подключит полноценный ввод владения, ударов, угловых, фолов, офсайдов, передач, сейвов и xG.
                 </p>
               </section>
 
               <section className="statisticsPanel matchCenterRoadmap">
                 <p className="eyebrow blue">ВЕТКА v2.3</p>
                 <RoadmapStep version="v2.3.1" title="События / таймлайн ✓" />
-                <RoadmapStep version="следующий" title="Составы и замены" />
-                <RoadmapStep version="после составов" title="Командная статистика" />
+                <RoadmapStep version="v2.3.7" title="Составы и замены ✓" />
+                <RoadmapStep version="следующий" title="Командная статистика" />
                 <RoadmapStep version="после статистики" title="Публичная страница матча" />
               </section>
 
@@ -334,6 +360,14 @@ export default async function MatchCenterMatchPage({
               </section>
             </aside>
           </div>
+
+          <LineupEditor
+            match={match}
+            players={players}
+            settings={lineupSettings}
+            entries={lineupEntries}
+            events={events}
+          />
 
           <section className="statisticsPanel matchEventEditor">
             <div className="statisticsPanelHead">
@@ -568,8 +602,8 @@ function MatchCenterMigrationRequired({ message }: { message: string }) {
         <div className="container adminHeroInner">
           <div>
             <p className="eyebrow">FC EDINEȚ • MATCH CENTER</p>
-            <h1>Нужна миграция 041</h1>
-            <p>Фундамент статистики матча ещё не создан в Supabase.</p>
+            <h1>Нужна миграция 045</h1>
+            <p>Слой стартовых составов v2.3.7 ещё не создан в Supabase.</p>
           </div>
           <Link href="/admin/matches" className="adminBack">← Матчи</Link>
         </div>
@@ -578,8 +612,8 @@ function MatchCenterMigrationRequired({ message }: { message: string }) {
         <div className="container">
           <div className="statisticsMigrationCard">
             <p className="eyebrow blue">DB • ОДИН РАЗ</p>
-            <h2>Примени migration 041</h2>
-            <p>В Supabase → SQL Editor выполни файл <code>database/041_match_statistics_foundation.sql</code>, затем обнови страницу.</p>
+            <h2>Примени migration 045</h2>
+            <p>В Supabase → SQL Editor выполни файл <code>database/045_match_lineups.sql</code>, затем обнови страницу.</p>
             <p className="formError">Ответ базы: {message}</p>
           </div>
         </div>
