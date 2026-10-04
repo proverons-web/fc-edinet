@@ -1,0 +1,12 @@
+FC EDINEȚ v2.3.8 DEPLOY
+
+1. Copy .env.local from the previous working version.
+2. Supabase -> SQL Editor -> run database/046_practical_match_protocol.sql once.
+3. Confirm: Success. No rows returned.
+4. Run DEPLOY_FC_EDINET.bat.
+5. Wait for SUCCESS.
+6. Check /api/version -> 2.3.8.
+7. Open /admin/match-center and a finished match.
+8. Make the goal timeline match the final score.
+9. Click "Опубликовать протокол".
+10. Open /matches/[id].

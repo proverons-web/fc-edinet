@@ -830,6 +830,8 @@ export type MatchReport = {
   pitch_condition: string | null;
   summary: string | null;
   man_of_match_player_id: string | null;
+  is_published?: boolean;
+  published_at?: string | null;
   completed_at: string | null;
   completed_by: string | null;
   created_by: string | null;

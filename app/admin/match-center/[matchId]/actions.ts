@@ -273,6 +273,78 @@ export async function saveMatchReportFoundation(formData: FormData) {
   go(matchId, { saved: "report" });
 }
 
+
+export async function publishMatchProtocol(formData: FormData) {
+  const { supabase, userId } = await requireEditor();
+  const matchId = text(formData, "match_id");
+  if (!/^\d+$/.test(matchId)) redirect("/admin/match-center");
+
+  const { data: match, error: matchError } = await supabase
+    .from("matches")
+    .select("id,status,home_team_id,away_team_id,home_score,away_score")
+    .eq("id", matchId)
+    .maybeSingle();
+  if (matchError || !match) go(matchId, { error: "Матч не найден." });
+  if (match.status !== "finished") go(matchId, { error: "Публичный протокол можно опубликовать только после завершения матча." });
+
+  const { data: events, error: eventsError } = await supabase
+    .from("match_events")
+    .select("team_id,event_type")
+    .eq("match_id", matchId);
+  if (eventsError) go(matchId, { error: `Не удалось проверить таймлайн: ${eventsError.message}` });
+
+  const goalTypes = new Set(["goal", "penalty_goal", "own_goal"]);
+  const homeGoals = (events ?? []).filter((event) => String(event.team_id) === String(match.home_team_id) && goalTypes.has(event.event_type)).length;
+  const awayGoals = (events ?? []).filter((event) => String(event.team_id) === String(match.away_team_id) && goalTypes.has(event.event_type)).length;
+  if (homeGoals !== Number(match.home_score ?? 0) || awayGoals !== Number(match.away_score ?? 0)) {
+    go(matchId, { error: `Перед публикацией таймлайн голов должен совпадать со счётом (${homeGoals}:${awayGoals} / ${match.home_score ?? 0}:${match.away_score ?? 0}).` });
+  }
+
+  const now = new Date().toISOString();
+  const { error } = await supabase
+    .from("match_reports")
+    .upsert({
+      match_id: matchId,
+      status: "complete",
+      is_published: true,
+      published_at: now,
+      completed_at: now,
+      completed_by: userId,
+      updated_by: userId,
+      created_by: userId,
+    }, { onConflict: "match_id" });
+  if (error) go(matchId, { error: `Не удалось опубликовать протокол: ${error.message}. Проверь миграцию 046.` });
+
+  revalidateMatchCenter(matchId);
+  revalidatePath("/matches");
+  revalidatePath(`/matches/${matchId}`);
+  go(matchId, { saved: "published" });
+}
+
+export async function unpublishMatchProtocol(formData: FormData) {
+  const { supabase, userId } = await requireEditor();
+  const matchId = text(formData, "match_id");
+  if (!/^\d+$/.test(matchId)) redirect("/admin/match-center");
+
+  const { error } = await supabase
+    .from("match_reports")
+    .update({
+      is_published: false,
+      published_at: null,
+      status: "draft",
+      completed_at: null,
+      completed_by: null,
+      updated_by: userId,
+    })
+    .eq("match_id", matchId);
+  if (error) go(matchId, { error: `Не удалось снять протокол с публикации: ${error.message}` });
+
+  revalidateMatchCenter(matchId);
+  revalidatePath("/matches");
+  revalidatePath(`/matches/${matchId}`);
+  go(matchId, { saved: "unpublished" });
+}
+
 export async function createMatchEvent(formData: FormData) {
   const { supabase, userId } = await requireEditor();
   const matchId = text(formData, "match_id");

@@ -693,7 +693,6 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
                         <th>{text.contribution}</th>
                         <th>{text.yellow}</th>
                         <th>{text.red}</th>
-                        <th>{text.extended}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -722,7 +721,6 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
                           <td className="accentBlue"><strong>{contribution(row)}</strong></td>
                           <td>{row.yellow_cards}</td>
                           <td>{row.red_cards}</td>
-                          <td className="teamStatisticsExtended">{extendedLabel(row, locale)}</td>
                         </tr>
                       ))}
                     </tbody>

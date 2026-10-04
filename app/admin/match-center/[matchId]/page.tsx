@@ -15,7 +15,9 @@ import type {
 import {
   createMatchEvent,
   deleteMatchEvent,
+  publishMatchProtocol,
   saveMatchReportFoundation,
+  unpublishMatchProtocol,
   updateMatchEvent,
 } from "./actions";
 import LineupEditor from "./LineupEditor";
@@ -189,7 +191,7 @@ export default async function MatchCenterMatchPage({
       <section className="adminHero compactAdminHero matchCenterHero">
         <div className="container adminHeroInner">
           <div>
-            <p className="eyebrow">FC EDINEȚ • MATCH CENTER v2.3.7</p>
+            <p className="eyebrow">FC EDINEȚ • MATCH CENTER v2.3.8</p>
             <h1>
               {match.home?.name ?? "—"}{" "}
               <b>
@@ -222,6 +224,8 @@ export default async function MatchCenterMatchPage({
           {saved === "lineup-home" && <div className="statisticsSuccess matchCenterNotice">Состав хозяев сохранён.</div>}
           {saved === "lineup-away" && <div className="statisticsSuccess matchCenterNotice">Состав гостей сохранён.</div>}
           {saved === "lineup-imported" && <div className="statisticsSuccess matchCenterNotice">Состав FC Edineț импортирован из статистики игроков.</div>}
+          {saved === "published" && <div className="statisticsSuccess matchCenterNotice">Публичный протокол матча опубликован.</div>}
+          {saved === "unpublished" && <div className="matchCenterNotice practicalMutedNotice">Публичный протокол снят с публикации.</div>}
 
           {!timelineMatchesScore && (
             <div className="matchCenterTimelineWarning">
@@ -247,10 +251,10 @@ export default async function MatchCenterMatchPage({
               detail="Ветка v2.2"
             />
             <ProgressCard
-              label="Командная статистика"
-              value={`${progress?.team_stats_filled ?? 0}/2`}
-              tone={(progress?.team_stats_filled ?? 0) === 2 ? "ready" : "empty"}
-              detail={foundationReady ? "2 команды подготовлены" : "Нужна миграция 045"}
+              label="Расширенные цифры"
+              value={(progress?.team_stats_filled ?? 0) > 0 ? "Есть данные" : "Необязательно"}
+              tone={(progress?.team_stats_filled ?? 0) > 0 ? "draft" : "ready"}
+              detail="xG, владение, удары и т.п. можно не заполнять"
             />
             <ProgressCard
               label="События"
@@ -273,7 +277,7 @@ export default async function MatchCenterMatchPage({
                 <div>
                   <p className="eyebrow blue">ОСНОВА ОТЧЁТА</p>
                   <h2>Данные матча</h2>
-                  <p>Метаданные будущей публичной страницы матча. Их можно заполнять постепенно.</p>
+                  <p>Практический протокол: заполняй только то, что реально известно. Судья, посещаемость, погода и MVP необязательны.</p>
                 </div>
                 <span className={`statisticsState ${reportHasMetadata ? "draft" : "empty"}`}>
                   {reportHasMetadata ? "Основа сохранена" : "Не заполнено"}
@@ -316,40 +320,40 @@ export default async function MatchCenterMatchPage({
               </div>
 
               <div className="matchCenterFormFooter">
-                <p>Основа отчёта сохраняется независимо от таймлайна и статистики команд.</p>
+                <p>Основу можно сохранять постепенно. Для публикации достаточно завершённого матча и корректного таймлайна голов.</p>
                 <button className="primaryButton" type="submit">Сохранить основу</button>
               </div>
             </form>
 
             <aside className="matchCenterSidebar">
-              <section className="statisticsPanel">
-                <p className="eyebrow blue">КОМАНДЫ</p>
-                <h3>Фундамент статистики</h3>
-                <div className="matchCenterTeams">
-                  <TeamFoundation
-                    name={match.home?.name ?? "Хозяева"}
-                    side="HOME"
-                    ready={Boolean(homeFoundation)}
-                    logo={match.home?.logo_url ?? null}
-                  />
-                  <TeamFoundation
-                    name={match.away?.name ?? "Гости"}
-                    side="AWAY"
-                    ready={Boolean(awayFoundation)}
-                    logo={match.away?.logo_url ?? null}
-                  />
-                </div>
+              <section className="statisticsPanel practicalProtocolPublish">
+                <p className="eyebrow blue">ПУБЛИЧНЫЙ ПРОТОКОЛ</p>
+                <h3>{report?.is_published ? "Опубликован" : "Не опубликован"}</h3>
                 <p className="matchCenterHelp">
-                  Следующий матчевый этап подключит полноценный ввод владения, ударов, угловых, фолов, офсайдов, передач, сейвов и xG.
+                  На публичной странице показываем только реальные данные: счёт, составы, голы, карточки, замены, отчёт и MVP. Профессиональные метрики не нужны.
                 </p>
+                {report?.is_published ? (
+                  <>
+                    <Link className="rowAction" href={`/matches/${match.id}`} target="_blank">Открыть страницу ↗</Link>
+                    <form action={unpublishMatchProtocol}>
+                      <input type="hidden" name="match_id" value={String(match.id)} />
+                      <button className="rowAction muted" type="submit">Снять с публикации</button>
+                    </form>
+                  </>
+                ) : (
+                  <form action={publishMatchProtocol}>
+                    <input type="hidden" name="match_id" value={String(match.id)} />
+                    <button className="primaryButton" type="submit" disabled={match.status !== "finished" || !timelineMatchesScore}>Опубликовать протокол</button>
+                  </form>
+                )}
               </section>
 
               <section className="statisticsPanel matchCenterRoadmap">
                 <p className="eyebrow blue">ВЕТКА v2.3</p>
                 <RoadmapStep version="v2.3.1" title="События / таймлайн ✓" />
-                <RoadmapStep version="v2.3.7" title="Составы и замены ✓" />
-                <RoadmapStep version="следующий" title="Командная статистика" />
-                <RoadmapStep version="после статистики" title="Публичная страница матча" />
+                <RoadmapStep version="v2.3.8" title="Составы и замены ✓" />
+                <RoadmapStep version="v2.3.8" title="Практический протокол + публичная страница ✓" />
+                <RoadmapStep version="опционально" title="Расширенные цифры, если когда-нибудь появятся" />
               </section>
 
               <section className="statisticsPanel">
@@ -603,7 +607,7 @@ function MatchCenterMigrationRequired({ message }: { message: string }) {
           <div>
             <p className="eyebrow">FC EDINEȚ • MATCH CENTER</p>
             <h1>Нужна миграция 045</h1>
-            <p>Слой стартовых составов v2.3.7 ещё не создан в Supabase.</p>
+            <p>Слой стартовых составов v2.3.8 ещё не создан в Supabase.</p>
           </div>
           <Link href="/admin/matches" className="adminBack">← Матчи</Link>
         </div>

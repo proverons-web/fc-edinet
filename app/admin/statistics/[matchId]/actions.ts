@@ -94,6 +94,23 @@ export async function saveMatchStatistics(formData: FormData) {
   }
 
   const validPlayerIds = new Set((players ?? []).map((player) => String(player.id)));
+
+  // v2.3.8 practical mode: advanced metrics are no longer shown in the normal form.
+  // Preserve any advanced data that may already exist from older versions instead of
+  // silently resetting it when an editor saves the simplified protocol.
+  const { data: existingDetailedRows, error: existingDetailedError } = await supabase
+    .from("player_match_stats")
+    .select("*")
+    .eq("match_id", matchId);
+
+  if (existingDetailedError) {
+    go(matchId, { error: `Не удалось загрузить сохранённые показатели: ${existingDetailedError.message}` });
+  }
+
+  const existingByPlayer = new Map(
+    (existingDetailedRows ?? []).map((row) => [String(row.player_id), row as Record<string, unknown>])
+  );
+
   const payload: Record<string, unknown>[] = [];
   let startersCount = 0;
   let goalkeepersCount = 0;
@@ -118,43 +135,12 @@ export async function saveMatchStatistics(formData: FormData) {
       if (isGoalkeeper) goalkeepersCount += 1;
       if (isCaptain) captainsCount += 1;
 
-      const shots = isGoalkeeper
-        ? 0
-        : integer(formData, `shots_${playerId}`, 0, 40, "Удары");
-      const shotsOnTarget = isGoalkeeper
-        ? 0
-        : integer(formData, `shots_on_target_${playerId}`, 0, 40, "Удары в створ");
-      if (shotsOnTarget > shots) {
-        throw new Error("Удары в створ не могут быть больше общего количества ударов.");
-      }
-
-      const passesAttempted = integer(
-        formData,
-        `passes_attempted_${playerId}`,
-        0,
-        400,
-        "Передачи всего"
-      );
-      const passesCompleted = integer(
-        formData,
-        `passes_completed_${playerId}`,
-        0,
-        400,
-        "Точные передачи"
-      );
-      if (passesCompleted > passesAttempted) {
-        throw new Error("Точных передач не может быть больше общего количества передач.");
-      }
-
-      const defensiveRole = position === "defender" || position === "midfielder";
-      const defender = position === "defender";
-      const goalsConceded = isGoalkeeper
-        ? integer(formData, `goals_conceded_${playerId}`, 0, 30, "Пропущенные голы")
-        : 0;
-      const cleanSheet = isGoalkeeper && formData.get(`clean_sheet_${playerId}`) === "on";
-      if (cleanSheet && goalsConceded > 0) {
-        throw new Error("Сухой матч нельзя отметить, если у вратаря указаны пропущенные голы.");
-      }
+      const previous = existingByPlayer.get(playerId) ?? {};
+      const previousNumber = (key: string) => {
+        const value = Number(previous[key] ?? 0);
+        return Number.isFinite(value) ? value : 0;
+      };
+      const previousBool = (key: string) => Boolean(previous[key]);
 
       payload.push({
         match_id: matchId,
@@ -171,40 +157,22 @@ export async function saveMatchStatistics(formData: FormData) {
         yellow_cards: integer(formData, `yellow_${playerId}`, 0, 2, "Жёлтые карточки"),
         red_cards: integer(formData, `red_${playerId}`, 0, 1, "Красные карточки"),
 
-        goals_conceded: goalsConceded,
-        saves: isGoalkeeper
-          ? integer(formData, `saves_${playerId}`, 0, 50, "Сейвы")
-          : 0,
-        clean_sheet: cleanSheet,
-        penalties_saved: isGoalkeeper
-          ? integer(formData, `penalties_saved_${playerId}`, 0, 10, "Отражённые пенальти")
-          : 0,
-
-        shots,
-        shots_on_target: shotsOnTarget,
-        passes_attempted: passesAttempted,
-        passes_completed: passesCompleted,
-        key_passes: isGoalkeeper
-          ? 0
-          : integer(formData, `key_passes_${playerId}`, 0, 60, "Ключевые передачи"),
-        tackles_won: defensiveRole
-          ? integer(formData, `tackles_won_${playerId}`, 0, 60, "Выигранные отборы")
-          : 0,
-        interceptions: defensiveRole
-          ? integer(formData, `interceptions_${playerId}`, 0, 60, "Перехваты")
-          : 0,
-        clearances: defender
-          ? integer(formData, `clearances_${playerId}`, 0, 80, "Выносы")
-          : 0,
-        blocks: defender
-          ? integer(formData, `blocks_${playerId}`, 0, 60, "Блоки")
-          : 0,
-        fouls_committed: isGoalkeeper
-          ? 0
-          : integer(formData, `fouls_committed_${playerId}`, 0, 30, "Фолы"),
-        fouls_won: isGoalkeeper
-          ? 0
-          : integer(formData, `fouls_won_${playerId}`, 0, 30, "Заработанные фолы"),
+        // Advanced metrics are intentionally preserved, not requested in practical mode.
+        goals_conceded: previousNumber("goals_conceded"),
+        saves: previousNumber("saves"),
+        clean_sheet: previousBool("clean_sheet"),
+        penalties_saved: previousNumber("penalties_saved"),
+        shots: previousNumber("shots"),
+        shots_on_target: previousNumber("shots_on_target"),
+        passes_attempted: previousNumber("passes_attempted"),
+        passes_completed: previousNumber("passes_completed"),
+        key_passes: previousNumber("key_passes"),
+        tackles_won: previousNumber("tackles_won"),
+        interceptions: previousNumber("interceptions"),
+        clearances: previousNumber("clearances"),
+        blocks: previousNumber("blocks"),
+        fouls_committed: previousNumber("fouls_committed"),
+        fouls_won: previousNumber("fouls_won"),
 
         notes: text(formData, `notes_${playerId}`).slice(0, 1000) || null,
         created_by: userId,

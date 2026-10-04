@@ -1,0 +1,18 @@
+FC EDINEȚ v2.3.8 — PRACTICAL MATCH PROTOCOL
+
+WHY
+The club plays in a lower league where xG, possession, pass maps, tackles and other professional metrics are usually not tracked. v2.3.8 makes those metrics optional and removes them from the normal workflow.
+
+WHAT CHANGED
+- Simplified per-player match entry: played, start/sub, position, minutes, goals, assists, cards, captain.
+- Rare events remain in one small collapsed block: own goals, penalties, note.
+- Previously entered advanced metrics are preserved in the database and are not erased.
+- Admin season summary no longer has the noisy advanced-stat column.
+- Public team/player pages focus on core statistics. Advanced player block appears only if real advanced data exists.
+- Match Center labels team metrics as optional.
+- New public match page: /matches/[id]
+- Public protocol contains score, timeline, lineups, report, referee/attendance/weather/pitch/MVP when available.
+- Editor explicitly publishes/unpublishes each protocol from Match Center.
+
+DATABASE
+Run database/046_practical_match_protocol.sql once after 045.

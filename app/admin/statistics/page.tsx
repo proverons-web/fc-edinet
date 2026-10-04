@@ -599,7 +599,6 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
                         <th title="Голы">Г</th>
                         <th title="Голевые передачи">А</th>
                         <th title="Голы + ассисты">Г+А</th>
-                        <th title="Расширенные показатели по позиции">Расшир.</th>
                         <th title="Жёлтые карточки">ЖК</th>
                         <th title="Красные карточки">КК</th>
                         <th title="Сухие матчи">Сух.</th>
@@ -634,7 +633,6 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
                           <td className="statisticsAccentCell">{row.goals}</td>
                           <td className="statisticsAccentCell">{row.assists}</td>
                           <td><b>{row.goals + row.assists}</b></td>
-                          <td className="statisticsExtendedCell">{extendedSummary(row)}</td>
                           <td>{row.yellow_cards}</td>
                           <td>{row.red_cards}</td>
                           <td>{row.player.position === "goalkeeper" ? row.clean_sheets : "—"}</td>
