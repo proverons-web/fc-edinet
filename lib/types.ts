@@ -44,6 +44,9 @@ export type NewsArticle = {
   ro_translation_source_hash?: string | null;
   ro_translation_updated_at?: string | null;
   cover_image_url: string | null;
+  cover_position_x?: number | null;
+  cover_position_y?: number | null;
+  cover_zoom?: number | null;
   author_name: string | null;
   status: 'draft' | 'review' | 'published';
   published_at: string | null;

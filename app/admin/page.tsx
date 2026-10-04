@@ -174,18 +174,10 @@ export default async function AdminPage() {
               }
             />
             <AdminModule
-              title="Page Builder"
-              text="Page Builder 3.1: реальное Live Preview, ручное позиционирование, Focus X/Y и Zoom кадра отдельно для Desktop / Tablet / Mobile."
-              badge={
-                profile.role === "editor" || profile.role === "admin"
-                  ? "v2.3.5"
-                  : "Editor/Admin"
-              }
-              href={
-                profile.role === "editor" || profile.role === "admin"
-                  ? "/admin/page-builder"
-                  : undefined
-              }
+              title="Редактор сайта"
+              text="Единый центр: Главная, Клуб, Новости, Команда, Матчи, Таблица, Медиа, Партнёры и Академия. Дизайн + контент + Live Preview."
+              badge={profile.role === "editor" || profile.role === "admin" ? "v2.4.0" : "Editor/Admin"}
+              href={profile.role === "editor" || profile.role === "admin" ? "/admin/site-builder" : undefined}
             />
             <AdminModule
               title="Клуб"
@@ -226,20 +218,6 @@ export default async function AdminPage() {
               href={
                 profile.role === "editor" || profile.role === "admin"
                   ? "/admin/home"
-                  : undefined
-              }
-            />
-            <AdminModule
-              title="Visual Editor"
-              text="Конструктор Hero и главной страницы: Canvas, секции, Block Library, медиатека, адаптивные режимы, черновики и история."
-              badge={
-                profile.role === "editor" || profile.role === "admin"
-                  ? "Работает"
-                  : "Editor/Admin"
-              }
-              href={
-                profile.role === "editor" || profile.role === "admin"
-                  ? "/admin/design"
                   : undefined
               }
             />

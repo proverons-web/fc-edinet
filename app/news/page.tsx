@@ -26,7 +26,7 @@ export default async function NewsPage({ searchParams }: PageProps) {
   const selectedCategory = categories.find((item) => item.slug === selectedSlug);
 
   let query = supabase.from("news").select(`
-      id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,cover_image_url,author_name,status,
+      id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,cover_image_url,cover_position_x,cover_position_y,cover_zoom,author_name,status,
       published_at,views,is_featured,category_id,
       category:news_categories(id,name,name_ro,slug)
     `).eq("status", "published").lte("published_at", new Date().toISOString())

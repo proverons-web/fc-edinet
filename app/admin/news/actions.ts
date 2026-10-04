@@ -51,6 +51,9 @@ export async function saveNews(
   const editorNoteInput = String(
     formData.get("editor_note") ?? ""
   ).trim();
+  const coverPositionX = intRange(formData.get("cover_position_x"), 0, 100, 50);
+  const coverPositionY = intRange(formData.get("cover_position_y"), 0, 100, 50);
+  const coverZoom = intRange(formData.get("cover_zoom"), 100, 200, 100);
 
   if (title.length < 5 || title.length > 180) {
     return { error: "Заголовок должен содержать от 5 до 180 символов." };
@@ -90,7 +93,7 @@ export async function saveNews(
       .select(`
         id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,
         ro_translation_locked,ro_translation_source_hash,ro_translation_updated_at,
-        cover_image_url,author_name,status,
+        cover_image_url,cover_position_x,cover_position_y,cover_zoom,author_name,status,
         published_at,views,is_featured,category_id,created_by,submitted_at,
         published_by,editor_note,created_at,updated_at,
         category:news_categories(id,name,slug)
@@ -240,6 +243,9 @@ export async function saveNews(
     ro_translation_updated_at:
       translation.translatedAt ?? existing?.ro_translation_updated_at ?? null,
     cover_image_url: coverImageUrl,
+    cover_position_x: coverPositionX,
+    cover_position_y: coverPositionY,
+    cover_zoom: coverZoom,
     author_name: authorName,
     status,
     submitted_at: submittedAt,
@@ -368,4 +374,9 @@ function humanizeDatabaseError(message?: string) {
   }
 
   return `Не удалось сохранить новость: ${message}`;
+}
+
+function intRange(value: FormDataEntryValue | null, min: number, max: number, fallback: number) {
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.max(min, Math.min(max, Math.round(n))) : fallback;
 }

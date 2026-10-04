@@ -23,6 +23,9 @@ export default function NewsEditorForm({
   const [slug, setSlug] = useState(article?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(Boolean(article?.slug));
   const [preview, setPreview] = useState(article?.cover_image_url ?? "");
+  const [coverX, setCoverX] = useState(article?.cover_position_x ?? 50);
+  const [coverY, setCoverY] = useState(article?.cover_position_y ?? 50);
+  const [coverZoom, setCoverZoom] = useState(article?.cover_zoom ?? 100);
   const objectUrlRef = useRef<string | null>(null);
 
   const editor = role === "editor" || role === "admin";
@@ -263,12 +266,19 @@ export default function NewsEditorForm({
           <div className="editorSideCard">
             <h3>Обложка</h3>
 
-            <div className="coverPreview">
+            <div className="coverPreview newsCoverEditorPreview">
               {preview ? (
-                <img src={preview} alt="" />
+                <img className="newsCoverManaged" src={preview} alt="" style={{objectPosition:`${coverX}% ${coverY}%`,transform:`scale(${coverZoom/100})`,transformOrigin:`${coverX}% ${coverY}%`}} />
               ) : (
                 <span>ОБЛОЖКА НОВОСТИ</span>
               )}
+              <div className="newsCoverSafeZone" aria-hidden="true"><span>SAFE ZONE ГЛАВНОЙ</span></div>
+            </div>
+            <div className="newsCoverControls">
+              <label><span>Фокус X <b>{coverX}%</b></span><input name="cover_position_x" type="range" min="0" max="100" value={coverX} onChange={(e)=>setCoverX(Number(e.target.value))}/></label>
+              <label><span>Фокус Y <b>{coverY}%</b></span><input name="cover_position_y" type="range" min="0" max="100" value={coverY} onChange={(e)=>setCoverY(Number(e.target.value))}/></label>
+              <label><span>Zoom <b>{coverZoom}%</b></span><input name="cover_zoom" type="range" min="100" max="200" value={coverZoom} onChange={(e)=>setCoverZoom(Number(e.target.value))}/></label>
+              <small>Внутренняя рамка показывает безопасную область карточки на Главной. Держи лицо, герб и важный объект внутри неё.</small>
             </div>
 
             <div className="fieldGroup">

@@ -74,7 +74,6 @@ export default function HeaderNavClient({
             </div>}
           </div>
         ) : <Link className="login" href="/login">{text.login}</Link>)}
-        <Link className="headerTicketButton" href="/matches">{locale === "ro" ? "BILETE" : "БИЛЕТЫ"} <span>→</span></Link>
         <button className="menuToggle" onClick={() => setMenuOpen(!menuOpen)} aria-label={text.openMenu}>{menuOpen ? "✕" : "☰"}</button>
       </div>
 

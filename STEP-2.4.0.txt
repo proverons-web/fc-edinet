@@ -1,0 +1,9 @@
+FC Edinet v2.4.0 — Unified Site Builder
+
+1. Apply database/047_unified_site_builder_news_safe_zone.sql once.
+2. Copy .env.local from the previous working version.
+3. Run DEPLOY_FC_EDINET.bat.
+4. Verify /api/version -> 2.4.0.
+5. Main editor: /admin/site-builder.
+
+Changes: removed Tickets CTA, fixed compact standings overflow, news cover safe-zone/focus/zoom, unified inner-page styling, redesigned Club styling, unified Page Builder + Visual Editor hub.

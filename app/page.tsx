@@ -4,6 +4,7 @@ import StandingsTable from "@/app/components/StandingsTable";
 import { createClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/locale";
 import { dateLocale, localized, publicText, type Locale } from "@/lib/i18n";
+import { newsCoverStyle } from "@/lib/news-cover";
 import { defaultHomepageCanvas, normalizeHomepageCanvas } from "@/lib/homepage-canvas";
 import { repairHomepageCanvas } from "@/lib/homepage-safe-zone";
 import { defaultHeroLayerConfig, heroLayerState, heroLayerVisible, homeHeroLayerDefinitions, normalizeHeroLayerConfig } from "@/lib/hero-builder";
@@ -50,7 +51,7 @@ export default async function Home() {
     supabase
       .from("news")
       .select(`
-        id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,cover_image_url,author_name,status,
+        id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,cover_image_url,cover_position_x,cover_position_y,cover_zoom,author_name,status,
         published_at,views,is_featured,category_id,
         category:news_categories(id,name,name_ro,slug)
       `)
@@ -93,7 +94,7 @@ export default async function Home() {
       ? supabase
           .from("news")
           .select(`
-            id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,cover_image_url,author_name,status,
+            id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,cover_image_url,cover_position_x,cover_position_y,cover_zoom,author_name,status,
             published_at,views,is_featured,category_id,
             category:news_categories(id,name,name_ro,slug)
           `)
@@ -248,14 +249,14 @@ export default async function Home() {
           {sectionEnabled("news") && <>
             <div className="fcRefLeadColumn">
               {leadNews ? <Link href={`/news/${leadNews.slug}`} className="fcRefLeadNews">
-                <div className="fcRefLeadNewsMedia">{leadNews.cover_image_url ? <img src={leadNews.cover_image_url} alt="" /> : <div className="fcRefNewsFallback">FC EDINEȚ</div>}<span>{locale === "ro" ? "ȘTIREA PRINCIPALĂ" : "ГЛАВНАЯ НОВОСТЬ"}</span></div>
+                <div className="fcRefLeadNewsMedia">{leadNews.cover_image_url ? <img className="newsCoverManaged" src={leadNews.cover_image_url} alt="" style={newsCoverStyle(leadNews)} /> : <div className="fcRefNewsFallback">FC EDINEȚ</div>}<span>{locale === "ro" ? "ȘTIREA PRINCIPALĂ" : "ГЛАВНАЯ НОВОСТЬ"}</span></div>
                 <div className="fcRefLeadNewsBody"><time>{formatNewsDate(leadNews.published_at, locale)}</time><h2>{localized(leadNews.title, leadNews.title_ro, locale)}</h2>{localized(leadNews.excerpt, leadNews.excerpt_ro, locale) && <p>{localized(leadNews.excerpt, leadNews.excerpt_ro, locale)}</p>}<b>{locale === "ro" ? "CITEȘTE" : "ЧИТАТЬ ДАЛЬШЕ"} →</b></div>
               </Link> : <div className="fcRefEmptyCard">{locale === "ro" ? "Publică prima știre." : "Опубликуй первую новость."}</div>}
             </div>
 
             <div className="fcRefLatestColumn">
               <div className="fcRefPanelTitle"><h2>{locale === "ro" ? "ULTIMELE ȘTIRI" : "ПОСЛЕДНИЕ НОВОСТИ"}</h2><Link href="/news">{locale === "ro" ? "TOATE ȘTIRILE" : "ВСЕ НОВОСТИ"} →</Link></div>
-              <div className="fcRefNewsList">{latestNews.length ? latestNews.map((article) => <Link key={article.id} href={`/news/${article.slug}`} className="fcRefNewsRow"><div>{article.cover_image_url ? <img src={article.cover_image_url} alt="" /> : <span>FCE</span>}</div><section><time>{formatNewsDate(article.published_at, locale)}</time><h3>{localized(article.title, article.title_ro, locale)}</h3></section></Link>) : <div className="fcRefEmptyCard compact">{locale === "ro" ? "Nu sunt alte știri." : "Других новостей пока нет."}</div>}</div>
+              <div className="fcRefNewsList">{latestNews.length ? latestNews.map((article) => <Link key={article.id} href={`/news/${article.slug}`} className="fcRefNewsRow"><div>{article.cover_image_url ? <img className="newsCoverManaged" src={article.cover_image_url} alt="" style={newsCoverStyle(article)} /> : <span>FCE</span>}</div><section><time>{formatNewsDate(article.published_at, locale)}</time><h3>{localized(article.title, article.title_ro, locale)}</h3></section></Link>) : <div className="fcRefEmptyCard compact">{locale === "ro" ? "Nu sunt alte știri." : "Других новостей пока нет."}</div>}</div>
             </div>
           </>}
 

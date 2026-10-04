@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { NewsArticle } from "@/lib/types";
 import { dateLocale, localized, publicText, type Locale } from "@/lib/i18n";
+import { newsCoverStyle } from "@/lib/news-cover";
 
 export default function NewsCard({ article, locale = "ru" }: { article: NewsArticle; locale?: Locale }) {
   const text = publicText[locale].news;
@@ -12,7 +13,7 @@ export default function NewsCard({ article, locale = "ru" }: { article: NewsArti
     <article className="newsDbCard">
       <Link href={`/news/${article.slug}`} className="newsDbMedia">
         {article.cover_image_url ? (
-          <img src={article.cover_image_url} alt={title} />
+          <img className="newsCoverManaged" src={article.cover_image_url} alt={title} style={newsCoverStyle(article)} />
         ) : (
           <span>FC EDINEȚ</span>
         )}

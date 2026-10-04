@@ -62,6 +62,7 @@ export default async function AdminDesignPage({ searchParams }: PageProps) {
             <p>Visual Editor управляет Design System, глобальными Header/Footer, Hero, секциями и Block Library. Глобальные элементы имеют отдельный черновик и историю версий и применяются ко всем публичным страницам только после публикации.</p>
           </div>
           <div className="adminHeroActions">
+            <Link href="/admin/site-builder" className="rowAction">Unified Site Builder</Link>
             <Link href="/admin" className="adminBack">← Админка</Link>
             <Link href="/admin/home" className="rowAction muted">Контент главной</Link>
             <Link href="/" className="rowAction muted">Открыть сайт ↗</Link>

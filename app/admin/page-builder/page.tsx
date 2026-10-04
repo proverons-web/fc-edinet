@@ -9,7 +9,7 @@ export default async function PageBuilderIndex() {
   return <main className="adminPage">
     <section className="adminHero compactAdminHero"><div className="container adminHeroInner">
       <div><p className="eyebrow">FC EDINEȚ • PAGE BUILDER PRO</p><h1>Конструктор страниц</h1><p>Один профессиональный редактор: быстрый простой режим + расширенная точная настройка. Preview и публичная страница используют один рендер.</p></div>
-      <div className="adminHeroActions"><Link href="/admin" className="adminBack">← Админка</Link></div>
+      <div className="adminHeroActions"><Link href="/admin/site-builder" className="primaryButton">Открыть Unified Site Builder</Link><Link href="/admin" className="adminBack">← Админка</Link></div>
     </div></section>
     <section className="section adminSurface"><div className="container">
       <div className="pageBuilderCatalog">
