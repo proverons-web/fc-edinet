@@ -51,6 +51,7 @@ export default async function AdminMediaPage() {
             <Link href="/admin" className="adminBack">
               ← Админка
             </Link>
+            <Link href="/admin/page-builder/media" className="rowAction primaryRowAction">Конструктор страницы</Link>
             <Link href="/media" className="rowAction muted">
               Открыть на сайте ↗
             </Link>

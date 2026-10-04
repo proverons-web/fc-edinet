@@ -582,6 +582,7 @@ export type SitePageDesignKey =
   | "club"
   | "media"
   | "partners"
+  | "academy"
   | "template_news"
   | "template_player"
   | "template_album";

@@ -31,6 +31,7 @@ const catalog: Record<SitePageDesignKey, HeroLayerDefinition[]> = {
   standings: simplePageLayers,
   media: simplePageLayers,
   partners: simplePageLayers,
+  academy: simplePageLayers,
   club: [
     { key: "background", label: "Фон", description: "Фото клуба или системный фон." },
     { key: "intro", label: "Информация клуба", description: "Город, название клуба и девиз." },

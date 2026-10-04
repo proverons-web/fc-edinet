@@ -1,0 +1,7 @@
+FC Edinet v2.3.6 — Page Builder Pro
+
+1. Run database/044_page_builder_pro.sql once in Supabase SQL Editor.
+2. Copy .env.local from the previous working version.
+3. Run DEPLOY_FC_EDINET.bat.
+4. Check /api/version -> 2.3.6.
+5. Open /admin/page-builder and test Media / Partners / Academy.

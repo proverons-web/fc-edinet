@@ -73,6 +73,7 @@ export default async function AdminPartnersPage({ searchParams }: PageProps) {
             <Link href="/admin" className="adminBack">
               ← Админка
             </Link>
+            <Link href="/admin/page-builder/partners" className="rowAction primaryRowAction">Конструктор страницы</Link>
             <Link href="/partners" className="rowAction muted">
               Открыть на сайте ↗
             </Link>

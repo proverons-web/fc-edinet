@@ -1,0 +1,18 @@
+FC EDINET v2.3.6 — PAGE BUILDER PRO
+
+NEW:
+- Professional unified Page Builder for Media / Partners / Academy.
+- Simple / Advanced modes.
+- Exact preview uses the same renderer as the public page.
+- Presets: Club Blue / Editorial / Minimal.
+- Section reorder, visibility, variants, width, backgrounds, spacing.
+- Responsive Desktop / Tablet / Mobile columns and advanced offsets/scale.
+- Undo / Redo.
+- New public /academy page and Academy Hero support in Visual Editor.
+
+INSTALL:
+1) Run database/044_page_builder_pro.sql in Supabase SQL Editor once.
+2) Copy .env.local from the previous working version.
+3) Run DEPLOY_FC_EDINET.bat.
+4) Verify /api/version = 2.3.6.
+5) Open /admin/page-builder.
