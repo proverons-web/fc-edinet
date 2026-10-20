@@ -44,7 +44,9 @@ export default function HeaderNavClient({
     matches: { href: "/matches", label: text.matches },
     standings: { href: "/standings", label: text.standings },
     club: { href: "/club", label: text.club },
+    academy: { href: "/academy", label: text.academy },
     media: { href: "/media", label: text.media },
+    partners: { href: "/partners", label: text.partners },
   };
   const order = navOrder?.length ? navOrder : Object.keys(linkMap) as HeaderNavKey[];
   const links = order.filter((key) => navVisibility?.[key] !== false).map((key) => linkMap[key]);

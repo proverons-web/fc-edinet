@@ -1319,3 +1319,23 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   html{scroll-behavior:auto!important}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
+
+
+/* ============================================================
+   FC EDINEȚ v2.6.1 — UX POLISH / HEADER NAVIGATION CONTROL
+   Academy + Partners are first-class managed Header links.
+   ============================================================ */
+.globalNavHint{margin:0 0 12px;color:#60728a;font-size:12px;line-height:1.5}
+.globalNavEditor{display:grid;gap:7px}
+.globalNavRow{min-width:0}
+.globalNavRow strong{overflow-wrap:anywhere}
+@media(max-width:1320px){
+  .globalHeader .menu{font-size:10px!important}
+  .globalHeader .menu a{padding-inline:7px!important}
+  .globalHeader .nav{gap:14px!important}
+}
+@media(max-width:1120px){
+  .globalHeader .menu{display:none!important}
+  .globalHeader .menuToggle{display:grid!important;place-items:center}
+  .globalHeader .brandText{display:block!important}
+}

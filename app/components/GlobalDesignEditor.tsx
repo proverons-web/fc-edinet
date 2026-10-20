@@ -15,7 +15,7 @@ import {
 import type { DesignMediaAsset } from "@/lib/types";
 
 const initialState: { success?: string; error?: string } = {};
-const navLabels: Record<HeaderNavKey, string> = { news: "Новости", team: "Команда", statistics: "Статистика", matches: "Матчи", standings: "Таблица", club: "Клуб", media: "Медиа" };
+const navLabels: Record<HeaderNavKey, string> = { news: "Новости", team: "Команда", statistics: "Статистика", matches: "Матчи", standings: "Таблица", club: "Клуб", academy: "Академия", media: "Медиа", partners: "Партнёры" };
 
 export default function GlobalDesignEditor({
   componentKey,
@@ -91,7 +91,7 @@ function HeaderControls({ config, setConfig, assets }: { config: HeaderDesignCon
       <Check label="Аккаунт / Войти" checked={config.show_account} onChange={(value) => update({ show_account: value })}/>
       <Check label="Ссылка Админка для staff" checked={config.show_admin_link} onChange={(value) => update({ show_admin_link: value })}/>
     </ControlSection>
-    <ControlSection title="Меню и порядок">
+    <ControlSection title="Меню и порядок"><p className="globalNavHint">Отметь разделы, которые должны отображаться в основном меню. Стрелками можно менять их порядок на Desktop и Mobile.</p>
       <div className="globalNavEditor">{config.nav_order.map((key, index) => <div className="globalNavRow" key={key}><input type="checkbox" checked={config.nav_visibility[key]} onChange={(event) => update({ nav_visibility: { ...config.nav_visibility, [key]: event.target.checked } })}/><strong>{navLabels[key]}</strong><div><button type="button" onClick={() => move(key, -1)} disabled={index === 0}>↑</button><button type="button" onClick={() => move(key, 1)} disabled={index === config.nav_order.length - 1}>↓</button></div></div>)}</div>
     </ControlSection>
   </>;

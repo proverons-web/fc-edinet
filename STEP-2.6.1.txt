@@ -1,0 +1,18 @@
+FC EDINEȚ v2.6.1 — UX POLISH / HEADER NAVIGATION CONTROL
+
+HEADER NAVIGATION
+- Academy is now a managed Header navigation item
+- Partners is now a managed Header navigation item
+- both items can be enabled/disabled in Admin -> Design -> Header
+- both items can be reordered with the existing up/down controls
+- RU/RO labels added: Академия / Academia, Партнёры / Parteneri
+- desktop and mobile menus use the same managed configuration
+- old saved Header configs are normalized automatically
+- new items are inserted predictably into legacy nav order
+
+RESPONSIVE UX
+- desktop menu compacts at medium widths
+- mobile menu breakpoint is moved earlier to protect nine-item navigation from overflow
+
+No SQL migration required.
+Base: v2.6.0 FULL.

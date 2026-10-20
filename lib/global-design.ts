@@ -1,6 +1,6 @@
 import type { Locale } from "@/lib/i18n";
 
-export type HeaderNavKey = "news" | "team" | "statistics" | "matches" | "standings" | "club" | "media";
+export type HeaderNavKey = "news" | "team" | "statistics" | "matches" | "standings" | "club" | "academy" | "media" | "partners";
 export type HeaderBackground = "solid" | "glass" | "transparent";
 export type FooterBackground = "dark" | "blue" | "light";
 
@@ -64,7 +64,7 @@ export type FooterDesignConfig = {
   padding_bottom: number;
 };
 
-export const headerNavKeys: HeaderNavKey[] = ["news", "team", "statistics", "matches", "standings", "club", "media"];
+export const headerNavKeys: HeaderNavKey[] = ["news", "team", "statistics", "matches", "standings", "club", "academy", "media", "partners"];
 
 export const defaultHeaderDesign: HeaderDesignConfig = {
   topbar_enabled: true,
@@ -240,14 +240,21 @@ function normalizeFooterLink(value: unknown, fallback: FooterLinkConfig): Footer
 function uniqueHeaderKeys(value: unknown, fallback: HeaderNavKey[]) {
   if (!Array.isArray(value)) return [...fallback];
   const valid = value.map(String).filter((item, index, array): item is HeaderNavKey => headerNavKeys.includes(item as HeaderNavKey) && array.indexOf(item) === index);
-  // v2.2.5: existing published headers do not know about the new Statistics item.
-  // Insert it next to Team instead of silently pushing it to the far right.
-  if (!valid.includes("statistics")) {
-    const teamIndex = valid.indexOf("team");
-    valid.splice(teamIndex >= 0 ? teamIndex + 1 : valid.length, 0, "statistics");
-  }
+
+  // Backward compatibility for Header configs published before newer navigation items existed.
+  // Keep the user's saved order, but insert missing items in a predictable football-site hierarchy.
+  insertAfter(valid, "statistics", "team");
+  insertAfter(valid, "academy", "club");
+  insertAfter(valid, "partners", "media");
+
   for (const key of headerNavKeys) if (!valid.includes(key)) valid.push(key);
   return valid;
+}
+
+function insertAfter(order: HeaderNavKey[], key: HeaderNavKey, anchor: HeaderNavKey) {
+  if (order.includes(key)) return;
+  const anchorIndex = order.indexOf(anchor);
+  order.splice(anchorIndex >= 0 ? anchorIndex + 1 : order.length, 0, key);
 }
 function objectValue(value: unknown): Record<string, any> { return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, any> : {}; }
 function booleanValue(value: unknown, fallback: boolean) { return typeof value === "boolean" ? value : fallback; }

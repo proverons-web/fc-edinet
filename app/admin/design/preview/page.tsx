@@ -147,7 +147,7 @@ function DesignSystemShowcase({ config }: { config: DesignSystemConfig }) { retu
 function PreviewSection({ title, detail }: { title: string; detail: string }) { return <section className="draftSectionCard"><p className="eyebrow blue">FC EDINEȚ</p><h2>{title}</h2><small>{detail}</small><div className="draftSkeletonGrid"><span/><span/><span/><span/></div></section>; }
 
 const sectionLabels: Record<HomepageSectionKey, string> = { matches: "Матчи", standings: "Турнирная таблица", news: "Новости", players: "Команда", media: "Фото и видео", partners: "Партнёры" };
-const headerLabels: Record<string, string> = { news: "Новости", team: "Команда", matches: "Матчи", standings: "Таблица", club: "Клуб", media: "Медиа" };
+const headerLabels: Record<string, string> = { news: "Новости", team: "Команда", statistics: "Статистика", matches: "Матчи", standings: "Таблица", club: "Клуб", academy: "Академия", media: "Медиа", partners: "Партнёры" };
 
 function buildPublishedHome(hero: HomepageHero | null, sections: HomepageSection[], blocks: HomepagePublishedBlock[]): HomepageDesignSnapshot {
   const canvasFallback = defaultHomepageCanvas({ desktop_position_x: hero?.desktop_position_x, desktop_position_y: hero?.desktop_position_y, desktop_zoom_percent: hero?.desktop_zoom_percent, mobile_position_x: hero?.mobile_position_x, mobile_position_y: hero?.mobile_position_y, mobile_zoom_percent: hero?.mobile_zoom_percent, hero_height_desktop: hero?.hero_height_desktop, hero_height_mobile: hero?.hero_height_mobile, text_alignment: hero?.text_alignment, show_match_card: hero?.show_match_card });
