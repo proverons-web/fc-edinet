@@ -227,16 +227,22 @@ export default async function Home() {
           <aside className="fcRefNextMatch" data-hero-layer="match_card" style={{ zIndex: heroLayerState(heroLayers, "match_card").order, display: showHeroMatchCard ? undefined : "none" }}>
             <div className="fcRefMatchHead"><strong>{locale === "ro" ? "URMĂTORUL MECI" : "СЛЕДУЮЩИЙ МАТЧ"}</strong><Link href="/matches">{locale === "ro" ? "TOATE MECIURILE" : "ВСЕ МАТЧИ"} →</Link></div>
             {nextMatch ? <>
-              <div className="fcRefCompetition">{nextMatch.competition?.name || competition?.name || "Liga 2"}{nextMatch.round ? <span>{nextMatch.round}</span> : null}</div>
-              <div className="fcRefMatchTeams">
-                <ReferenceTeam team={nextMatch.home} locale={locale} />
-                <div className="fcRefVs">VS</div>
-                <ReferenceTeam team={nextMatch.away} locale={locale} />
+              <div className="fcRefCompetition">
+                <span className="fcRefMatchChip">{nextMatch.competition?.name || competition?.name || "Liga 2"}</span>
+                {nextMatch.round ? <span className="fcRefMatchChip">{nextMatch.round}</span> : null}
+                <span className="fcRefMatchChip fcRefMatchChipAccent">{locale === "ro" ? "MECI VIITOR" : "БЛИЖАЙШИЙ МАТЧ"}</span>
               </div>
-              <div className="fcRefMatchFacts">
-                <span><b>▣</b>{formatMatchDay(nextMatch.kickoff, locale)}</span>
-                <span><b>◷</b>{formatMatchTime(nextMatch.kickoff, locale)}</span>
-                <span><b>⌖</b>{nextMatch.stadium || text.stadiumUnknown}</span>
+              <div className="fcRefMatchBody">
+                <div className="fcRefMatchTeams">
+                  <ReferenceTeam team={nextMatch.home} locale={locale} label={locale === "ro" ? "GAZDE" : "ХОЗЯЕВА"} />
+                  <div className="fcRefVs">VS</div>
+                  <ReferenceTeam team={nextMatch.away} locale={locale} label={locale === "ro" ? "OASPEȚI" : "ГОСТИ"} />
+                </div>
+                <div className="fcRefMatchFacts">
+                  <span><b>▣</b><small>{locale === "ro" ? "DATA" : "ДАТА"}</small><strong>{formatMatchDay(nextMatch.kickoff, locale)}</strong></span>
+                  <span><b>◷</b><small>{locale === "ro" ? "ORA" : "ВРЕМЯ"}</small><strong>{formatMatchTime(nextMatch.kickoff, locale)}</strong></span>
+                  <span><b>⌖</b><small>{locale === "ro" ? "STADION" : "СТАДИОН"}</small><strong>{nextMatch.stadium || text.stadiumUnknown}</strong></span>
+                </div>
               </div>
               <Link href="/matches" className="fcYellowButton fcRefMatchButton">{locale === "ro" ? "DETALII MECI" : "ПОДРОБНЕЕ О МАТЧЕ"} <span>→</span></Link>
             </> : <div className="fcRefNoMatch">{locale === "ro" ? "Următorul meci nu a fost încă programat." : "Следующий матч пока не назначен."}</div>}
@@ -287,9 +293,9 @@ export default async function Home() {
   );
 }
 
-function ReferenceTeam({ team, locale }: { team: ClubMatch["home"]; locale: Locale }) {
+function ReferenceTeam({ team, locale, label }: { team: ClubMatch["home"]; locale: Locale; label?: string }) {
   const logo = team?.logo_url || (team?.is_club ? CLUB_LOGO : null);
-  return <div className="fcRefTeamBadge">{logo ? <img src={logo} alt="" /> : <span>{(team?.short_name || team?.name || "FC").slice(0,3).toUpperCase()}</span>}<strong>{team?.short_name || team?.name || (locale === "ro" ? "Echipă" : "Команда")}</strong></div>;
+  return <div className="fcRefTeamBadge">{label ? <small>{label}</small> : null}{logo ? <img src={logo} alt="" /> : <span>{(team?.short_name || team?.name || "FC").slice(0,3).toUpperCase()}</span>}<strong>{team?.short_name || team?.name || (locale === "ro" ? "Echipă" : "Команда")}</strong></div>;
 }
 
 function ReferencePlayer({ player, locale }: { player: Player; locale: Locale }) {
