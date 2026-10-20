@@ -10,7 +10,7 @@ const pages=[
  {key:"club",label:"Клуб",preview:"/club",design:"/admin/page-builder/club",content:"/admin/club"},
  {key:"news",label:"Новости",preview:"/news",design:"/admin/design?page=news",content:"/admin/news"},
  {key:"team",label:"Команда",preview:"/team",design:"/admin/design?page=team",content:"/admin/players"},
- {key:"matches",label:"Матчи",preview:"/matches",design:"/admin/design?page=matches",content:"/admin/matches"},
+ {key:"matches",label:"Календарь",preview:"/matches",design:"/admin/design?page=matches",content:"/admin/matches"},
  {key:"standings",label:"Таблица",preview:"/standings",design:"/admin/design?page=standings",content:"/admin/standings"},
  {key:"media",label:"Медиа",preview:"/media",design:"/admin/page-builder/media",content:"/admin/media"},
  {key:"partners",label:"Партнёры",preview:"/partners",design:"/admin/page-builder/partners",content:"/admin/partners"},

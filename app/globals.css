@@ -3391,3 +3391,15 @@ body:has(.adminEmbedded){background:#f3f6fa}
   .matchTimelineSubstitutionItem{grid-template-columns:1fr}
   .matchTimelineInlineActions{justify-content:flex-start}
 }
+
+
+/* ============================================================
+   FC EDINEȚ v2.9.5 — calendar/admin/match-center/player-card polish
+   ============================================================ */
+.matchCenterRow.is-complete{border-color:#9fd8b5;background:linear-gradient(90deg,#f0fbf4 0%,#ffffff 72%);box-shadow:0 10px 30px rgba(25,130,74,.08)}
+.matchCenterRow.is-complete:hover{border-color:#76c895;box-shadow:0 14px 36px rgba(25,130,74,.12)}
+.matchCenterRow.is-complete .matchCenterDate strong,.matchCenterRow.is-complete .matchCenterMatchMain h2{color:#12663a}
+.adminSortFilters{margin-top:10px;align-items:center;flex-wrap:wrap}.adminFilterLabel{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#6f8398;margin-right:4px}
+.teamPage .playerPhotoPlaceholder{position:relative;background:linear-gradient(155deg,#123d72,#071c3a)!important;overflow:hidden}
+.teamPage .playerPhotoPlaceholderCrest{width:42%!important;height:52%!important;object-fit:contain!important;opacity:.16;filter:grayscale(1) brightness(2.2);display:block}
+.teamPage .playerInfo:after{right:-4px!important;bottom:6px!important;width:102px!important;height:116px!important;opacity:.09!important;background-size:contain!important}

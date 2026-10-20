@@ -1,0 +1,14 @@
+FC EDINEȚ v2.9.5 — Match Center + Calendar + Team Admin + Player Cards polish
+
+Changes:
+- Removed manual FIO field from FC Edineț lineup; squad is selected only from club player database.
+- Already selected club players are removed from other lineup dropdowns.
+- Both opponent and FC Edineț lineup editors now use a single Save action.
+- Admin/public menu label changed from Matches to Calendar.
+- Standings block removed from public /matches page.
+- Admin team list sorting added: number, first name, last name, position.
+- Completed Match Center rows (report + players + events) are highlighted green.
+- Player cards without photos now use the official club crest as a subtle placeholder.
+- Decorative crest in player-card info area moved up so it is fully visible.
+
+No SQL migration required.

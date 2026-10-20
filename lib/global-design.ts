@@ -118,7 +118,7 @@ export const defaultFooterDesign: FooterDesignConfig = {
       links: [
         { id: "players", label_ru: "Игроки", label_ro: "Jucători", href: "/team" },
         { id: "statistics", label_ru: "Статистика", label_ro: "Statistici", href: "/statistics" },
-        { id: "matches", label_ru: "Матчи", label_ro: "Meciuri", href: "/matches" },
+        { id: "matches", label_ru: "Календарь", label_ro: "Calendar", href: "/matches" },
       ],
     },
     {

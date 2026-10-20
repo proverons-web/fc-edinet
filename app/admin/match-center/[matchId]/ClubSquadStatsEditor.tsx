@@ -18,7 +18,6 @@ type ExistingStat = {
 
 type RowState = {
   playerId: string;
-  manualName: string;
   position: string;
   captain: boolean;
 };
@@ -83,7 +82,6 @@ export default function ClubSquadStatsEditor({
         const stat = playerId ? statByPlayer.get(playerId) : undefined;
         next[`${role}-${slot}`] = {
           playerId,
-          manualName: playerId ? "" : entry?.player_name ?? "",
           position: stat?.position || entry?.position || "",
           captain: Boolean(stat?.is_captain ?? entry?.is_captain),
         };
@@ -93,8 +91,8 @@ export default function ClubSquadStatsEditor({
   });
 
   const selectedIds = new Set(Object.values(state).map((row) => row.playerId).filter(Boolean));
-  const startersCount = Object.entries(state).filter(([key, row]) => key.startsWith("starter-") && (row.playerId || row.manualName.trim())).length;
-  const benchCount = Object.entries(state).filter(([key, row]) => key.startsWith("substitute-") && (row.playerId || row.manualName.trim())).length;
+  const startersCount = Object.entries(state).filter(([key, row]) => key.startsWith("starter-") && row.playerId).length;
+  const benchCount = Object.entries(state).filter(([key, row]) => key.startsWith("substitute-") && row.playerId).length;
 
   function patch(key: string, changes: Partial<RowState>) {
     setState((current) => {
@@ -103,7 +101,7 @@ export default function ClubSquadStatsEditor({
         for (const id of Object.keys(next)) next[id] = { ...next[id], captain: false };
       }
       const merged = { ...next[key], ...changes };
-      if (!merged.playerId && !merged.manualName.trim()) {
+      if (!merged.playerId) {
         merged.captain = false;
         merged.position = "";
       }
@@ -118,7 +116,7 @@ export default function ClubSquadStatsEditor({
         <div>
           <p className="eyebrow blue">{sideLabel} • FC EDINEȚ</p>
           <h2>{teamName}</h2>
-          <p>Выбери состав. Позиция подставится из карточки игрока. Если футболиста нет в базе — введи ФИО вручную: Match Center создаст скрытый временный профиль, чтобы сохранить его статистику.</p>
+          <p>Выбери состав из базы клуба. Позиция подставится автоматически из карточки игрока, а статистика посчитается из событий матча.</p>
         </div>
         <span className={`statisticsState ${currentStatus}`}>{currentStatus === "complete" ? "Готово" : currentStatus === "draft" ? "Черновик" : "Не заполнено"}</span>
       </div>
@@ -176,8 +174,7 @@ export default function ClubSquadStatsEditor({
             <span>Замена задаёт минуты, гол/ассист и карточки попадают в сезон автоматически.</span>
           </div>
           <div>
-            <button className="rowAction muted" type="submit" name="intent" value="draft">Сохранить</button>
-            <button className="primaryButton" type="submit" name="intent" value="complete">Завершить</button>
+            <button className="primaryButton" type="submit" name="intent" value="draft">Сохранить</button>
           </div>
         </div>
       </form>
@@ -216,7 +213,7 @@ function SquadList({
           const entry = entries.get(slot);
           const stat = local?.playerId ? statByPlayer.get(local.playerId) : undefined;
           const player = local?.playerId ? players.find((item) => String(item.id) === local.playerId) : undefined;
-          const hasPlayer = Boolean(local?.playerId || local?.manualName.trim());
+          const hasPlayer = Boolean(local?.playerId);
           const positionClass = local?.position ? `position-${local.position}` : "position-empty";
           return (
             <div className={`matchCenterSquadCompactRow ${role} ${hasPlayer ? "filled" : "empty"} ${positionClass}`} key={key}>
@@ -229,31 +226,25 @@ function SquadList({
                     const selected = players.find((item) => String(item.id) === event.target.value);
                     patch(key, {
                       playerId: event.target.value,
-                      manualName: event.target.value ? "" : local?.manualName ?? "",
                       position: selected?.position ?? (event.target.value ? "" : local?.position ?? ""),
                     });
                   }}
                 >
                   <option value="">— выбрать по фамилии —</option>
-                  {players.map((option) => {
-                    const id = String(option.id);
-                    const usedElsewhere = selectedIds.has(id) && id !== local?.playerId;
-                    return (
-                      <option value={id} disabled={usedElsewhere} key={id}>
-                        {option.last_name} {option.first_name}{option.shirt_number != null ? ` · #${option.shirt_number}` : ""}{!option.is_active ? " · временный/архив" : ""}
-                      </option>
-                    );
-                  })}
+                  {players
+                    .filter((option) => {
+                      const id = String(option.id);
+                      return !selectedIds.has(id) || id === local?.playerId;
+                    })
+                    .map((option) => {
+                      const id = String(option.id);
+                      return (
+                        <option value={id} key={id}>
+                          {option.last_name} {option.first_name}{option.shirt_number != null ? ` · #${option.shirt_number}` : ""}{!option.is_active ? " · архив" : ""}
+                        </option>
+                      );
+                    })}
                 </select>
-                {!local?.playerId && (
-                  <input
-                    name={`${role}_${slot}_player_name`}
-                    value={local?.manualName ?? ""}
-                    onChange={(event) => patch(key, { manualName: event.target.value })}
-                    placeholder="ФИО вручную, если игрока нет в базе"
-                    maxLength={120}
-                  />
-                )}
               </div>
               <select
                 className="matchCenterCompactPosition"

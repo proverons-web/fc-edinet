@@ -138,8 +138,14 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
                   ? `${match.home_score ?? 0} : ${match.away_score ?? 0}`
                   : "VS";
 
+                const hasCompleteProtocol = Boolean(
+                  progress?.report_has_metadata &&
+                  progress?.player_stats_status !== "empty" &&
+                  (progress?.events_count ?? 0) > 0
+                );
+
                 return (
-                  <article className="matchCenterRow" key={match.id}>
+                  <article className={`matchCenterRow${hasCompleteProtocol ? " is-complete" : ""}`} key={match.id}>
                     <div className="matchCenterDate">
                       <strong>{formatDate(match.kickoff)}</strong>
                       <span>{formatTime(match.kickoff)}</span>

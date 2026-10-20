@@ -7,7 +7,7 @@ export const metadata = { title: "Игроки — Админ" };
 export const dynamic = "force-dynamic";
 
 type PageProps = {
-  searchParams: Promise<{ status?: string | string[] }>;
+  searchParams: Promise<{ status?: string | string[]; sort?: string | string[] }>;
 };
 
 export default async function AdminPlayersPage({
@@ -23,6 +23,8 @@ export default async function AdminPlayersPage({
     rawStatus === "active" || rawStatus === "inactive"
       ? rawStatus
       : "all";
+  const rawSort = Array.isArray(params.sort) ? params.sort[0] : params.sort;
+  const sort = rawSort === "first" || rawSort === "last" || rawSort === "position" ? rawSort : "number";
 
   let query = supabase
     .from("players")
@@ -41,7 +43,14 @@ export default async function AdminPlayersPage({
   }
 
   const { data, error } = await query;
-  const players = (data ?? []) as Player[];
+  const collator = new Intl.Collator("ru", { sensitivity: "base" });
+  const positionRank: Record<string, number> = { goalkeeper: 0, defender: 1, midfielder: 2, forward: 3 };
+  const players = ((data ?? []) as Player[]).sort((a, b) => {
+    if (sort === "first") return collator.compare(a.first_name || "", b.first_name || "") || collator.compare(a.last_name || "", b.last_name || "");
+    if (sort === "last") return collator.compare(a.last_name || "", b.last_name || "") || collator.compare(a.first_name || "", b.first_name || "");
+    if (sort === "position") return (positionRank[a.position] ?? 99) - (positionRank[b.position] ?? 99) || (a.shirt_number ?? 999) - (b.shirt_number ?? 999);
+    return (a.shirt_number ?? 999) - (b.shirt_number ?? 999) || collator.compare(a.last_name || "", b.last_name || "");
+  });
 
   return (
     <main className="adminPage">
@@ -69,21 +78,29 @@ export default async function AdminPlayersPage({
       <section className="section adminSurface">
         <div className="container">
           <nav className="adminFilters">
-            <Filter href="/admin/players" active={status === "all"}>
+            <Filter href={playerListHref("all", sort)} active={status === "all"}>
               Все
             </Filter>
             <Filter
-              href="/admin/players?status=active"
+              href={playerListHref("active", sort)}
               active={status === "active"}
             >
               Текущий состав
             </Filter>
             <Filter
-              href="/admin/players?status=inactive"
+              href={playerListHref("inactive", sort)}
               active={status === "inactive"}
             >
               Архив
             </Filter>
+          </nav>
+
+          <nav className="adminFilters adminSortFilters" aria-label="Сортировка игроков">
+            <span className="adminFilterLabel">Сортировка:</span>
+            <Filter href={playerListHref(status, "number")} active={sort === "number"}>По номеру</Filter>
+            <Filter href={playerListHref(status, "first")} active={sort === "first"}>По имени</Filter>
+            <Filter href={playerListHref(status, "last")} active={sort === "last"}>По фамилии</Filter>
+            <Filter href={playerListHref(status, "position")} active={sort === "position"}>По позиции</Filter>
           </nav>
 
           {error ? (
@@ -188,4 +205,11 @@ function Filter({
       {children}
     </Link>
   );
+}
+
+function playerListHref(status: string, sort: string) {
+  const params = new URLSearchParams();
+  if (status !== "all") params.set("status", status);
+  params.set("sort", sort);
+  return `/admin/players?${params.toString()}`;
 }

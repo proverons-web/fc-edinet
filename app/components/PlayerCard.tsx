@@ -11,7 +11,9 @@ export default function PlayerCard({ player, locale = "ru" }: { player: Player; 
       {player.photo_url ? (
         <div className="playerPhoto playerPhotoReal"><img src={player.photo_url} alt={fullName} loading="lazy" decoding="async" /></div>
       ) : (
-        <div className="playerPhoto">{text.photo}</div>
+        <div className="playerPhoto playerPhotoPlaceholder">
+          <img className="playerPhotoPlaceholderCrest" src="/brand/fc-edinet-crest.png" alt="" aria-hidden="true" />
+        </div>
       )}
       <span className="number">{player.shirt_number ?? "—"}</span>
       <div className="playerInfo">

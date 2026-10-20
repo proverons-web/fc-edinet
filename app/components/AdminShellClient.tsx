@@ -19,7 +19,7 @@ const groups = [
     items: [
       { href: "/admin/news", label: "Новости", icon: "N", minRole: "author" as UserRole },
       { href: "/admin/players", label: "Команда", icon: "P", minRole: "editor" as UserRole },
-      { href: "/admin/matches", label: "Матчи", icon: "M", minRole: "editor" as UserRole },
+      { href: "/admin/matches", label: "Календарь", icon: "M", minRole: "editor" as UserRole },
       { href: "/admin/match-center", label: "Протокол матча", icon: "MC", minRole: "editor" as UserRole },
       { href: "/admin/standings", label: "Таблица", icon: "T", minRole: "editor" as UserRole },
       { href: "/admin/statistics", label: "Статистика", icon: "S", minRole: "editor" as UserRole },
@@ -53,7 +53,7 @@ const adminRouteLabels: Record<string, string> = {
   design: "Глобальный дизайн",
   news: "Новости",
   players: "Команда",
-  matches: "Матчи",
+  matches: "Календарь",
   "match-center": "Протокол матча",
   standings: "Турнирная таблица",
   statistics: "Статистика",
