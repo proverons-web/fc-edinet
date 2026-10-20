@@ -1064,7 +1064,7 @@ export async function saveClubSquadAndStats(formData: FormData) {
     hasSeasonCompetition = !competitionError && Boolean(competition?.season_id);
   }
 
-  // v2.9.8: there is only one Save button. A valid lineup of a finished match
+  // v2.9.9: there is only one Save button. A valid lineup of a finished match
   // becomes COMPLETE automatically so season/tournament aggregation includes it.
   const completed =
     match.status === "finished" &&

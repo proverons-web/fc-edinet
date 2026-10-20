@@ -239,9 +239,9 @@ export default async function Home() {
                   <ReferenceTeam team={nextMatch.away} locale={locale} label={locale === "ro" ? "OASPEȚI" : "ГОСТИ"} />
                 </div>
                 <div className="fcRefMatchFacts">
-                  <span><b>▣</b><small>{locale === "ro" ? "DATA" : "ДАТА"}</small><strong>{formatMatchDay(nextMatch.kickoff, locale)}</strong></span>
-                  <span><b>◷</b><small>{locale === "ro" ? "ORA" : "ВРЕМЯ"}</small><strong>{formatMatchTime(nextMatch.kickoff, locale)}</strong></span>
-                  <span><b>⌖</b><small>{locale === "ro" ? "STADION" : "СТАДИОН"}</small><strong>{nextMatch.stadium || text.stadiumUnknown}</strong></span>
+                  <span><small>{locale === "ro" ? "DATA" : "ДАТА"}</small><strong>{formatMatchDay(nextMatch.kickoff, locale)}</strong></span>
+                  <span><small>{locale === "ro" ? "ORA" : "ЧАС"}</small><strong>{formatMatchTime(nextMatch.kickoff, locale)}</strong></span>
+                  <span><small>{locale === "ro" ? "STADION" : "СТАДИОН"}</small><strong>{nextMatch.stadium || text.stadiumUnknown}</strong></span>
                 </div>
               </div>
               <Link href="/matches" className="fcYellowButton fcRefMatchButton">{locale === "ro" ? "DETALII MECI" : "ПОДРОБНЕЕ О МАТЧЕ"} <span>→</span></Link>
@@ -317,7 +317,7 @@ function formatNewsDate(value: string | null, locale: Locale) {
 }
 
 function formatMatchDay(value: string, locale: Locale) {
-  return new Intl.DateTimeFormat(dateLocale(locale), { weekday: "short", day: "2-digit", month: "long", timeZone: "Europe/Chisinau" }).format(new Date(value));
+  return new Intl.DateTimeFormat(dateLocale(locale), { weekday: "long", day: "2-digit", month: "long", timeZone: "Europe/Chisinau" }).format(new Date(value));
 }
 
 function formatMatchTime(value: string, locale: Locale) {

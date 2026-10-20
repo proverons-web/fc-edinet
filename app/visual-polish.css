@@ -373,31 +373,31 @@ body :where(h1,h2,h3,h4,h5,h6){text-wrap:balance}
 
 /* NEXT MATCH — premium compact matchday card. */
 .fcRefNextMatch{
-  overflow:hidden;padding:0!important;
+  position:relative!important;overflow:hidden;padding:0!important;
   background:radial-gradient(circle at top right,rgba(18,91,183,.22),transparent 34%),linear-gradient(160deg,rgba(3,22,50,.98),rgba(6,46,90,.95))!important;
   border:1px solid rgba(169,202,239,.24)!important;border-radius:10px!important;
   box-shadow:0 32px 82px rgba(0,12,32,.44)!important;backdrop-filter:blur(18px)!important
 }
 .fcRefNextMatch:before{content:"";display:block;height:4px;background:linear-gradient(90deg,var(--fc-ref-yellow),#f8d74f)}
+.fcRefNextMatch:after{content:"";position:absolute;right:-34px;bottom:-18px;width:210px;height:250px;background:url("/brand/fc-edinet-crest.png") center/contain no-repeat;opacity:.08;pointer-events:none;filter:grayscale(.05)}
 .fcRefMatchHead{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:14px!important;padding:16px 18px 12px!important;border-bottom:1px solid rgba(255,255,255,.10)!important}
 .fcRefMatchHead strong{font-family:var(--font-fce-display),Arial,sans-serif!important;font-size:19px!important;font-weight:850!important;letter-spacing:.01em!important}
 .fcRefMatchHead a{color:#b8cee7!important;font-size:9px!important;letter-spacing:.08em!important;white-space:nowrap}
-.fcRefCompetition{display:flex!important;flex-wrap:wrap!important;gap:8px!important;padding:12px 18px 0!important}
+.fcRefCompetition{display:flex!important;flex-wrap:wrap!important;justify-content:center!important;gap:8px!important;padding:12px 18px 0!important}
 .fcRefMatchChip{display:inline-flex!important;align-items:center!important;min-height:24px!important;padding:0 10px!important;border-radius:999px!important;background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.10)!important;color:#e3eefb!important;font-size:10px!important;font-weight:800!important;letter-spacing:.08em!important;text-transform:uppercase!important}
 .fcRefMatchChipAccent{background:rgba(243,198,30,.16)!important;border-color:rgba(243,198,30,.25)!important;color:#ffe17a!important}
 .fcRefMatchBody{padding:12px 18px 10px!important}
 .fcRefMatchTeams{padding:0 0 14px!important;grid-template-columns:minmax(0,1fr) 54px minmax(0,1fr)!important;gap:12px!important;align-items:stretch!important}
-.fcRefTeamBadge{display:grid!important;grid-template-rows:auto auto 1fr!important;align-content:start!important;justify-items:center!important;gap:8px!important;min-height:168px!important;padding:12px 10px 14px!important;text-align:center!important;background:rgba(255,255,255,.045)!important;border:1px solid rgba(255,255,255,.085)!important;border-radius:10px!important}
+.fcRefTeamBadge{display:grid!important;grid-template-rows:auto auto 1fr!important;align-content:start!important;justify-items:center!important;gap:8px!important;min-height:172px!important;padding:12px 10px 14px!important;text-align:center!important;background:rgba(255,255,255,.045)!important;border:1px solid rgba(255,255,255,.085)!important;border-radius:10px!important}
 .fcRefTeamBadge small{font-size:9px!important;letter-spacing:.12em!important;font-weight:800!important;color:#8fa9c8!important;text-transform:uppercase!important}
-.fcRefTeamBadge img{width:72px!important;height:82px!important;object-fit:contain!important;filter:drop-shadow(0 7px 14px rgba(0,0,0,.30))}
+.fcRefTeamBadge img{width:80px!important;height:90px!important;object-fit:contain!important;filter:drop-shadow(0 7px 14px rgba(0,0,0,.30))}
 .fcRefTeamBadge>span{width:62px!important;height:62px!important;border-radius:14px!important;background:#124f98!important;border:1px solid rgba(255,255,255,.20)!important}
-.fcRefTeamBadge strong{max-width:100%!important;font-family:var(--font-fce-display),Arial,sans-serif!important;font-size:14px!important;font-weight:800!important;line-height:1.12!important;text-wrap:balance!important;color:#fff!important}
+.fcRefTeamBadge strong{max-width:100%!important;font-family:var(--font-fce-display),Arial,sans-serif!important;font-size:15px!important;font-weight:800!important;line-height:1.12!important;text-wrap:balance!important;color:#fff!important}
 .fcRefVs{display:grid!important;place-items:center!important;align-self:center!important;width:54px!important;height:54px!important;border-radius:50%!important;border:1px solid rgba(255,255,255,.10)!important;background:linear-gradient(180deg,rgba(248,212,51,.95),rgba(227,182,17,.95))!important;color:#082348!important;font-family:var(--font-fce-display),Arial,sans-serif!important;font-size:16px!important;font-weight:900!important;letter-spacing:.05em!important;box-shadow:0 10px 24px rgba(2,12,34,.22)!important}
 .fcRefMatchFacts{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important;margin:0!important;padding:0!important;color:#d9e5f3!important}
-.fcRefMatchFacts span{display:grid!important;grid-template-columns:18px 1fr!important;grid-template-areas:"icon label" "icon value"!important;column-gap:10px!important;row-gap:2px!important;align-items:center!important;min-height:58px!important;padding:10px 11px!important;background:rgba(255,255,255,.045)!important;border:1px solid rgba(255,255,255,.085)!important;border-radius:10px!important}
-.fcRefMatchFacts b{grid-area:icon!important;width:auto!important;color:var(--fc-ref-yellow)!important;text-align:center!important;font-size:13px!important}
-.fcRefMatchFacts small{grid-area:label!important;font-size:8px!important;font-weight:800!important;letter-spacing:.12em!important;color:#86a3c6!important;text-transform:uppercase!important}
-.fcRefMatchFacts strong{grid-area:value!important;font-size:11px!important;font-weight:750!important;line-height:1.3!important;color:#f6fbff!important}
+.fcRefMatchFacts span{display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;row-gap:4px!important;text-align:center!important;min-height:66px!important;padding:10px 12px!important;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.035))!important;border:1px solid rgba(255,255,255,.085)!important;border-radius:10px!important}
+.fcRefMatchFacts small{font-size:8px!important;font-weight:800!important;letter-spacing:.12em!important;color:#8faacc!important;text-transform:uppercase!important}
+.fcRefMatchFacts strong{font-size:13px!important;font-weight:780!important;line-height:1.35!important;color:#f6fbff!important;text-wrap:balance!important}
 .fcRefMatchButton{width:calc(100% - 36px)!important;margin:0 18px 18px!important;min-height:46px!important;justify-content:center!important}
 .fcRefNoMatch{padding:34px 20px 38px!important}
 /* Hero ticker/footer line. */
@@ -468,7 +468,7 @@ body :where(h1,h2,h3,h4,h5,h6){text-wrap:balance}
 }
 @media(max-width:680px){
   .fcRefHeroCopy{width:min(92vw,560px)!important;padding-inline:4px!important}.fcRefHeroKicker{font-size:9px!important;margin-bottom:14px!important}.fcRefHeroKicker:before{width:25px}.fcRefHeroCopy h1{font-size:clamp(44px,13.5vw,62px)!important;line-height:.88!important}.fcRefHeroCopy p{font-size:14px!important;line-height:1.55!important;margin-top:17px!important}.fcRefHeroActions{margin-top:21px!important}.fcYellowButton,.fcGhostButton{min-height:42px!important;padding:0 15px!important;font-size:9px!important}
-  .fcRefNextMatch{width:min(var(--hero-match-mobile-width,360px),94vw)!important}.fcRefMatchHead{padding:14px 14px 10px!important}.fcRefMatchHead strong{font-size:16px!important}.fcRefCompetition{padding:10px 14px 0!important}.fcRefMatchBody{padding:10px 14px 8px!important}.fcRefMatchTeams{grid-template-columns:minmax(0,1fr) 46px minmax(0,1fr)!important;gap:8px!important}.fcRefTeamBadge{min-height:140px!important;padding:10px 8px 12px!important}.fcRefTeamBadge img{width:56px!important;height:64px!important}.fcRefTeamBadge strong{font-size:10px!important}.fcRefMatchFacts{grid-template-columns:1fr!important}.fcRefMatchButton{width:calc(100% - 28px)!important;margin:0 14px 14px!important}
+  .fcRefNextMatch{width:min(var(--hero-match-mobile-width,360px),94vw)!important}.fcRefMatchHead{padding:14px 14px 10px!important}.fcRefMatchHead strong{font-size:16px!important}.fcRefCompetition{padding:10px 14px 0!important}.fcRefMatchBody{padding:10px 14px 8px!important}.fcRefMatchTeams{grid-template-columns:minmax(0,1fr) 46px minmax(0,1fr)!important;gap:8px!important}.fcRefTeamBadge{min-height:140px!important;padding:10px 8px 12px!important}.fcRefTeamBadge img{width:62px!important;height:70px!important}.fcRefTeamBadge strong{font-size:11px!important}.fcRefMatchFacts{grid-template-columns:1fr!important}.fcRefMatchButton{width:calc(100% - 28px)!important;margin:0 14px 14px!important}
   .fcRefHeroBottom{width:calc(100% - 24px);min-height:38px;padding-inline:4px;gap:9px!important;font-size:6px!important;letter-spacing:.10em!important}.fcRefHeroBottom strong{display:none!important}
   .fcRefAnnouncementInner{min-height:72px!important}.fcRefAnnouncementInner strong{font-size:17px!important}.fcRefAnnouncementInner a{font-size:8px!important;padding-inline:10px}
   .fcRefDashboardSection{padding:32px 0 36px!important}.fcRefDashboard{gap:12px!important}.fcRefLeadColumn,.fcRefLatestColumn,.fcRefTableColumn{padding:12px!important;border-radius:6px!important}.fcRefLeadNewsMedia{height:220px!important}.fcRefLeadNewsBody{padding:19px 18px 21px!important}.fcRefLeadNewsBody h2{font-size:24px!important}.fcRefPanelTitle h2{font-size:17px!important}.fcRefNewsRow{grid-template-columns:96px minmax(0,1fr)!important;gap:11px!important;min-height:94px!important;padding:12px 0!important}.fcRefNewsRow>div{height:68px!important}.fcRefNewsRow h3{font-size:13px!important}
