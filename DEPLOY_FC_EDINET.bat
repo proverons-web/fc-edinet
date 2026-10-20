@@ -85,8 +85,24 @@ if errorlevel 1 goto :fail
 
 echo.
 echo [7/8] Creating commit...
+
+echo Verifying Git ignore rules...
+git check-ignore -q node_modules
+if errorlevel 1 (
+    echo [ERROR] node_modules is not ignored.
+    echo Check .gitignore before deploying.
+    goto :fail
+)
+
+echo Cleaning generated files from Git index...
+git rm -r --cached --ignore-unmatch node_modules .next .vercel >nul 2>&1
+
 git status
-git add .
+git add -A
+if errorlevel 1 goto :fail
+
+echo Checking staged files for GitHub 100 MB limit...
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$limit=95MB; $bad=@(); git ls-files | ForEach-Object { if(Test-Path -LiteralPath $_){ $f=Get-Item -LiteralPath $_; if(-not $f.PSIsContainer -and $f.Length -ge $limit){ $bad += ('{0} ({1:N2} MB)' -f $_,($f.Length/1MB)) } } }; if($bad.Count -gt 0){ Write-Host '[ERROR] Large files detected in Git index:' -ForegroundColor Red; $bad | ForEach-Object { Write-Host ('  ' + $_) -ForegroundColor Red }; Write-Host 'Remove these files from Git or use an external storage solution.' -ForegroundColor Yellow; exit 1 }"
 if errorlevel 1 goto :fail
 
 git diff --cached --quiet

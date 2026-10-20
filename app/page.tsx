@@ -3,6 +3,7 @@ import Link from "next/link";
 import StandingsTable from "@/app/components/StandingsTable";
 import { createClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/locale";
+import { publicSectionMetadata } from "@/lib/seo";
 import { dateLocale, localized, publicText, type Locale } from "@/lib/i18n";
 import { newsCoverStyle } from "@/lib/news-cover";
 import { defaultHomepageCanvas, normalizeHomepageCanvas } from "@/lib/homepage-canvas";
@@ -21,6 +22,12 @@ import type {
 } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  const locale = await getLocale();
+  return publicSectionMetadata("home", locale, "/");
+}
+
 
 const CLUB_LOGO = "/brand/fc-edinet-crest.png";
 

@@ -2,10 +2,17 @@ import ManagedPageCanvas from "@/app/components/ManagedPageCanvas";
 import { createClient } from "@/lib/supabase/server";
 import type { Partner } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
+import { publicSectionMetadata } from "@/lib/seo";
 import { getPublishedSitePageDesign } from "@/lib/page-design";
 import { getPublishedProPageLayout } from "@/lib/pro-page-builder";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  const locale = await getLocale();
+  return publicSectionMetadata("partners", locale, "/partners");
+}
+
 
 export default async function PartnersPage() {
   const locale = await getLocale();

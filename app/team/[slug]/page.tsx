@@ -22,6 +22,7 @@ import { accountText } from "@/lib/account-i18n";
 import { dateLocale, footLabelsI18n, localized, positionLabelsI18n, publicText } from "@/lib/i18n";
 import { getPublishedSitePageDesign } from "@/lib/page-design";
 import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
+import { publicMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -69,10 +70,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const player = await getPlayer(slug);
   if (!player) return { title: publicText[locale].team.notFound };
   const fullName = `${player.first_name} ${player.last_name}`.trim();
-  return {
+  return publicMetadata({
     title: fullName,
     description: `${fullName} — ${positionLabelsI18n[locale][player.position] ?? player.position}, FC Edineț.`,
-  };
+    path: `/team/${encodeURIComponent(slug)}`,
+    locale,
+    image: player.photo_url,
+  });
 }
 
 export default async function PlayerPage({ params, searchParams }: PageProps) {

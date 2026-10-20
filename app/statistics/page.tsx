@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import PageHeroShell from "@/app/components/PageHeroShell";
 import { createClient } from "@/lib/supabase/server";
@@ -13,16 +12,17 @@ import type {
   Season,
 } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
+import { publicSectionMetadata } from "@/lib/seo";
 import { positionLabelsI18n } from "@/lib/i18n";
 import { getPublishedSitePageDesign } from "@/lib/page-design";
 import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Статистика команды — FC Edineț",
-  description: "Статистика FC Edineț по сезонам и турнирам: лидеры, матчи, голы, ассисты и игровое время.",
-};
+export async function generateMetadata() {
+  const locale = await getLocale();
+  return publicSectionMetadata("statistics", locale, "/statistics");
+}
 
 type PageProps = {
   searchParams: Promise<{

@@ -11,6 +11,7 @@ import { getLocale } from "@/lib/locale";
 import { dateLocale, publicText, type Locale } from "@/lib/i18n";
 import { getPublishedSitePageDesign } from "@/lib/page-design";
 import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
+import { publicMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 type PageProps = { params: Promise<{ slug: string }> };
@@ -31,7 +32,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const data = await getAlbum(slug);
   if (!data) return { title: publicText[locale].media.defaultAlbum };
-  return { title: data.title, description: data.description || `${data.title} — FC Edineț`, openGraph: { title: data.title, description: data.description || `${data.title} — FC Edineț`, type: "website", images: data.cover_image_url ? [{ url: data.cover_image_url }] : undefined } };
+  return publicMetadata({
+    title: data.title,
+    description: data.description || `${data.title} — FC Edineț`,
+    path: `/media/${encodeURIComponent(slug)}`,
+    locale,
+    image: data.cover_image_url,
+  });
 }
 
 export default async function MediaAlbumPage({ params }: PageProps) {

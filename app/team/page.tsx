@@ -4,11 +4,18 @@ import { PublicMessageState } from "@/app/components/PublicRouteState";
 import { createClient } from "@/lib/supabase/server";
 import type { Player } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
+import { publicSectionMetadata } from "@/lib/seo";
 import { positionPluralLabelsI18n, publicText } from "@/lib/i18n";
 import { getPublishedSitePageDesign, resolvePageHeroText } from "@/lib/page-design";
 import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  const locale = await getLocale();
+  return publicSectionMetadata("team", locale, "/team");
+}
+
 const order = ["goalkeeper", "defender", "midfielder", "forward"];
 
 export default async function TeamPage() {

@@ -4,12 +4,19 @@ import PageHeroShell from "@/app/components/PageHeroShell";
 import { createClient } from "@/lib/supabase/server";
 import type { Competition, StandingEntry } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
+import { publicSectionMetadata } from "@/lib/seo";
 import { publicText } from "@/lib/i18n";
 import { getPublishedSitePageDesign, resolvePageHeroText } from "@/lib/page-design";
 import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
 import { sortStandings } from "@/lib/standings";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  const locale = await getLocale();
+  return publicSectionMetadata("standings", locale, "/standings");
+}
+
 type PageProps = { searchParams: Promise<{ competition?: string | string[] }> };
 
 export default async function StandingsPage({ searchParams }: PageProps) {

@@ -5,11 +5,18 @@ import { toggleFavoriteMatch } from "@/app/account/actions";
 import { createClient } from "@/lib/supabase/server";
 import type { ClubMatch, Competition, StandingEntry } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
+import { publicSectionMetadata } from "@/lib/seo";
 import { accountText } from "@/lib/account-i18n";
 import { dateLocale, matchStatusLabelsI18n, publicText, type Locale } from "@/lib/i18n";
 import { getPublishedSitePageDesign, resolvePageHeroText } from "@/lib/page-design";
 import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
 export const dynamic="force-dynamic";
+
+export async function generateMetadata() {
+  const locale = await getLocale();
+  return publicSectionMetadata("matches", locale, "/matches");
+}
+
 export default async function MatchesPage(){
  const locale=await getLocale();const text=publicText[locale].matches;const account=accountText[locale];const supabase=await createClient();const now=new Date().toISOString();
  const {data:claimsData}=await supabase.auth.getClaims();const userId=claimsData?.claims?.sub;

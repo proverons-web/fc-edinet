@@ -1,13 +1,42 @@
-node_modules
-.next
-out
-.vercel
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Vercel local metadata
+.vercel/
+
+# Environment / secrets
 .env
 .env.local
-.env*.local
-.DS_Store
-*.tsbuildinfo
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+*.log
+
+# TypeScript / tooling caches
+*.tsbuildinfo
+.eslintcache
+.turbo/
+.cache/
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Local archives / temporary files
+*.zip
+*.tmp
+*.temp

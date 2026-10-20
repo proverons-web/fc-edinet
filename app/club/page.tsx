@@ -2,11 +2,18 @@ import ClubPageCanvas from "@/app/components/ClubPageCanvas";
 import { createClient } from "@/lib/supabase/server";
 import type { ClubAchievement, ClubLeader, ClubProfile } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
+import { publicSectionMetadata } from "@/lib/seo";
 import { publicText } from "@/lib/i18n";
 import { getPublishedSitePageDesign } from "@/lib/page-design";
 import { getPublishedClubPageLayout } from "@/lib/content-page-builder";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  const locale = await getLocale();
+  return publicSectionMetadata("club", locale, "/club");
+}
+
 
 export default async function ClubPage() {
   const locale = await getLocale();

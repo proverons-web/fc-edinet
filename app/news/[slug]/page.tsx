@@ -14,6 +14,7 @@ import { localized, publicText } from "@/lib/i18n";
 import { getPublishedSitePageDesign } from "@/lib/page-design";
 import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
 import { newsCoverStyle } from "@/lib/news-cover";
+import { publicMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 type PageProps = {
@@ -38,7 +39,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!article) return { title: publicText[locale].news.notFound };
   const title = localized(article.title, article.title_ro, locale);
   const excerpt = localized(article.excerpt, article.excerpt_ro, locale);
-  return { title, description: excerpt || `${title} — FC Edineț` };
+  return publicMetadata({
+    title,
+    description: excerpt || `${title} — FC Edineț`,
+    path: `/news/${encodeURIComponent(slug)}`,
+    locale,
+    image: article.cover_image_url,
+    type: "article",
+  });
 }
 
 export default async function NewsArticlePage({ params, searchParams }: PageProps) {

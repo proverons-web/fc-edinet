@@ -5,12 +5,19 @@ import { PublicMessageState } from "@/app/components/PublicRouteState";
 import { createClient } from "@/lib/supabase/server";
 import type { NewsArticle, NewsCategory, SitePageDesignSnapshot } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
+import { publicSectionMetadata } from "@/lib/seo";
 import { localized, publicText, type Locale } from "@/lib/i18n";
 import { getPublishedSitePageDesign, resolvePageHeroText } from "@/lib/page-design";
 import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
 import { newsCoverStyle } from "@/lib/news-cover";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  const locale = await getLocale();
+  return publicSectionMetadata("news", locale, "/news");
+}
+
 type PageProps = { searchParams: Promise<{ category?: string | string[] }> };
 
 export default async function NewsPage({ searchParams }: PageProps) {

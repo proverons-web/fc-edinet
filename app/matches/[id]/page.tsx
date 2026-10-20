@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
+import { cache } from "react";
 import PublicBreadcrumbs from "@/app/components/PublicBreadcrumbs";
 import PublicBackLink from "@/app/components/PublicBackLink";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/locale";
 import { publicText } from "@/lib/i18n";
+import { publicMetadata } from "@/lib/seo";
 import type { ClubMatch, MatchEvent, MatchLineupEntry, MatchLineupSetting, MatchReport } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -145,6 +148,32 @@ function matchSelect() {
   competition:competitions!matches_competition_id_fkey(id,name,slug,season,is_active)`;
 }
 
+const getMatch = cache(async (id: string): Promise<ClubMatch | null> => {
+  if (!/^\d+$/.test(id)) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("matches")
+    .select(matchSelect())
+    .eq("id", id)
+    .maybeSingle();
+  if (error || !data) return null;
+  return data as unknown as ClubMatch;
+});
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const locale = (await getLocale()) as Locale;
+  const { id } = await params;
+  const match = await getMatch(id);
+  if (!match) return { title: locale === "ro" ? "Meci — FC Edineț" : "Матч — FC Edineț" };
+  const home = match.home?.name ?? "—";
+  const away = match.away?.name ?? "—";
+  const title = `${home} — ${away}`;
+  const description = locale === "ro"
+    ? `${title}. Calendar, scor și raportul meciului FC Edineț.`
+    : `${title}. Дата, счёт и протокол матча FC Edineț.`;
+  return publicMetadata({ title, description, path: `/matches/${encodeURIComponent(id)}`, locale });
+}
+
 function formatDate(value: string, locale: Locale) {
   return new Intl.DateTimeFormat(locale === "ro" ? "ro-RO" : "ru-RU", {
     day: "2-digit",
@@ -173,15 +202,9 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
 
   const locale = (await getLocale()) as Locale;
   const t = copy[locale] ?? copy.ru;
+  const match = await getMatch(id);
+  if (!match) notFound();
   const supabase = await createClient();
-
-  const { data: matchData, error: matchError } = await supabase
-    .from("matches")
-    .select(matchSelect())
-    .eq("id", id)
-    .maybeSingle();
-  if (matchError || !matchData) notFound();
-  const match = matchData as unknown as ClubMatch;
 
   const { data: reportData } = await supabase
     .from("match_reports")
