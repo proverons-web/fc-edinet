@@ -15,9 +15,12 @@ export default function PlayerCard({ player, locale = "ru" }: { player: Player; 
       )}
       <span className="number">{player.shirt_number ?? "—"}</span>
       <div className="playerInfo">
-        <small>{positionLabelsI18n[locale][player.position] ?? player.position}</small>
-        <h3>{fullName}</h3>
-        {player.nationality && <p>{player.nationality}</p>}
+        <span className="playerCardPosition">{positionLabelsI18n[locale][player.position] ?? player.position}</span>
+        <h3><span>{player.first_name}</span><strong>{player.last_name}</strong></h3>
+        <div className="playerCardMeta">
+          <span>{player.nationality || "FC Edineț"}</span>
+          <b>{text.profile} <i aria-hidden="true">→</i></b>
+        </div>
       </div>
     </Link>
   );

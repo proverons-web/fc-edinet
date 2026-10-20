@@ -341,15 +341,6 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
         </>
       </PageHeroShell>
 
-      <PlayerCareerSection
-        player={player}
-        career={careerTotal}
-        seasons={careerSeasons}
-        error={careerError}
-        locale={locale}
-        slug={slug}
-      />
-
       <PlayerStatisticsSection
         player={player}
         seasons={seasons}
@@ -358,6 +349,15 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
         competitions={competitionSummaries}
         recentMatches={recentMatches}
         error={statisticsError}
+        locale={locale}
+        slug={slug}
+      />
+
+      <PlayerCareerSection
+        player={player}
+        career={careerTotal}
+        seasons={careerSeasons}
+        error={careerError}
         locale={locale}
         slug={slug}
       />

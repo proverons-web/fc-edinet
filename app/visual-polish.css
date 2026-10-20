@@ -468,3 +468,102 @@ body :where(h1,h2,h3,h4,h5,h6){text-wrap:balance}
   .fcRefTeamSection{padding:48px 0 52px!important}.fcRefTeamHead{align-items:flex-start!important;margin-bottom:24px!important}.fcRefTeamHead h2{font-size:30px!important}.fcRefPlayers{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}.fcRefPlayerCard{height:250px!important}.fcRefPlayerNumber{left:12px!important;bottom:49px!important;font-size:34px!important}.fcRefPlayerMeta{left:12px!important;right:10px!important;bottom:12px!important}.fcRefPlayerMeta strong{font-size:13px!important}.fcRefPlayerCard:after{display:none}
   .fcRefPartnersStrip{padding:24px 0!important}.fcRefPartnerLogos{gap:18px!important}.fcRefPartnerLogos img{max-width:94px!important;max-height:36px!important}
 }
+
+/* ============================================================
+   FC EDINEȚ v2.5.3 — TEAM + PLAYER PROFILE / PHASE 4
+   ============================================================ */
+
+/* TEAM — squad overview and stronger editorial rhythm */
+.teamHero{position:relative;isolation:isolate}
+.teamHero:after{content:"FC EDINEȚ";position:absolute;right:max(24px,calc((100vw - 1200px)/2));bottom:-.08em;z-index:0;color:rgba(255,255,255,.035);font-family:var(--font-fce-display),Arial,sans-serif;font-size:clamp(90px,13vw,190px);font-weight:900;line-height:.75;letter-spacing:-.055em;white-space:nowrap;pointer-events:none}
+.teamHero .managedPageHeroInner{position:relative;z-index:1}
+.teamPage{padding-top:54px!important;background:linear-gradient(180deg,#04152e 0%,#06244a 46%,#03162f 100%)!important}
+.teamSquadOverview{display:grid;grid-template-columns:minmax(260px,.8fr) minmax(0,1.2fr);gap:1px;margin:0 0 72px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.10);box-shadow:0 20px 60px rgba(0,0,0,.18)}
+.teamSquadOverviewLead{display:flex;align-items:center;gap:22px;min-height:126px;padding:24px 30px;background:linear-gradient(135deg,#0a58ad,#073d80)}
+.teamSquadOverviewNumber{font-family:var(--font-fce-display),Arial,sans-serif;font-size:72px;font-weight:900;line-height:.8;letter-spacing:-.055em;color:#ffd328}
+.teamSquadOverviewLead div{display:grid;gap:6px}.teamSquadOverviewLead small{font-size:9px;font-weight:900;letter-spacing:.16em;color:#a9cbed}.teamSquadOverviewLead strong{font-family:var(--font-fce-display),Arial,sans-serif;font-size:26px;line-height:1;text-transform:uppercase}
+.teamSquadOverviewPositions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:#071d3a}
+.teamSquadOverviewPositions>div{display:grid;align-content:center;gap:6px;min-height:126px;padding:20px 22px;border-left:1px solid rgba(255,255,255,.09)}
+.teamSquadOverviewPositions strong{font-family:var(--font-fce-display),Arial,sans-serif;font-size:30px;line-height:1;color:#fff}
+.teamSquadOverviewPositions span{font-size:10px;font-weight:800;line-height:1.25;text-transform:uppercase;letter-spacing:.055em;color:#8eaac8}
+.teamGroup{position:relative;margin-bottom:82px!important}
+.teamGroupHeading{position:relative;display:flex;align-items:flex-end;gap:18px;margin-bottom:24px!important;padding-bottom:15px;border-bottom:1px solid rgba(255,255,255,.13)}
+.teamGroupHeading .eyebrow{position:absolute;left:0;top:-20px;margin:0!important;font-size:9px!important;letter-spacing:.14em!important;color:#ffd328!important}
+.teamGroupHeading h2{margin:0!important;font-size:clamp(30px,4vw,48px)!important;line-height:.9!important;letter-spacing:-.03em!important}
+.teamGroupCount{margin-left:auto;font-family:var(--font-fce-display),Arial,sans-serif;font-size:25px;font-weight:800;color:rgba(255,255,255,.25)}
+.teamPage .players{grid-template-columns:repeat(4,minmax(0,1fr));gap:18px!important}
+
+/* TEAM — broadcast player card */
+.teamPage .playerCard{min-height:455px!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:5px!important;background:#061b38!important;box-shadow:0 16px 40px rgba(0,0,0,.20)!important;isolation:isolate;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease!important}
+.teamPage .playerCard:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:#ffd328;transform:scaleY(0);transform-origin:bottom;transition:transform .22s ease;z-index:6}
+.teamPage .playerCardLink:hover{transform:translateY(-5px)!important;border-color:rgba(255,211,40,.42)!important;box-shadow:0 26px 64px rgba(0,0,0,.31)!important}
+.teamPage .playerCardLink:hover:before{transform:scaleY(1)}
+.teamPage .playerPhoto{height:325px!important;background:linear-gradient(155deg,#133e73,#071c3a)!important}
+.teamPage .playerPhotoReal{position:relative}
+.teamPage .playerPhotoReal:after{content:"";position:absolute;inset:auto 0 0;height:38%;background:linear-gradient(to top,#061b38,transparent);pointer-events:none}
+.teamPage .playerPhotoReal img{transition:transform .35s ease,filter .35s ease;transform-origin:center 20%}
+.teamPage .playerCardLink:hover .playerPhotoReal img{transform:scale(1.035);filter:saturate(1.04) contrast(1.02)}
+.teamPage .number{top:274px!important;right:14px!important;width:auto!important;min-width:66px!important;height:66px!important;padding:0 12px;border:0!important;border-radius:3px!important;background:#ffd328!important;box-shadow:none!important;color:#071b36!important;font-family:var(--font-fce-display),Arial,sans-serif;font-size:35px!important;font-weight:900!important;text-shadow:none!important}
+.teamPage .playerInfo{min-height:130px;padding:18px 18px 16px!important;background:#061b38!important;overflow:hidden}
+.teamPage .playerInfo:after{right:-18px!important;bottom:-32px!important;width:118px!important;height:136px!important;opacity:.065!important;filter:grayscale(1) brightness(2.4)!important}
+.teamPage .playerCardPosition{display:block;max-width:calc(100% - 72px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#8eb9e8;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.09em}
+.teamPage .playerInfo h3{display:grid;gap:0;margin:7px 0 15px!important;font-family:var(--font-fce-display),Arial,sans-serif;font-size:23px!important;line-height:.92!important;letter-spacing:-.02em!important;text-transform:uppercase}
+.teamPage .playerInfo h3 span{font-weight:500;color:#d7e4f2}.teamPage .playerInfo h3 strong{font-size:1.12em;font-weight:900;color:#fff}
+.teamPage .playerCardMeta{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:11px;border-top:1px solid rgba(255,255,255,.09)}
+.teamPage .playerCardMeta>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#8ca2bb;font-size:10px;font-weight:700}
+.teamPage .playerCardMeta>b{display:flex;align-items:center;gap:7px;flex:none;color:#ffd328;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}.teamPage .playerCardMeta i{font-style:normal;font-size:14px;transition:transform .2s ease}.teamPage .playerCardLink:hover .playerCardMeta i{transform:translateX(4px)}
+
+/* PLAYER PROFILE — matchday identity */
+.playerProfileHero{position:relative;isolation:isolate;background:linear-gradient(118deg,#03142d 0%,#052a57 62%,#0757ac 100%)!important}
+.playerProfileHero:before{content:"FC EDINEȚ";position:absolute;right:-.02em;top:50%;z-index:0;transform:translateY(-50%) rotate(-90deg);transform-origin:center;color:rgba(255,255,255,.035);font-family:var(--font-fce-display),Arial,sans-serif;font-size:clamp(76px,9vw,150px);font-weight:900;line-height:1;letter-spacing:-.055em;white-space:nowrap;pointer-events:none}
+.playerProfileHero .playerProfileGrid{position:relative;z-index:1;grid-template-columns:minmax(340px,.82fr) minmax(0,1.18fr)!important;gap:clamp(44px,6vw,88px)!important}
+.profilePhotoWrap{min-height:620px!important;overflow:visible}
+.profilePhoto{height:620px!important;border-radius:0!important;background:#082347!important;box-shadow:18px 0 60px rgba(0,0,0,.19)}
+.profilePhotoWrap:after{content:"";position:absolute;left:0;right:0;bottom:0;height:32%;background:linear-gradient(to top,rgba(3,20,45,.8),transparent);pointer-events:none}
+.profileNumber{left:-14px!important;bottom:-18px!important;z-index:2;font-family:var(--font-fce-display),Arial,sans-serif;font-size:clamp(150px,16vw,230px)!important;font-weight:900!important;color:rgba(255,211,40,.14)!important}
+.profileIntro{padding-bottom:68px!important}
+.backLink{margin-bottom:42px!important;color:#a9c6e8!important;font-size:10px;font-weight:850!important;text-transform:uppercase;letter-spacing:.07em}
+.profileIntro>.eyebrow{display:inline-flex;align-items:center;gap:9px;margin-bottom:13px!important;color:#ffd328!important;font-size:10px!important;letter-spacing:.12em!important}.profileIntro>.eyebrow:before{content:"";width:26px;height:2px;background:#ffd328}
+.profileIntro h1{font-family:var(--font-fce-display),Arial,sans-serif!important;font-size:clamp(66px,7.8vw,112px)!important;line-height:.78!important;letter-spacing:-.045em!important}
+.profileIntro h1 span{margin-top:.06em;color:#8dc0ff!important}
+.profileFacts{grid-template-columns:repeat(4,minmax(0,1fr))!important;margin-top:36px!important;border:1px solid rgba(255,255,255,.13)!important;border-radius:4px!important;background:rgba(255,255,255,.10)!important}
+.profileFacts>div{min-height:86px;padding:17px 18px!important;background:rgba(2,18,40,.60)!important}
+.profileFacts small{font-size:9px!important;font-weight:850;text-transform:uppercase;letter-spacing:.06em;color:#7f9dbd!important}.profileFacts strong{font-family:var(--font-fce-display),Arial,sans-serif;font-size:19px!important;color:#fff}
+.playerFavoriteAction{margin-top:18px}.playerFavoriteAction .favoriteButton,.playerFavoriteAction .favoriteActiveButton{border-radius:3px!important;min-height:42px;padding:0 16px;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.05em}
+
+/* Season stats first: make the current season feel like the primary story */
+.playerStatsSection{position:relative;padding:76px 0!important;background:#f5f8fc!important}
+.playerStatsSection:before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,#0755a5 0 18%,#ffd328 18% 24%,#e3eaf2 24%)}
+.playerStatsHeader{padding-bottom:17px;border-bottom:1px solid #dbe4ee}
+.playerStatsHeader h2{font-family:var(--font-fce-display),Arial,sans-serif!important;font-size:clamp(38px,4.6vw,62px)!important;line-height:.9!important;letter-spacing:-.035em!important;text-transform:uppercase}
+.playerSeasonNav a{border-radius:3px!important;font-size:10px!important;text-transform:uppercase;letter-spacing:.04em}
+.playerStatsKpiGrid{gap:1px!important;background:#dbe4ee;border:1px solid #dbe4ee}
+.playerStatsKpi{min-height:126px!important;border:0!important;border-radius:0!important;padding:19px!important;background:#fff!important}
+.playerStatsKpi strong{font-family:var(--font-fce-display),Arial,sans-serif;font-size:clamp(34px,3.3vw,50px)!important;color:#082b55!important}.playerStatsKpi span{font-size:9px!important;letter-spacing:.075em!important}
+.playerStatsKpi.accent{background:linear-gradient(155deg,#0757ad,#06417f)!important}.playerStatsKpi.accent strong,.playerStatsKpi.accent span{color:#fff!important}
+.playerStatsMini{border-radius:3px!important;background:#fff!important}.playerStatsBlock{border-radius:5px!important;box-shadow:0 10px 30px rgba(5,35,70,.045)}.playerStatsBlockHead{background:#f8fafc!important}.playerStatsBlockHead h3{font-family:var(--font-fce-display),Arial,sans-serif;text-transform:uppercase;letter-spacing:-.01em}
+.playerMatchResult{border-radius:3px!important}.playerRecentOpponent>img,.playerRecentOpponentLogo{border-radius:3px!important}.playerRecentNumbers>span{border-radius:3px!important}
+
+/* Career and biography — editorial, lighter, less dashboard-like */
+.playerCareerSection{background:#fff!important}.playerCareerHeader h2,.bioCard h2{font-family:var(--font-fce-display),Arial,sans-serif!important;text-transform:uppercase;letter-spacing:-.025em}
+.playerCareerKpis{gap:1px!important;background:#dfe7ef;border:1px solid #dfe7ef}.playerCareerKpis>*{border-radius:0!important}
+.profileSection{padding-top:72px!important;padding-bottom:88px!important;background:#eef3f8!important}
+.profileContentGrid{gap:24px!important;align-items:stretch}.bioCard,.detailsCard{border-radius:5px!important;border:1px solid #d8e2ec!important;background:#fff!important;box-shadow:0 12px 34px rgba(5,35,70,.05)!important}.bioCard{position:relative;overflow:hidden;padding:34px!important}.bioCard:before{content:"";position:absolute;right:-32px;bottom:-46px;width:190px;height:215px;background:url('/brand/fc-edinet-crest.png') center/contain no-repeat;opacity:.035;filter:grayscale(1);pointer-events:none}.bioText{position:relative;font-size:16px!important;line-height:1.78!important;color:#465a70!important}.detailsCard{overflow:hidden}.detailRow{padding:15px 19px!important;border-bottom:1px solid #edf1f5!important}.detailRow:last-child{border-bottom:0!important}
+
+@media(max-width:1100px){
+  .teamPage .players{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .teamSquadOverview{grid-template-columns:1fr}.teamSquadOverviewPositions>div:first-child{border-left:0}
+  .playerProfileHero .playerProfileGrid{grid-template-columns:minmax(300px,.78fr) minmax(0,1.22fr)!important;gap:38px!important}
+  .profileIntro h1{font-size:clamp(58px,8vw,86px)!important}
+}
+@media(max-width:820px){
+  .teamPage .players{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .teamSquadOverviewPositions{grid-template-columns:repeat(2,1fr)}.teamSquadOverviewPositions>div:nth-child(3){border-top:1px solid rgba(255,255,255,.09)}.teamSquadOverviewPositions>div:nth-child(4){border-top:1px solid rgba(255,255,255,.09)}
+  .playerProfileHero .playerProfileGrid{grid-template-columns:1fr!important;gap:0!important}.profileIntro{grid-row:1;padding:46px 0 34px!important}.profilePhotoWrap{grid-row:2;min-height:520px!important;max-width:520px}.profilePhoto{height:520px!important}.profileFacts{max-width:620px}.backLink{margin-bottom:28px!important}
+}
+@media(max-width:560px){
+  .teamHero:after{display:none}.teamPage{padding-top:34px!important}.teamSquadOverview{margin-bottom:54px}.teamSquadOverviewLead{min-height:104px;padding:20px}.teamSquadOverviewNumber{font-size:58px}.teamSquadOverviewLead strong{font-size:21px}.teamSquadOverviewPositions>div{min-height:88px;padding:15px}.teamSquadOverviewPositions strong{font-size:25px}.teamSquadOverviewPositions span{font-size:8px}
+  .teamGroup{margin-bottom:60px!important}.teamPage .players{grid-template-columns:1fr;gap:14px!important}.teamPage .playerCard{min-height:430px!important}.teamPage .playerPhoto{height:305px!important}.teamPage .number{top:254px!important}
+  .playerProfileHero:before{display:none}.profileIntro h1{font-size:55px!important;line-height:.8!important}.profileFacts{grid-template-columns:repeat(2,1fr)!important;margin-top:28px!important}.profileFacts>div{min-height:74px;padding:14px!important}.profilePhotoWrap{min-height:440px!important}.profilePhoto{height:440px!important}.profileNumber{font-size:130px!important}
+  .playerStatsSection{padding:56px 0!important}.playerStatsHeader h2{font-size:38px!important}.playerStatsKpi{min-height:108px!important;padding:14px!important}.profileSection{padding-top:56px!important;padding-bottom:62px!important}.bioCard{padding:24px!important}
+}
