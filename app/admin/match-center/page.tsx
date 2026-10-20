@@ -87,12 +87,12 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
         <div className="container adminHeroInner">
           <div>
             <p className="eyebrow">FC EDINEȚ • MATCH CENTER v2.3.8</p>
-            <h1>Статистика матчей</h1>
+            <h1>Матч-центр</h1>
             <p>Единая точка для отчёта, событий, составов, командных цифр и связи со статистикой игроков.</p>
           </div>
           <div className="adminHeroActions">
             <Link href="/admin" className="adminBack">← Админка</Link>
-            <Link href="/admin/matches" className="rowAction muted">Календарь матчей</Link>
+            <Link href="/admin/matches" className="rowAction muted">Открыть календарь</Link>
           </div>
         </div>
       </section>

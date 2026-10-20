@@ -1,0 +1,15 @@
+FC EDINEȚ v2.8.4 — Admin Cleanup
+
+Changes:
+- cleaned and clarified Admin sidebar terminology
+- Match Center is now clearly presented as the detailed match protocol workflow
+- friendly Admin breadcrumb trail instead of raw URL slugs
+- mobile Admin menu closes on route change / Escape and locks background scroll
+- repetitive “back to admin” hero links are removed inside the Admin shell
+- filters, empty states, utility surfaces and page spacing are more consistent
+- advanced Page Builder is explicitly marked as a secondary compatibility editor; Site Builder remains the primary workflow
+- admin table containers receive safer horizontal overflow handling
+- editor/detail page headers are normalized to the Admin shell
+- no public-site renderer or Supabase schema changes
+
+No SQL migration required.
