@@ -3320,3 +3320,74 @@ body:has(.adminEmbedded){background:#f3f6fa}
   .matchCenterAutoStats{grid-column:2/-1}
   .matchCenterLineupsGrid .matchLineupRow{grid-template-columns:24px minmax(0,1fr) 40px 56px 30px}
 }
+
+
+/* ============================================================
+   FC EDINEȚ v2.9.4 — unified lineups + grouped substitutions
+   ============================================================ */
+/* Both teams use one visual system. The data source differs, the editor does not. */
+.matchCenterLineupsGrid.club-home,
+.matchCenterLineupsGrid.club-away{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:stretch}
+.matchCenterLineupsGrid.club-home>.club,
+.matchCenterLineupsGrid.club-home>.opponent,
+.matchCenterLineupsGrid.club-away>.club,
+.matchCenterLineupsGrid.club-away>.opponent{grid-column:auto;min-width:0}
+.matchCenterLineupsGrid>.statisticsPanel{height:100%}
+.matchCenterLineupsGrid .statisticsPanelHead.matchCenterSectionHead,
+.matchCenterLineupsGrid .matchLineupPanel>.statisticsPanelHead{min-height:132px;padding:20px 20px 14px;box-sizing:border-box}
+.matchCenterLineupsGrid .statisticsPanelHead h2{font-size:23px;line-height:1.05}
+.matchCenterLineupsGrid .statisticsPanelHead p:not(.eyebrow){font-size:11px;line-height:1.5;max-width:620px}
+
+/* Identical squad-row geometry on both sides. */
+.matchCenterSquadCompactRow,
+.matchCenterLineupsGrid .matchCenterSquadCompactRow.opponent-unified{grid-template-columns:30px minmax(0,1fr) 118px 40px 102px;gap:8px;min-height:58px;padding:7px 9px;border-radius:10px;align-items:center;overflow:hidden}
+.matchCenterSquadSlot{font-size:11px;font-weight:950}
+.matchCenterPlayerPick select,
+.matchCenterPlayerPick input,
+.matchCenterOpponentName{height:39px!important;font-size:13.5px!important;font-weight:850!important;line-height:1.1;color:#0a2e55}
+.matchCenterPlayerPick select{padding-left:12px;padding-right:32px}
+.matchCenterCompactPosition{height:39px!important;font-size:10.5px!important;font-weight:850!important}
+.matchCenterCaptainToggle{height:39px!important}
+.matchCenterAutoStats{min-height:39px;font-size:9px}
+.matchCenterAutoStats span{font-size:8.5px;padding:0 6px}
+
+/* Opponent identity mirrors the club identity area while retaining shirt-number input. */
+.matchCenterOpponentIdentity{display:grid;grid-template-columns:54px minmax(0,1fr);gap:7px;min-width:0}
+.matchCenterOpponentNumber{width:54px!important;min-width:54px!important;height:39px!important;text-align:center;font-size:11px!important;font-weight:850!important;padding:0 4px!important}
+.matchCenterOpponentName{width:100%;min-width:0;padding:0 11px;text-overflow:ellipsis}
+.matchCenterOpponentSquadList{gap:6px}
+.matchCenterOpponentSquadWrap{margin-top:0}
+.matchCenterOpponentUnifiedForm{gap:12px}
+.matchCenterOpponentSaveBar{margin-top:auto}
+
+/* Use the same cards/summary rhythm for both teams. */
+.matchCenterLineupsGrid .matchCenterSquadMeta{grid-template-columns:minmax(130px,.7fr) minmax(220px,1.3fr);gap:10px}
+.matchCenterLineupsGrid .matchCenterSquadSummary{grid-column:1/-1;margin-top:0}
+.matchCenterLineupsGrid .matchCenterSquadTableWrap>h3{font-size:15px;margin:0 0 9px;font-weight:950;color:#0b3159}
+.matchCenterLineupsGrid .matchCenterBenchDetails>summary,
+.matchCenterLineupsGrid .matchCenterSquadTableWrap{font-size:12px}
+
+/* Multiple substitutions by the same team at the same minute are one timeline block. */
+.matchTimelineEvent.grouped-substitutions .matchTimelineCard{padding-bottom:10px}
+.matchTimelineSubstitutionList{display:grid;gap:7px;margin-top:7px}
+.matchTimelineSubstitutionItem{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 9px;border:1px solid rgba(10,55,100,.10);border-radius:8px;background:rgba(255,255,255,.76)}
+.matchTimelineSubstitutionItem>strong{font-size:11.5px;line-height:1.35;color:#0c3158;min-width:0}
+.matchTimelineSubstitutionItem>strong span{padding:0 4px;color:#6b8097}
+.matchTimelineInlineActions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.matchTimelineInlineActions summary{font-size:9px;font-weight:900;color:#0664cc;cursor:pointer}
+.matchTimelineInlineActions .rowAction{min-height:28px;padding:4px 8px;font-size:8px}
+.matchTimelineInlineActions details[open]{grid-column:1/-1}
+.matchTimelineInlineActions .matchEventEditForm{margin-top:8px;min-width:min(520px,70vw)}
+
+@media(max-width:1240px){
+  .matchCenterLineupsGrid.club-home,.matchCenterLineupsGrid.club-away{grid-template-columns:1fr}
+  .matchCenterSquadCompactRow,.matchCenterLineupsGrid .matchCenterSquadCompactRow.opponent-unified{grid-template-columns:30px minmax(0,1fr) 118px 40px 110px}
+}
+@media(max-width:720px){
+  .matchCenterSquadCompactRow,.matchCenterLineupsGrid .matchCenterSquadCompactRow.opponent-unified{grid-template-columns:28px minmax(0,1fr) 88px 38px}
+  .matchCenterAutoStats{grid-column:2/-1}
+  .matchCenterOpponentIdentity{grid-template-columns:48px minmax(0,1fr)}
+  .matchCenterOpponentNumber{width:48px!important;min-width:48px!important}
+  .matchTimelineSubstitutionItem{grid-template-columns:1fr}
+  .matchTimelineInlineActions{justify-content:flex-start}
+}

@@ -76,7 +76,7 @@ export default function LineupEditor({
           <h2>{teamName}</h2>
           <p>Введи состав соперника вручную. Сохранённые игроки сразу появятся в событиях матча.</p>
         </div>
-        <span className="matchCenterVersionBadge">{starterCount}/11 • {subCount} запасных</span>
+        <span className={`statisticsState ${starterCount === 11 ? "complete" : starterCount > 0 ? "draft" : "empty"}`}>{starterCount}/11 • {subCount} запасных</span>
       </div>
 
       <div className="matchLineupTeams singleOpponent">
@@ -145,11 +145,11 @@ function TeamLineup({
         </form>
       )}
 
-      <form action={saveMatchLineup} className="matchLineupForm">
+      <form action={saveMatchLineup} className="matchLineupForm matchCenterOpponentUnifiedForm">
         <input type="hidden" name="match_id" value={matchId} />
         <input type="hidden" name="side" value={side} />
 
-        <div className="matchLineupMeta">
+        <div className="matchCenterSquadMeta compact">
           <label className="fieldGroup">
             <span>Схема</span>
             <input name="formation" defaultValue={setting?.formation ?? ""} placeholder="4-3-3" maxLength={40} />
@@ -158,10 +158,14 @@ function TeamLineup({
             <span>Тренер</span>
             <input name="coach_name" defaultValue={setting?.coach_name ?? ""} placeholder="Имя тренера" maxLength={160} />
           </label>
+          <div className="matchCenterSquadSummary">
+            <span><b>{starterCount}</b>/11 старт</span>
+            <span><b>{subCount}</b> запасных</span>
+          </div>
         </div>
 
         <LineupGroup
-          title="Стартовые 11"
+          title="Стартовый состав"
           role="starter"
           slots={11}
           map={starters}
@@ -170,19 +174,29 @@ function TeamLineup({
           events={events}
           open
         />
-        <LineupGroup
-          title="Запасные"
-          role="substitute"
-          slots={12}
-          map={substitutes}
-          isClub={isClub}
-          players={players}
-          events={events}
-        />
+        <details className="matchCenterBenchDetails" open={subCount > 0}>
+          <summary>
+            <span>Запасные</span>
+            <small>{subCount} выбрано</small>
+          </summary>
+          <LineupGroup
+            title=""
+            role="substitute"
+            slots={12}
+            map={substitutes}
+            isClub={isClub}
+            players={players}
+            events={events}
+            bare
+          />
+        </details>
 
-        <footer className="matchLineupFooter">
-          <span>Пустые строки не сохраняются. Для соперника достаточно имени игрока.</span>
-          <button className="primaryButton" type="submit">Сохранить состав</button>
+        <footer className="matchCenterUnifiedSaveBar compact matchCenterOpponentSaveBar">
+          <div>
+            <strong>Состав соперника</strong>
+            <span>Пустые строки не сохраняются. После сохранения игроки доступны в событиях.</span>
+          </div>
+          <button className="primaryButton" type="submit">Сохранить</button>
         </footer>
       </form>
     </article>
@@ -198,6 +212,7 @@ function LineupGroup({
   players,
   events,
   open = false,
+  bare = false,
 }: {
   title: string;
   role: "starter" | "substitute";
@@ -207,69 +222,81 @@ function LineupGroup({
   players: Player[];
   events: MatchEvent[];
   open?: boolean;
+  bare?: boolean;
 }) {
-  const filled = [...map.values()].length;
-  return (
-    <details className="matchLineupGroup" open={open}>
-      <summary>
-        <strong>{title}</strong>
-        <span>{filled}/{slots}</span>
-      </summary>
-      <div className="matchLineupRows">
-        {Array.from({ length: slots }, (_, index) => index + 1).map((slot) => {
-          const entry = map.get(slot);
-          const notes = entry ? substitutionNotes(entry, events) : [];
-          return (
-            <div className={`matchLineupRow ${entry ? "filled" : ""} position-${entry?.position ?? "empty"}`} key={`${role}-${slot}`}>
-              <span className="matchLineupSlot">{slot}</span>
-              <div className="matchLineupPlayerField">
-                {isClub ? (
-                  <>
-                    <select name={`${role}_${slot}_player_id`} defaultValue={entry?.player_id ?? ""}>
-                      <option value="">— выбрать игрока —</option>
-                      {players.map((player) => (
-                        <option value={String(player.id)} key={player.id}>
-                          {player.shirt_number != null ? `#${player.shirt_number} ` : ""}{player.first_name} {player.last_name}{!player.is_active ? " · архив" : ""}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      name={`${role}_${slot}_player_name`}
-                      defaultValue={entry?.player_id ? "" : entry?.player_name ?? ""}
-                      placeholder="или имя вручную"
-                      maxLength={120}
-                    />
-                  </>
-                ) : (
-                  <input name={`${role}_${slot}_player_name`} defaultValue={entry?.player_name ?? ""} placeholder="Имя игрока" maxLength={120} />
-                )}
-              </div>
-              <input
-                className="matchLineupNumber"
-                name={`${role}_${slot}_shirt_number`}
-                type="number"
-                min={0}
-                max={99}
-                defaultValue={entry?.shirt_number ?? ""}
-                placeholder="#"
-              />
-              <select className="matchLineupPosition" name={`${role}_${slot}_position`} defaultValue={entry?.position ?? ""}>
-                <option value="">Поз.</option>
-                {POSITION_OPTIONS.map(([value, label]) => {
-                  return <option value={value} key={value}>{label}</option>;
-                })}
-              </select>
-              <label className="matchLineupCaptain">
-                <input name={`${role}_${slot}_captain`} type="checkbox" defaultChecked={Boolean(entry?.is_captain)} />
-                <span>C</span>
-              </label>
-              <div className="matchLineupSubNotes">
-                {notes.map((note, noteIndex) => <span className={note.tone} key={`${note.label}-${noteIndex}`}>{note.label}</span>)}
-              </div>
+  const rows = (
+    <div className="matchCenterSquadList matchCenterOpponentSquadList">
+      {Array.from({ length: slots }, (_, index) => index + 1).map((slot) => {
+        const entry = map.get(slot);
+        const notes = entry ? substitutionNotes(entry, events) : [];
+        const hasPlayer = Boolean(entry?.player_id || entry?.player_name?.trim());
+        const positionClass = entry?.position ? `position-${entry.position}` : "position-empty";
+        return (
+          <div className={`matchCenterSquadCompactRow opponent-unified ${role} ${hasPlayer ? "filled" : "empty"} ${positionClass}`} key={`${role}-${slot}`}>
+            <span className="matchCenterSquadSlot">{slot}</span>
+            <div className="matchCenterPlayerPick opponent-pick">
+              {isClub ? (
+                <>
+                  <select name={`${role}_${slot}_player_id`} defaultValue={entry?.player_id ?? ""}>
+                    <option value="">— выбрать по фамилии —</option>
+                    {players.map((player) => (
+                      <option value={String(player.id)} key={player.id}>
+                        {player.last_name} {player.first_name}{player.shirt_number != null ? ` · #${player.shirt_number}` : ""}{!player.is_active ? " · архив" : ""}
+                      </option>
+                    ))}
+                  </select>
+                  {!entry?.player_id && (
+                    <input name={`${role}_${slot}_player_name`} defaultValue={entry?.player_name ?? ""} placeholder="ФИО вручную" maxLength={120} />
+                  )}
+                </>
+              ) : (
+                <div className="matchCenterOpponentIdentity">
+                  <input
+                    className="matchCenterOpponentNumber"
+                    name={`${role}_${slot}_shirt_number`}
+                    type="number"
+                    min={0}
+                    max={99}
+                    defaultValue={entry?.shirt_number ?? ""}
+                    placeholder="#"
+                    aria-label={`Номер игрока ${slot}`}
+                  />
+                  <input
+                    className="matchCenterOpponentName"
+                    name={`${role}_${slot}_player_name`}
+                    defaultValue={entry?.player_name ?? ""}
+                    placeholder="Фамилия Имя"
+                    maxLength={120}
+                  />
+                </div>
+              )}
             </div>
-          );
-        })}
-      </div>
-    </details>
+            {isClub && <input type="hidden" name={`${role}_${slot}_shirt_number`} value={entry?.shirt_number ?? ""} />}
+            <select className="matchCenterCompactPosition" name={`${role}_${slot}_position`} defaultValue={entry?.position ?? ""} disabled={isClub && !hasPlayer}>
+              <option value="">Позиция</option>
+              {POSITION_OPTIONS.map(([value, label]) => <option value={value} key={value}>{label}</option>)}
+            </select>
+            <label className="matchCenterCaptainToggle" title="Капитан">
+              <input name={`${role}_${slot}_captain`} type="checkbox" defaultChecked={Boolean(entry?.is_captain)} disabled={isClub && !hasPlayer} />
+              <span>C</span>
+            </label>
+            <div className="matchCenterAutoStats matchCenterOpponentEventNotes" aria-label="События игрока">
+              {notes.length > 0 ? notes.map((note, noteIndex) => (
+                <span className={note.tone} key={`${note.label}-${noteIndex}`}>{note.label}</span>
+              )) : hasPlayer ? <span className="muted">из событий</span> : null}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  if (bare) return rows;
+  return (
+    <div className="matchCenterSquadTableWrap compact matchCenterOpponentSquadWrap">
+      {title && <h3>{title}</h3>}
+      {rows}
+    </div>
   );
 }
+

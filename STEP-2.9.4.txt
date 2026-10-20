@@ -1,0 +1,7 @@
+FC EDINEȚ v2.9.4 — Match Center unified lineups + grouped substitutions
+
+- Home and away lineup cards now share the same row geometry, typography and controls.
+- Player names are larger and easier to read.
+- Opponent rows use the same structure as FC Edineț while keeping manual shirt-number/name entry.
+- Multiple substitutions by the same team at the same minute render as one timeline card with multiple substitution lines.
+- No SQL migration required.

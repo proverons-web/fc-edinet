@@ -509,6 +509,17 @@ function TimelineHalf({
   clubSide: "home" | "away" | null;
   participants: EventParticipantOption[];
 }) {
+  const grouped: Array<{ key: string; events: MatchEvent[] }> = [];
+  for (const event of events) {
+    const canGroup = event.event_type === "substitution";
+    const key = canGroup
+      ? `sub:${String(event.team_id)}:${event.minute}:${event.stoppage_minute}`
+      : `event:${String(event.id)}`;
+    const existing = grouped.find((group) => group.key === key);
+    if (existing) existing.events.push(event);
+    else grouped.push({ key, events: [event] });
+  }
+
   return (
     <div className="matchTimelineHalf">
       <div className="matchTimelineHalfHead">
@@ -519,47 +530,86 @@ function TimelineHalf({
         <div className="matchTimelineEmpty">Событий нет</div>
       ) : (
         <div className="matchTimeline">
-          {events.map((event) => {
-            const isHome = String(event.team_id) === String(match.home_team_id);
+          {grouped.map((group) => {
+            const first = group.events[0];
+            const isHome = String(first.team_id) === String(match.home_team_id);
             const isClubEvent = clubSide === "home" ? isHome : clubSide === "away" ? !isHome : false;
             const teamName = isHome ? match.home?.name : match.away?.name;
+            const isSubGroup = first.event_type === "substitution";
             return (
-              <article className={`matchTimelineEvent ${isHome ? "home" : "away"} ${isClubEvent ? "club-event" : "opponent-event"}`} key={event.id}>
-                <div className="matchTimelineMinute">{eventMinute(event)}</div>
-                <div className="matchTimelineRail"><span>{EVENT_ICONS[event.event_type]}</span></div>
+              <article className={`matchTimelineEvent ${isHome ? "home" : "away"} ${isClubEvent ? "club-event" : "opponent-event"} ${isSubGroup && group.events.length > 1 ? "grouped-substitutions" : ""}`} key={group.key}>
+                <div className="matchTimelineMinute">{eventMinute(first)}</div>
+                <div className="matchTimelineRail"><span>{EVENT_ICONS[first.event_type]}</span></div>
                 <div className="matchTimelineCard">
                   <div className="matchTimelineEventHead">
                     <div>
                       <small>{teamName ?? "Команда"}</small>
-                      <strong>{EVENT_LABELS[event.event_type]}</strong>
+                      <strong>{isSubGroup && group.events.length > 1 ? `Замены · ${group.events.length}` : EVENT_LABELS[first.event_type]}</strong>
                     </div>
-                    <span>{eventParticipant(event)}</span>
+                    {!isSubGroup && <span>{eventParticipant(first)}</span>}
                   </div>
-                  {event.description && event.description !== event.player_name && <p>{event.description}</p>}
-                  <div className="matchTimelineActions">
-                    <details>
-                      <summary>Изменить</summary>
-                      <form action={updateMatchEvent} className="matchEventEditForm">
-                        <input type="hidden" name="match_id" value={String(match.id)} />
-                        <input type="hidden" name="event_id" value={String(event.id)} />
-                        <EventFields
-                          homeTeamId={String(match.home_team_id)}
-                          awayTeamId={String(match.away_team_id)}
-                          homeTeamName={match.home?.name ?? "Хозяева"}
-                          awayTeamName={match.away?.name ?? "Гости"}
-                          participants={participants}
-                          defaults={event}
-                          compact
-                        />
-                        <button className="rowAction" type="submit">Сохранить изменения</button>
-                      </form>
-                    </details>
-                    <form action={deleteMatchEvent}>
-                      <input type="hidden" name="match_id" value={String(match.id)} />
-                      <input type="hidden" name="event_id" value={String(event.id)} />
-                      <button className="rowAction muted" type="submit">Удалить</button>
-                    </form>
-                  </div>
+
+                  {isSubGroup ? (
+                    <div className="matchTimelineSubstitutionList">
+                      {group.events.map((event, index) => (
+                        <div className="matchTimelineSubstitutionItem" key={event.id}>
+                          <strong>{event.player_name || "Игрок ушёл"} <span>→</span> {event.related_player_name || "Игрок вышел"}</strong>
+                          <div className="matchTimelineInlineActions">
+                            <details>
+                              <summary>Изменить {group.events.length > 1 ? index + 1 : ""}</summary>
+                              <form action={updateMatchEvent} className="matchEventEditForm">
+                                <input type="hidden" name="match_id" value={String(match.id)} />
+                                <input type="hidden" name="event_id" value={String(event.id)} />
+                                <EventFields
+                                  homeTeamId={String(match.home_team_id)}
+                                  awayTeamId={String(match.away_team_id)}
+                                  homeTeamName={match.home?.name ?? "Хозяева"}
+                                  awayTeamName={match.away?.name ?? "Гости"}
+                                  participants={participants}
+                                  defaults={event}
+                                  compact
+                                />
+                                <button className="rowAction" type="submit">Сохранить изменения</button>
+                              </form>
+                            </details>
+                            <form action={deleteMatchEvent}>
+                              <input type="hidden" name="match_id" value={String(match.id)} />
+                              <input type="hidden" name="event_id" value={String(event.id)} />
+                              <button className="rowAction muted" type="submit">Удалить</button>
+                            </form>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <>
+                      {first.description && first.description !== first.player_name && <p>{first.description}</p>}
+                      <div className="matchTimelineActions">
+                        <details>
+                          <summary>Изменить</summary>
+                          <form action={updateMatchEvent} className="matchEventEditForm">
+                            <input type="hidden" name="match_id" value={String(match.id)} />
+                            <input type="hidden" name="event_id" value={String(first.id)} />
+                            <EventFields
+                              homeTeamId={String(match.home_team_id)}
+                              awayTeamId={String(match.away_team_id)}
+                              homeTeamName={match.home?.name ?? "Хозяева"}
+                              awayTeamName={match.away?.name ?? "Гости"}
+                              participants={participants}
+                              defaults={first}
+                              compact
+                            />
+                            <button className="rowAction" type="submit">Сохранить изменения</button>
+                          </form>
+                        </details>
+                        <form action={deleteMatchEvent}>
+                          <input type="hidden" name="match_id" value={String(match.id)} />
+                          <input type="hidden" name="event_id" value={String(first.id)} />
+                          <button className="rowAction muted" type="submit">Удалить</button>
+                        </form>
+                      </div>
+                    </>
+                  )}
                 </div>
               </article>
             );
