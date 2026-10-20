@@ -147,25 +147,47 @@ function PartnerCard({ partner, locale, variant }: { partner: Partner; locale: L
 }
 
 function AcademyIntro({ section, layout, locale }: { section: ProPageLayoutConfig["sections"][number]; layout: ProPageLayoutConfig; locale: Locale }) {
-  return <section className={proSectionClass(section)} style={proSectionStyle(section)}><div className="proSectionMotion"><div className="proSectionInner proAcademyIntro"><p className="eyebrow blue">FC EDINEȚ ACADEMY</p><h2>{localizedAcademy(layout, "intro_title", locale)}</h2><p>{localizedAcademy(layout, "intro_text", locale)}</p><div className="proAcademyFact"><strong>FC EDINEȚ</strong><span>{locale === "ro" ? "De la primii pași până la echipa mare" : "От первых шагов до основной команды"}</span></div></div></div></section>;
+  const benefits = locale === "ro" ? [
+    ["01", "Tehnică", "Controlul mingii, coordonare și decizii bune sub presiune."],
+    ["02", "Caracter", "Disciplină, responsabilitate și respect pentru echipă."],
+    ["03", "Progres", "Obiective clare pentru fiecare etapă de dezvoltare."],
+  ] : [
+    ["01", "Техника", "Работа с мячом, координация и правильные решения под давлением."],
+    ["02", "Характер", "Дисциплина, ответственность и уважение к команде."],
+    ["03", "Прогресс", "Понятные цели на каждом этапе развития игрока."],
+  ];
+  return <section className={`${proSectionClass(section)} academyIntroSection`} style={proSectionStyle(section)}><div className="proSectionMotion"><div className="proSectionInner proAcademyIntro">
+    <div className="proAcademyIntroCopy"><p className="eyebrow blue">FC EDINEȚ ACADEMY</p><h2>{localizedAcademy(layout, "intro_title", locale)}</h2><p>{localizedAcademy(layout, "intro_text", locale)}</p><div className="proAcademyBenefits">{benefits.map(([num,title,body]) => <article key={num}><span>{num}</span><div><h3>{title}</h3><p>{body}</p></div></article>)}</div></div>
+    <div className="proAcademyFact"><div className="proAcademyFactMark">FCE</div><strong>FC EDINEȚ</strong><span>{locale === "ro" ? "De la primii pași până la echipa mare" : "От первых шагов до основной команды"}</span><small>{locale === "ro" ? "Academie • Edineț • Moldova" : "Академия • Единец • Молдова"}</small></div>
+  </div></div></section>;
 }
 
 function AcademyGroups({ section, locale }: { section: ProPageLayoutConfig["sections"][number]; locale: Locale }) {
   const groups = locale === "ro" ? [
-    ["U7–U9", "Primii pași", "Tehnică, coordonare și dragoste pentru joc."],
-    ["U11–U13", "Dezvoltare", "Înțelegerea jocului, disciplină și lucru în echipă."],
-    ["U15–U17", "Performanță", "Pregătire pentru fotbalul competitiv și echipa mare."],
+    ["U7–U9", "Primii pași", "Tehnică, coordonare și dragoste pentru joc.", "Bază tehnică", "2–3 sesiuni / săpt."],
+    ["U11–U13", "Dezvoltare", "Înțelegerea jocului, disciplină și lucru în echipă.", "Tactică + tehnică", "3 sesiuni / săpt."],
+    ["U15–U17", "Performanță", "Pregătire pentru fotbalul competitiv și echipa mare.", "Performanță", "3–4 sesiuni / săpt."],
   ] : [
-    ["U7–U9", "Первые шаги", "Техника, координация и любовь к игре."],
-    ["U11–U13", "Развитие", "Понимание футбола, дисциплина и командная работа."],
-    ["U15–U17", "Подготовка", "Переход к соревновательному футболу и основной команде."],
+    ["U7–U9", "Первые шаги", "Техника, координация и любовь к игре.", "Базовая техника", "2–3 тренировки / нед."],
+    ["U11–U13", "Развитие", "Понимание футбола, дисциплина и командная работа.", "Тактика + техника", "3 тренировки / нед."],
+    ["U15–U17", "Подготовка", "Переход к соревновательному футболу и основной команде.", "Высокая интенсивность", "3–4 тренировки / нед."],
   ];
-  return <section className={proSectionClass(section)} style={proSectionStyle(section)}><div className="proSectionMotion"><div className="proSectionInner"><SectionHeading eyebrow="FC EDINEȚ" title={locale === "ro" ? "Grupe de vârstă" : "Возрастные группы"} align={section.align}/><div className={`proCardGrid proAcademyGroups proAcademyGroups-${section.variant}`}>{groups.map(([age, title, body]) => <article className="proAcademyGroupCard" key={age}><b>{age}</b><h3>{title}</h3><p>{body}</p></article>)}</div></div></div></section>;
+  return <section className={`${proSectionClass(section)} academyGroupsSection`} style={proSectionStyle(section)}><div className="proSectionMotion"><div className="proSectionInner"><SectionHeading eyebrow="FC EDINEȚ" title={locale === "ro" ? "Grupe de vârstă" : "Возрастные группы"} align={section.align}/><div className={`proCardGrid proAcademyGroups proAcademyGroups-${section.variant}`}>{groups.map(([age, title, body, focus, schedule], index) => <article className="proAcademyGroupCard" key={age}><div className="proAcademyGroupTop"><b>{age}</b><span>{String(index + 1).padStart(2, "0")}</span></div><h3>{title}</h3><p>{body}</p><div className="proAcademyGroupMeta"><span>{focus}</span><span>{schedule}</span></div></article>)}</div></div></div></section>;
 }
 
 function AcademyPathway({ section, locale }: { section: ProPageLayoutConfig["sections"][number]; locale: Locale }) {
-  const steps = locale === "ro" ? ["Selecție", "Fundamente", "Competiție", "Echipa mare"] : ["Набор", "Фундамент", "Соревнования", "Основная команда"];
-  return <section className={proSectionClass(section)} style={proSectionStyle(section)}><div className="proSectionMotion"><div className="proSectionInner"><SectionHeading eyebrow="PLAYER PATHWAY" title={locale === "ro" ? "Drumul jucătorului" : "Путь игрока"} align={section.align}/><div className={`proCardGrid proAcademyPathway proAcademyPathway-${section.variant}`}>{steps.map((title, index) => <article key={title}><span>{String(index + 1).padStart(2, "0")}</span><h3>{title}</h3></article>)}</div></div></div></section>;
+  const steps = locale === "ro" ? [
+    ["U7–U9", "Selecție", "Coordonare, tehnică de bază și bucuria jocului."],
+    ["U11–U13", "Fundamente", "Citirea jocului, disciplină și responsabilitate."],
+    ["U15–U17", "Competiție", "Ritm, intensitate și pregătire pentru seniori."],
+    ["SENIOR", "Echipa mare", "Integrare în structura primei echipe FC Edineț."],
+  ] : [
+    ["U7–U9", "Набор", "Координация, базовая техника и удовольствие от игры."],
+    ["U11–U13", "Фундамент", "Чтение игры, дисциплина и ответственность."],
+    ["U15–U17", "Соревнования", "Темп, интенсивность и подготовка к взрослому футболу."],
+    ["SENIOR", "Основная команда", "Переход в структуру первой команды FC Edineț."],
+  ];
+  return <section className={`${proSectionClass(section)} academyPathwaySection`} style={proSectionStyle(section)}><div className="proSectionMotion"><div className="proSectionInner"><SectionHeading eyebrow={locale === "ro" ? "DRUMUL JUCĂTORULUI" : "ПУТЬ ИГРОКА"} title={locale === "ro" ? "De la academie la prima echipă" : "От академии до первой команды"} align={section.align}/><div className={`proCardGrid proAcademyPathway proAcademyPathway-${section.variant}`}>{steps.map(([age,title,body], index) => <article key={title}><div className="proAcademyPathIndex"><span>{String(index + 1).padStart(2, "0")}</span><b>{age}</b></div><h3>{title}</h3><p>{body}</p></article>)}</div></div></div></section>;
 }
 
 function CtaSection({ section, eyebrow, title, body, href, button }: { section: ProPageLayoutConfig["sections"][number]; eyebrow: string; title: string; body: string; href: string; button: string }) {

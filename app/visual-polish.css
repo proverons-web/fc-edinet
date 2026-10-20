@@ -794,3 +794,84 @@ body :where(h1,h2,h3,h4,h5,h6){text-wrap:balance}
   .proPartners-rows{grid-template-columns:1fr!important}.proPartners-rows .proPartnerCard{grid-template-columns:1fr!important;text-align:center}.proPartners-rows .proPartnerLogo{height:70px!important}
   .managedProPage-partners .proCta{padding:25px!important}.managedProPage-partners .proCta:after{font-size:72px}
 }
+
+/* ==========================================================
+   FC EDINEȚ v2.5.8 — ACADEMY / PHASE 9
+   ========================================================== */
+.managedProPage-academy{background:#f4f7fb}
+.managedProPage-academy .proManagedHero{position:relative;overflow:hidden;isolation:isolate}
+.managedProPage-academy .proManagedHero:after{content:"ACADEMY";position:absolute;right:3vw;bottom:-.18em;z-index:0;font-family:var(--font-fce-display),Arial,sans-serif;font-size:clamp(92px,15vw,220px);font-weight:900;line-height:.78;letter-spacing:-.06em;color:rgba(255,255,255,.035);pointer-events:none}
+.managedProPage-academy .proManagedHeroInner{position:relative;z-index:2}
+.managedProPage-academy .proManagedHeroInner h1{max-width:980px;font-family:var(--font-fce-display),Arial,sans-serif;font-size:clamp(58px,7.2vw,106px);line-height:.86;letter-spacing:-.05em;text-transform:uppercase;text-wrap:balance}
+.managedProPage-academy .proManagedHeroInner>p:not(.eyebrow){max-width:760px;font-size:16px;line-height:1.7;color:#d7e4f2}
+
+.academyIntroSection{background:#f4f7fb!important}
+.proAcademyIntro{grid-template-columns:minmax(0,1.25fr) minmax(300px,.55fr)!important;gap:56px!important;align-items:stretch!important}
+.proAcademyIntroCopy{min-width:0}
+.proAcademyIntro h2{max-width:830px;margin:7px 0 20px!important;font-family:var(--font-fce-display),Arial,sans-serif;font-size:clamp(46px,5.6vw,78px)!important;line-height:.9!important;letter-spacing:-.045em;text-transform:uppercase;color:#071d3b}
+.proAcademyIntroCopy>p:not(.eyebrow){max-width:790px;margin:0;color:#566f87;font-size:16px;line-height:1.85}
+.proAcademyBenefits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin-top:34px;border:1px solid #dce5ee;background:#dce5ee}
+.proAcademyBenefits article{display:grid;grid-template-columns:auto 1fr;gap:13px;padding:22px 20px;background:#fff}
+.proAcademyBenefits article>span{color:#0f63ff;font-family:var(--font-fce-display),Arial,sans-serif;font-size:13px;font-weight:900;letter-spacing:.06em}
+.proAcademyBenefits h3{margin:0 0 6px;font-family:var(--font-fce-display),Arial,sans-serif;font-size:20px;line-height:1;text-transform:uppercase;color:#0a315f}
+.proAcademyBenefits p{margin:0;color:#6b8095;font-size:11px;line-height:1.6}
+.proAcademyFact{position:relative;display:flex;flex-direction:column;justify-content:flex-end;min-height:100%;padding:34px!important;overflow:hidden;border-radius:5px!important;background:linear-gradient(155deg,#041630 0%,#082d5c 62%,#0755a5 100%)!important;box-shadow:0 22px 58px rgba(5,36,73,.14)}
+.proAcademyFact:after{content:"";position:absolute;right:-42px;top:-36px;width:220px;height:220px;background:url('/brand/fc-edinet-crest.png') center/contain no-repeat;opacity:.085;filter:grayscale(1) brightness(3)}
+.proAcademyFactMark{position:absolute;left:30px;top:28px;color:#ffd328;font-family:var(--font-fce-display),Arial,sans-serif;font-size:60px;font-weight:900;line-height:.8;letter-spacing:-.05em}
+.proAcademyFact strong{position:relative;z-index:1;margin-top:145px;font-family:var(--font-fce-display),Arial,sans-serif;font-size:36px!important;line-height:.92;text-transform:uppercase}
+.proAcademyFact span{position:relative;z-index:1;margin-top:12px!important;color:#d5e4f2!important;font-size:14px;line-height:1.55}
+.proAcademyFact small{position:relative;z-index:1;margin-top:22px;padding-top:18px;border-top:1px solid rgba(255,255,255,.14);color:#8fb4db;font-size:8px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+
+.academyGroupsSection{position:relative;overflow:hidden;background:#fff!important}
+.academyGroupsSection:after{content:"DEVELOPMENT";position:absolute;right:-.04em;bottom:-.15em;font-family:var(--font-fce-display),Arial,sans-serif;font-size:clamp(90px,13vw,180px);font-weight:900;line-height:.8;letter-spacing:-.055em;color:#eef3f8;pointer-events:none}
+.academyGroupsSection .proSectionInner{position:relative;z-index:1}
+.managedProPage-academy .proSectionHeading{margin-bottom:26px}
+.managedProPage-academy .proSectionHeading h2{font-family:var(--font-fce-display),Arial,sans-serif;font-size:clamp(40px,5vw,66px);line-height:.9;letter-spacing:-.04em;text-transform:uppercase;color:#082d59}
+.proAcademyGroups{gap:14px!important}
+.proAcademyGroupCard{position:relative;min-height:310px;padding:28px 28px 26px!important;overflow:hidden;border:1px solid #dce5ee!important;border-radius:5px!important;background:#fff!important;box-shadow:none!important;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.proAcademyGroupCard:before{content:"";position:absolute;left:0;top:0;width:100%;height:4px;background:#0f63ff;transform:scaleX(.22);transform-origin:left;transition:transform .22s ease,background .22s ease}
+.proAcademyGroupCard:hover{transform:translateY(-4px);border-color:#c8d7e7!important;box-shadow:0 18px 44px rgba(6,39,77,.09)!important}
+.proAcademyGroupCard:hover:before{transform:scaleX(1);background:#ffd328}
+.proAcademyGroupTop{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.proAcademyGroupTop>b{font-family:var(--font-fce-display),Arial,sans-serif;font-size:48px!important;line-height:.85;color:#0755a5!important;letter-spacing:-.04em}
+.proAcademyGroupTop>span{font-family:var(--font-fce-display),Arial,sans-serif;font-size:24px;font-weight:850;line-height:1;color:#d7e1eb}
+.proAcademyGroupCard h3{margin:36px 0 11px!important;font-family:var(--font-fce-display),Arial,sans-serif;font-size:31px;line-height:.95;text-transform:uppercase;color:#0a315f}
+.proAcademyGroupCard>p{max-width:360px;margin:0!important;color:#667d94!important;font-size:13px!important;line-height:1.68!important}
+.proAcademyGroupMeta{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px;padding-top:18px;border-top:1px solid #e7edf3}
+.proAcademyGroupMeta span{padding:6px 8px;border-radius:2px;background:#f2f6fa;color:#47627e;font-size:8px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+
+.academyPathwaySection{position:relative;overflow:hidden;background:linear-gradient(135deg,#03142d 0%,#062a57 60%,#074b91 100%)!important;color:#fff!important}
+.academyPathwaySection:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none}
+.academyPathwaySection .proSectionInner{position:relative;z-index:1}
+.academyPathwaySection .proSectionHeading .eyebrow{color:#ffd328!important}
+.academyPathwaySection .proSectionHeading h2{color:#fff!important}
+.proAcademyPathway{position:relative;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important}
+.proAcademyPathway:before{content:"";position:absolute;left:6%;right:6%;top:46px;height:2px;background:linear-gradient(90deg,#ffd328,#4e93e4);opacity:.8}
+.proAcademyPathway article{position:relative;min-height:260px;padding:26px 22px 24px!important;border:0!important;border-radius:0!important;background:transparent!important}
+.proAcademyPathway article:before{content:"";position:absolute;left:50%;top:38px;width:18px;height:18px;border:5px solid #072b57;border-radius:50%;background:#ffd328;transform:translateX(-50%);box-shadow:0 0 0 1px rgba(255,255,255,.12)}
+.proAcademyPathIndex{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:66px}
+.proAcademyPathIndex span{color:#7ca9d6!important;font-family:var(--font-fce-display),Arial,sans-serif;font-size:12px!important;font-weight:900}
+.proAcademyPathIndex b{color:#ffd328;font-family:var(--font-fce-display),Arial,sans-serif;font-size:15px;letter-spacing:.04em}
+.proAcademyPathway h3{margin:0 0 10px!important;font-family:var(--font-fce-display),Arial,sans-serif;font-size:27px!important;line-height:.98;text-transform:uppercase;color:#fff}
+.proAcademyPathway p{margin:0;color:#a9bfd6;font-size:11px;line-height:1.65}
+
+.managedProPage-academy .proCta{position:relative;overflow:hidden;border:0!important;border-radius:5px!important;background:linear-gradient(115deg,#ffd328 0%,#ffdf57 42%,#fff2a5 100%)!important;color:#071d3b!important}
+.managedProPage-academy .proCta:after{content:"JOIN";position:absolute;right:-.02em;bottom:-.18em;font-family:var(--font-fce-display),Arial,sans-serif;font-size:120px;font-weight:900;line-height:.8;letter-spacing:-.05em;color:rgba(7,29,59,.07);pointer-events:none}
+.managedProPage-academy .proCta .eyebrow{color:#0755a5!important}
+.managedProPage-academy .proCta h2{max-width:760px;font-family:var(--font-fce-display),Arial,sans-serif;font-size:clamp(40px,5vw,64px);line-height:.9;text-transform:uppercase;letter-spacing:-.04em;color:#071d3b!important}
+.managedProPage-academy .proCta>div,.managedProPage-academy .proCta>a{position:relative;z-index:1}
+.managedProPage-academy .proCta .primaryButton{background:#071d3b!important;color:#fff!important;border-color:#071d3b!important}
+
+@media(max-width:1000px){
+  .proAcademyIntro{grid-template-columns:1fr!important}.proAcademyFact{min-height:330px}.proAcademyFact strong{margin-top:130px}
+  .proAcademyBenefits{grid-template-columns:1fr}.proAcademyBenefits article{grid-template-columns:42px 1fr}
+  .proAcademyPathway{grid-template-columns:repeat(2,minmax(0,1fr))!important}.proAcademyPathway:before{display:none}.proAcademyPathway article{min-height:220px;border-top:1px solid rgba(255,255,255,.12)!important}.proAcademyPathway article:before{display:none}.proAcademyPathIndex{margin-bottom:34px}
+}
+@media(max-width:700px){
+  .managedProPage-academy .proManagedHeroInner h1{font-size:50px}.managedProPage-academy .proManagedHeroInner>p:not(.eyebrow){font-size:13px}
+  .proAcademyIntro h2{font-size:45px!important}.proAcademyIntroCopy>p:not(.eyebrow){font-size:14px}.proAcademyBenefits{margin-top:26px}.proAcademyBenefits article{padding:17px 16px}
+  .proAcademyFact{min-height:280px;padding:26px!important}.proAcademyFactMark{left:24px;top:24px;font-size:48px}.proAcademyFact strong{margin-top:116px;font-size:31px!important}
+  .proAcademyGroups{grid-template-columns:1fr!important}.proAcademyGroupCard{min-height:0;padding:22px!important}.proAcademyGroupTop>b{font-size:42px!important}.proAcademyGroupCard h3{margin-top:26px!important;font-size:27px}
+  .proAcademyPathway{grid-template-columns:1fr!important}.proAcademyPathway article{min-height:0;padding:22px 0!important}.proAcademyPathIndex{margin-bottom:18px}.proAcademyPathway h3{font-size:25px!important}
+  .managedProPage-academy .proCta{padding:26px!important}.managedProPage-academy .proCta h2{font-size:40px}.managedProPage-academy .proCta:after{font-size:78px}
+}
