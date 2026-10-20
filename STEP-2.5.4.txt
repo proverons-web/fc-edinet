@@ -1,0 +1,16 @@
+FC EDINEȚ v2.5.4 — SITE-WIDE VISUAL POLISH / PHASE 5
+
+MATCHES + MATCH PAGE
+
+- Public matches index redesigned into a compact matchday presentation.
+- Date badge, stronger club emphasis, result state accent (win/draw/loss).
+- Match cards no longer look like SaaS panels.
+- Match detail hero upgraded to a club scoreboard presentation.
+- Match status chip added to the hero.
+- Timeline labels localized RU/RO; removed hard-coded English eyebrow labels.
+- Timeline uses a visual spine and event-type accents for goals/cards.
+- Practical match facts are cleaner and MVP gets a dedicated emphasis.
+- Lineups redesigned as two club sheets with stronger headers and readable rows.
+- Responsive behavior improved for tablet/mobile.
+- No SQL migration. No xG/possession/advanced stats made mandatory.
+- Existing Match Center data model and publication workflow preserved.

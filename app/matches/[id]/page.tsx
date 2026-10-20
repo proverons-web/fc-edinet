@@ -30,6 +30,11 @@ type Copy = {
   captain: string;
   formation: string;
   match: string;
+  storyEyebrow: string;
+  reportEyebrow: string;
+  infoEyebrow: string;
+  lineupEyebrow: string;
+  status: string;
 };
 
 const copy: Record<Locale, Copy> = {
@@ -55,6 +60,11 @@ const copy: Record<Locale, Copy> = {
     captain: "капитан",
     formation: "Схема",
     match: "Матч",
+    storyEyebrow: "ХРОНОЛОГИЯ",
+    reportEyebrow: "ОТЧЁТ",
+    infoEyebrow: "ИНФОРМАЦИЯ",
+    lineupEyebrow: "СОСТАВЫ",
+    status: "Статус",
   },
   ro: {
     back: "← Toate meciurile",
@@ -78,6 +88,11 @@ const copy: Record<Locale, Copy> = {
     captain: "căpitan",
     formation: "Sistem",
     match: "Meci",
+    storyEyebrow: "CRONOLOGIE",
+    reportEyebrow: "RAPORT",
+    infoEyebrow: "INFORMAȚII",
+    lineupEyebrow: "ECHIPE",
+    status: "Statut",
   },
 };
 
@@ -208,6 +223,7 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
           <Link href="/matches" className="publicMatchBack">{t.back}</Link>
           <div className="publicMatchDetailMeta">
             <span>{match.competition?.name ?? t.match}</span>
+            <span className={`publicMatchStatusChip status-${match.status}`}>{match.status === "finished" ? (locale === "ro" ? "Final" : "Завершён") : match.status === "live" ? "LIVE" : match.status === "postponed" ? (locale === "ro" ? "Amânat" : "Перенесён") : (locale === "ro" ? "Programat" : "Запланирован")}</span>
             <strong>{formatDate(match.kickoff, locale)}</strong>
             <small>{[match.round, match.stadium].filter(Boolean).join(" • ")}</small>
           </div>
@@ -233,13 +249,13 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
             <div className="publicMatchProtocolGrid">
               <div className="publicMatchProtocolMain">
                 <section className="publicMatchPanel publicMatchTimelinePublic">
-                  <div className="publicMatchSectionHead"><p className="eyebrow blue">LIVE STORY</p><h2>{t.timeline}</h2></div>
+                  <div className="publicMatchSectionHead"><p className="eyebrow blue">{t.storyEyebrow}</p><h2>{t.timeline}</h2></div>
                   {events.length === 0 ? <div className="adminEmpty">{t.noEvents}</div> : (
                     <div className="publicMatchEventList">
                       {events.map((event) => {
                         const isHome = String(event.team_id) === String(match.home_team_id);
                         return (
-                          <article className={`publicMatchEvent ${isHome ? "home" : "away"}`} key={String(event.id)}>
+                          <article className={`publicMatchEvent ${isHome ? "home" : "away"} event-${event.event_type}`} key={String(event.id)}>
                             <div className="publicMatchEventMinute">{eventMinute(event)}</div>
                             <div className="publicMatchEventIcon">{eventIcons[event.event_type] ?? "•"}</div>
                             <div className="publicMatchEventBody">
@@ -257,7 +273,7 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
 
                 {report?.summary ? (
                   <section className="publicMatchPanel publicMatchReportText">
-                    <div className="publicMatchSectionHead"><p className="eyebrow blue">MATCH REPORT</p><h2>{t.report}</h2></div>
+                    <div className="publicMatchSectionHead"><p className="eyebrow blue">{t.reportEyebrow}</p><h2>{t.report}</h2></div>
                     <p>{report.summary}</p>
                   </section>
                 ) : null}
@@ -265,19 +281,19 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
 
               <aside className="publicMatchProtocolSide">
                 <section className="publicMatchPanel">
-                  <div className="publicMatchSectionHead compact"><p className="eyebrow blue">INFO</p><h3>{t.report}</h3></div>
+                  <div className="publicMatchSectionHead compact"><p className="eyebrow blue">{t.infoEyebrow}</p><h3>{t.report}</h3></div>
                   <dl className="publicMatchFacts">
                     {report?.referee ? <><dt>{t.referee}</dt><dd>{report.referee}</dd></> : null}
                     {report?.attendance != null ? <><dt>{t.attendance}</dt><dd>{report.attendance.toLocaleString(locale === "ro" ? "ro-RO" : "ru-RU")}</dd></> : null}
                     {report?.weather ? <><dt>{t.weather}</dt><dd>{report.weather}</dd></> : null}
                     {report?.pitch_condition ? <><dt>{t.pitch}</dt><dd>{report.pitch_condition}</dd></> : null}
-                    {mvpName ? <><dt>{t.mvp}</dt><dd>{mvpName}</dd></> : null}
+                    {mvpName ? <><dt className="mvpFactLabel">{t.mvp}</dt><dd className="mvpFactValue">★ {mvpName}</dd></> : null}
                   </dl>
                 </section>
               </aside>
 
               <section className="publicMatchPanel publicMatchLineupsPanel">
-                <div className="publicMatchSectionHead"><p className="eyebrow blue">XI</p><h2>{t.lineups}</h2></div>
+                <div className="publicMatchSectionHead"><p className="eyebrow blue">{t.lineupEyebrow}</p><h2>{t.lineups}</h2></div>
                 <div className="publicMatchLineupGrid">
                   <PublicLineup side="home" teamName={match.home?.name ?? "HOME"} settings={lineupSettings} entries={lineupEntries} t={t} />
                   <PublicLineup side="away" teamName={match.away?.name ?? "AWAY"} settings={lineupSettings} entries={lineupEntries} t={t} />
