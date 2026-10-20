@@ -90,9 +90,15 @@ function MediaAlbums({ section, albums, locale }: { section: ProPageLayoutConfig
   return <section className={proSectionClass(section)} style={proSectionStyle(section)}><div className="proSectionMotion"><div className="proSectionInner">
     <SectionHeading eyebrow={text.photo} title={text.albums} align={section.align}/>
     {albums.length ? <div className={`proCardGrid proMediaAlbums proAlbums-${section.variant}`}>
-      {albums.map((album, index) => <Link href={`/media/${album.slug}`} className={`proMediaAlbumCard${section.variant === "featured" && index === 0 ? " isFeatured" : ""}`} key={album.id}>
+      {albums.map((album, index) => <Link href={`/media/${album.slug}`} className={`proMediaAlbumCard${index === 0 ? " isLeadAlbum" : ""}${section.variant === "featured" && index === 0 ? " isFeatured" : ""}`} key={album.id}>
         <div className="proMediaAlbumImage">{album.cover_image_url ? <img src={album.cover_image_url} alt={album.title}/> : <span>FC EDINEȚ</span>}<div className="proMediaShade"/></div>
-        <div className="proMediaAlbumCopy"><span>{formatDate(album.event_date, locale)}{album.location ? ` · ${album.location}` : ""}</span><h3>{album.title}</h3>{album.description && section.variant !== "grid" && <p>{album.description}</p>}<b>{text.openAlbum} →</b></div>
+        <div className="proMediaAlbumIndex" aria-hidden="true">{String(index + 1).padStart(2, "0")}</div>
+        <div className="proMediaAlbumCopy">
+          <div className="proMediaAlbumMeta"><span>{formatDate(album.event_date, locale)}</span>{album.location && <span>{album.location}</span>}</div>
+          <h3>{album.title}</h3>
+          {album.description && section.variant !== "grid" && <p>{album.description}</p>}
+          <b className="proMediaAlbumOpen">{text.openAlbum} <span>→</span></b>
+        </div>
       </Link>)}
     </div> : <div className="adminEmpty">{text.albumsEmpty}</div>}
   </div></div></section>;
@@ -100,10 +106,23 @@ function MediaAlbums({ section, albums, locale }: { section: ProPageLayoutConfig
 
 function MediaVideos({ section, videos, locale }: { section: ProPageLayoutConfig["sections"][number]; videos: MediaVideo[]; locale: Locale }) {
   const text = publicText[locale].media;
+  const watchLabel = locale === "ro" ? "Vezi video" : "Смотреть видео";
   return <section className={proSectionClass(section)} style={proSectionStyle(section)}><div className="proSectionMotion"><div className="proSectionInner">
     <SectionHeading eyebrow="FC EDINEȚ TV" title={text.videos} align={section.align}/>
     {videos.length ? <div className={`proCardGrid proMediaVideos proVideos-${section.variant}`}>
-      {videos.map((video) => <article className="proMediaVideoCard" key={video.id}><div className="proMediaVideoEmbed"><iframe src={`https://www.youtube-nocookie.com/embed/${video.youtube_id}`} title={video.title} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen/></div><div className="proMediaVideoCopy"><span>{formatDate(video.published_at, locale)}</span><h3>{video.title}</h3>{video.description && section.variant !== "grid" && <p>{video.description}</p>}</div></article>)}
+      {videos.map((video, index) => <a className={`proMediaVideoCard${index === 0 ? " isLeadVideo" : ""}`} href={video.youtube_url} target="_blank" rel="noopener noreferrer" key={video.id}>
+        <div className="proMediaVideoPreview">
+          <img src={`https://i.ytimg.com/vi/${video.youtube_id}/hqdefault.jpg`} alt="" loading="lazy"/>
+          <span className="proMediaVideoPlay" aria-hidden="true"><i>▶</i></span>
+          <span className="proMediaVideoPlatform">FC EDINEȚ TV</span>
+        </div>
+        <div className="proMediaVideoCopy">
+          <span>{formatDate(video.published_at, locale)}</span>
+          <h3>{video.title}</h3>
+          {video.description && section.variant !== "grid" && <p>{video.description}</p>}
+          <b className="proMediaVideoWatch">{watchLabel} ↗</b>
+        </div>
+      </a>)}
     </div> : <div className="adminEmpty">{text.videosEmpty}</div>}
   </div></div></section>;
 }
@@ -113,14 +132,18 @@ function PartnersGrid({ section, partners, locale }: { section: ProPageLayoutCon
   return <section className={proSectionClass(section)} style={proSectionStyle(section)}><div className="proSectionMotion"><div className="proSectionInner">
     {!partners.length ? <div className="adminEmpty">{text.empty}</div> : <div className="proPartnerGroups">{partnerLevels.map((level) => {
       const items = partners.filter((partner) => partner.partner_level === level); if (!items.length) return null;
-      return <section className="proPartnerGroup" key={level}><SectionHeading eyebrow={text.cooperation} title={partnerLevelLabelsI18n[locale][level]} align={section.align}/><div className={`proCardGrid proPartnersGrid proPartners-${section.variant}`}>{items.map((partner) => <PartnerCard key={partner.id} partner={partner} locale={locale} variant={section.variant}/>)}</div></section>;
+      return <section className={`proPartnerGroup proPartnerGroup-${level}`} key={level}>
+        <div className="proPartnerGroupHead"><SectionHeading eyebrow={text.cooperation} title={partnerLevelLabelsI18n[locale][level]} align={section.align}/><span>{String(items.length).padStart(2, "0")}</span></div>
+        <div className={`proCardGrid proPartnersGrid proPartners-${section.variant}`}>{items.map((partner) => <PartnerCard key={partner.id} partner={partner} locale={locale} variant={section.variant}/>)}</div>
+      </section>;
     })}</div>}
   </div></div></section>;
 }
 
 function PartnerCard({ partner, locale, variant }: { partner: Partner; locale: Locale; variant: string }) {
   const body = <><div className="proPartnerLogo"><img src={partner.logo_url} alt={partner.name}/></div><div className="proPartnerCopy"><strong>{partner.name}</strong>{variant !== "logos" && localized(partner.description, partner.description_ro, locale) && <p>{localized(partner.description, partner.description_ro, locale)}</p>}{partner.website_url && variant !== "logos" && <span>{publicText[locale].partners.openSite} ↗</span>}</div></>;
-  return partner.website_url ? <a className="proPartnerCard" href={partner.website_url} target="_blank" rel="noopener noreferrer">{body}</a> : <article className="proPartnerCard">{body}</article>;
+  const className = `proPartnerCard proPartnerCard-${partner.partner_level}`;
+  return partner.website_url ? <a className={className} href={partner.website_url} target="_blank" rel="noopener noreferrer">{body}</a> : <article className={className}>{body}</article>;
 }
 
 function AcademyIntro({ section, layout, locale }: { section: ProPageLayoutConfig["sections"][number]; layout: ProPageLayoutConfig; locale: Locale }) {
