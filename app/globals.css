@@ -2593,3 +2593,338 @@ html,body,button,input,select,textarea{font-synthesis:none;text-rendering:geomet
 .pageBuilderTextInspector{margin:12px 0;border:1px solid #dbe4ef;background:#f8fbfe}.pageBuilderTextInspector summary{cursor:pointer;padding:10px 11px;font-size:9px;font-weight:950;color:#2c4b68}.pageBuilderTextInspectorBody{display:grid;gap:10px;padding:10px;border-top:1px solid #e2e9f1}.pageBuilderTextInspector input[type="color"]{width:100%;height:38px;border:1px solid #d6e0ea;padding:3px;background:#fff}
 @media(max-width:1100px){.clubManualFrame:not(.is-image){font-family:var(--f-t-family,var(--f-d-family,inherit));color:var(--f-t-color,var(--f-d-color,inherit));font-weight:var(--f-t-weight,var(--f-d-weight,inherit));letter-spacing:var(--f-t-letter,var(--f-d-letter,normal));line-height:var(--f-t-line,var(--f-d-line,inherit));text-transform:var(--f-t-transform,var(--f-d-transform,none));font-style:var(--f-t-style,var(--f-d-style,normal));text-decoration:var(--f-t-decoration,var(--f-d-decoration,none));-webkit-text-stroke-width:var(--f-t-stroke,var(--f-d-stroke,0));-webkit-text-stroke-color:var(--f-t-stroke-color,var(--f-d-stroke-color,transparent))}}
 @media(max-width:680px){.clubManualFrame:not(.is-image){font-family:var(--f-m-family,var(--f-t-family,inherit));color:var(--f-m-color,var(--f-t-color,inherit));font-weight:var(--f-m-weight,var(--f-t-weight,inherit));letter-spacing:var(--f-m-letter,var(--f-t-letter,normal));line-height:var(--f-m-line,var(--f-t-line,inherit));text-transform:var(--f-m-transform,var(--f-t-transform,none));font-style:var(--f-m-style,var(--f-t-style,normal));text-decoration:var(--f-m-decoration,var(--f-t-decoration,none));-webkit-text-stroke-width:var(--f-m-stroke,var(--f-t-stroke,0));-webkit-text-stroke-color:var(--f-m-stroke-color,var(--f-t-stroke-color,transparent))}}
+
+
+/* ===== FC EDINET v2.4.2 — CLUB PROFESSIONAL EDITORIAL ===== */
+.clubProfessionalPage{
+  --club-display:"Arial Black","Segoe UI",Arial,Helvetica,sans-serif;
+  --club-body:"Segoe UI",Arial,Helvetica,sans-serif;
+  --club-navy:#041a38;
+  --club-navy-2:#082d5b;
+  --club-blue:#0b58ad;
+  --club-cyan:#24a7e8;
+  --club-gold:#ffd328;
+  --club-ink:#10243e;
+  --club-muted:#60738a;
+  --club-paper:#f6f8fb;
+  font-family:var(--club-body);
+  color:var(--club-ink);
+  background:#fff;
+}
+.clubProfessionalPage .clubHero{
+  min-height:380px!important;
+  border-bottom:3px solid var(--club-gold)!important;
+  background-color:var(--club-navy)!important;
+}
+.clubProfessionalPage .clubHeroInner{max-width:1180px!important}
+.clubProfessionalPage .clubHeroIntro{max-width:720px}
+.clubProfessionalPage .clubHero h1{
+  margin:8px 0 12px!important;
+  font-family:var(--club-display)!important;
+  font-size:clamp(48px,6vw,82px)!important;
+  line-height:.92!important;
+  letter-spacing:-.045em!important;
+  text-transform:uppercase;
+  text-wrap:balance;
+}
+.clubProfessionalPage .clubHeroMotto{
+  max-width:620px!important;
+  margin:0 0 22px!important;
+  font-family:var(--club-body)!important;
+  font-size:clamp(16px,1.8vw,20px)!important;
+  line-height:1.5!important;
+  color:#dce8f5!important;
+}
+.clubProfessionalPage .clubHeroFacts{gap:8px!important}
+.clubProfessionalPage .clubHeroFacts .clubFact{
+  min-width:132px!important;
+  padding:10px 14px!important;
+  border-radius:2px!important;
+  background:rgba(4,30,64,.78)!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  backdrop-filter:blur(8px);
+}
+.clubProfessionalPage .clubHeroFacts .clubFact strong{font-size:14px!important}
+
+.clubProfessionalPage .contentBuilderSection{
+  isolation:isolate;
+  overflow:hidden;
+}
+.clubProfessionalPage .contentBuilderInner{
+  width:min(calc(100% - 48px),1160px);
+}
+.clubProfessionalPage .contentBuilderWidth-wide .contentBuilderInner{width:min(calc(100% - 48px),1320px)}
+.clubProfessionalPage .contentBuilderSection:not(.contentBuilderManual){
+  padding-top:clamp(54px,var(--content-pad-top),82px)!important;
+  padding-bottom:clamp(54px,var(--content-pad-bottom),82px)!important;
+}
+.clubProfessionalPage .eyebrow{
+  margin:0 0 8px;
+  font-family:var(--club-body)!important;
+  font-size:10px!important;
+  font-weight:900!important;
+  letter-spacing:.16em!important;
+  text-transform:uppercase;
+}
+.clubProfessionalPage .contentBuilderSection h2,
+.clubProfessionalPage .clubHistoryContent h2,
+.clubProfessionalPage .sectionHeading h2{
+  margin:4px 0 20px!important;
+  font-family:var(--club-display)!important;
+  font-size:clamp(30px,4.2vw,52px)!important;
+  font-weight:900!important;
+  line-height:.98!important;
+  letter-spacing:-.045em!important;
+  text-transform:uppercase;
+  text-wrap:balance;
+}
+.clubProfessionalPage .sectionHeading{margin-bottom:28px!important}
+.clubProfessionalPage .sectionHeading:after{
+  content:"";
+  display:block;
+  width:64px;
+  height:4px;
+  margin-top:14px;
+  background:var(--club-gold);
+}
+
+/* About — readable editorial split */
+.clubProfessionalPage .clubAboutSection{background:#fff!important}
+.clubProfessionalPage .clubStoryGrid{
+  grid-template-columns:minmax(0,1fr) minmax(280px,340px)!important;
+  gap:clamp(34px,5vw,72px)!important;
+  align-items:start;
+}
+.clubProfessionalPage .clubAboutCopy{max-width:760px}
+.clubProfessionalPage .clubAboutCopy>h2{color:var(--club-navy)}
+.clubProfessionalPage .clubAboutCopy .clubRichComposer{
+  font-size:16px;
+  line-height:1.68;
+}
+.clubProfessionalPage .clubRichParagraph{
+  margin:0 0 13px;
+  color:#53677f;
+  font-size:15.5px;
+  line-height:1.68;
+}
+.clubProfessionalPage .clubContactCard{
+  position:relative;
+  overflow:hidden;
+  padding:24px 24px 20px!important;
+  border:0!important;
+  border-radius:3px!important;
+  background:linear-gradient(145deg,#061d3e,#0b3f7b)!important;
+  box-shadow:0 20px 45px rgba(6,29,62,.14);
+}
+.clubProfessionalPage .clubContactCard:before{
+  content:"FCE";
+  position:absolute;
+  right:-14px;
+  bottom:-30px;
+  font-family:var(--club-display);
+  font-size:92px;
+  color:rgba(255,255,255,.035);
+  pointer-events:none;
+}
+.clubProfessionalPage .clubContactCard h3{font-family:var(--club-display)!important;font-size:21px!important;letter-spacing:-.02em}
+.clubProfessionalPage .clubContactRow{padding:10px 0!important}
+.clubProfessionalPage .clubContactRow strong{font-size:13px!important;line-height:1.45}
+
+/* Stadium — photograph is the hero of the section */
+.clubProfessionalPage .clubStadiumSection{
+  background:linear-gradient(125deg,#031832 0%,#062750 55%,#082f60 100%)!important;
+}
+.clubProfessionalPage .clubStadiumSection .sectionHeading h2{color:#fff!important}
+.clubProfessionalPage .clubStadiumBuilder{
+  display:grid!important;
+  grid-template-columns:minmax(0,1.55fr) minmax(300px,.65fr)!important;
+  gap:0!important;
+  align-items:stretch!important;
+}
+.clubProfessionalPage .clubStadiumBuilder .clubStadiumImage{
+  min-height:470px!important;
+  height:470px!important;
+  border-radius:3px 0 0 3px!important;
+  box-shadow:none!important;
+}
+.clubProfessionalPage .clubStadiumImage img{filter:saturate(.92) contrast(1.03)}
+.clubProfessionalPage .clubStadiumBuilder .clubStadiumInfo{
+  position:relative!important;
+  width:auto!important;
+  margin:0!important;
+  z-index:2;
+  display:flex!important;
+  flex-direction:column;
+  justify-content:center;
+  padding:30px!important;
+  border:0!important;
+  border-radius:0 3px 3px 0!important;
+  background:#061d3e!important;
+  box-shadow:none!important;
+}
+.clubProfessionalPage .clubStadiumFacts{
+  grid-template-columns:1fr!important;
+  gap:7px!important;
+  margin-bottom:20px!important;
+}
+.clubProfessionalPage .clubStadiumInfo .clubFact{
+  min-width:0!important;
+  padding:11px 13px!important;
+  border-radius:2px!important;
+  background:rgba(255,255,255,.055)!important;
+  border-color:rgba(255,255,255,.08)!important;
+}
+.clubProfessionalPage .clubStadiumInfo .clubRichParagraph{color:#c8d6e6!important;font-size:14px;line-height:1.65}
+.clubProfessionalPage .clubStadiumInfo .clubRichImage{width:100%!important;float:none!important;margin:16px 0!important}
+
+/* History — long text becomes an editorial spread */
+.clubProfessionalPage .clubHistorySection{background:var(--club-paper)!important}
+.clubProfessionalPage .clubHistoryContent{max-width:none!important}
+.clubProfessionalPage .clubHistoryContent>h2{max-width:720px;color:var(--club-navy)}
+.clubProfessionalPage .clubHistoryContent .clubRichComposer{
+  max-width:none;
+  columns:2;
+  column-gap:clamp(34px,5vw,64px);
+  column-rule:1px solid #dfe6ee;
+  font-size:15px;
+  line-height:1.7;
+}
+.clubProfessionalPage .clubHistoryContent .clubRichParagraph,
+.clubProfessionalPage .clubHistoryContent .clubRichHeading,
+.clubProfessionalPage .clubHistoryContent .clubRichSubheading,
+.clubProfessionalPage .clubHistoryContent .clubRichQuote,
+.clubProfessionalPage .clubHistoryContent .clubRichImage{
+  break-inside:avoid;
+}
+.clubProfessionalPage .clubHistoryContent .clubRichHeading{
+  margin-top:6px!important;
+  font-family:var(--club-display)!important;
+  font-size:23px!important;
+  line-height:1.1!important;
+  color:var(--club-navy)!important;
+}
+.clubProfessionalPage .clubHistoryContent .clubRichSubheading{font-size:18px!important;color:#174d85!important}
+.clubProfessionalPage .clubHistoryContent .clubRichImage{
+  float:none!important;
+  width:100%!important;
+  margin:10px 0 20px!important;
+}
+.clubProfessionalPage .clubHistoryContent .clubRichImage img{
+  width:100%;
+  max-height:310px;
+  object-fit:cover;
+  border-radius:3px!important;
+  box-shadow:0 12px 30px rgba(16,42,72,.1)!important;
+}
+.clubProfessionalPage .clubHistoryContent .clubRichQuote{
+  margin:18px 0!important;
+  padding:16px 18px!important;
+  border-radius:0!important;
+  border-left:4px solid var(--club-gold)!important;
+  background:#fff!important;
+  color:#264762!important;
+}
+
+/* Leadership — compact editorial cards */
+.clubProfessionalPage .clubLeadershipSection{background:#fff!important}
+.clubProfessionalPage .clubLeadershipGrid{
+  gap:14px!important;
+  align-items:stretch;
+}
+.clubProfessionalPage .clubLeaderCard{
+  position:relative;
+  display:grid;
+  grid-template-rows:auto 1fr;
+  border:1px solid #dce4ed!important;
+  border-radius:3px!important;
+  background:#fff!important;
+  box-shadow:0 10px 28px rgba(11,45,83,.055);
+}
+.clubProfessionalPage .clubLeaderPhoto{
+  aspect-ratio:4/3.35!important;
+  min-height:0!important;
+  background:linear-gradient(145deg,#082650,#0b4f96)!important;
+}
+.clubProfessionalPage .clubLeaderPhoto img{object-position:center 20%;filter:saturate(.9)}
+.clubProfessionalPage .clubLeaderCard>div:last-child{padding:16px 17px 18px!important}
+.clubProfessionalPage .clubLeaderCard span{font-size:9px!important;color:#0b58ad!important;letter-spacing:.12em!important}
+.clubProfessionalPage .clubLeaderCard h3{
+  margin:5px 0 7px!important;
+  font-family:var(--club-display)!important;
+  font-size:18px!important;
+  line-height:1.08;
+  color:var(--club-navy);
+}
+.clubProfessionalPage .clubLeaderCard p{
+  display:-webkit-box;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  font-size:12px!important;
+  line-height:1.5!important;
+}
+
+/* Achievements — compact grid instead of a long vertical list */
+.clubProfessionalPage .clubAchievementsSection{
+  background:linear-gradient(120deg,#041a38,#07376d)!important;
+}
+.clubProfessionalPage .clubAchievementsSection .sectionHeading h2{color:#fff!important}
+.clubProfessionalPage .clubAchievementsSection .clubTimeline{
+  max-width:none!important;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.clubProfessionalPage .clubAchievementsSection .clubTimeline article{
+  display:block!important;
+  min-height:150px;
+  padding:20px!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  border-radius:3px!important;
+  background:rgba(255,255,255,.055)!important;
+}
+.clubProfessionalPage .clubAchievementsSection .clubTimelineYear{
+  margin:0 0 12px!important;
+  font-family:var(--club-display)!important;
+  font-size:28px!important;
+  color:var(--club-gold)!important;
+}
+.clubProfessionalPage .clubAchievementsSection .clubTimeline h3{
+  margin:0 0 7px!important;
+  font-family:var(--club-display)!important;
+  font-size:17px!important;
+  line-height:1.15!important;
+  color:#fff!important;
+}
+.clubProfessionalPage .clubAchievementsSection .clubTimeline p{font-size:12.5px!important;line-height:1.55!important;color:#bcd0e5!important}
+
+/* Rich media consistency */
+.clubProfessionalPage .clubRichImage img{border-radius:3px!important}
+.clubProfessionalPage .clubRichImage figcaption{font-size:10px!important;color:#7a8da2!important}
+.clubProfessionalPage .clubRichDivider{margin:22px 0!important}
+
+@media(max-width:980px){
+  .clubProfessionalPage .clubStoryGrid{grid-template-columns:1fr!important;gap:28px!important}
+  .clubProfessionalPage .clubContactCard{max-width:620px}
+  .clubProfessionalPage .clubStadiumBuilder{grid-template-columns:1fr!important}
+  .clubProfessionalPage .clubStadiumBuilder .clubStadiumImage{height:410px!important;border-radius:3px 3px 0 0!important}
+  .clubProfessionalPage .clubStadiumBuilder .clubStadiumInfo{border-radius:0 0 3px 3px!important}
+  .clubProfessionalPage .clubHistoryContent .clubRichComposer{columns:1;column-rule:0}
+  .clubProfessionalPage .clubAchievementsSection .clubTimeline{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:680px){
+  .clubProfessionalPage .contentBuilderInner,.clubProfessionalPage .contentBuilderWidth-wide .contentBuilderInner{width:min(calc(100% - 28px),1160px)!important}
+  .clubProfessionalPage .clubHero{min-height:320px!important}
+  .clubProfessionalPage .clubHero h1{font-size:clamp(42px,14vw,62px)!important}
+  .clubProfessionalPage .clubHeroMotto{font-size:15px!important}
+  .clubProfessionalPage .clubHeroFacts{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));width:100%}
+  .clubProfessionalPage .clubHeroFacts .clubFact{min-width:0!important;padding:9px!important}
+  .clubProfessionalPage .clubHeroFacts .clubFact strong{font-size:12px!important}
+  .clubProfessionalPage .contentBuilderSection:not(.contentBuilderManual){padding-top:44px!important;padding-bottom:44px!important}
+  .clubProfessionalPage .contentBuilderSection h2,.clubProfessionalPage .clubHistoryContent h2,.clubProfessionalPage .sectionHeading h2{font-size:31px!important}
+  .clubProfessionalPage .clubStadiumBuilder .clubStadiumImage{height:300px!important}
+  .clubProfessionalPage .clubStadiumBuilder .clubStadiumInfo{padding:20px!important}
+  .clubProfessionalPage .clubLeadershipGrid{grid-template-columns:1fr!important}
+  .clubProfessionalPage .clubLeaderCard{grid-template-columns:112px 1fr;grid-template-rows:1fr}
+  .clubProfessionalPage .clubLeaderPhoto{aspect-ratio:auto!important;min-height:142px!important}
+  .clubProfessionalPage .clubAchievementsSection .clubTimeline{grid-template-columns:1fr}
+}
