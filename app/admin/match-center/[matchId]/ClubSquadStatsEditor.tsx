@@ -118,7 +118,7 @@ export default function ClubSquadStatsEditor({
         <div>
           <p className="eyebrow blue">{sideLabel} • FC EDINEȚ</p>
           <h2>{teamName}</h2>
-          <p>Выбери состав. Позиция подставится из карточки игрока. Минуты, голы, ассисты и карточки рассчитываются из событий матча.</p>
+          <p>Выбери состав. Позиция подставится из карточки игрока. Если футболиста нет в базе — введи ФИО вручную: Match Center создаст скрытый временный профиль, чтобы сохранить его статистику.</p>
         </div>
         <span className={`statisticsState ${currentStatus}`}>{currentStatus === "complete" ? "Готово" : currentStatus === "draft" ? "Черновик" : "Не заполнено"}</span>
       </div>
@@ -238,9 +238,18 @@ function SquadList({
                   {players.map((option) => {
                     const id = String(option.id);
                     const usedElsewhere = selectedIds.has(id) && id !== local?.playerId;
+                    const optionTone = option.position === "goalkeeper"
+                      ? "#fff2bf"
+                      : option.position === "defender"
+                        ? "#e7f1ff"
+                        : option.position === "midfielder"
+                          ? "#e7f7ee"
+                          : option.position === "forward"
+                            ? "#fdeaea"
+                            : "#ffffff";
                     return (
-                      <option value={id} disabled={usedElsewhere} key={id}>
-                        {option.last_name} {option.first_name}{option.shirt_number != null ? ` · #${option.shirt_number}` : ""}{!option.is_active ? " · архив" : ""}
+                      <option value={id} disabled={usedElsewhere} key={id} style={{ backgroundColor: optionTone, color: "#102f50" }}>
+                        {option.last_name} {option.first_name}{option.shirt_number != null ? ` · #${option.shirt_number}` : ""}{!option.is_active ? " · временный/архив" : ""}
                       </option>
                     );
                   })}
@@ -262,7 +271,10 @@ function SquadList({
                 onChange={(event) => patch(key, { position: event.target.value })}
               >
                 <option value="">Позиция</option>
-                {POSITION_OPTIONS.map(([value, label]) => <option value={value} key={value}>{label}</option>)}
+                {POSITION_OPTIONS.map(([value, label]) => {
+                  const optionTone = value === "goalkeeper" ? "#fff2bf" : value === "defender" ? "#e7f1ff" : value === "midfielder" ? "#e7f7ee" : "#fdeaea";
+                  return <option value={value} key={value} style={{ backgroundColor: optionTone }}>{label}</option>;
+                })}
               </select>
               <label className="matchCenterCaptainToggle" title="Капитан">
                 <input type="checkbox" name={`${role}_${slot}_captain`} checked={Boolean(local?.captain)} disabled={!hasPlayer} onChange={(event) => patch(key, { captain: event.target.checked })} />

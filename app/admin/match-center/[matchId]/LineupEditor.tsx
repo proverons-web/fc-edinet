@@ -63,19 +63,20 @@ export default function LineupEditor({
   events: MatchEvent[];
   onlySide?: "home" | "away";
 }) {
+  const side = onlySide ?? "home";
+  const teamName = side === "home" ? match.home?.name ?? "Хозяева" : match.away?.name ?? "Гости";
+  const starterCount = entries.filter((entry) => entry.side === side && entry.lineup_role === "starter").length;
+  const subCount = entries.filter((entry) => entry.side === side && entry.lineup_role === "substitute").length;
+
   return (
-    <section className="statisticsPanel matchLineupPanel" id="lineups">
-      <div className="statisticsPanelHead">
+    <section className="statisticsPanel matchLineupPanel matchCenterTeamColumn opponent" id="lineups">
+      <div className="statisticsPanelHead matchCenterSectionHead">
         <div>
-          <p className="eyebrow blue">СОПЕРНИК</p>
-          <h2>Состав соперника</h2>
-          <p>
-            Для соперника достаточно вручную указать имена, номера и при необходимости схему. Пустые строки не сохраняются.
-          </p>
+          <p className="eyebrow blue">{side === "home" ? "ХОЗЯЕВА" : "ГОСТИ"} • СОПЕРНИК</p>
+          <h2>{teamName}</h2>
+          <p>Введи состав соперника вручную. Сохранённые игроки сразу появятся в событиях матча.</p>
         </div>
-        <span className="matchCenterVersionBadge">
-          {entries.filter((entry) => entry.lineup_role === "starter").length} в старте
-        </span>
+        <span className="matchCenterVersionBadge">{starterCount}/11 • {subCount} запасных</span>
       </div>
 
       <div className="matchLineupTeams singleOpponent">
@@ -137,19 +138,12 @@ function TeamLineup({
 
   return (
     <article className={`matchLineupTeam ${isClub ? "club" : "opponent"}`}>
-      <header className="matchLineupTeamHead">
-        <div>
-          <small>{side === "home" ? "ХОЗЯЕВА" : "ГОСТИ"}{isClub ? " • FC EDINEȚ" : ""}</small>
-          <h3>{teamName}</h3>
-          <span>{starterCount}/11 старт • {subCount} запасных</span>
-        </div>
-        {isClub && (
-          <form action={importClubLineupFromPlayerStats}>
-            <input type="hidden" name="match_id" value={matchId} />
-            <button className="rowAction muted" type="submit">↻ Из статистики игроков</button>
-          </form>
-        )}
-      </header>
+      {isClub && (
+        <form action={importClubLineupFromPlayerStats} className="matchLineupImportAction">
+          <input type="hidden" name="match_id" value={matchId} />
+          <button className="rowAction muted" type="submit">↻ Из статистики игроков</button>
+        </form>
+      )}
 
       <form action={saveMatchLineup} className="matchLineupForm">
         <input type="hidden" name="match_id" value={matchId} />
@@ -261,7 +255,10 @@ function LineupGroup({
               />
               <select className="matchLineupPosition" name={`${role}_${slot}_position`} defaultValue={entry?.position ?? ""}>
                 <option value="">Поз.</option>
-                {POSITION_OPTIONS.map(([value, label]) => <option value={value} key={value}>{label}</option>)}
+                {POSITION_OPTIONS.map(([value, label]) => {
+                  const optionTone = value === "goalkeeper" ? "#fff2bf" : value === "defender" ? "#e7f1ff" : value === "midfielder" ? "#e7f7ee" : "#fdeaea";
+                  return <option value={value} key={value} style={{ backgroundColor: optionTone }}>{label}</option>;
+                })}
               </select>
               <label className="matchLineupCaptain">
                 <input name={`${role}_${slot}_captain`} type="checkbox" defaultChecked={Boolean(entry?.is_captain)} />

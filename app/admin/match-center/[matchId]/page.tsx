@@ -204,6 +204,8 @@ export default async function MatchCenterMatchPage({
   const timelineMatchesScore =
     !scoreCanBeChecked ||
     (homeGoalsFromTimeline === (match.home_score ?? 0) && awayGoalsFromTimeline === (match.away_score ?? 0));
+  const firstHalfEvents = events.filter((event) => Number(event.minute ?? 0) <= 45);
+  const secondHalfEvents = events.filter((event) => Number(event.minute ?? 0) > 45);
 
   return (
     <main className="adminPage matchCenterPage">
@@ -293,7 +295,7 @@ export default async function MatchCenterMatchPage({
                 <p>Сначала сохрани оба состава. После этого все сохранённые игроки — в том числе введённые вручную — доступны в событиях матча.</p>
               </div>
             </div>
-            <div className="matchCenterLineupsGrid">
+            <div className={`matchCenterLineupsGrid club-${clubSide ?? "none"}`}>
               {clubSide === "home" ? (
                 <>
                   <ClubSquadStatsEditor
@@ -466,60 +468,105 @@ export default async function MatchCenterMatchPage({
             {events.length === 0 ? (
               <div className="adminEmpty">Событий пока нет. Добавь первый эпизод выше.</div>
             ) : (
-              <div className="matchTimeline">
-                {events.map((event) => {
-                  const isHome = String(event.team_id) === String(match.home_team_id);
-                  const isClubEvent = clubSide === "home" ? isHome : clubSide === "away" ? !isHome : false;
-                  const teamName = isHome ? match.home?.name : match.away?.name;
-                  return (
-                    <article className={`matchTimelineEvent ${isHome ? "home" : "away"} ${isClubEvent ? "club-event" : "opponent-event"}`} key={event.id}>
-                      <div className="matchTimelineMinute">{eventMinute(event)}</div>
-                      <div className="matchTimelineRail"><span>{EVENT_ICONS[event.event_type]}</span></div>
-                      <div className="matchTimelineCard">
-                        <div className="matchTimelineEventHead">
-                          <div>
-                            <small>{teamName ?? "Команда"}</small>
-                            <strong>{EVENT_LABELS[event.event_type]}</strong>
-                          </div>
-                          <span>{eventParticipant(event)}</span>
-                        </div>
-                        {event.description && event.description !== event.player_name && (
-                          <p>{event.description}</p>
-                        )}
-                        <div className="matchTimelineActions">
-                          <details>
-                            <summary>Изменить</summary>
-                            <form action={updateMatchEvent} className="matchEventEditForm">
-                              <input type="hidden" name="match_id" value={String(match.id)} />
-                              <input type="hidden" name="event_id" value={String(event.id)} />
-                              <EventFields
-                                homeTeamId={String(match.home_team_id)}
-                                awayTeamId={String(match.away_team_id)}
-                                homeTeamName={match.home?.name ?? "Хозяева"}
-                                awayTeamName={match.away?.name ?? "Гости"}
-                                participants={eventParticipants}
-                                defaults={event}
-                                compact
-                              />
-                              <button className="rowAction" type="submit">Сохранить изменения</button>
-                            </form>
-                          </details>
-                          <form action={deleteMatchEvent}>
-                            <input type="hidden" name="match_id" value={String(match.id)} />
-                            <input type="hidden" name="event_id" value={String(event.id)} />
-                            <button className="rowAction muted" type="submit">Удалить</button>
-                          </form>
-                        </div>
-                      </div>
-                    </article>
-                  );
-                })}
+              <div className="matchTimelineHalves">
+                <TimelineHalf
+                  title="1 тайм"
+                  range="0–45+"
+                  events={firstHalfEvents}
+                  match={match}
+                  clubSide={clubSide}
+                  participants={eventParticipants}
+                />
+                <TimelineHalf
+                  title="2 тайм"
+                  range="46–90+"
+                  events={secondHalfEvents}
+                  match={match}
+                  clubSide={clubSide}
+                  participants={eventParticipants}
+                />
               </div>
             )}
           </section>
         </div>
       </section>
     </main>
+  );
+}
+
+function TimelineHalf({
+  title,
+  range,
+  events,
+  match,
+  clubSide,
+  participants,
+}: {
+  title: string;
+  range: string;
+  events: MatchEvent[];
+  match: ClubMatch;
+  clubSide: "home" | "away" | null;
+  participants: EventParticipantOption[];
+}) {
+  return (
+    <div className="matchTimelineHalf">
+      <div className="matchTimelineHalfHead">
+        <strong>{title}</strong>
+        <span>{range}</span>
+      </div>
+      {events.length === 0 ? (
+        <div className="matchTimelineEmpty">Событий нет</div>
+      ) : (
+        <div className="matchTimeline">
+          {events.map((event) => {
+            const isHome = String(event.team_id) === String(match.home_team_id);
+            const isClubEvent = clubSide === "home" ? isHome : clubSide === "away" ? !isHome : false;
+            const teamName = isHome ? match.home?.name : match.away?.name;
+            return (
+              <article className={`matchTimelineEvent ${isHome ? "home" : "away"} ${isClubEvent ? "club-event" : "opponent-event"}`} key={event.id}>
+                <div className="matchTimelineMinute">{eventMinute(event)}</div>
+                <div className="matchTimelineRail"><span>{EVENT_ICONS[event.event_type]}</span></div>
+                <div className="matchTimelineCard">
+                  <div className="matchTimelineEventHead">
+                    <div>
+                      <small>{teamName ?? "Команда"}</small>
+                      <strong>{EVENT_LABELS[event.event_type]}</strong>
+                    </div>
+                    <span>{eventParticipant(event)}</span>
+                  </div>
+                  {event.description && event.description !== event.player_name && <p>{event.description}</p>}
+                  <div className="matchTimelineActions">
+                    <details>
+                      <summary>Изменить</summary>
+                      <form action={updateMatchEvent} className="matchEventEditForm">
+                        <input type="hidden" name="match_id" value={String(match.id)} />
+                        <input type="hidden" name="event_id" value={String(event.id)} />
+                        <EventFields
+                          homeTeamId={String(match.home_team_id)}
+                          awayTeamId={String(match.away_team_id)}
+                          homeTeamName={match.home?.name ?? "Хозяева"}
+                          awayTeamName={match.away?.name ?? "Гости"}
+                          participants={participants}
+                          defaults={event}
+                          compact
+                        />
+                        <button className="rowAction" type="submit">Сохранить изменения</button>
+                      </form>
+                    </details>
+                    <form action={deleteMatchEvent}>
+                      <input type="hidden" name="match_id" value={String(match.id)} />
+                      <input type="hidden" name="event_id" value={String(event.id)} />
+                      <button className="rowAction muted" type="submit">Удалить</button>
+                    </form>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 

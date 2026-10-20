@@ -671,6 +671,57 @@ export async function importClubLineupFromPlayerStats(formData: FormData) {
 }
 
 
+async function ensureTemporaryClubPlayer(
+  supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"],
+  matchId: string,
+  clubTeamId: string,
+  manualName: string,
+  position: string,
+) {
+  const cleaned = manualName.replace(/\s+/g, " ").trim().slice(0, 120);
+  const parts = cleaned.split(" ").filter(Boolean);
+  const lastName = (parts[0] || "Игрок").slice(0, 80);
+  const firstName = (parts.slice(1).join(" ") || "Временный").slice(0, 80);
+  const slug = `match-player-${matchId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+  const { data: created, error } = await supabase
+    .from("players")
+    .insert({
+      first_name: firstName,
+      last_name: lastName,
+      slug,
+      position,
+      is_active: false,
+      display_order: 9999,
+    })
+    .select("id,first_name,last_name,shirt_number,position")
+    .single();
+
+  if (error || !created) {
+    go(matchId, { error: `Не удалось создать временного игрока ${cleaned}: ${error?.message || "ошибка базы"}` });
+  }
+
+  const playerId = String(created.id);
+  await Promise.all([
+    supabase
+      .from("match_events")
+      .update({ player_id: playerId })
+      .eq("match_id", matchId)
+      .eq("team_id", clubTeamId)
+      .is("player_id", null)
+      .ilike("player_name", cleaned),
+    supabase
+      .from("match_events")
+      .update({ related_player_id: playerId })
+      .eq("match_id", matchId)
+      .eq("team_id", clubTeamId)
+      .is("related_player_id", null)
+      .ilike("related_player_name", cleaned),
+  ]);
+
+  return { playerId, player: created, playerName: cleaned };
+}
+
 async function syncClubPlayerStatsFromEvents(
   supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"],
   userId: string,
@@ -899,14 +950,17 @@ export async function saveClubSquadAndStats(formData: FormData) {
   }
 
   const requestedIds: string[] = [];
+  const requestedManualNames: string[] = [];
   for (const role of LINEUP_ROLES) {
     const max = role === "starter" ? 11 : 12;
     for (let slot = 1; slot <= max; slot += 1) {
       const playerId = text(formData, `${role}_${slot}_player_id`);
+      const manualName = text(formData, `${role}_${slot}_player_name`).replace(/\s+/g, " ").trim().toLowerCase();
       if (playerId) requestedIds.push(playerId);
+      else if (manualName) requestedManualNames.push(manualName);
     }
   }
-  if (new Set(requestedIds).size !== requestedIds.length) {
+  if (new Set(requestedIds).size !== requestedIds.length || new Set(requestedManualNames).size !== requestedManualNames.length) {
     go(matchId, { error: "Один игрок не может быть одновременно указан в нескольких строках состава." });
   }
 
@@ -925,19 +979,29 @@ export async function saveClubSquadAndStats(formData: FormData) {
     const max = role === "starter" ? 11 : 12;
     for (let slot = 1; slot <= max; slot += 1) {
       const prefix = `${role}_${slot}`;
-      const playerId = text(formData, `${prefix}_player_id`) || null;
+      let playerId = text(formData, `${prefix}_player_id`) || null;
       const manualName = nullableText(formData, `${prefix}_player_name`, 120);
-      const player = playerId ? playerMap.get(playerId) : null;
+      let player = playerId ? playerMap.get(playerId) : null;
       if (playerId && !player) go(matchId, { error: `Игрок в строке ${slot} не найден.` });
-      const playerName = player ? `${player.first_name} ${player.last_name}`.trim() : manualName;
-      if (!playerName) continue;
 
       const positionRaw = text(formData, `${prefix}_position`);
-      const position = LINEUP_POSITIONS.has(positionRaw)
+      let position = LINEUP_POSITIONS.has(positionRaw)
         ? positionRaw
         : LINEUP_POSITIONS.has(String(player?.position ?? ""))
           ? String(player?.position)
           : null;
+
+      let playerName = player ? `${player.first_name} ${player.last_name}`.trim() : manualName;
+      if (!playerName) continue;
+
+      if (!playerId && manualName) {
+        if (!position) go(matchId, { error: `Для игрока ${manualName} выбери позицию.` });
+        const temporary = await ensureTemporaryClubPlayer(supabase, matchId, clubTeamId, manualName, position);
+        playerId = temporary.playerId;
+        player = temporary.player;
+        playerName = temporary.playerName;
+        playerMap.set(playerId, player);
+      }
       const isCaptain = formData.get(`${prefix}_captain`) === "on";
       const shirtRaw = text(formData, `${prefix}_shirt_number`);
       let shirtNumber = player?.shirt_number ?? null;

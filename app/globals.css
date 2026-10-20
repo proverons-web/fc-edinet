@@ -3189,3 +3189,79 @@ body:has(.adminEmbedded){background:#f3f6fa}
 @media(max-width:1380px){.matchCenterLineupsGrid{grid-template-columns:1fr}.matchCenterSquadCompactRow{grid-template-columns:28px minmax(220px,1fr) 110px 38px minmax(130px,.7fr)}}
 @media(max-width:980px){.matchEventFields{grid-template-columns:repeat(2,minmax(0,1fr))}.matchEventFields .matchEventDescription{grid-column:span 2}.matchEventFields .matchEventSortOrder{grid-column:auto}}
 @media(max-width:720px){.matchCenterSquadCompactRow{grid-template-columns:28px minmax(0,1fr) 82px 36px}.matchCenterPlayerPick{grid-column:2/-1;grid-template-columns:1fr}.matchCenterCompactPosition{grid-column:2}.matchCenterCaptainToggle{grid-column:3}.matchCenterAutoStats{grid-column:2/-1}.matchEventFields,.matchEventFields.compact{grid-template-columns:1fr}.matchEventFields .matchEventDescription,.matchEventFields.compact .matchEventDescription{grid-column:auto}.matchTimeline{max-width:none}.matchTimeline:before{left:50px}.matchTimelineEvent{grid-template-columns:32px 36px minmax(0,1fr)}}
+
+
+/* ============================================================
+   FC EDINEȚ v2.9.2 — Match Center visual balance + half timeline
+   ============================================================ */
+.matchCenterLineupsGrid.club-home{grid-template-columns:minmax(0,1.18fr) minmax(0,.82fr)}
+.matchCenterLineupsGrid.club-away{grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr)}
+.matchCenterLineupsGrid>.statisticsPanel{height:100%;display:flex;flex-direction:column}
+.matchCenterLineupsGrid .statisticsPanelHead.matchCenterSectionHead,
+.matchCenterLineupsGrid .matchLineupPanel>.statisticsPanelHead{min-height:132px;align-items:flex-start}
+.matchCenterLineupsGrid .statisticsPanelHead h2{font-size:22px;line-height:1.02;letter-spacing:-.025em}
+.matchCenterLineupsGrid .statisticsPanelHead p:not(.eyebrow){max-width:560px;font-size:10.5px;line-height:1.55}
+.matchCenterLineupsGrid .matchLineupTeams.singleOpponent,
+.matchCenterLineupsGrid .matchLineupTeam,
+.matchCenterLineupsGrid .matchLineupForm{display:flex;flex:1;flex-direction:column;min-width:0}
+.matchCenterLineupsGrid .matchLineupTeam{padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+.matchCenterLineupsGrid .matchLineupForm{gap:12px}
+.matchCenterLineupsGrid .matchLineupMeta,
+.matchCenterSquadMeta.compact{grid-template-columns:minmax(120px,.7fr) minmax(170px,1.3fr);gap:9px}
+.matchCenterLineupsGrid .fieldGroup>span{font-size:8px;font-weight:900;letter-spacing:.045em;text-transform:uppercase;color:#6f8297}
+.matchCenterLineupsGrid .fieldGroup input{height:38px;font-size:11px;font-weight:700}
+.matchCenterSquadCompactRow{grid-template-columns:28px minmax(315px,1.55fr) 116px 38px minmax(105px,.55fr);min-height:54px;padding:6px 8px;border-left-width:0;overflow:visible}
+.matchCenterSquadCompactRow.position-goalkeeper,.matchLineupRow.position-goalkeeper{border-color:#e1bd53;background:#fff4c9}
+.matchCenterSquadCompactRow.position-defender,.matchLineupRow.position-defender{border-color:#a9c9ef;background:#eaf3ff}
+.matchCenterSquadCompactRow.position-midfielder,.matchLineupRow.position-midfielder{border-color:#abd9bf;background:#e9f8ef}
+.matchCenterSquadCompactRow.position-forward,.matchLineupRow.position-forward{border-color:#eabbbb;background:#fdecec}
+.matchCenterSquadCompactRow.position-empty,.matchLineupRow.position-empty{background:#fff}
+.matchCenterPlayerPick{grid-template-columns:minmax(205px,1.7fr) minmax(125px,.8fr);gap:6px}
+.matchCenterPlayerPick select{font-size:11.5px;font-weight:850;color:#102f50;text-overflow:clip}
+.matchCenterPlayerPick input{font-size:10px}
+.matchCenterCompactPosition{font-size:9.5px}
+.matchCenterLineupsGrid .matchLineupRow{grid-template-columns:24px minmax(205px,1fr) 46px 64px 34px 58px;min-height:48px;padding:6px 7px;border-left-width:0}
+.matchCenterLineupsGrid .matchLineupPlayerField input{font-size:10.5px;font-weight:750}
+.matchCenterLineupsGrid .matchLineupPosition{font-size:9px;font-weight:800}
+.matchCenterLineupsGrid .matchLineupFooter{margin-top:auto}
+.matchTimelineHalves{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}
+.matchTimelineHalf{min-width:0;border:1px solid #dde6ef;border-radius:14px;background:#fbfcfe;padding:12px}
+.matchTimelineHalfHead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 4px 10px;border-bottom:1px solid #e5ebf2}
+.matchTimelineHalfHead strong{font-size:13px;color:#102f50}.matchTimelineHalfHead span{font-size:9px;font-weight:850;color:#718398}
+.matchTimelineHalf .matchTimeline{max-width:none;margin:8px 0 0;gap:2px}
+.matchTimelineHalf .matchTimeline:before{left:54px}
+.matchTimelineHalf .matchTimelineEvent{grid-template-columns:36px 38px minmax(0,1fr);min-height:64px}
+.matchTimelineHalf .matchTimelineMinute{font-size:11px;padding-top:12px}
+.matchTimelineHalf .matchTimelineRail{padding-top:7px}
+.matchTimelineHalf .matchTimelineCard{margin:2px 0 6px;padding:8px 9px}
+.matchTimelineHalf .matchTimelineEventHead{gap:8px;align-items:flex-start}.matchTimelineHalf .matchTimelineEventHead>span{max-width:55%;text-align:right;white-space:normal;line-height:1.25}
+.matchTimelineEmpty{padding:28px 12px;text-align:center;color:#8b9aad;font-size:10px}
+@media(max-width:1500px){
+  .matchCenterLineupsGrid.club-home,.matchCenterLineupsGrid.club-away{grid-template-columns:1fr 1fr}
+  .matchCenterSquadCompactRow{grid-template-columns:28px minmax(250px,1.35fr) 108px 38px minmax(95px,.5fr)}
+  .matchCenterPlayerPick{grid-template-columns:minmax(170px,1.5fr) minmax(110px,.8fr)}
+}
+@media(max-width:1180px){
+  .matchCenterLineupsGrid.club-home,.matchCenterLineupsGrid.club-away{grid-template-columns:1fr}
+  .matchCenterLineupsGrid>.statisticsPanel{height:auto}
+  .matchCenterSquadCompactRow{grid-template-columns:28px minmax(280px,1fr) 112px 38px minmax(120px,.6fr)}
+}
+@media(max-width:900px){.matchTimelineHalves{grid-template-columns:1fr}}
+@media(max-width:720px){
+  .matchCenterSquadCompactRow{grid-template-columns:28px minmax(0,1fr) 82px 36px}
+  .matchCenterPlayerPick{grid-template-columns:1fr}
+  .matchTimelineHalf{padding:9px}
+  .matchTimelineHalf .matchTimeline:before{left:48px}
+  .matchTimelineHalf .matchTimelineEvent{grid-template-columns:32px 34px minmax(0,1fr)}
+}
+
+.matchCenterLineupsGrid .matchLineupGroup,
+.matchCenterLineupsGrid .matchCenterBenchDetails{border-color:#dfe7f0;border-radius:12px;background:#f9fbfd}
+.matchCenterLineupsGrid .matchLineupGroup>summary,
+.matchCenterLineupsGrid .matchCenterBenchDetails>summary{min-height:46px;padding:11px 13px;font-size:11px}
+.matchCenterLineupsGrid .matchLineupRows,
+.matchCenterLineupsGrid .matchCenterSquadList{gap:6px}
+.matchCenterLineupsGrid .matchLineupMeta{margin-bottom:0}
+.matchCenterLineupsGrid .matchLineupFooter{padding-top:12px}
+.matchCenterLineupsGrid .matchLineupFooter span{font-size:8.5px;line-height:1.45}
+.matchCenterSquadCompactRow select option{font-weight:750}

@@ -1,0 +1,20 @@
+FC EDINEȚ v2.9.2 — Match Center Visual + Manual Player Stats Fix
+
+Changes:
+- balanced home/away lineup cards and typography
+- club lineup gets more horizontal space on wide screens
+- full player names are easier to read
+- position color now fills the complete player row
+- player/position select options use matching position colors where supported by the browser
+- manual FC Edineț players are promoted to hidden temporary player records so match/season stats can be stored
+- existing manual event references are linked to the temporary player on save
+- timeline is split into two columns: first half and second half
+- club/opponent event colors are preserved in both halves
+
+No SQL migration required.
+
+Deployment:
+1. Extract into a fresh folder.
+2. Copy only .env.local from the previous working version.
+3. Run DEPLOY_FC_EDINET.bat.
+4. Verify /api/version -> 2.9.2.
