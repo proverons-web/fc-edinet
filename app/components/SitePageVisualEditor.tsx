@@ -23,6 +23,7 @@ import type {
 
 const initialState: VisualEditorState = {};
 type ViewMode = VisualImageDevice;
+type InspectorTab = "content" | "layout" | "style" | "responsive";
 
 export default function SitePageVisualEditor({
   pageKey,
@@ -40,6 +41,7 @@ export default function SitePageVisualEditor({
   const [state, action, pending] = useActionState(saveSitePageVisualEditor, initialState);
   const [mode, setMode] = useState<ViewMode>("desktop");
   const [safeZone, setSafeZone] = useState(true);
+  const [inspectorTab, setInspectorTab] = useState<InspectorTab>("style");
   const [backgroundMode, setBackgroundMode] = useState<PageHeroBackgroundMode>(initial.background_mode);
   const layerDefinitions = useMemo(() => siteHeroLayerDefinitions(pageKey), [pageKey]);
   const [layerConfig, setLayerConfig] = useState(initial.layer_config);
@@ -203,6 +205,9 @@ export default function SitePageVisualEditor({
       <input type="hidden" name="desktop_position_x" value={desktopX} /><input type="hidden" name="desktop_position_y" value={desktopY} /><input type="hidden" name="desktop_zoom_percent" value={desktopZoom} /><input type="hidden" name="hero_height_desktop" value={desktopHeight} />
       <input type="hidden" name="tablet_position_x" value={tabletX} /><input type="hidden" name="tablet_position_y" value={tabletY} /><input type="hidden" name="tablet_zoom_percent" value={tabletZoom} /><input type="hidden" name="hero_height_tablet" value={tabletHeight} />
       <input type="hidden" name="mobile_position_x" value={mobileX} /><input type="hidden" name="mobile_position_y" value={mobileY} /><input type="hidden" name="mobile_zoom_percent" value={mobileZoom} /><input type="hidden" name="hero_height_mobile" value={mobileHeight} />
+      <input type="hidden" name="background_mode" value={backgroundMode} /><input type="hidden" name="overlay_opacity" value={overlay} /><input type="hidden" name="overlay_style" value={overlayStyle} /><input type="hidden" name="text_alignment" value={alignment} /><input type="hidden" name="content_width" value={contentWidth} />
+      <input type="hidden" name="show_eyebrow" value={showEyebrow ? "on" : ""} /><input type="hidden" name="show_description" value={showDescription ? "on" : ""} />
+      <input type="hidden" name="eyebrow_ru" value={eyebrowRu} /><input type="hidden" name="eyebrow_ro" value={eyebrowRo} /><input type="hidden" name="title_ru" value={titleRu} /><input type="hidden" name="title_ro" value={titleRo} /><input type="hidden" name="description_ru" value={descriptionRu} /><input type="hidden" name="description_ro" value={descriptionRo} />
       <Publishing2Bar autosave={autosave} canUndo={history.canUndo} canRedo={history.canRedo} onUndo={history.undo} onRedo={history.redo} previewHref={`/admin/design/preview?page=${pageKey}`} checks={checks} pendingMedia={hasPendingMedia} preparePreview={() => autosaveAction(editorSnapshot)} />
 
       <section className="visualEditorWorkspace heroBuilderWorkspace">
@@ -240,41 +245,47 @@ export default function SitePageVisualEditor({
         </section>
       </div>
 
-      <div className="visualEditorColumns">
-        <section className="clubAdminSection visualControlCard imageEditor2Card">
-          <div className="formSectionTitle"><p className="eyebrow blue">КАДР • {mode.toUpperCase()}</p><h2>Изображение устройства</h2><p>Можно загрузить новое фото, физически обрезать его в WebP или повторно использовать кадр из Media Library.</p></div>
-          <div className="fieldGroup"><label htmlFor={`${pageKey}_background_mode`}>Режим фона</label><select id={`${pageKey}_background_mode`} name="background_mode" value={backgroundMode} onChange={(e) => setBackgroundMode(e.target.value as PageHeroBackgroundMode)}><option value="default">Системный фон страницы</option><option value="custom">Своё фото</option>{item.supportsContentImage && <option value="content">Фото текущего материала</option>}</select></div>
-          {mode === "desktop" && <VisualImageField device="desktop" fileName="desktop_image" assetFieldName="desktop_image_asset_id" currentUrl={customDesktop} assets={assets} onPreviewChange={(url) => { setDesktopImage(url); setBackgroundMode("custom"); }} onClearChange={setClearDesktop} clear={clearDesktop} onActivate={() => { setMode("desktop"); setBackgroundMode("custom"); }} />}
-          {mode === "tablet" && <VisualImageField device="tablet" fileName="tablet_image" assetFieldName="tablet_image_asset_id" currentUrl={customTablet} assets={assets} onPreviewChange={(url) => { setTabletImage(url); setBackgroundMode("custom"); }} onClearChange={setClearTablet} clear={clearTablet} onActivate={() => { setMode("tablet"); setBackgroundMode("custom"); }} />}
-          {mode === "mobile" && <VisualImageField device="mobile" fileName="mobile_image" assetFieldName="mobile_image_asset_id" currentUrl={customMobile} assets={assets} onPreviewChange={(url) => { setMobileImage(url); setBackgroundMode("custom"); }} onClearChange={setClearMobile} clear={clearMobile} onActivate={() => { setMode("mobile"); setBackgroundMode("custom"); }} />}
-          <Range label="Фокус X" min={0} max={100} value={preview.x} setValue={setFocusX} suffix="%" />
-          <Range label="Фокус Y" min={0} max={100} value={preview.y} setValue={setFocusY} suffix="%" />
-          <ZoomRange value={preview.zoom} setValue={setZoom} />
-          <Range label="Высота Hero" min={180} max={950} step={10} value={preview.height} setValue={setHeight} suffix=" px" />
-        </section>
+      <section className="clubAdminSection visualControlCard unifiedInspectorCard">
+        <div className="unifiedInspectorHead">
+          <div><p className="eyebrow blue">INSPECTOR 3.0</p><h2>Настройки Hero</h2><p>Один инспектор для контента, геометрии, внешнего вида и адаптивных overrides. Preview и production используют те же значения.</p></div>
+          <div className="unifiedInspectorTabs" role="tablist" aria-label="Раздел инспектора">
+            {([['content','Content'],['layout','Layout'],['style','Style'],['responsive','Responsive']] as const).map(([key,label]) => <button type="button" key={key} className={inspectorTab===key?'active':''} onClick={()=>setInspectorTab(key)}>{label}</button>)}
+          </div>
+        </div>
 
-        <section className="clubAdminSection visualControlCard">
-          <div className="formSectionTitle"><p className="eyebrow blue">КОМПОЗИЦИЯ</p><h2>Hero и текст</h2><p>Глобальные параметры выбранного Hero. Управление отдельными объектами находится в панели слоёв.</p></div>
-          <Range label="Затемнение фото" name="overlay_opacity" min={0} max={95} value={overlay} setValue={setOverlay} suffix="%" />
-          <Range label="Максимальная ширина текста" name="content_width" min={420} max={1200} step={10} value={contentWidth} setValue={setContentWidth} suffix=" px" />
-          <div className="fieldGroup"><label htmlFor={`${pageKey}_overlay_style`}>Тип затемнения</label><select id={`${pageKey}_overlay_style`} name="overlay_style" value={overlayStyle} onChange={(e) => setOverlayStyle(e.target.value as PageHeroOverlayStyle)}><option value="solid">Равномерное</option><option value="gradient-left">Сильнее слева</option><option value="gradient-right">Сильнее справа</option></select></div>
-          <div className="fieldGroup"><label htmlFor={`${pageKey}_alignment`}>Выравнивание текста</label><select id={`${pageKey}_alignment`} name="text_alignment" value={alignment} onChange={(e) => setAlignment(e.target.value as typeof alignment)}><option value="left">Слева</option><option value="center">По центру</option><option value="right">Справа</option></select></div>
-          <label className="checkRow"><input type="checkbox" name="show_eyebrow" checked={showEyebrow} onChange={(e) => setShowEyebrow(e.target.checked)} /><span><strong>Показывать eyebrow</strong><small>Сохраняется для обратной совместимости; слой Eyebrow имеет приоритет.</small></span></label>
-          <label className="checkRow"><input type="checkbox" name="show_description" checked={showDescription} onChange={(e) => setShowDescription(e.target.checked)} /><span><strong>Показывать описание</strong><small>Слой Description/Анонс также может скрыть его отдельно.</small></span></label>
-          <div className="canvasDeviceSummary">{(["desktop","tablet","mobile"] as ViewMode[]).map((key) => <button type="button" key={key} className={mode === key ? "active" : ""} onClick={() => setMode(key)}><strong>{key}</strong><span>{key === "desktop" ? `${desktopX}/${desktopY} • ${desktopZoom}%` : key === "tablet" ? `${tabletX}/${tabletY} • ${tabletZoom}%` : `${mobileX}/${mobileY} • ${mobileZoom}%`}</span></button>)}</div>
-        </section>
-      </div>
+        {inspectorTab === "content" && <div className="unifiedInspectorPane">
+          <div className="formSectionTitle"><h3>{item.editableText ? "Текст страницы" : "Динамический контент"}</h3><p>{item.editableText ? "Пустое поле означает штатный текст сайта. RU и RO редактируются независимо." : "Текст берётся из текущего материала; здесь настраивается только визуальная подача Hero."}</p></div>
+          {item.editableText ? <div className="sitePageTextFields">
+            <TextField label="Eyebrow RU" name="ui_eyebrow_ru" value={eyebrowRu} setValue={setEyebrowRu} placeholder={item.preview.eyebrow} />
+            <TextField label="Eyebrow RO" name="ui_eyebrow_ro" value={eyebrowRo} setValue={setEyebrowRo} />
+            <TextField label="Заголовок RU" name="ui_title_ru" value={titleRu} setValue={setTitleRu} placeholder={item.preview.title} />
+            <TextField label="Заголовок RO" name="ui_title_ro" value={titleRo} setValue={setTitleRo} />
+            <TextArea label="Описание RU" name="ui_description_ru" value={descriptionRu} setValue={setDescriptionRu} placeholder={item.preview.description} />
+            <TextArea label="Описание RO" name="ui_description_ro" value={descriptionRo} setValue={setDescriptionRo} />
+          </div> : <div className="visualDynamicHint"><strong>{item.route}</strong><span>Preview использует демонстрационные данные. На сайте будут реальные данные текущего материала.</span></div>}
+          <div className="unifiedInspectorChecks"><label className="checkRow"><input type="checkbox" checked={showEyebrow} onChange={(e)=>setShowEyebrow(e.target.checked)} /><span><strong>Показывать eyebrow</strong></span></label><label className="checkRow"><input type="checkbox" checked={showDescription} onChange={(e)=>setShowDescription(e.target.checked)} /><span><strong>Показывать описание</strong></span></label></div>
+        </div>}
 
-      <section className="clubAdminSection visualControlCard">
-        <div className="formSectionTitle"><p className="eyebrow blue">ТЕКСТ</p><h2>{item.editableText ? "Текст страницы" : "Динамический контент"}</h2><p>{item.editableText ? "Пустое поле означает: использовать штатный текст сайта. Можно задать отдельные RU и RO варианты." : "На шаблонах данные берутся из конкретного материала; Hero Builder управляет слоями и визуальной подачей."}</p></div>
-        {item.editableText ? <div className="sitePageTextFields">
-          <TextField label="Eyebrow RU" name="eyebrow_ru" value={eyebrowRu} setValue={setEyebrowRu} placeholder={item.preview.eyebrow} />
-          <TextField label="Eyebrow RO" name="eyebrow_ro" value={eyebrowRo} setValue={setEyebrowRo} />
-          <TextField label="Заголовок RU" name="title_ru" value={titleRu} setValue={setTitleRu} placeholder={item.preview.title} />
-          <TextField label="Заголовок RO" name="title_ro" value={titleRo} setValue={setTitleRo} />
-          <TextArea label="Описание RU" name="description_ru" value={descriptionRu} setValue={setDescriptionRu} placeholder={item.preview.description} />
-          <TextArea label="Описание RO" name="description_ro" value={descriptionRo} setValue={setDescriptionRo} />
-        </div> : <div className="visualDynamicHint"><strong>{item.route}</strong><span>Preview использует демонстрационные данные. На сайте будут реальные данные конкретного материала.</span></div>}
+        {inspectorTab === "layout" && <div className="unifiedInspectorPane inspectorGrid2">
+          <div><div className="formSectionTitle"><h3>Композиция</h3><p>Размеры и выравнивание Hero.</p></div><Range label="Максимальная ширина текста" min={420} max={1200} step={10} value={contentWidth} setValue={setContentWidth} suffix=" px" /><div className="fieldGroup"><label>Выравнивание текста</label><select value={alignment} onChange={(e)=>setAlignment(e.target.value as typeof alignment)}><option value="left">Слева</option><option value="center">По центру</option><option value="right">Справа</option></select></div></div>
+          <div><div className="formSectionTitle"><h3>Текущий viewport</h3><p>{mode === 'desktop' ? 'Desktop' : mode === 'tablet' ? 'Tablet' : 'Mobile'} override.</p></div><Range label="Высота Hero" min={180} max={950} step={10} value={preview.height} setValue={setHeight} suffix=" px" /><div className="inspectorQuickActions"><button type="button" onClick={()=>{setFocusX(50);setFocusY(50);setZoom(100)}}>Сбросить кадр</button></div></div>
+        </div>}
+
+        {inspectorTab === "style" && <div className="unifiedInspectorPane inspectorGrid2">
+          <div><div className="formSectionTitle"><h3>Фон • {mode.toUpperCase()}</h3><p>Изображение, Focus X/Y, Zoom и режим источника.</p></div><div className="fieldGroup"><label>Режим фона</label><select value={backgroundMode} onChange={(e)=>setBackgroundMode(e.target.value as PageHeroBackgroundMode)}><option value="default">Системный фон страницы</option><option value="custom">Своё фото</option>{item.supportsContentImage && <option value="content">Фото текущего материала</option>}</select></div>
+          {mode === "desktop" && <VisualImageField device="desktop" fileName="desktop_image" assetFieldName="desktop_image_asset_id" currentUrl={customDesktop} assets={assets} onPreviewChange={(url)=>{setDesktopImage(url);setBackgroundMode('custom')}} onClearChange={setClearDesktop} clear={clearDesktop} onActivate={()=>{setMode('desktop');setBackgroundMode('custom')}} />}
+          {mode === "tablet" && <VisualImageField device="tablet" fileName="tablet_image" assetFieldName="tablet_image_asset_id" currentUrl={customTablet} assets={assets} onPreviewChange={(url)=>{setTabletImage(url);setBackgroundMode('custom')}} onClearChange={setClearTablet} clear={clearTablet} onActivate={()=>{setMode('tablet');setBackgroundMode('custom')}} />}
+          {mode === "mobile" && <VisualImageField device="mobile" fileName="mobile_image" assetFieldName="mobile_image_asset_id" currentUrl={customMobile} assets={assets} onPreviewChange={(url)=>{setMobileImage(url);setBackgroundMode('custom')}} onClearChange={setClearMobile} clear={clearMobile} onActivate={()=>{setMode('mobile');setBackgroundMode('custom')}} />}
+          <Range label="Фокус X" min={0} max={100} value={preview.x} setValue={setFocusX} suffix="%" /><Range label="Фокус Y" min={0} max={100} value={preview.y} setValue={setFocusY} suffix="%" /><ZoomRange value={preview.zoom} setValue={setZoom} /></div>
+          <div><div className="formSectionTitle"><h3>Overlay</h3><p>Внешний вид затемнения и безопасная зона.</p></div><Range label="Затемнение фото" min={0} max={95} value={overlay} setValue={setOverlay} suffix="%" /><div className="fieldGroup"><label>Тип затемнения</label><select value={overlayStyle} onChange={(e)=>setOverlayStyle(e.target.value as PageHeroOverlayStyle)}><option value="solid">Равномерное</option><option value="gradient-left">Сильнее слева</option><option value="gradient-right">Сильнее справа</option></select></div><label className="checkRow"><input type="checkbox" checked={safeZone} onChange={(e)=>setSafeZone(e.target.checked)} /><span><strong>Показывать Safe Zone</strong><small>Только направляющая Preview, production не меняет.</small></span></label></div>
+        </div>}
+
+        {inspectorTab === "responsive" && <div className="unifiedInspectorPane">
+          <div className="formSectionTitle"><h3>Responsive overrides</h3><p>Каждое устройство хранит собственные Focus X/Y, Zoom и высоту Hero. Переключение ниже сразу меняет Preview.</p></div>
+          <div className="responsiveOverrideCards">{(["desktop","tablet","mobile"] as ViewMode[]).map((key)=>{const vals=key==='desktop'?{x:desktopX,y:desktopY,z:desktopZoom,h:desktopHeight}:key==='tablet'?{x:tabletX,y:tabletY,z:tabletZoom,h:tabletHeight}:{x:mobileX,y:mobileY,z:mobileZoom,h:mobileHeight};return <button type="button" key={key} className={mode===key?'active':''} onClick={()=>setMode(key)}><strong>{key}</strong><span>Focus {vals.x}/{vals.y}</span><span>Zoom {vals.z}%</span><span>Hero {vals.h}px</span></button>})}</div>
+          <div className="inspectorGrid2"><div><Range label="Фокус X" min={0} max={100} value={preview.x} setValue={setFocusX} suffix="%" /><Range label="Фокус Y" min={0} max={100} value={preview.y} setValue={setFocusY} suffix="%" /></div><div><ZoomRange value={preview.zoom} setValue={setZoom} /><Range label="Высота Hero" min={180} max={950} step={10} value={preview.height} setValue={setHeight} suffix=" px" /></div></div>
+          <div className="inspectorQuickActions"><button type="button" onClick={()=>{setTabletX(desktopX);setTabletY(desktopY);setTabletZoom(desktopZoom);setTabletHeight(desktopHeight)}}>Desktop → Tablet</button><button type="button" onClick={()=>{setMobileX(desktopX);setMobileY(desktopY);setMobileZoom(desktopZoom);setMobileHeight(desktopHeight)}}>Desktop → Mobile</button><button type="button" onClick={()=>{setFocusX(50);setFocusY(50);setZoom(100)}}>Сбросить текущий viewport</button></div>
+        </div>}
       </section>
 
       <section className="visualPublishBar">
