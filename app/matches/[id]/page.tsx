@@ -142,6 +142,30 @@ const eventIcons: Record<string, string> = {
   other: "•",
 };
 
+function eventCountsAsGoal(event: MatchEvent) {
+  return event.event_type === "goal" || event.event_type === "penalty_goal" || event.event_type === "own_goal";
+}
+
+function eventScoringTeamId(event: MatchEvent, match: ClubMatch) {
+  const eventTeamId = String(event.team_id);
+  if (event.event_type !== "own_goal") return eventTeamId;
+  return eventTeamId === String(match.home_team_id) ? String(match.away_team_id) : String(match.home_team_id);
+}
+
+function publicRunningScoreByEvent(events: MatchEvent[], match: ClubMatch) {
+  let home = 0;
+  let away = 0;
+  const scores = new Map<string, { home: number; away: number }>();
+  for (const event of events) {
+    if (!eventCountsAsGoal(event)) continue;
+    const scoringTeam = eventScoringTeamId(event, match);
+    if (scoringTeam === String(match.home_team_id)) home += 1;
+    if (scoringTeam === String(match.away_team_id)) away += 1;
+    scores.set(String(event.id), { home, away });
+  }
+  return scores;
+}
+
 function matchSelect() {
   return `id,competition_id,home_team_id,away_team_id,kickoff,stadium,round,status,home_score,away_score,notes,created_at,updated_at,
   home:teams!matches_home_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
@@ -250,6 +274,7 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
   }
 
   const statusHasScore = match.status === "finished" || match.status === "live";
+  const scoreAfterEvent = publicRunningScoreByEvent(events, match);
   const eventJsonLd = sportsEventJsonLd(match, locale);
 
   return (
@@ -292,15 +317,18 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
                   {events.length === 0 ? <div className="adminEmpty">{t.noEvents}</div> : (
                     <div className="publicMatchEventList">
                       {events.map((event) => {
-                        const isHome = String(event.team_id) === String(match.home_team_id);
+                        const scoringTeam = eventCountsAsGoal(event) ? eventScoringTeamId(event, match) : String(event.team_id);
+                        const displayIsHome = scoringTeam === String(match.home_team_id);
+                        const goalScore = scoreAfterEvent.get(String(event.id));
                         return (
-                          <article className={`publicMatchEvent ${isHome ? "home" : "away"} event-${event.event_type}`} key={String(event.id)}>
+                          <article className={`publicMatchEvent ${displayIsHome ? "home" : "away"} event-${event.event_type}`} key={String(event.id)}>
                             <div className="publicMatchEventMinute">{eventMinute(event)}</div>
                             <div className="publicMatchEventIcon">{eventIcons[event.event_type] ?? "•"}</div>
                             <div className="publicMatchEventBody">
-                              <small>{isHome ? match.home?.name : match.away?.name}</small>
+                              <small>{displayIsHome ? match.home?.name : match.away?.name}</small>
                               <strong>{eventLabels[locale][event.event_type] ?? event.event_type}</strong>
                               <span>{eventPerson(event)}</span>
+                              {goalScore ? <b className="publicMatchRunningScore">{goalScore.home}:{goalScore.away}</b> : null}
                               {event.description && event.description !== event.player_name ? <p>{event.description}</p> : null}
                             </div>
                           </article>

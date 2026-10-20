@@ -305,8 +305,17 @@ export async function publishMatchProtocol(formData: FormData) {
   if (eventsError) go(matchId, { error: `Не удалось проверить таймлайн: ${eventsError.message}` });
 
   const goalTypes = new Set(["goal", "penalty_goal", "own_goal"]);
-  const homeGoals = (events ?? []).filter((event) => String(event.team_id) === String(match.home_team_id) && goalTypes.has(event.event_type)).length;
-  const awayGoals = (events ?? []).filter((event) => String(event.team_id) === String(match.away_team_id) && goalTypes.has(event.event_type)).length;
+  let homeGoals = 0;
+  let awayGoals = 0;
+  for (const event of events ?? []) {
+    if (!goalTypes.has(event.event_type)) continue;
+    const eventTeamId = String(event.team_id);
+    const scoringTeamId = event.event_type === "own_goal"
+      ? (eventTeamId === String(match.home_team_id) ? String(match.away_team_id) : String(match.home_team_id))
+      : eventTeamId;
+    if (scoringTeamId === String(match.home_team_id)) homeGoals += 1;
+    if (scoringTeamId === String(match.away_team_id)) awayGoals += 1;
+  }
   if (homeGoals !== Number(match.home_score ?? 0) || awayGoals !== Number(match.away_score ?? 0)) {
     go(matchId, { error: `Перед публикацией таймлайн голов должен совпадать со счётом (${homeGoals}:${awayGoals} / ${match.home_score ?? 0}:${match.away_score ?? 0}).` });
   }

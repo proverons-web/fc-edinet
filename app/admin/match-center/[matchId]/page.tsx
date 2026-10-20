@@ -88,6 +88,26 @@ function countsAsGoal(event: MatchEvent) {
   return event.event_type === "goal" || event.event_type === "penalty_goal" || event.event_type === "own_goal";
 }
 
+function scoringTeamId(event: MatchEvent, match: ClubMatch) {
+  const eventTeamId = String(event.team_id);
+  if (event.event_type !== "own_goal") return eventTeamId;
+  return eventTeamId === String(match.home_team_id) ? String(match.away_team_id) : String(match.home_team_id);
+}
+
+function runningScoreByEvent(events: MatchEvent[], match: ClubMatch) {
+  let home = 0;
+  let away = 0;
+  const result = new Map<string, { home: number; away: number }>();
+  for (const event of events) {
+    if (!countsAsGoal(event)) continue;
+    const scoringTeam = scoringTeamId(event, match);
+    if (scoringTeam === String(match.home_team_id)) home += 1;
+    if (scoringTeam === String(match.away_team_id)) away += 1;
+    result.set(String(event.id), { home, away });
+  }
+  return result;
+}
+
 export default async function MatchCenterMatchPage({
   params,
   searchParams,
@@ -195,11 +215,12 @@ export default async function MatchCenterMatchPage({
   const reportHasMetadata = Boolean(progress?.report_has_metadata);
 
   const homeGoalsFromTimeline = events.filter(
-    (event) => String(event.team_id) === String(match.home_team_id) && countsAsGoal(event),
+    (event) => countsAsGoal(event) && scoringTeamId(event, match) === String(match.home_team_id),
   ).length;
   const awayGoalsFromTimeline = events.filter(
-    (event) => String(event.team_id) === String(match.away_team_id) && countsAsGoal(event),
+    (event) => countsAsGoal(event) && scoringTeamId(event, match) === String(match.away_team_id),
   ).length;
+  const scoreAfterEvent = runningScoreByEvent(events, match);
   const scoreCanBeChecked = match.status === "finished" || match.status === "live";
   const timelineMatchesScore =
     !scoreCanBeChecked ||
@@ -444,7 +465,7 @@ export default async function MatchCenterMatchPage({
               />
               <div className="matchEventFormFooter">
                 <p>
-                  Для автогола в поле «Команда» выбирай команду, <b>которой засчитан гол</b>. Для обычного гола вторым игроком можно указать ассистента.
+                  Для автогола выбирай <b>команду игрока, забившего в свои ворота</b>. Система сама засчитает мяч сопернику. Для обычного гола вторым игроком можно указать ассистента.
                 </p>
                 <button className="primaryButton" type="submit">+ Добавить событие</button>
               </div>
@@ -476,6 +497,7 @@ export default async function MatchCenterMatchPage({
                   match={match}
                   clubSide={clubSide}
                   participants={eventParticipants}
+                  scoreAfterEvent={scoreAfterEvent}
                 />
                 <TimelineHalf
                   title="2 тайм"
@@ -484,6 +506,7 @@ export default async function MatchCenterMatchPage({
                   match={match}
                   clubSide={clubSide}
                   participants={eventParticipants}
+                  scoreAfterEvent={scoreAfterEvent}
                 />
               </div>
             )}
@@ -501,6 +524,7 @@ function TimelineHalf({
   match,
   clubSide,
   participants,
+  scoreAfterEvent,
 }: {
   title: string;
   range: string;
@@ -508,6 +532,7 @@ function TimelineHalf({
   match: ClubMatch;
   clubSide: "home" | "away" | null;
   participants: EventParticipantOption[];
+  scoreAfterEvent: Map<string, { home: number; away: number }>;
 }) {
   const grouped: Array<{ key: string; events: MatchEvent[] }> = [];
   for (const event of events) {
@@ -532,12 +557,14 @@ function TimelineHalf({
         <div className="matchTimeline">
           {grouped.map((group) => {
             const first = group.events[0];
-            const isHome = String(first.team_id) === String(match.home_team_id);
-            const isClubEvent = clubSide === "home" ? isHome : clubSide === "away" ? !isHome : false;
-            const teamName = isHome ? match.home?.name : match.away?.name;
+            const scoringTeam = countsAsGoal(first) ? scoringTeamId(first, match) : String(first.team_id);
+            const displayIsHome = scoringTeam === String(match.home_team_id);
+            const isClubEvent = clubSide === "home" ? displayIsHome : clubSide === "away" ? !displayIsHome : false;
+            const teamName = displayIsHome ? match.home?.name : match.away?.name;
             const isSubGroup = first.event_type === "substitution";
+            const goalScore = scoreAfterEvent.get(String(first.id));
             return (
-              <article className={`matchTimelineEvent ${isHome ? "home" : "away"} ${isClubEvent ? "club-event" : "opponent-event"} ${isSubGroup && group.events.length > 1 ? "grouped-substitutions" : ""}`} key={group.key}>
+              <article className={`matchTimelineEvent ${displayIsHome ? "home" : "away"} ${isClubEvent ? "club-event" : "opponent-event"} ${isSubGroup && group.events.length > 1 ? "grouped-substitutions" : ""}`} key={group.key}>
                 <div className="matchTimelineMinute">{eventMinute(first)}</div>
                 <div className="matchTimelineRail"><span>{EVENT_ICONS[first.event_type]}</span></div>
                 <div className="matchTimelineCard">
@@ -547,6 +574,11 @@ function TimelineHalf({
                       <strong>{isSubGroup && group.events.length > 1 ? `Замены · ${group.events.length}` : EVENT_LABELS[first.event_type]}</strong>
                     </div>
                     {!isSubGroup && <span>{eventParticipant(first)}</span>}
+                    {goalScore && (
+                      <b className="matchTimelineRunningScore" title="Счёт после события">
+                        {goalScore.home}:{goalScore.away}
+                      </b>
+                    )}
                   </div>
 
                   {isSubGroup ? (

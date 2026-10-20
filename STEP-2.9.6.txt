@@ -1,0 +1,8 @@
+FC EDINEȚ v2.9.6 — Own Goal Scoring Fix + Running Score
+
+- own goals are credited to the opposite team for score validation
+- Match Center own-goal cards use the beneficiary team color
+- publication validation now accepts correct own-goal timelines
+- every goal event shows the running score after that event
+- own-goal event still keeps the actual player who scored into his own net
+- no SQL migration required
