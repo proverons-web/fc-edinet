@@ -2594,7 +2594,7 @@ html,body,button,input,select,textarea{font-synthesis:none;text-rendering:geomet
 @media(max-width:1100px){.clubManualFrame:not(.is-image){font-family:var(--f-t-family,var(--f-d-family,inherit));color:var(--f-t-color,var(--f-d-color,inherit));font-weight:var(--f-t-weight,var(--f-d-weight,inherit));letter-spacing:var(--f-t-letter,var(--f-d-letter,normal));line-height:var(--f-t-line,var(--f-d-line,inherit));text-transform:var(--f-t-transform,var(--f-d-transform,none));font-style:var(--f-t-style,var(--f-d-style,normal));text-decoration:var(--f-t-decoration,var(--f-d-decoration,none));-webkit-text-stroke-width:var(--f-t-stroke,var(--f-d-stroke,0));-webkit-text-stroke-color:var(--f-t-stroke-color,var(--f-d-stroke-color,transparent))}}
 @media(max-width:680px){.clubManualFrame:not(.is-image){font-family:var(--f-m-family,var(--f-t-family,inherit));color:var(--f-m-color,var(--f-t-color,inherit));font-weight:var(--f-m-weight,var(--f-t-weight,inherit));letter-spacing:var(--f-m-letter,var(--f-t-letter,normal));line-height:var(--f-m-line,var(--f-t-line,inherit));text-transform:var(--f-m-transform,var(--f-t-transform,none));font-style:var(--f-m-style,var(--f-t-style,normal));text-decoration:var(--f-m-decoration,var(--f-t-decoration,none));-webkit-text-stroke-width:var(--f-m-stroke,var(--f-t-stroke,0));-webkit-text-stroke-color:var(--f-m-stroke-color,var(--f-t-stroke-color,transparent))}}
 
-/* ===== FC EDINET v2.4.2 — CLUB PAGE SIGNATURE REDESIGN ===== */
+/* ===== FC EDINET v2.4.3 — CLUB PAGE POLISH / STICKY NAV / TYPOGRAPHY ===== */
 .clubPageDocument{
   --club-ink:#06152d;
   --club-navy:#071a36;
@@ -2610,7 +2610,7 @@ html,body,button,input,select,textarea{font-synthesis:none;text-rendering:geomet
   color:var(--club-text);
   overflow:hidden;
 }
-.clubPageDocument .contentBuilderSection{position:relative;isolation:isolate;scroll-margin-top:118px}
+.clubPageDocument .contentBuilderSection{position:relative;isolation:isolate;scroll-margin-top:calc(var(--club-header-offset,78px) + var(--club-subnav-height,64px) + 18px)}
 .clubPageDocument .contentBuilderSection:before{content:"";position:absolute;inset:0;pointer-events:none;z-index:-1;background-image:linear-gradient(90deg,rgba(13,99,200,.035) 1px,transparent 1px),linear-gradient(rgba(13,99,200,.028) 1px,transparent 1px);background-size:72px 72px;mask-image:linear-gradient(to bottom,transparent,black 22%,black 78%,transparent)}
 .clubPageDocument .contentBuilderInner{width:min(calc(100% - 64px),1260px)}
 
@@ -2628,15 +2628,16 @@ html,body,button,input,select,textarea{font-synthesis:none;text-rendering:geomet
 .clubPageDocument .clubHeroFacts .clubFact span{color:#9db4d2;font-size:8px;letter-spacing:.14em}
 .clubPageDocument .clubHeroFacts .clubFact strong{margin-top:7px;color:#fff;font-size:16px;line-height:1.1}
 
-.clubSectionNav{position:sticky;top:0;z-index:25;background:rgba(5,21,45,.95);border-bottom:1px solid rgba(255,255,255,.09);box-shadow:0 8px 30px rgba(3,16,35,.16);backdrop-filter:blur(18px)}
+.clubSectionNav{position:sticky;top:var(--club-header-offset,78px);z-index:45;background:rgba(5,21,45,.965);border-bottom:1px solid rgba(255,255,255,.09);box-shadow:0 10px 34px rgba(3,16,35,.2);backdrop-filter:blur(18px);isolation:isolate}
 .clubSectionNavInner{width:min(calc(100% - 64px),1260px);margin:auto;display:flex;align-items:stretch;min-height:64px}
-.clubSectionNavMark{display:grid;place-items:center;width:72px;margin-right:24px;background:var(--club-yellow);color:#071a36;font:950 16px/1 "Arial Black",Arial,sans-serif;letter-spacing:-.04em;transform:skewX(-9deg)}
+.clubSectionNavMark{display:grid;place-items:center;width:72px;margin-right:24px;background:var(--club-yellow);color:#071a36;font:950 16px/1.2 "Arial Black",Arial,sans-serif;letter-spacing:-.02em;transform:skewX(-9deg)}
 .clubSectionNavLinks{display:flex;align-items:stretch;overflow:auto;scrollbar-width:none}.clubSectionNavLinks::-webkit-scrollbar{display:none}
-.clubSectionNavLinks a{position:relative;display:flex;align-items:center;gap:8px;padding:0 20px;color:#d7e3f1;text-decoration:none;white-space:nowrap;font-size:11px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;transition:background .18s ease,color .18s ease}
-.clubSectionNavLinks a span{color:#6487ad;font-size:8px}.clubSectionNavLinks a:hover{background:rgba(255,255,255,.06);color:#fff}.clubSectionNavLinks a:hover:after{content:"";position:absolute;left:20px;right:20px;bottom:0;height:3px;background:var(--club-yellow)}
+.clubSectionNavLinks a{position:relative;display:flex;align-items:center;gap:8px;min-height:64px;padding:6px 20px;color:#d7e3f1;text-decoration:none;white-space:nowrap;font-size:11px;font-weight:900;line-height:1.2;letter-spacing:.035em;text-transform:uppercase;box-sizing:border-box;transition:background .18s ease,color .18s ease}
+.clubSectionNavLinks a span{color:#6487ad;font-size:8px;line-height:1}.clubSectionNavLinks a:hover,.clubSectionNavLinks a.active{background:rgba(255,255,255,.065);color:#fff}.clubSectionNavLinks a.active span{color:var(--club-yellow)}.clubSectionNavLinks a:hover:after,.clubSectionNavLinks a.active:after{content:"";position:absolute;left:20px;right:20px;bottom:0;height:3px;background:var(--club-yellow)}
+.clubSectionProgress{position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--club-yellow);transform-origin:left center;z-index:4;pointer-events:none;box-shadow:0 0 12px rgba(255,212,41,.45)}
 
 .clubPageDocument .contentBuilderSection{padding-top:max(var(--content-pad-top),88px);padding-bottom:max(var(--content-pad-bottom),88px)}
-.clubPageDocument .sectionHeading{margin-bottom:38px}.clubPageDocument .sectionHeading h2,.clubPageDocument .clubAboutCopy h2,.clubPageDocument .clubHistoryContent h2{margin:8px 0 0;color:var(--club-ink);font:950 clamp(42px,5vw,72px)/.92 "Arial Black",Arial,Helvetica,sans-serif;letter-spacing:-.055em;text-transform:uppercase}
+.clubPageDocument .sectionHeading{margin-bottom:38px}.clubPageDocument .sectionHeading h2,.clubPageDocument .clubAboutCopy h2,.clubPageDocument .clubHistoryContent h2{margin:8px 0 0;color:var(--club-ink);font:950 clamp(42px,5vw,72px)/1.02 "Arial Black",Arial,Helvetica,sans-serif;letter-spacing:-.04em;text-transform:uppercase}
 .clubPageDocument .eyebrow,.clubPageDocument .eyebrow.blue{color:var(--club-blue);font-size:9px;font-weight:950;letter-spacing:.17em;text-transform:uppercase}
 .clubPageDocument .eyebrow:before{content:"";display:inline-block;width:26px;height:3px;margin:0 10px 2px 0;background:var(--club-yellow);vertical-align:middle}
 
@@ -2646,8 +2647,8 @@ html,body,button,input,select,textarea{font-synthesis:none;text-rendering:geomet
 .clubPageDocument .clubRichComposer{font-size:17px;line-height:1.8}
 .clubPageDocument .clubRichParagraph{margin:0 0 20px;color:#53677f;font-size:16px;line-height:1.82}
 .clubPageDocument .clubAboutCopy .clubRichParagraph:first-of-type,.clubPageDocument .clubHistoryContent .clubRichParagraph:first-of-type{color:#203c5a;font-size:20px;line-height:1.6;font-weight:650;letter-spacing:-.01em}
-.clubPageDocument .clubRichHeading{margin:40px 0 14px;color:var(--club-ink);font-size:clamp(26px,3vw,40px);font-weight:950;letter-spacing:-.035em}
-.clubPageDocument .clubRichSubheading{color:#1f4162;font-weight:900}
+.clubPageDocument .clubRichHeading{margin:42px 0 16px;color:var(--club-ink);font-size:clamp(26px,3vw,40px);font-weight:950;line-height:1.12;letter-spacing:-.025em}
+.clubPageDocument .clubRichSubheading{color:#1f4162;font-weight:900;line-height:1.35}
 .clubPageDocument .clubRichQuote{border-left:0;border-top:4px solid var(--club-yellow);border-radius:0;background:#eef4fb;color:#1c3b5b;padding:24px 28px;font-size:18px;line-height:1.55}
 .clubPageDocument .clubRichImage img{border-radius:2px;box-shadow:0 22px 55px rgba(9,31,58,.14)}
 .clubPageDocument .clubRichImage figcaption{padding-left:14px;border-left:3px solid var(--club-yellow);color:#72869d;text-transform:uppercase;letter-spacing:.07em;font-weight:800}
@@ -2673,23 +2674,26 @@ html,body,button,input,select,textarea{font-synthesis:none;text-rendering:geomet
 
 .clubPageDocument .clubHistorySection{background:#eef3f8}
 .clubPageDocument .clubHistoryContent{max-width:1050px;margin:0 auto}
-.clubPageDocument .clubHistoryContent:before{content:"OUR STORY";display:block;margin-bottom:-22px;color:rgba(8,44,83,.05);font:950 clamp(74px,11vw,150px)/.8 "Arial Black",Arial,sans-serif;letter-spacing:-.07em;white-space:nowrap;text-align:center;pointer-events:none}
+.clubPageDocument .clubHistoryContent:before{content:"НАША ИСТОРИЯ";display:block;margin-bottom:-22px;color:rgba(8,44,83,.05);font:950 clamp(74px,11vw,150px)/.8 "Arial Black",Arial,sans-serif;letter-spacing:-.07em;white-space:nowrap;text-align:center;pointer-events:none}
+.clubPageDocument[data-locale="ro"] .clubHistoryContent:before{content:"ISTORIA NOASTRĂ"}
 .clubPageDocument .clubHistoryContent>.eyebrow,.clubPageDocument .clubHistoryContent>h2{position:relative}
 .clubPageDocument .clubHistoryVariant-card{border:0;border-radius:2px;background:#fff;box-shadow:0 28px 80px rgba(8,35,67,.09);padding:54px 62px}
 .clubPageDocument .clubHistoryVariant-columns .clubRichComposer{columns:2;column-gap:70px;column-rule:1px solid #d4dfe9}
 .clubPageDocument .clubHistoryVariant-columns .clubRichParagraph{break-inside:avoid;margin-bottom:24px}
 .clubPageDocument .clubHistoryContent .clubRichHeading{padding-top:8px;border-top:1px solid #cfdbe7}
 
-.clubPageDocument .clubLeadershipSection{background:#fff}
-.clubPageDocument .clubLeadershipGrid{gap:24px}
+.clubPageDocument .clubLeadershipSection{background:linear-gradient(180deg,#fff 0%,#f6f9fc 100%)}
+.clubPageDocument .clubLeadershipSection .contentBuilderInner{padding-inline:clamp(8px,1.6vw,22px)}
+.clubPageDocument .clubLeadershipSection .sectionHeading{margin-bottom:48px}
+.clubPageDocument .clubLeadershipGrid{gap:28px;margin-top:8px}
 .clubPageDocument .clubLeaderCard{position:relative;display:grid;grid-template-rows:auto 1fr;overflow:hidden;border:0;border-radius:2px;background:#f1f5f9;box-shadow:none;transition:transform .22s ease,box-shadow .22s ease}
 .clubPageDocument .clubLeaderCard:hover{transform:translateY(-5px);box-shadow:0 24px 55px rgba(5,30,61,.12)}
 .clubPageDocument .clubLeaderCard:after{content:"";position:absolute;right:-18px;bottom:-22px;width:125px;height:125px;background:url('/brand/fc-edinet-crest.png') center/contain no-repeat;opacity:.035;filter:grayscale(1)}
 .clubPageDocument .clubLeaderPhoto{aspect-ratio:4/4.6;border-radius:0;background:linear-gradient(145deg,#0a2348,#0f4a8d)}
 .clubPageDocument .clubLeaderPhoto img{transition:transform .35s ease;filter:saturate(.92) contrast(1.03)}.clubPageDocument .clubLeaderCard:hover .clubLeaderPhoto img{transform:scale(1.025)}
-.clubPageDocument .clubLeaderCard>div:last-child{position:relative;z-index:2;padding:24px 24px 28px;border-top:5px solid var(--club-yellow)}
-.clubPageDocument .clubLeaderCard span{color:var(--club-blue);font-size:9px;letter-spacing:.13em}.clubPageDocument .clubLeaderCard h3{margin:7px 0 12px;color:#0a2345;font-size:25px;line-height:1;letter-spacing:-.035em}.clubPageDocument .clubLeaderCard p{color:#60748a;font-size:13px;line-height:1.65}
-.clubPageDocument .clubLeadershipVariant-compact .clubLeaderCard{grid-template-columns:190px 1fr;grid-template-rows:auto}.clubPageDocument .clubLeadershipVariant-compact .clubLeaderCard>div:last-child{border-top:0;border-left:5px solid var(--club-yellow)}
+.clubPageDocument .clubLeaderCard>div:last-child{position:relative;z-index:2;padding:30px 30px 34px;border-top:5px solid var(--club-yellow)}
+.clubPageDocument .clubLeaderCard span{color:var(--club-blue);font-size:9px;line-height:1.35;letter-spacing:.13em}.clubPageDocument .clubLeaderCard h3{margin:9px 0 15px;color:#0a2345;font-size:25px;line-height:1.12;letter-spacing:-.025em}.clubPageDocument .clubLeaderCard p{margin:0;color:#60748a;font-size:14px;line-height:1.72}
+.clubPageDocument .clubLeadershipVariant-compact .clubLeaderCard{grid-template-columns:190px 1fr;grid-template-rows:auto}.clubPageDocument .clubLeadershipVariant-compact .clubLeaderCard>div:last-child{border-top:0;border-left:5px solid var(--club-yellow);padding:34px 38px}
 
 .clubPageDocument .clubAchievementsSection{background:#05162f;color:#fff}
 .clubPageDocument .clubAchievementsSection:after{content:"FCE";position:absolute;right:-25px;bottom:-70px;color:rgba(255,255,255,.035);font:950 330px/.8 "Arial Black",Arial,sans-serif;letter-spacing:-.1em;z-index:-1}
@@ -2699,7 +2703,7 @@ html,body,button,input,select,textarea{font-synthesis:none;text-rendering:geomet
 .clubPageDocument .clubTimeline article{position:relative;grid-template-columns:160px minmax(0,1fr);gap:42px;padding:32px 0;border-top:1px solid rgba(255,255,255,.13)}
 .clubPageDocument .clubTimeline article:before{content:"";position:absolute;left:151px;top:42px;width:17px;height:17px;border:4px solid #05162f;border-radius:50%;background:var(--club-yellow);box-shadow:0 0 0 1px rgba(255,255,255,.2)}
 .clubPageDocument .clubTimelineYear{color:var(--club-yellow);font:950 30px/1 "Arial Black",Arial,sans-serif;letter-spacing:-.04em}
-.clubPageDocument .clubTimeline h3{margin:0 0 10px;color:#fff;font-size:25px;letter-spacing:-.025em}.clubPageDocument .clubTimeline p{max-width:850px;color:#aebfd2;font-size:15px;line-height:1.68}
+.clubPageDocument .clubTimeline h3{margin:0 0 12px;color:#fff;font-size:25px;line-height:1.18;letter-spacing:-.02em}.clubPageDocument .clubTimeline p{max-width:850px;color:#aebfd2;font-size:15px;line-height:1.72}
 .clubPageDocument .clubAchievementsVariant-cards{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.clubPageDocument .clubAchievementsVariant-cards article{display:block;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.045);padding:28px}.clubPageDocument .clubAchievementsVariant-cards article:before{display:none}
 
 @media(max-width:1050px){
@@ -2711,12 +2715,12 @@ html,body,button,input,select,textarea{font-synthesis:none;text-rendering:geomet
   .clubPageDocument .contentBuilderInner,.clubSectionNavInner,.clubPageDocument .clubHeroInner{width:min(calc(100% - 32px),1260px)}
   .clubPageDocument .clubHero{min-height:570px}.clubPageDocument .clubHeroInner{padding-top:90px!important;padding-bottom:50px!important}.clubPageDocument .clubHero h1{font-size:clamp(58px,18vw,86px)}.clubPageDocument .clubHeroMotto{font-size:19px}
   .clubPageDocument .clubHeroFacts{grid-template-columns:1fr}.clubPageDocument .clubHeroFacts .clubFact{padding:14px 16px}.clubPageDocument .clubHero:after{font-size:110px;bottom:-12px}
-  .clubSectionNavInner{width:100%;min-height:58px}.clubSectionNavMark{width:58px;min-width:58px;margin-right:4px}.clubSectionNavLinks a{padding:0 15px;font-size:10px}
+  .clubSectionNavInner{width:100%;min-height:58px}.clubSectionNavMark{width:58px;min-width:58px;margin-right:4px}.clubSectionNavLinks a{min-height:58px;padding:7px 15px;font-size:10px;line-height:1.2}
   .clubPageDocument .contentBuilderSection{padding-top:max(var(--content-pad-top),64px);padding-bottom:max(var(--content-pad-bottom),64px)}
   .clubPageDocument .sectionHeading h2,.clubPageDocument .clubAboutCopy h2,.clubPageDocument .clubHistoryContent h2{font-size:42px}
   .clubPageDocument .clubAboutCopy .clubRichParagraph:first-of-type,.clubPageDocument .clubHistoryContent .clubRichParagraph:first-of-type{font-size:18px}
   .clubPageDocument .clubHistoryContent:before{font-size:72px;margin-bottom:-10px}.clubPageDocument .clubHistoryVariant-card{padding:30px 22px}.clubPageDocument .clubHistoryVariant-columns .clubRichComposer{columns:1;column-rule:0}
   .clubPageDocument .clubStadiumVariant-cinematic .clubStadiumInfo{width:calc(100% - 20px);margin:-44px 10px 0;padding:22px}.clubPageDocument .clubStadiumFacts{grid-template-columns:1fr}
-  .clubPageDocument .clubLeadershipGrid{grid-template-columns:1fr}.clubPageDocument .clubLeadershipVariant-compact .clubLeaderCard{grid-template-columns:110px 1fr}
+  .clubPageDocument .clubLeadershipSection .contentBuilderInner{padding-inline:0}.clubPageDocument .clubLeadershipGrid{grid-template-columns:1fr;gap:20px}.clubPageDocument .clubLeaderCard>div:last-child{padding:24px 22px 28px}.clubPageDocument .clubLeadershipVariant-compact .clubLeaderCard{grid-template-columns:110px 1fr}.clubPageDocument .clubLeadershipVariant-compact .clubLeaderCard>div:last-child{padding:22px 20px}
   .clubPageDocument .clubTimeline article{grid-template-columns:1fr;gap:10px;padding:25px 0}.clubPageDocument .clubTimeline article:before{display:none}.clubPageDocument .clubAchievementsVariant-cards{grid-template-columns:1fr}
 }

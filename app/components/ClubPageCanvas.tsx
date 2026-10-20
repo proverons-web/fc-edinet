@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from "react";
+import type { CSSProperties, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import PageHeroShell from "@/app/components/PageHeroShell";
 import ClubRichContent from "@/app/components/ClubRichContent";
 import type { ClubAchievement, ClubLeader, ClubProfile, SitePageDesignSnapshot } from "@/lib/types";
@@ -54,6 +54,10 @@ export default function ClubPageCanvas({
   const [layout, setLayout] = useState(() => normalizeClubPageLayout(initialLayout));
   const [breakpoint, setBreakpoint] = useState<BuilderBreakpoint>("desktop");
   const [selected, setSelected] = useState<SelectedElement>(null);
+  const [activeSection, setActiveSection] = useState<string>("about");
+  const [readingProgress, setReadingProgress] = useState(0);
+  const pageRef = useRef<HTMLElement | null>(null);
+  const navRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!builderMode) return;
@@ -208,15 +212,85 @@ export default function ClubPageCanvas({
     label: section.key === "about" ? text.about : section.key === "stadium" ? text.arena : section.key === "history" ? text.history : section.key === "leadership" ? text.leadership : text.achievements,
   }));
 
-  return <main className={`clubPageDocument${builderMode ? " clubBuilderPreviewDocument" : ""}`}>
+  useEffect(() => {
+    const page = pageRef.current;
+    const nav = navRef.current;
+    if (!page || !nav) return;
+
+    const updateOffsets = () => {
+      const header = document.querySelector<HTMLElement>(".globalHeader");
+      const headerIsSticky = header && getComputedStyle(header).position === "sticky";
+      const headerHeight = headerIsSticky ? Math.round(header.getBoundingClientRect().height) : 0;
+      const navHeight = Math.round(nav.getBoundingClientRect().height);
+      page.style.setProperty("--club-header-offset", `${headerHeight}px`);
+      page.style.setProperty("--club-subnav-height", `${navHeight}px`);
+    };
+
+    updateOffsets();
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(updateOffsets) : null;
+    const header = document.querySelector<HTMLElement>(".globalHeader");
+    if (header) observer?.observe(header);
+    observer?.observe(nav);
+    window.addEventListener("resize", updateOffsets);
+    return () => { observer?.disconnect(); window.removeEventListener("resize", updateOffsets); };
+  }, []);
+
+  useEffect(() => {
+    if (builderMode) return;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const page = pageRef.current;
+      const nav = navRef.current;
+      if (!page || !nav) return;
+      const css = getComputedStyle(page);
+      const headerOffset = Number.parseFloat(css.getPropertyValue("--club-header-offset")) || 0;
+      const navHeight = nav.getBoundingClientRect().height || 64;
+      const threshold = headerOffset + navHeight + 30;
+      let current = navItems[0]?.key ?? "about";
+      for (const item of navItems) {
+        const section = document.getElementById(`club-${item.key}`);
+        if (section && section.getBoundingClientRect().top <= threshold) current = item.key;
+      }
+      setActiveSection((prev) => prev === current ? prev : current);
+      const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      setReadingProgress(Math.max(0, Math.min(1, window.scrollY / maxScroll)));
+    };
+    const onScroll = () => { if (!frame) frame = window.requestAnimationFrame(update); };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => { if (frame) window.cancelAnimationFrame(frame); window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); };
+  }, [builderMode, navItems.map((item) => item.key).join("|")]);
+
+  useEffect(() => {
+    if (builderMode) return;
+    const strip = navRef.current?.querySelector<HTMLElement>(".clubSectionNavLinks");
+    const active = strip?.querySelector<HTMLElement>(`a[data-section-key="${activeSection}"]`);
+    if (!strip || !active) return;
+    const target = active.offsetLeft - (strip.clientWidth - active.offsetWidth) / 2;
+    strip.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+  }, [activeSection, builderMode]);
+
+  const jumpToSection = (event: ReactMouseEvent<HTMLAnchorElement>, key: string) => {
+    if (builderMode) return;
+    const section = document.getElementById(`club-${key}`);
+    if (!section) return;
+    event.preventDefault();
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.history.replaceState(null, "", `#club-${key}`);
+  };
+
+  return <main ref={pageRef} data-locale={locale} className={`clubPageDocument${builderMode ? " clubBuilderPreviewDocument" : ""}`}>
     <PageHeroShell design={design} className="clubHero" contentClassName="container clubHeroInner" contentImageUrl={profile?.hero_image_url}>
       <>{heroLayerVisible(design.layer_config,"intro") && <div className="clubHeroIntro" style={heroLayerStyle(design.layer_config,"intro")}>{design.show_eyebrow && <p className="eyebrow">{city.toUpperCase()} • MOLDOVA</p>}<h1>{clubName}</h1>{design.show_description && <p className="clubHeroMotto">{motto}</p>}</div>}{heroLayerVisible(design.layer_config,"facts") && <div className="clubHeroFacts" style={heroLayerStyle(design.layer_config,"facts")}><Fact label={text.founded} value={profile?.founded_year ? String(profile.founded_year) : "—"}/><Fact label={text.city} value={city}/><Fact label={text.colors} value={colors}/></div>}</>
     </PageHeroShell>
-    <nav className="clubSectionNav" aria-label={locale === "ro" ? "Navigare club" : "Навигация по странице клуба"}>
+    <nav ref={navRef} className="clubSectionNav" aria-label={locale === "ro" ? "Navigare club" : "Навигация по странице клуба"}>
       <div className="clubSectionNavInner">
         <span className="clubSectionNavMark" aria-hidden="true">FCE</span>
-        <div className="clubSectionNavLinks">{navItems.map((item, index) => <a key={item.key} href={`#club-${item.key}`}><span>{String(index + 1).padStart(2, "0")}</span>{item.label}</a>)}</div>
+        <div className="clubSectionNavLinks">{navItems.map((item, index) => <a key={item.key} data-section-key={item.key} className={activeSection === item.key ? "active" : ""} aria-current={activeSection === item.key ? "location" : undefined} href={`#club-${item.key}`} onClick={(event)=>jumpToSection(event,item.key)}><span>{String(index + 1).padStart(2, "0")}</span>{item.label}</a>)}</div>
       </div>
+      <span className="clubSectionProgress" aria-hidden="true" style={{transform:`scaleX(${readingProgress})`}}/>
     </nav>
     {layout.sections.map(renderSection)}
   </main>;
