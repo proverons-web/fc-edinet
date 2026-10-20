@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { cache } from "react";
 import PublicBreadcrumbs from "@/app/components/PublicBreadcrumbs";
 import PublicBackLink from "@/app/components/PublicBackLink";
+import JsonLd from "@/app/components/JsonLd";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/locale";
 import { publicText } from "@/lib/i18n";
-import { publicMetadata } from "@/lib/seo";
+import { publicMetadata, sportsEventJsonLd } from "@/lib/seo";
 import type { ClubMatch, MatchEvent, MatchLineupEntry, MatchLineupSetting, MatchReport } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -168,10 +169,19 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const home = match.home?.name ?? "—";
   const away = match.away?.name ?? "—";
   const title = `${home} — ${away}`;
+  const score = match.home_score !== null && match.away_score !== null
+    ? `${match.home_score}:${match.away_score}`
+    : null;
   const description = locale === "ro"
-    ? `${title}. Calendar, scor și raportul meciului FC Edineț.`
-    : `${title}. Дата, счёт и протокол матча FC Edineț.`;
-  return publicMetadata({ title, description, path: `/matches/${encodeURIComponent(id)}`, locale });
+    ? `${title}.${score ? ` Scor ${score}.` : ""} Calendar și raportul meciului FC Edineț.`
+    : `${title}.${score ? ` Счёт ${score}.` : ""} Дата и протокол матча FC Edineț.`;
+  return publicMetadata({
+    title,
+    description,
+    path: `/matches/${encodeURIComponent(id)}`,
+    locale,
+    image: `/matches/${encodeURIComponent(id)}/opengraph-image`,
+  });
 }
 
 function formatDate(value: string, locale: Locale) {
@@ -240,9 +250,12 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
   }
 
   const statusHasScore = match.status === "finished" || match.status === "live";
+  const eventJsonLd = sportsEventJsonLd(match, locale);
 
   return (
-    <main className="publicMatchDetailPage">
+    <>
+      <JsonLd data={eventJsonLd} />
+      <main className="publicMatchDetailPage">
       <section className="publicMatchDetailHero">
         <div className="container">
           <PublicBackLink fallbackHref="/matches" locale={locale} className="publicBackOnDark" />
@@ -329,7 +342,8 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
           )}
         </div>
       </section>
-    </main>
+      </main>
+    </>
   );
 }
 

@@ -65,6 +65,12 @@ if (!fs.existsSync(officialCrestPath)) {
   errors.push("Official crest is missing: public/brand/fc-edinet-crest.png");
 }
 
+for (const requiredSeoFile of ["app/sitemap.ts", "app/robots.ts", "app/opengraph-image.tsx"]) {
+  if (!fs.existsSync(path.join(cwd, requiredSeoFile))) {
+    errors.push(`SEO release file is missing: ${requiredSeoFile}`);
+  }
+}
+
 
 // Client-boundary hygiene: keep the full public translation dictionary out of
 // hydrated components. Passing small string subsets from server components

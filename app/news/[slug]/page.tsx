@@ -7,6 +7,7 @@ import NewsComments from "@/app/components/NewsComments";
 import PageHeroShell from "@/app/components/PageHeroShell";
 import PublicBreadcrumbs from "@/app/components/PublicBreadcrumbs";
 import PublicBackLink from "@/app/components/PublicBackLink";
+import JsonLd from "@/app/components/JsonLd";
 import { createClient } from "@/lib/supabase/server";
 import type { CommentBlock, NewsArticle, NewsComment } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
@@ -14,7 +15,7 @@ import { localized, publicText } from "@/lib/i18n";
 import { getPublishedSitePageDesign } from "@/lib/page-design";
 import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
 import { newsCoverStyle } from "@/lib/news-cover";
-import { publicMetadata } from "@/lib/seo";
+import { newsArticleJsonLd, publicMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 type PageProps = {
@@ -26,7 +27,7 @@ const getArticle = cache(async (slug: string): Promise<NewsArticle | null> => {
   const supabase = await createClient();
   const { data, error } = await supabase.from("news").select(`
       id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,cover_image_url,cover_position_x,cover_position_y,cover_zoom,author_name,status,
-      published_at,views,is_featured,category_id,category:news_categories(id,name,name_ro,slug)
+      published_at,created_at,updated_at,views,is_featured,category_id,category:news_categories(id,name,name_ro,slug)
     `).eq("slug", slug).eq("status", "published").lte("published_at", new Date().toISOString()).maybeSingle();
   if (error) return null;
   return data as unknown as NewsArticle | null;
@@ -39,13 +40,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!article) return { title: publicText[locale].news.notFound };
   const title = localized(article.title, article.title_ro, locale);
   const excerpt = localized(article.excerpt, article.excerpt_ro, locale);
+  const description = excerpt || `${title} — FC Edineț`;
+  const category = localized(article.category?.name, article.category?.name_ro, locale) || undefined;
   return publicMetadata({
     title,
-    description: excerpt || `${title} — FC Edineț`,
+    description,
     path: `/news/${encodeURIComponent(slug)}`,
     locale,
     image: article.cover_image_url,
     type: "article",
+    article: {
+      publishedTime: article.published_at,
+      modifiedTime: article.updated_at || article.published_at,
+      authors: [article.author_name || "FC Edineț"],
+      section: category,
+    },
   });
 }
 
@@ -73,7 +82,7 @@ export default async function NewsArticlePage({ params, searchParams }: PageProp
   const relatedPromise = article.category_id
     ? supabase.from("news").select(`
         id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,cover_image_url,cover_position_x,cover_position_y,cover_zoom,author_name,status,
-        published_at,views,is_featured,category_id,category:news_categories(id,name,name_ro,slug)
+        published_at,created_at,updated_at,views,is_featured,category_id,category:news_categories(id,name,name_ro,slug)
       `).eq("category_id", article.category_id).eq("status", "published").neq("id", article.id)
       .lte("published_at", new Date().toISOString()).order("published_at", { ascending: false }).limit(3)
     : Promise.resolve({ data: [] as unknown[] });
@@ -107,8 +116,19 @@ export default async function NewsArticlePage({ params, searchParams }: PageProp
 
   const articleStoryLabel = locale === "ro" ? "POVESTEA CLUBULUI" : "ИСТОРИЯ КЛУБА";
   const articleInfoLabel = locale === "ro" ? "DETALII" : "ДЕТАЛИ";
+  const articleJsonLd = newsArticleJsonLd({
+    slug: article.slug,
+    title,
+    description: excerpt || `${title} — FC Edineț`,
+    image: article.cover_image_url,
+    publishedAt: article.published_at,
+    updatedAt: article.updated_at || article.published_at,
+    authorName: article.author_name,
+    section: category,
+    locale,
+  });
 
-  return <main className="newsArticlePage"><article>
+  return <><JsonLd data={articleJsonLd} /><main className="newsArticlePage"><article>
     <PageHeroShell design={design} className="articleHeader" contentClassName="container articleHeaderInner" contentImageUrl={article.cover_image_url}>
       <>
         {heroLayerVisible(design.layer_config,"navigation") && <div className="articleHeroNavigation" style={heroLayerStyle(design.layer_config,"navigation")}><PublicBackLink fallbackHref="/news" locale={locale} className="publicBackOnDark" /><PublicBreadcrumbs locale={locale} items={[{ label: text.title, href: "/news" }, { label: title }]} className="breadcrumbsOnDark" />{design.show_eyebrow && <div className="articleMeta"><span>{category}</span><time>{formatNewsDate(article.published_at, locale)}</time></div>}</div>}
@@ -136,7 +156,7 @@ export default async function NewsArticlePage({ params, searchParams }: PageProp
   />
 
   {related.length > 0 && <section className="section relatedNewsSection"><div className="container"><div className="sectionHeading"><div><p className="eyebrow blue">{text.relatedEyebrow}</p><h2>{text.related}</h2></div><Link href="/news">{text.back.replace("← ", "")} →</Link></div><div className="newsDbGrid relatedGrid">{related.map((item) => <NewsCard key={item.id} article={item} locale={locale} />)}</div></div></section>}
-  </main>;
+  </main></>;
 }
 
 function firstParam(value: string | string[] | undefined) {

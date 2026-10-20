@@ -24,6 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [
     { data: news },
     { data: players },
+    { data: matches },
     { data: albums },
     { data: photos },
   ] = await Promise.all([
@@ -36,6 +37,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .select("slug")
       .eq("is_active", true),
     supabase
+      .from("matches")
+      .select("id,kickoff,updated_at,status")
+      .order("kickoff", { ascending: false }),
+    supabase
       .from("media_albums")
       .select("slug,updated_at")
       .eq("is_published", true),
@@ -47,8 +52,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const newsRoutes: MetadataRoute.Sitemap = (news ?? []).map((item) => ({
     url: `${base}/news/${encodeURIComponent(item.slug)}`,
-    lastModified:
-      item.updated_at || item.published_at || new Date(),
+    lastModified: item.updated_at || item.published_at || undefined,
     changeFrequency: "monthly",
     priority: 0.7,
   }));
@@ -61,10 +65,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })
   );
 
+  const matchRoutes: MetadataRoute.Sitemap = (matches ?? []).map((match) => ({
+    url: `${base}/matches/${match.id}`,
+    lastModified: match.updated_at || match.kickoff || undefined,
+    changeFrequency:
+      match.status === "live" || match.status === "scheduled" ? "daily" : "monthly",
+    priority: match.status === "live" || match.status === "scheduled" ? 0.75 : 0.6,
+  }));
+
   const albumRoutes: MetadataRoute.Sitemap = (albums ?? []).map(
     (album) => ({
       url: `${base}/media/${encodeURIComponent(album.slug)}`,
-      lastModified: album.updated_at || new Date(),
+      lastModified: album.updated_at || undefined,
       changeFrequency: "monthly",
       priority: 0.6,
     })
@@ -73,7 +85,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const photoRoutes: MetadataRoute.Sitemap = (photos ?? []).map(
     (photo) => ({
       url: `${base}/media/photo/${photo.id}`,
-      lastModified: photo.created_at || new Date(),
+      lastModified: photo.created_at || undefined,
       changeFrequency: "yearly",
       priority: 0.4,
     })
@@ -83,6 +95,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticRoutes,
     ...newsRoutes,
     ...playerRoutes,
+    ...matchRoutes,
     ...albumRoutes,
     ...photoRoutes,
   ];
@@ -103,7 +116,6 @@ function route(
 ): MetadataRoute.Sitemap[number] {
   return {
     url: `${base}${path}`,
-    lastModified: new Date(),
     changeFrequency,
     priority,
   };

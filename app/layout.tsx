@@ -4,6 +4,7 @@ import "./globals.css";
 import "./visual-polish.css";
 import SiteHeader from "./components/SiteHeader";
 import SiteFooter from "./components/SiteFooter";
+import JsonLd from "./components/JsonLd";
 import { getSiteUrlObject } from "@/lib/site-url";
 import { getLocale } from "@/lib/locale";
 import { defaultDesignSystem, designSystemCssVariables, normalizeDesignSystem } from "@/lib/design-system";
@@ -53,12 +54,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const globalDesigns = await getGlobalDesignConfigs();
   const designSystem = normalizeDesignSystem(globalDesigns.design_system, defaultDesignSystem);
 
-  const teamJsonLd = sportsTeamJsonLd();
+  const teamJsonLd = sportsTeamJsonLd(locale);
 
   return (
     <html lang={locale}>
       <body className={`${fceBodyFont.variable} ${fceDisplayFont.variable}`} style={designSystemCssVariables(designSystem)}>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(teamJsonLd).replace(/</g, "\\u003c") }} />
+        <JsonLd data={teamJsonLd} />
         <SiteHeader />
         {children}
         <SiteFooter />

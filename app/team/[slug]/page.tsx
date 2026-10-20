@@ -4,6 +4,7 @@ import Link from "next/link";
 import PageHeroShell from "@/app/components/PageHeroShell";
 import PublicBreadcrumbs from "@/app/components/PublicBreadcrumbs";
 import PublicBackLink from "@/app/components/PublicBackLink";
+import JsonLd from "@/app/components/JsonLd";
 import { notFound } from "next/navigation";
 import { toggleFavoritePlayer } from "@/app/account/actions";
 import { createClient } from "@/lib/supabase/server";
@@ -22,7 +23,7 @@ import { accountText } from "@/lib/account-i18n";
 import { dateLocale, footLabelsI18n, localized, positionLabelsI18n, publicText } from "@/lib/i18n";
 import { getPublishedSitePageDesign } from "@/lib/page-design";
 import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
-import { publicMetadata } from "@/lib/seo";
+import { playerPersonJsonLd, publicMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -280,9 +281,23 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
   const currentPath = selectedSeason
     ? `/team/${slug}?season=${selectedSeason.id}`
     : `/team/${slug}`;
+  const playerBio = localized(player.bio, player.bio_ro, locale) || null;
+  const personJsonLd = playerPersonJsonLd({
+    slug: player.slug,
+    fullName,
+    position: pos,
+    image: player.photo_url,
+    birthDate: player.birth_date,
+    nationality: player.nationality,
+    hometown: player.hometown,
+    bio: playerBio,
+    locale,
+  });
 
   return (
-    <main>
+    <>
+      <JsonLd data={personJsonLd} />
+      <main>
       <PageHeroShell
         design={design}
         className="playerProfileHero"
@@ -378,7 +393,7 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
             <p className="eyebrow blue">{text.aboutEyebrow}</p>
             <h2>{text.profile}</h2>
             <p className="bioText">
-              {localized(player.bio, player.bio_ro, locale) || text.bioEmpty}
+              {playerBio || text.bioEmpty}
             </p>
           </article>
           <aside className="detailsCard">
@@ -397,7 +412,8 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
           </aside>
         </div>
       </section>
-    </main>
+      </main>
+    </>
   );
 }
 
