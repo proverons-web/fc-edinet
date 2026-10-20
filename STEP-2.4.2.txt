@@ -1,15 +1,24 @@
-FC EDINEȚ v2.4.2 — Club Professional Editorial
+FC EDINEȚ v2.4.2 — Club Page Signature Redesign
 
-- Professional compact redesign of /club without changing database content.
-- Stable browser-safe typography: Arial Black / Segoe UI / Arial.
-- Compact Hero and facts.
-- About section with readable editorial split and compact club passport.
-- Stadium becomes a strong image + information composition.
-- Long History content is rendered as a two-column editorial spread on desktop.
-- Leadership cards are more compact with better portrait proportions.
-- Achievements become a compact responsive card grid.
-- Rich-content images use consistent restrained styling.
-- Existing Club Page Builder and manual layouts remain supported.
+BASE: v2.4.1 FULL. No SQL migration required.
 
-Database: no new migration required.
-Deployment: copy .env.local and run DEPLOY_FC_EDINET.bat.
+Changes:
+- premium editorial redesign of /club
+- stronger cinematic Hero using existing club Hero image
+- sticky in-page section navigation
+- improved typography and long-form readability
+- premium contact card with official crest watermark
+- cinematic stadium treatment
+- editorial history treatment
+- redesigned leadership cards
+- trophy/history achievements presentation
+- responsive desktop/tablet/mobile styling
+- same ClubPageCanvas renderer remains used by production and Page Builder preview
+
+Deployment:
+1. Copy .env.local from previous working version.
+2. Run DEPLOY_FC_EDINET.bat.
+3. Deploy check must pass before push.
+4. Verify /api/version -> 2.4.2.
+
+No old migration should be rerun.

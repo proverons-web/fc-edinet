@@ -120,7 +120,7 @@ export default function ClubPageCanvas({
 
   const renderSection = (section: ClubSectionConfig) => {
     if (!section.visible) return null;
-    const common = { className: sectionClass(section), style: sectionStyle(section), key: section.key };
+    const common = { className: sectionClass(section), style: sectionStyle(section), key: section.key, id: `club-${section.key}` };
 
     if (section.layout_mode === "manual") {
       return <section {...common} data-builder-section={section.key}>
@@ -203,10 +203,21 @@ export default function ClubPageCanvas({
     }
   };
 
-  return <main className={`clubProfessionalPage ${builderMode ? "clubBuilderPreviewDocument" : ""}`.trim()}>
+  const navItems = layout.sections.filter((section) => section.visible).map((section) => ({
+    key: section.key,
+    label: section.key === "about" ? text.about : section.key === "stadium" ? text.arena : section.key === "history" ? text.history : section.key === "leadership" ? text.leadership : text.achievements,
+  }));
+
+  return <main className={`clubPageDocument${builderMode ? " clubBuilderPreviewDocument" : ""}`}>
     <PageHeroShell design={design} className="clubHero" contentClassName="container clubHeroInner" contentImageUrl={profile?.hero_image_url}>
       <>{heroLayerVisible(design.layer_config,"intro") && <div className="clubHeroIntro" style={heroLayerStyle(design.layer_config,"intro")}>{design.show_eyebrow && <p className="eyebrow">{city.toUpperCase()} • MOLDOVA</p>}<h1>{clubName}</h1>{design.show_description && <p className="clubHeroMotto">{motto}</p>}</div>}{heroLayerVisible(design.layer_config,"facts") && <div className="clubHeroFacts" style={heroLayerStyle(design.layer_config,"facts")}><Fact label={text.founded} value={profile?.founded_year ? String(profile.founded_year) : "—"}/><Fact label={text.city} value={city}/><Fact label={text.colors} value={colors}/></div>}</>
     </PageHeroShell>
+    <nav className="clubSectionNav" aria-label={locale === "ro" ? "Navigare club" : "Навигация по странице клуба"}>
+      <div className="clubSectionNavInner">
+        <span className="clubSectionNavMark" aria-hidden="true">FCE</span>
+        <div className="clubSectionNavLinks">{navItems.map((item, index) => <a key={item.key} href={`#club-${item.key}`}><span>{String(index + 1).padStart(2, "0")}</span>{item.label}</a>)}</div>
+      </div>
+    </nav>
     {layout.sections.map(renderSection)}
   </main>;
 }
