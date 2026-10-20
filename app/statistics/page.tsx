@@ -561,6 +561,15 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
     { title: text.cleanSheets, key: "career-clean", rows: topRows(careerSummaries, "clean_sheets"), value: (row: PlayerSummary) => row.clean_sheets },
   ];
 
+  const featuredLeader = [...summaries].sort((a, b) => {
+    const contributionDiff = contribution(b) - contribution(a);
+    if (contributionDiff) return contributionDiff;
+    if (b.goals !== a.goals) return b.goals - a.goals;
+    return b.minutes_played - a.minutes_played;
+  })[0] ?? null;
+
+  const featureText = locale === "ro" ? { player: "Jucătorul sezonului", goals: "Goluri", assists: "Assisturi", matches: "Meciuri", minutes: "Minute", profile: "Profilul jucătorului" } : { player: "Игрок сезона", goals: "Голы", assists: "Ассисты", matches: "Матчи", minutes: "Минуты", profile: "Профиль игрока" };
+
   const leaderboards = [
     { title: text.scorers, key: "goals" as const, rows: topRows(summaries, "goals"), value: (row: PlayerSummary) => row.goals },
     { title: text.assistants, key: "assists" as const, rows: topRows(summaries, "assists"), value: (row: PlayerSummary) => row.assists },
@@ -631,6 +640,27 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
             <TeamMetric label={text.winRate} value={`${results.winRate}%`} accent="blue" />
             <TeamMetric label={text.dataCoverage} value={`${results.statisticsComplete}/${results.played}`} accent="blue" />
           </div>
+
+          {featuredLeader && !statisticsError && (
+            <Link href={`/team/${featuredLeader.player.slug}`} className="statisticsFeaturedPlayer">
+              <div className="statisticsFeaturedPlayerMedia">
+                {featuredLeader.player.photo_url ? <img src={featuredLeader.player.photo_url} alt=""/> : <div className="statisticsFeaturedPlayerFallback">{featuredLeader.player.shirt_number ?? "FCE"}</div>}
+                <span className="statisticsFeaturedNumber">{featuredLeader.player.shirt_number ?? ""}</span>
+              </div>
+              <div className="statisticsFeaturedPlayerBody">
+                <p className="eyebrow">{featureText.player}</p>
+                <h2>{featuredLeader.player.first_name} {featuredLeader.player.last_name}</h2>
+                <span className="statisticsFeaturedPosition">{positionLabelsI18n[locale][featuredLeader.player.position] ?? featuredLeader.player.position}</span>
+                <div className="statisticsFeaturedMetrics">
+                  <div><strong>{featuredLeader.goals}</strong><span>{featureText.goals}</span></div>
+                  <div><strong>{featuredLeader.assists}</strong><span>{featureText.assists}</span></div>
+                  <div><strong>{featuredLeader.appearances}</strong><span>{featureText.matches}</span></div>
+                  <div><strong>{featuredLeader.minutes_played}</strong><span>{featureText.minutes}</span></div>
+                </div>
+                <b className="statisticsFeaturedCta">{featureText.profile} →</b>
+              </div>
+            </Link>
+          )}
 
           {statisticsError ? (
             <div className="teamStatisticsEmpty errorBox">{statisticsError}</div>
