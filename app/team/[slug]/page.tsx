@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PageHeroShell from "@/app/components/PageHeroShell";
 import PublicBreadcrumbs from "@/app/components/PublicBreadcrumbs";
+import PublicBackLink from "@/app/components/PublicBackLink";
 import { notFound } from "next/navigation";
 import { toggleFavoritePlayer } from "@/app/account/actions";
 import { createClient } from "@/lib/supabase/server";
@@ -302,6 +303,7 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
               className="profileIntro"
               style={heroLayerStyle(design.layer_config, "intro")}
             >
+              <PublicBackLink fallbackHref="/team" locale={locale} className="publicBackOnDark" />
               <PublicBreadcrumbs
                 locale={locale}
                 items={[{ label: text.title, href: "/team" }, { label: `${player.first_name} ${player.last_name}`.trim() }]}

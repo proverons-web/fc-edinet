@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import MediaGallery from "@/app/components/MediaGallery";
 import PageHeroShell from "@/app/components/PageHeroShell";
 import PublicBreadcrumbs from "@/app/components/PublicBreadcrumbs";
+import PublicBackLink from "@/app/components/PublicBackLink";
 import { createClient } from "@/lib/supabase/server";
 import type { MediaAlbum, MediaPhoto } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
@@ -38,7 +39,7 @@ export default async function MediaAlbumPage({ params }: PageProps) {
 
   return <main>
     <PageHeroShell design={design} className="mediaAlbumHero" contentImageUrl={album.cover_image_url}>
-<>{heroLayerVisible(design.layer_config,"navigation") && <div className="mediaAlbumNavigation" style={heroLayerStyle(design.layer_config,"navigation")}><PublicBreadcrumbs locale={locale} items={[{ label: text.title, href: "/media" }, { label: album.title }]} className="breadcrumbsOnDark" />{design.show_eyebrow && <p className="eyebrow">{formatDate(album.event_date, locale)}{album.location ? ` • ${album.location}` : ""}</p>}</div>}{heroLayerVisible(design.layer_config,"title") && <h1 style={heroLayerStyle(design.layer_config,"title")}>{album.title}</h1>}{heroLayerVisible(design.layer_config,"description") && design.show_description && album.description && <p style={heroLayerStyle(design.layer_config,"description")}>{album.description}</p>}{heroLayerVisible(design.layer_config,"count") && <span className="mediaAlbumCount" style={heroLayerStyle(design.layer_config,"count")}>{photos.length} {photoWord(photos.length, locale)}</span>}</>
+<>{heroLayerVisible(design.layer_config,"navigation") && <div className="mediaAlbumNavigation" style={heroLayerStyle(design.layer_config,"navigation")}><PublicBackLink fallbackHref="/media" locale={locale} className="publicBackOnDark" /><PublicBreadcrumbs locale={locale} items={[{ label: text.title, href: "/media" }, { label: album.title }]} className="breadcrumbsOnDark" />{design.show_eyebrow && <p className="eyebrow">{formatDate(album.event_date, locale)}{album.location ? ` • ${album.location}` : ""}</p>}</div>}{heroLayerVisible(design.layer_config,"title") && <h1 style={heroLayerStyle(design.layer_config,"title")}>{album.title}</h1>}{heroLayerVisible(design.layer_config,"description") && design.show_description && album.description && <p style={heroLayerStyle(design.layer_config,"description")}>{album.description}</p>}{heroLayerVisible(design.layer_config,"count") && <span className="mediaAlbumCount" style={heroLayerStyle(design.layer_config,"count")}>{photos.length} {photoWord(photos.length, locale)}</span>}</>
     </PageHeroShell>
     <section className="section mediaGallerySection"><div className="container">{photos.length ? <MediaGallery photos={photos} albumTitle={album.title} locale={locale}/> : <div className="adminEmpty">{text.albumEmpty}</div>}</div></section>
   </main>;

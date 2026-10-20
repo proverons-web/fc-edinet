@@ -60,11 +60,13 @@ export default function NewsComments({
               )}
             </div>
           ) : (
-            <form action={createComment} className="commentComposer">
+            <form action={createComment} className="commentComposer" aria-label={text.title}>
               <input type="hidden" name="news_id" value={String(articleId)} />
               <input type="hidden" name="slug" value={slug} />
               <input type="hidden" name="locale" value={locale} />
+              <label className="srOnly" htmlFor="comment-body">{text.placeholder}</label>
               <textarea
+                id="comment-body"
                 name="body"
                 minLength={1}
                 maxLength={2000}
@@ -102,7 +104,7 @@ export default function NewsComments({
                 <div className="commentBody">
                   <div className="commentMeta">
                     <strong>{comment.author_display_name}{own ? ` · ${text.own}` : ""}</strong>
-                    <time>{formatDateTime(comment.created_at, locale)}</time>
+                    <time dateTime={comment.created_at}>{formatDateTime(comment.created_at, locale)}</time>
                   </div>
                   <p>{comment.body}</p>
                   {currentUserId && (
@@ -166,7 +168,7 @@ function CommentNotice({ locale, notice }: { locale: Locale; notice: string }) {
   };
   const message = messages[notice];
   if (!message) return null;
-  return <div className={message.error ? "formError commentsNotice" : "formSuccess commentsNotice"}>{message.text}</div>;
+  return <div role={message.error ? "alert" : "status"} aria-live="polite" className={message.error ? "formError commentsNotice" : "formSuccess commentsNotice"}>{message.text}</div>;
 }
 
 function formatDateTime(value: string, locale: Locale) {

@@ -1,0 +1,13 @@
+FC EDINEȚ v2.6.3 — PHASE 12 / UX POLISH
+
+- Unified back navigation added to public detail pages.
+- Back action uses browser history with safe section fallback.
+- News, player, match, album and single-photo detail pages updated.
+- Media lightbox now traps keyboard focus, supports Escape and arrow keys, and restores focus to the originating photo.
+- Share menu now exposes proper menu semantics, closes on Escape/outside click, and announces copied-link state.
+- Account dropdown closes on Escape/outside click and exposes menu-item semantics.
+- Mobile navigation exposes dialog semantics.
+- Public auth/settings feedback improved with aria-busy, alert and live-status semantics.
+- Comment composer and notices improved for assistive technology.
+- Global focus-visible treatment standardized for keyboard users.
+- No SQL migration. Existing Supabase and admin logic preserved.

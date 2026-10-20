@@ -1415,3 +1415,34 @@ button:disabled:hover,[aria-disabled="true"]:hover{transform:none!important}
 @media(prefers-reduced-motion:reduce){
   .publicSkeleton::after,.publicSkeletonCard::after{animation:none}
 }
+
+/* ============================================================
+   FC EDINEȚ v2.6.3 — UX POLISH / BACK + KEYBOARD ACCESSIBILITY
+   ============================================================ */
+.srOnly{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.publicBackLink{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 2px;border:0;background:transparent;color:#48617d;font:800 12px/1 var(--font-fce-body),Arial,sans-serif;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:color .18s ease,transform .18s ease}
+.publicBackLink:hover{color:var(--fce-blue,#0755a5);transform:translateX(-2px)}
+.publicBackLink span:first-child{font-size:18px;line-height:1}
+.publicBackOnDark{color:rgba(255,255,255,.72)}
+.publicBackOnDark:hover{color:#ffd328}
+.articleHeroNavigation,.mediaAlbumNavigation{gap:12px;align-items:center;flex-wrap:wrap}
+.profileIntro>.publicBackLink{margin-bottom:4px}
+.publicMatchDetailHero .publicBackLink{margin-bottom:8px}
+.singlePhotoTopbar .publicBackLink{color:#fff}
+
+:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{outline:3px solid #ffd328!important;outline-offset:3px!important}
+:where(input,select,textarea):focus-visible{border-color:#0755a5!important;box-shadow:0 0 0 3px rgba(15,99,255,.12)!important;outline:0!important}
+.commentReportDetails>summary{cursor:pointer}
+.formError[role="alert"],.formSuccess[role="status"]{scroll-margin-top:110px}
+
+.photoShareMenu[role="menu"]{z-index:30}
+.photoShareMenu [role="menuitem"]{min-height:40px}
+.accountMenuDropdown[role="menu"] [role="menuitem"]{outline-offset:-2px}
+.mediaLightbox[role="dialog"]{isolation:isolate}
+.mediaLightboxClose,.mediaLightboxArrow{touch-action:manipulation}
+
+@media(max-width:760px){
+  .publicBackLink{min-height:44px;font-size:11px}
+  .articleHeroNavigation,.mediaAlbumNavigation{align-items:flex-start}
+  .articleHeroNavigation .publicBackLink,.mediaAlbumNavigation .publicBackLink{width:100%}
+}

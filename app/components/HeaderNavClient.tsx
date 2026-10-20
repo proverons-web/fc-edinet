@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/account/actions";
 import LanguageSwitcher from "@/app/components/LanguageSwitcher";
@@ -35,6 +35,7 @@ export default function HeaderNavClient({
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const accountWrapRef = useRef<HTMLDivElement>(null);
   const text = publicText[locale].nav;
   const account = accountText[locale];
   const linkMap: Record<HeaderNavKey, { href: string; label: string }> = {
@@ -69,6 +70,21 @@ export default function HeaderNavClient({
     };
   }, [menuOpen]);
 
+
+  useEffect(() => {
+    if (!accountOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setAccountOpen(false); };
+    const onPointerDown = (event: MouseEvent) => {
+      if (accountWrapRef.current && !accountWrapRef.current.contains(event.target as Node)) setAccountOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    document.addEventListener("mousedown", onPointerDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("mousedown", onPointerDown);
+    };
+  }, [accountOpen]);
+
   return (
     <>
       <nav className="menu">
@@ -81,25 +97,25 @@ export default function HeaderNavClient({
         {showLanguageMobile && <div className="headerMobileLanguage"><LanguageSwitcher locale={locale}/></div>}
         {showSearch && <button className="searchButton" aria-label={locale === "ro" ? "Căutare" : "Поиск"}><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg></button>}
         {showAccount && (isAuthenticated ? (
-          <div className="accountMenuWrap">
+          <div className="accountMenuWrap" ref={accountWrapRef}>
             <button className="accountMenuButton" type="button" onClick={() => setAccountOpen(!accountOpen)} aria-expanded={accountOpen} aria-haspopup="menu" aria-controls="account-menu-dropdown">
               <span className="accountMenuAvatar">{(accountName || text.account).slice(0, 1).toUpperCase()}</span>
               <span>{accountName || text.account}</span><b>⌄</b>
             </button>
             {accountOpen && <div className="accountMenuDropdown" id="account-menu-dropdown" role="menu">
-              <Link href="/account" onClick={() => setAccountOpen(false)}>{account.dashboard}</Link>
-              <Link href="/account/profile" onClick={() => setAccountOpen(false)}>{account.profile}</Link>
-              <Link href="/account/favorites" onClick={() => setAccountOpen(false)}>{account.favorites}</Link>
-              <Link href="/account/settings" onClick={() => setAccountOpen(false)}>{account.settings}</Link>
-              {showAdminLink && isStaff && <Link href="/admin" onClick={() => setAccountOpen(false)}>{text.admin}</Link>}
-              <form action={logout}><button type="submit">{account.logout}</button></form>
+              <Link role="menuitem" href="/account" onClick={() => setAccountOpen(false)}>{account.dashboard}</Link>
+              <Link role="menuitem" href="/account/profile" onClick={() => setAccountOpen(false)}>{account.profile}</Link>
+              <Link role="menuitem" href="/account/favorites" onClick={() => setAccountOpen(false)}>{account.favorites}</Link>
+              <Link role="menuitem" href="/account/settings" onClick={() => setAccountOpen(false)}>{account.settings}</Link>
+              {showAdminLink && isStaff && <Link role="menuitem" href="/admin" onClick={() => setAccountOpen(false)}>{text.admin}</Link>}
+              <form action={logout}><button role="menuitem" type="submit">{account.logout}</button></form>
             </div>}
           </div>
         ) : <Link className="login" href="/login">{text.login}</Link>)}
         <button className="menuToggle" type="button" onClick={() => setMenuOpen(!menuOpen)} aria-label={text.openMenu} aria-expanded={menuOpen} aria-controls="mobile-site-menu">{menuOpen ? "✕" : "☰"}</button>
       </div>
 
-      {menuOpen && <div className="mobileMenu mobileMenuAbsolute" id="mobile-site-menu"><div className="container mobileMenuInner">
+      {menuOpen && <div className="mobileMenu mobileMenuAbsolute" id="mobile-site-menu" role="dialog" aria-modal="true" aria-label={text.openMenu}><div className="container mobileMenuInner">
         <Link href="/" className={isActive("/") ? "isActive" : undefined} aria-current={isActive("/") ? "page" : undefined} onClick={() => setMenuOpen(false)}>{locale === "ro" ? "Acasă" : "Главная"}</Link>
         {links.map((link) => <Link key={link.href} href={link.href} className={isActive(link.href) ? "isActive" : undefined} aria-current={isActive(link.href) ? "page" : undefined} onClick={() => setMenuOpen(false)}>{link.label}</Link>)}
         {showAdminLink && isStaff && <Link href="/admin" onClick={() => setMenuOpen(false)}>{text.admin}</Link>}

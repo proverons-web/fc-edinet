@@ -19,7 +19,7 @@ export default function AccountSettingsForm({
   const [state, action, pending] = useActionState(updateSettings, initialState);
   const text = accountText[locale];
   return (
-    <form action={action} className="accountSettingsForm">
+    <form action={action} className="accountSettingsForm" aria-busy={pending}>
       <input type="hidden" name="locale" value={locale} />
       <fieldset className="accountSettingBlock">
         <legend>{text.language}</legend>
@@ -32,8 +32,8 @@ export default function AccountSettingsForm({
         <p>{text.notificationsHint}</p>
         <label className="accountCheck"><input type="checkbox" name="notifications_enabled" defaultChecked={notificationsEnabled} /><span>{text.notifications}</span></label>
       </fieldset>
-      {state.error && <div className="formError">{state.error}</div>}
-      {state.success && <div className="formSuccess">{state.success}</div>}
+      {state.error && <div className="formError" role="alert">{state.error}</div>}
+      {state.success && <div className="formSuccess" role="status" aria-live="polite">{state.success}</div>}
       <button className="authSubmit" disabled={pending} type="submit">{pending ? text.saving : text.save}</button>
     </form>
   );
