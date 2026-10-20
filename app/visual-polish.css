@@ -1055,3 +1055,267 @@ iframe{max-width:100%}
   .clubPageDocument .clubStadiumBuilder .clubStadiumImage{height:250px!important}
   .clubPageDocument .clubLeadershipGrid-single .clubLeaderBody{padding-inline:19px!important}
 }
+
+
+/* =============================================================
+   FC EDINEȚ v2.6.0 — FINAL VISUAL QA / PHASE 11
+   Cross-page consistency, overflow safety, responsive rhythm,
+   accessibility-visible focus and release-level finishing.
+   ============================================================= */
+
+:root{
+  --fce-release-content:1260px;
+  --fce-release-narrow:900px;
+  --fce-release-line:#dfe7ef;
+  --fce-release-ink:#0a315f;
+  --fce-release-muted:#647b92;
+  --fce-release-navy:#031a38;
+  --fce-release-yellow:#ffd328;
+}
+
+/* Global release-level rendering consistency. */
+body{
+  min-width:320px;
+  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+  overflow-wrap:break-word;
+}
+main{min-width:0;min-height:52vh}
+main>section,main>div,section,article,aside{min-width:0}
+.container{width:min(calc(100% - 48px),var(--fce-release-content));margin-inline:auto}
+button,input,select,textarea{font:inherit}
+button,a{-webkit-tap-highlight-color:transparent}
+
+/* One focus language across the public site. */
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{
+  outline:3px solid var(--fce-release-yellow)!important;
+  outline-offset:3px!important;
+}
+.primaryButton,.secondaryButton,.fcYellowButton,.fcGhostButton,.fcOutlineButton,.readMore,.newsLeadRead,.newsSecondaryRead,.proCta a{
+  min-height:44px;
+}
+
+/* Long editorial strings should never blow out their grids. */
+.fcRefHeroCopy h1,.fcRefLeadNewsBody h2,.fcRefPanelTitle h2,.fcRefTeamHead h2,
+.newsEditorialHeading h2,.newsLeadBody h2,.newsSecondaryBody h3,.newsDbBody h2,
+.teamPageHero h1,.playerProfileHero h1,.publicMatchHero h1,.matchPublicScoreboard h1,
+.standingsPage h1,.teamStatisticsPage h1,.proManagedHero h1,.clubPageDocument h1,
+.globalFooterColumn a,.playerInfo h3,.teamStatisticsPlayer,.standingTeam strong{
+  overflow-wrap:anywhere;
+  text-wrap:balance;
+}
+
+/* Unified page-header rhythm after all page-specific redesigns. */
+.pageHero,.managedPageHero,.proManagedHero{
+  isolation:isolate;
+  overflow:hidden;
+}
+.pageHero .container,.managedPageHeroInner,.proManagedHeroInner{
+  width:min(calc(100% - 48px),var(--fce-release-content));
+  margin-inline:auto;
+}
+.pageHero h1,.managedPageHero h1,.proManagedHero h1{
+  max-width:980px;
+}
+.pageHero p:last-child,.managedPageHero p:last-child,.proManagedHeroInner>p:not(.eyebrow){
+  max-width:720px;
+}
+
+/* Empty/error states now feel intentional rather than like admin leftovers. */
+.archiveMessage,.adminEmpty,.teamStatisticsEmpty,.fcRefEmptyCard,.clubDarkEmpty,.proEmpty,
+.mediaEmpty,.partnersEmpty,.standingsEmpty{
+  border:1px solid var(--fce-release-line)!important;
+  border-radius:6px!important;
+  background:linear-gradient(180deg,#fff,#f7f9fc)!important;
+  color:var(--fce-release-muted)!important;
+  min-height:110px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:26px!important;
+  text-align:center;
+  line-height:1.55;
+}
+
+/* HOME — protect the editorial dashboard at the awkward laptop widths. */
+.fcRefDashboard,.fcRefHeroGrid,.fcRefTeamHead,.fcRefPartnersInner{min-width:0}
+.fcRefLeadNews,.fcRefNewsRow,.fcRefNextMatch,.fcRefPlayerCard{min-width:0}
+.fcRefLeadNewsMedia img,.fcRefNewsRow img,.fcRefPlayerPhoto img{width:100%;height:100%;object-fit:cover}
+.fcRefNewsRow section{min-width:0}
+.fcRefNewsRow h3{overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.fcRefLeadNewsBody p{max-width:68ch}
+.fcRefPartnerLogos img{max-height:58px;width:auto;object-fit:contain}
+.fcRefNextMatch{overflow:hidden}
+.fcRefMatchTeams>*{min-width:0}
+.fcRefTeamBadge strong{overflow-wrap:anywhere}
+
+/* NEWS — consistent image behavior and title height prevent zig-zag archive rows. */
+.newsLeadMedia,.newsSecondaryMedia,.newsDbMedia{overflow:hidden;background:#08244a}
+.newsLeadMedia img,.newsSecondaryMedia img,.newsDbMedia img{width:100%;height:100%;object-fit:cover}
+.newsEditorialLeadGrid>*{min-width:0}
+.newsSecondaryStory,.newsDbCard{height:100%}
+.newsDbBody{display:flex;flex-direction:column;min-width:0}
+.newsDbBody .readMore{margin-top:auto;align-self:flex-start}
+.newsDbBody h2 a,.newsSecondaryBody h3 a{hyphens:auto}
+.newsMetaLine{flex-wrap:wrap}
+
+/* TEAM + PLAYER — cards and statistic rows no longer depend on content length. */
+.teamSquadGrid,.playerGrid,.playersGrid{align-items:stretch}
+.playerCard{height:100%;min-height:430px}
+.playerCardLink{display:flex!important;flex-direction:column!important}
+.playerCard .playerInfo{margin-top:auto;min-width:0}
+.playerCardMeta{flex-wrap:wrap}
+.playerProfileHero>*{min-width:0}
+.playerCareerKpis,.playerProfileFacts,.playerCompetitionStats{min-width:0}
+.playerCareerHistoryTable,.playerCompetitionStatsWrap{max-width:100%}
+
+/* MATCHES — force scoreboards and long club names to stay inside the card. */
+.publicMatchCard,.matchPublicScoreboard,.matchPublicSection,.matchLineupsPublic{min-width:0}
+.publicMatchTeams,.matchPublicTeams,.matchScoreTeams{min-width:0}
+.publicMatchTeam,.matchPublicTeam{min-width:0}
+.publicMatchTeam strong,.matchPublicTeam strong{overflow-wrap:anywhere;text-align:center}
+.publicMatchScore,.matchPublicScore{font-variant-numeric:tabular-nums}
+.matchTimelineCard{min-width:0}
+.matchEventDescription{overflow-wrap:anywhere}
+
+/* STANDINGS — club identity remains visible while the numeric columns stay aligned. */
+.standingsTable{font-variant-numeric:tabular-nums}
+.standingsTable th,.standingsTable td{white-space:nowrap}
+.standingsTable .standingTeam{min-width:0}
+.standingsTable .standingTeam strong{white-space:normal;line-height:1.18}
+.standingsTable tr.club td:first-child{box-shadow:inset 4px 0 0 var(--fce-release-yellow)}
+
+/* STATISTICS — board metrics use consistent number rhythm and avoid label overlap. */
+.teamStatisticsScoreboard,.teamStatisticsHistoryScoreboard,.teamStatisticsLeaderboards{min-width:0}
+.teamStatisticsMetric strong,.teamStatisticsLeaderboardValue,.statisticsFeaturedMetrics strong{
+  font-variant-numeric:tabular-nums;
+}
+.teamStatisticsMetric{min-width:0}
+.teamStatisticsMetric span,.teamStatisticsMetric small{overflow-wrap:anywhere}
+.teamStatisticsPlayer{min-width:0}
+.teamStatisticsPlayer span{min-width:0}
+.teamStatisticsTableWrap,.teamStatisticsHistoryTableWrap{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+
+/* MEDIA — make mixed landscape/portrait assets feel deliberate. */
+.proMediaAlbumCard,.proMediaVideoCard{min-width:0;overflow:hidden}
+.proMediaAlbumImage,.proMediaVideoPreview{background:#071d3b}
+.proMediaAlbumImage img,.proMediaVideoPreview img{width:100%;height:100%;object-fit:cover}
+.proMediaAlbumCopy,.proMediaVideoCopy{min-width:0}
+.proMediaAlbumCopy h3,.proMediaVideoCopy h3{overflow-wrap:anywhere;text-wrap:balance}
+.mediaMasonry img{display:block;width:100%;height:auto}
+.mediaLightboxContent{max-width:min(94vw,1500px);max-height:92dvh}
+.mediaLightboxImage{max-width:100%;max-height:82dvh;object-fit:contain}
+
+/* PARTNERS — preserve logo proportions irrespective of source image dimensions. */
+.proPartnerCard{min-width:0}
+.proPartnerLogo{display:flex;align-items:center;justify-content:center;overflow:hidden}
+.proPartnerLogo img{max-width:88%;max-height:120px;width:auto;height:auto;object-fit:contain}
+.proPartnerCopy{min-width:0}
+.proPartnerCopy strong,.proPartnerCopy p{overflow-wrap:anywhere}
+
+/* ACADEMY — prevent the progression rail from creating intrinsic overflow. */
+.proAcademyGroupCard,.proAcademyPathway article,.proAcademyFact{min-width:0}
+.proAcademyGroupCard h3,.proAcademyPathway h3,.proAcademyFact strong{overflow-wrap:anywhere;text-wrap:balance}
+
+/* FOOTER — align all final-release pages to one calm bottom rhythm. */
+.globalFooter{overflow:hidden}
+.globalFooterGrid{align-items:start}
+.globalFooterBrand,.globalFooterColumn{min-width:0}
+.globalFooterColumn a{line-height:1.35}
+.footerBottom{gap:18px;flex-wrap:wrap}
+.footerSocialLinks{flex-wrap:wrap}
+
+/* 404 should look like part of the club rather than a generic Next page. */
+.notFoundEditorial{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  min-height:70vh;
+  display:flex;
+  align-items:center;
+  background:linear-gradient(125deg,#eef4fa 0%,#fff 48%,#edf4fb 100%);
+}
+.notFoundWatermark{
+  position:absolute;
+  right:-.04em;
+  bottom:-.2em;
+  z-index:-1;
+  font-family:var(--font-fce-display),Arial,sans-serif;
+  font-size:clamp(180px,32vw,520px);
+  font-weight:900;
+  line-height:.75;
+  letter-spacing:-.08em;
+  color:rgba(3,26,56,.045);
+  pointer-events:none;
+}
+.notFoundInner{display:grid;grid-template-columns:minmax(180px,280px) minmax(0,720px);gap:clamp(36px,7vw,100px);align-items:center;padding-block:90px}
+.notFoundCrest{display:flex;align-items:center;justify-content:center}
+.notFoundCrest img{width:min(100%,240px);filter:drop-shadow(0 22px 30px rgba(3,26,56,.16))}
+.notFoundCopy h1{margin:10px 0 16px;font-family:var(--font-fce-display),Arial,sans-serif;font-size:clamp(54px,8vw,96px);line-height:.86;letter-spacing:-.05em;text-transform:uppercase;color:#06264d;text-wrap:balance}
+.notFoundCopy>p:not(.eyebrow){max-width:620px;margin:0 0 28px;color:#667d94;font-size:16px;line-height:1.7}
+.notFoundCopy .primaryButton{display:inline-flex;align-items:center;gap:12px}
+
+/* Release breakpoints: these cover the widths that historically caused regressions. */
+@media(max-width:1180px){
+  .fcRefDashboard{grid-template-columns:minmax(0,1.25fr) minmax(260px,.75fr)!important}
+  .fcRefTableColumn{grid-column:1/-1!important}
+  .fcRefTableColumn .standingsTableWrap{max-width:100%}
+  .newsEditorialLeadGrid{grid-template-columns:minmax(0,1.4fr) minmax(280px,.6fr)!important}
+  .proPartnersGrid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+
+@media(max-width:920px){
+  .container,.pageHero .container,.managedPageHeroInner,.proManagedHeroInner{width:min(calc(100% - 36px),var(--fce-release-content))}
+  .fcRefDashboard{grid-template-columns:1fr!important}
+  .fcRefTableColumn{grid-column:auto!important}
+  .fcRefHeroGrid{grid-template-columns:1fr!important}
+  .fcRefNextMatch{width:min(100%,640px);justify-self:stretch}
+  .fcRefTeamHead{align-items:flex-start;gap:22px;flex-wrap:wrap}
+  .newsEditorialLeadGrid{grid-template-columns:1fr!important}
+  .newsEditorialSecondary{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+  .proPartnersGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .notFoundInner{grid-template-columns:180px minmax(0,1fr);gap:44px}
+}
+
+@media(max-width:760px){
+  .container,.pageHero .container,.managedPageHeroInner,.proManagedHeroInner{width:min(calc(100% - 30px),var(--fce-release-content))}
+  .fcRefHeroGrid{gap:30px!important}
+  .fcRefHeroCopy h1{font-size:clamp(54px,16vw,80px)!important}
+  .fcRefHeroActions{display:flex;flex-wrap:wrap;gap:10px}
+  .fcRefHeroActions a{flex:1 1 190px;justify-content:center;text-align:center}
+  .fcRefMatchTeams{grid-template-columns:minmax(0,1fr) 42px minmax(0,1fr)!important}
+  .fcRefDashboardSection,.fcRefTeamSection{padding-block:64px!important}
+  .fcRefLeadNewsBody{padding:24px 0 0!important}
+  .fcRefTeamHead h2{font-size:clamp(42px,13vw,58px)!important}
+  .newsEditorialSecondary{grid-template-columns:1fr}
+  .newsEditorialHeading{align-items:flex-end;gap:16px}
+  .newsEditorialHeading>strong{font-size:44px!important}
+  .playerCard{min-height:390px}
+  .publicMatchTeam strong,.matchPublicTeam strong{font-size:clamp(11px,3.6vw,15px)!important}
+  .proPartnersGrid{grid-template-columns:1fr!important}
+  .globalFooterGrid{grid-template-columns:1fr 1fr!important;gap:34px 22px!important}
+  .globalFooterBrand{grid-column:1/-1}
+  .footerBottom{align-items:flex-start!important}
+  .notFoundEditorial{min-height:65vh}
+  .notFoundInner{grid-template-columns:1fr;padding-block:64px;gap:28px}
+  .notFoundCrest{justify-content:flex-start}
+  .notFoundCrest img{width:120px}
+}
+
+@media(max-width:520px){
+  .container,.pageHero .container,.managedPageHeroInner,.proManagedHeroInner{width:min(calc(100% - 24px),var(--fce-release-content))}
+  .fcRefMatchTeams{grid-template-columns:1fr!important;gap:10px!important}
+  .fcRefVs{min-height:28px!important}
+  .fcRefMatchFacts{grid-template-columns:1fr!important}
+  .fcRefPanelTitle,.newsEditorialHeading,.teamStatisticsHeading,.teamStatisticsSubheading{align-items:flex-start!important;flex-direction:column!important}
+  .fcRefPanelTitle a{align-self:flex-start}
+  .globalFooterGrid{grid-template-columns:1fr!important}
+  .globalFooterBrand{grid-column:auto}
+  .proMediaAlbumMeta,.newsLeadMeta,.newsSecondaryMeta{gap:8px 12px;flex-wrap:wrap}
+  .notFoundCopy h1{font-size:52px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto!important}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}

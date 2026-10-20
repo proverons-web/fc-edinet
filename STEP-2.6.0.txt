@@ -1,0 +1,23 @@
+FC EDINEȚ v2.6.0 — Final Visual QA / Phase 11
+
+Site-wide release polish built on v2.5.9:
+- normalized public page container/hero rhythm
+- final overflow protection across Home, News, Team, Matches, Standings, Statistics, Media, Partners, Academy and Club
+- unified visible keyboard focus states and 44px minimum CTA targets
+- improved long-title wrapping and balanced headings
+- intentional public empty/error states
+- hardened Home dashboard at 1180/920/760/520px breakpoints
+- normalized news card heights and image behavior
+- stabilized player cards, match scoreboards and standings typography
+- improved statistics numeric alignment and horizontal table safety
+- preserved media crops and partner logo proportions
+- refined Footer responsive layout
+- redesigned localized 404 page to match the FC Edineț visual system
+- improved mobile navigation ARIA state/controls
+- no SQL migration required
+
+Deployment:
+1. Extract to a new folder.
+2. Copy the working .env.local from v2.5.9.
+3. Run DEPLOY_FC_EDINET.bat.
+4. Verify /api/version -> 2.6.0.
