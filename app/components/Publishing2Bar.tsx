@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import type { PublishingCheck } from "@/lib/publishing";
 import type { AutosaveStatus } from "@/app/components/usePublishing2";
 
@@ -24,6 +25,31 @@ export default function Publishing2Bar({
   pendingMedia?: boolean;
   preparePreview?: () => Promise<unknown>;
 }) {
+  useEffect(() => {
+    const dirty = autosave.state === "dirty" || autosave.state === "saving" || autosave.state === "error";
+    const beforeUnload = (event: BeforeUnloadEvent) => {
+      if (!dirty) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const tag = target?.tagName?.toLowerCase();
+      const typing = tag === "input" || tag === "textarea" || tag === "select" || target?.isContentEditable;
+      if (typing || !(event.ctrlKey || event.metaKey)) return;
+      if (event.key.toLowerCase() === "z" && !event.shiftKey && canUndo) { event.preventDefault(); onUndo(); }
+      else if ((event.key.toLowerCase() === "y" || (event.key.toLowerCase() === "z" && event.shiftKey)) && canRedo) { event.preventDefault(); onRedo(); }
+    };
+    window.addEventListener("beforeunload", beforeUnload);
+    window.addEventListener("keydown", onKeyDown);
+    return () => { window.removeEventListener("beforeunload", beforeUnload); window.removeEventListener("keydown", onKeyDown); };
+  }, [autosave.state, canUndo, canRedo, onUndo, onRedo]);
+
+  useEffect(() => {
+    if (window.parent === window) return;
+    window.parent.postMessage({ type: "fc-site-builder-save-state", state: autosave.state, message: autosave.message, savedAt: autosave.savedAt }, window.location.origin);
+  }, [autosave.state, autosave.message, autosave.savedAt]);
+
   const errors = checks.filter((item) => item.level === "error").length;
   const warnings = checks.filter((item) => item.level === "warning").length;
   async function openPreview() {

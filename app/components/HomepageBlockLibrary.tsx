@@ -27,11 +27,12 @@ type Props = {
   layoutOrder: HomepageLayoutItem[];
   setLayoutOrder: (updater: HomepageLayoutItem[] | ((current: HomepageLayoutItem[]) => HomepageLayoutItem[])) => void;
   sectionVisibility: Record<HomepageSectionKey, boolean>;
+  setSectionVisibility: (updater: Record<HomepageSectionKey, boolean> | ((current: Record<HomepageSectionKey, boolean>) => Record<HomepageSectionKey, boolean>)) => void;
   assets: DesignMediaAsset[];
   mode: Mode;
 };
 
-export default function HomepageBlockLibrary({ blocks, setBlocks, layoutOrder, setLayoutOrder, sectionVisibility, assets, mode }: Props) {
+export default function HomepageBlockLibrary({ blocks, setBlocks, layoutOrder, setLayoutOrder, sectionVisibility, setSectionVisibility, assets, mode }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(blocks[0]?.id ?? null);
   const [dragging, setDragging] = useState<HomepageLayoutItem | null>(null);
   const selected = blocks.find((block) => block.id === selectedId) ?? null;
@@ -61,6 +62,10 @@ export default function HomepageBlockLibrary({ blocks, setBlocks, layoutOrder, s
   }
 
   function removeBlock(id: string) {
+    const block = blocks.find((item) => item.id === id);
+    if (!block) return;
+    const label = block.content.title_ru || blockTypeLabel(block.type);
+    if (!window.confirm(`Удалить блок «${label}»? Это действие можно отменить через Undo до перезагрузки редактора.`)) return;
     setBlocks((current) => current.filter((block) => block.id !== id));
     setLayoutOrder((current) => current.filter((item) => item !== `block:${id}`));
     if (selectedId === id) setSelectedId(blocks.find((block) => block.id !== id)?.id ?? null);
@@ -82,6 +87,16 @@ export default function HomepageBlockLibrary({ blocks, setBlocks, layoutOrder, s
       return next;
     });
     setSelectedId(id);
+  }
+
+  function toggleLayoutItem(item: HomepageLayoutItem) {
+    if (item.startsWith("section:")) {
+      const key = item.slice(8) as HomepageSectionKey;
+      setSectionVisibility((current) => ({ ...current, [key]: !current[key] }));
+      return;
+    }
+    const id = item.slice(6);
+    setBlocks((current) => current.map((block) => block.id === id ? { ...block, enabled: !block.enabled } : block));
   }
 
   function moveItem(item: HomepageLayoutItem, direction: -1 | 1) {
@@ -140,7 +155,7 @@ export default function HomepageBlockLibrary({ blocks, setBlocks, layoutOrder, s
               const block = !isSection ? blocks.find((entry) => `block:${entry.id}` === item) : null;
               if (!isSection && !block) return null;
               return <div
-                className={`blockLayoutRow ${dragging === item ? "dragging" : ""} ${block && selectedId === block.id ? "selected" : ""}`}
+                className={`blockLayoutRow ${dragging === item ? "dragging" : ""} ${block && selectedId === block.id ? "selected" : ""} ${(isSection ? !sectionVisibility[key!] : block ? !block.enabled : false) ? "isHidden" : ""}`}
                 key={item}
                 draggable
                 onDragStart={() => setDragging(item)}
@@ -156,8 +171,10 @@ export default function HomepageBlockLibrary({ blocks, setBlocks, layoutOrder, s
                   <span>{isSection ? (sectionVisibility[key!] ? "Включена" : "Скрыта") : (block!.enabled ? "Опубликована" : "Скрыта")}</span>
                 </div>
                 <div className="visualSectionButtons">
-                  <button type="button" onClick={(e) => { e.stopPropagation(); moveItem(item, -1); }} disabled={index === 0}>↑</button>
-                  <button type="button" onClick={(e) => { e.stopPropagation(); moveItem(item, 1); }} disabled={index === layoutOrder.length - 1}>↓</button>
+                  {block && <button type="button" title="Редактировать блок" onClick={(e) => { e.stopPropagation(); setSelectedId(block.id); }}>✎</button>}
+                  <button type="button" title={(isSection ? sectionVisibility[key!] : block!.enabled) ? "Скрыть" : "Показать"} onClick={(e) => { e.stopPropagation(); toggleLayoutItem(item); }}>{(isSection ? sectionVisibility[key!] : block!.enabled) ? "◉" : "○"}</button>
+                  <button type="button" title="Переместить выше" onClick={(e) => { e.stopPropagation(); moveItem(item, -1); }} disabled={index === 0}>↑</button>
+                  <button type="button" title="Переместить ниже" onClick={(e) => { e.stopPropagation(); moveItem(item, 1); }} disabled={index === layoutOrder.length - 1}>↓</button>
                   {block && <button type="button" title="Дублировать" onClick={(e) => { e.stopPropagation(); duplicateBlock(block); }}>⧉</button>}
                   {block && <button type="button" className="danger" title="Удалить" onClick={(e) => { e.stopPropagation(); removeBlock(block.id); }}>×</button>}
                 </div>

@@ -1,0 +1,11 @@
+FC EDINEȚ v2.8.2 — Editing Workflow
+
+- real autosave state synced into Unified Site Builder
+- Saved / Unsaved / Saving / Error states
+- unsaved/saving/error unload protection
+- keyboard Undo / Redo shortcuts outside text fields
+- delete confirmation for custom homepage blocks
+- direct Edit / Show-Hide / Move / Duplicate / Delete controls
+- show/hide controls for system homepage sections from structure list
+- clearer hidden-row state
+- no Supabase schema changes

@@ -365,6 +365,7 @@ export default function VisualPageEditor({ initial, hero, hasDraft, assets }: { 
         layoutOrder={layoutOrder}
         setLayoutOrder={setLayoutOrder}
         sectionVisibility={visible}
+        setSectionVisibility={setVisible}
         assets={assets}
         mode={mode}
       />

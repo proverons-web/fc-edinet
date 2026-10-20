@@ -84,7 +84,8 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, mode }: P
   const [zoom, setZoom] = useState(75);
   const [fit, setFit] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
-  const [editorState, setEditorState] = useState<"saved" | "unsaved" | "saving">("saved");
+  const [editorState, setEditorState] = useState<"saved" | "unsaved" | "saving" | "error">("saved");
+  const [editorMessage, setEditorMessage] = useState("Все изменения сохранены");
   const editorRef = useRef<HTMLIFrameElement | null>(null);
   const liveRef = useRef<HTMLIFrameElement | null>(null);
   const fullscreenRef = useRef<HTMLIFrameElement | null>(null);
@@ -96,6 +97,7 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, mode }: P
     setFullscreen(false);
     setFit(true);
     setEditorState("saved");
+    setEditorMessage("Все изменения сохранены");
   }, [selected.key, mode]);
 
   useEffect(() => {
@@ -106,8 +108,8 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, mode }: P
       try {
         const doc = frame.contentDocument;
         if (!doc) return;
-        const markDirty = () => setEditorState("unsaved");
-        const markSaving = () => setEditorState("saving");
+        const markDirty = () => { setEditorState("unsaved"); setEditorMessage("Есть несохранённые изменения"); };
+        const markSaving = () => { setEditorState("saving"); setEditorMessage("Сохранение…"); };
         doc.addEventListener("input", markDirty, true);
         doc.addEventListener("change", markDirty, true);
         doc.addEventListener("submit", markSaving, true);
@@ -167,6 +169,14 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, mode }: P
       if (event.origin !== window.location.origin) return;
       const data = event.data as { type?: string; pageKey?: string; payload?: unknown; layout?: unknown };
       if (!data?.type) return;
+      if (data.type === "fc-site-builder-save-state") {
+        const rawState = String((data as { state?: string }).state ?? "");
+        const mapped = rawState === "dirty" ? "unsaved" : rawState === "saving" ? "saving" : rawState === "error" ? "error" : rawState === "saved" || rawState === "idle" ? "saved" : null;
+        if (mapped) setEditorState(mapped);
+        const message = (data as { message?: string }).message;
+        if (message) setEditorMessage(message);
+        return;
+      }
       if (data.type === "fc-site-builder-refresh") {
         if (data.pageKey && data.pageKey !== selected.key) return;
         if (refreshTimer.current) clearTimeout(refreshTimer.current);
@@ -243,8 +253,8 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, mode }: P
           </div>
 
           <div className="unifiedBuilderSaveStrip" aria-live="polite">
-            <span className={`builderSaveState ${editorState}`}><i />{editorState === "saved" ? "Все изменения сохранены" : editorState === "saving" ? "Сохранение…" : "Есть несохранённые изменения"}</span>
-            <small>{editorState === "unsaved" ? "Сохрани изменения в редакторе перед переходом на другую страницу." : "Site Builder отслеживает изменения внутри текущего редактора."}</small>
+            <span className={`builderSaveState ${editorState}`}><i />{editorMessage}</span>
+            <small>{editorState === "unsaved" ? "Изменения ещё не сохранены в черновик." : editorState === "saving" ? "Не закрывай редактор до завершения сохранения." : editorState === "error" ? "Сохранение не удалось. Проверь сообщение редактора и повтори попытку." : "История изменений и состояние черновика синхронизируются с текущим редактором."}</small>
           </div>
 
           <div className="unifiedBuilderToolbar" aria-label="Preview controls">

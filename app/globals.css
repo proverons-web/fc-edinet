@@ -2990,7 +2990,7 @@ body:has(.adminAppShell)>.globalFooter{display:none!important}
 @media(max-width:660px){.adminTopbarTrail{display:none}.adminTopbarUser>span{display:none}.adminDashboardV2{padding:24px 16px 54px}.adminDashboardIntro{align-items:flex-start;flex-direction:column}.adminDashboardIdentity{justify-items:start;width:100%}.adminDashboardStats,.adminDashboardGrid{grid-template-columns:1fr}.adminFeatureCopy{align-items:flex-start}.adminFeatureIcon{display:none}.adminDashCard{min-height:160px}.unifiedBuilderSaveStrip{align-items:flex-start;flex-direction:column}.adminAppShell .adminHero .container,.adminAppShell .adminSurface>.container,.adminAppShell .section>.container{padding-left:16px;padding-right:16px}}
 
 /* =============================================================
-   FC EDINEȚ v2.8.1 — USER MANAGEMENT + ADMIN POLISH
+   FC EDINEȚ v2.8.2 — USER MANAGEMENT + ADMIN POLISH
    ============================================================= */
 .adminUsersPageV2 .adminHeroActions{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex-wrap:wrap}
 .adminCreateUserPanel{scroll-margin-top:84px;margin:0 0 22px;padding:22px;border:1px solid #d7e2ee;border-radius:12px;background:linear-gradient(180deg,#fff,#fbfdff);box-shadow:0 10px 28px rgba(12,47,81,.04)}
@@ -3012,3 +3012,11 @@ body:has(.adminEmbedded){background:#f3f6fa}
 .adminEmbedded .adminHero .container,
 .adminEmbedded .adminSurface>.container,
 .adminEmbedded .section>.container{max-width:none;padding-left:24px;padding-right:24px}
+
+/* FC EDINEȚ v2.8.2 — Editing Workflow */
+.builderSaveState.error{color:#b42318}.builderSaveState.error i{background:#d92d20;box-shadow:0 0 0 3px rgba(217,45,32,.11)}
+.blockLayoutRow.isHidden{background:#f2f4f7;border-style:dashed;opacity:.72}
+.blockLayoutRow.isHidden .blockLayoutIdentity strong{text-decoration:line-through;text-decoration-thickness:1px;text-decoration-color:#98a2b3}
+.blockLayoutRow.isHidden .visualDragHandle{opacity:.45}
+.visualSectionButtons button[title="Редактировать блок"]{font-weight:900;color:#165fb5}
+@media(max-width:680px){.visualSectionButtons{display:flex;flex-wrap:wrap;gap:5px}}
