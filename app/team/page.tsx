@@ -1,5 +1,6 @@
 import PlayerCard from "@/app/components/PlayerCard";
 import PageHeroShell from "@/app/components/PageHeroShell";
+import { PublicMessageState } from "@/app/components/PublicRouteState";
 import { createClient } from "@/lib/supabase/server";
 import type { Player } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
@@ -39,8 +40,8 @@ export default async function TeamPage() {
           </div>
         </div>
       )}
-      {error && <div className="errorBox">{text.loadError}: {error.message}</div>}
-      {!error && players.length === 0 && <div className="emptyBox">{text.empty}</div>}
+      {error && <PublicMessageState title={text.loadError} text={locale === "ro" ? "Lotul nu este disponibil momentan. Încearcă din nou mai târziu." : "Состав временно недоступен. Попробуй снова позже."} actionLabel={locale === "ro" ? "Reîncarcă" : "Обновить"} actionHref="/team" />}
+      {!error && players.length === 0 && <PublicMessageState title={text.empty} text={locale === "ro" ? "Jucătorii vor apărea aici după publicarea lor în administrare." : "Игроки появятся здесь после публикации в админке."} />}
       {order.map((position) => { const group = players.filter((player) => player.position === position); if (!group.length) return null; return <section className="teamGroup" key={position}><div className="groupHeading teamGroupHeading"><p className="eyebrow">{position.toUpperCase()}</p><h2>{positionPluralLabelsI18n[locale][position] ?? position}</h2><span className="teamGroupCount">{String(group.length).padStart(2, "0")}</span></div><div className="players">{group.map((player) => <PlayerCard key={player.id} player={player} locale={locale} />)}</div></section>; })}
     </div></section>
   </main>;

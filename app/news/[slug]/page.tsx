@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import NewsCard, { formatNewsDate } from "@/app/components/NewsCard";
 import NewsComments from "@/app/components/NewsComments";
 import PageHeroShell from "@/app/components/PageHeroShell";
+import PublicBreadcrumbs from "@/app/components/PublicBreadcrumbs";
 import { createClient } from "@/lib/supabase/server";
 import type { CommentBlock, NewsArticle, NewsComment } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
@@ -100,7 +101,7 @@ export default async function NewsArticlePage({ params, searchParams }: PageProp
   return <main className="newsArticlePage"><article>
     <PageHeroShell design={design} className="articleHeader" contentClassName="container articleHeaderInner" contentImageUrl={article.cover_image_url}>
       <>
-        {heroLayerVisible(design.layer_config,"navigation") && <div className="articleHeroNavigation" style={heroLayerStyle(design.layer_config,"navigation")}><Link className="articleBack" href="/news">{text.back}</Link>{design.show_eyebrow && <div className="articleMeta"><span>{category}</span><time>{formatNewsDate(article.published_at, locale)}</time></div>}</div>}
+        {heroLayerVisible(design.layer_config,"navigation") && <div className="articleHeroNavigation" style={heroLayerStyle(design.layer_config,"navigation")}><PublicBreadcrumbs locale={locale} items={[{ label: text.title, href: "/news" }, { label: title }]} className="breadcrumbsOnDark" />{design.show_eyebrow && <div className="articleMeta"><span>{category}</span><time>{formatNewsDate(article.published_at, locale)}</time></div>}</div>}
         {heroLayerVisible(design.layer_config,"title") && <h1 style={heroLayerStyle(design.layer_config,"title")}>{title}</h1>}{heroLayerVisible(design.layer_config,"description") && design.show_description && excerpt && <p className="articleLead" style={heroLayerStyle(design.layer_config,"description")}>{excerpt}</p>}
         {heroLayerVisible(design.layer_config,"author") && <div className="articleAuthor" style={heroLayerStyle(design.layer_config,"author")}>{text.author}: <strong>{article.author_name || "FC Edineț"}</strong></div>}
       </>

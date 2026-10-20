@@ -1,0 +1,12 @@
+FC EDINEȚ v2.6.2 — UX POLISH / NAVIGATION + STATES
+
+- Added shared public breadcrumbs for News Article, Player Profile, Match and Media Album detail pages.
+- Breadcrumbs preserve existing Hero navigation visibility settings where applicable.
+- Added global and section-level loading skeletons for public routes.
+- Added recoverable public error page with Retry and Home actions.
+- Reworked News and Team empty/error states into consistent branded public states.
+- Raw Supabase error messages are no longer shown to visitors on News/Team list pages.
+- Added consistent disabled-state behavior for public controls.
+- Added responsive breadcrumb and state layouts for mobile widths.
+- Existing Supabase schema, Site Builder, Page Builder, Match Center and admin workflows preserved.
+- No SQL migration required.

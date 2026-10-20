@@ -1,7 +1,8 @@
-import Link from "next/link";
+import PublicBreadcrumbs from "@/app/components/PublicBreadcrumbs";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/locale";
+import { publicText } from "@/lib/i18n";
 import type { ClubMatch, MatchEvent, MatchLineupEntry, MatchLineupSetting, MatchReport } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -220,7 +221,7 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
     <main className="publicMatchDetailPage">
       <section className="publicMatchDetailHero">
         <div className="container">
-          <Link href="/matches" className="publicMatchBack">{t.back}</Link>
+          <PublicBreadcrumbs locale={locale} items={[{ label: publicText[locale].matches.title, href: "/matches" }, { label: `${match.home?.name ?? "—"} — ${match.away?.name ?? "—"}` }]} className="breadcrumbsOnDark publicMatchBreadcrumbs" />
           <div className="publicMatchDetailMeta">
             <span>{match.competition?.name ?? t.match}</span>
             <span className={`publicMatchStatusChip status-${match.status}`}>{match.status === "finished" ? (locale === "ro" ? "Final" : "Завершён") : match.status === "live" ? "LIVE" : match.status === "postponed" ? (locale === "ro" ? "Amânat" : "Перенесён") : (locale === "ro" ? "Programat" : "Запланирован")}</span>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import NewsCard, { formatNewsDate } from "@/app/components/NewsCard";
 import PageHeroShell from "@/app/components/PageHeroShell";
+import { PublicMessageState } from "@/app/components/PublicRouteState";
 import { createClient } from "@/lib/supabase/server";
 import type { NewsArticle, NewsCategory, SitePageDesignSnapshot } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
@@ -50,8 +51,8 @@ export default async function NewsPage({ searchParams }: PageProps) {
 
     <section className="newsEditorialSection"><div className="container">
       <CategoryFilters categories={categories} selectedSlug={selectedSlug} locale={locale} />
-      {error ? <div className="archiveMessage">{text.loadError}: {error.message}</div>
-      : articles.length === 0 ? <div className="archiveMessage">{text.empty}</div>
+      {error ? <PublicMessageState eyebrow="FC EDINEȚ" title={text.loadError} text={locale === "ro" ? "Reîncarcă pagina sau încearcă din nou peste câteva momente." : "Обнови страницу или попробуй снова через несколько минут."} actionLabel={locale === "ro" ? "Reîncarcă" : "Обновить"} actionHref={selectedSlug ? `/news?category=${encodeURIComponent(selectedSlug)}` : "/news"} />
+      : articles.length === 0 ? <PublicMessageState eyebrow="FC EDINEȚ" title={text.empty} text={locale === "ro" ? "Alege o altă categorie sau revino la toate publicațiile." : "Выбери другую категорию или вернись ко всем публикациям."} actionLabel={locale === "ro" ? "Toate știrile" : "Все новости"} actionHref="/news" />
       : <>
           <div className="newsEditorialHeading"><div><span>{selectedCategory ? localized(selectedCategory.name, selectedCategory.name_ro, locale) : latestLabel}</span><h2>{selectedCategory ? localized(selectedCategory.name, selectedCategory.name_ro, locale) : text.title}</h2></div><strong>{String(articles.length).padStart(2,"0")}</strong></div>
           <div className="newsEditorialLeadGrid">
