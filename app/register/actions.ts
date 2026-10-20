@@ -15,21 +15,22 @@ export async function register(
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const confirmPassword = String(formData.get("confirm_password") ?? "");
+  const locale = String(formData.get("locale") ?? "ru") === "ro" ? "ro" : "ru";
 
   if (fullName.length < 2) {
-    return { error: "Укажи имя минимум из 2 символов." };
+    return { error: locale === "ro" ? "Introdu un nume de cel puțin 2 caractere." : "Укажи имя минимум из 2 символов." };
   }
 
   if (!email.includes("@")) {
-    return { error: "Укажи корректный email." };
+    return { error: locale === "ro" ? "Introdu o adresă de email validă." : "Укажи корректный email." };
   }
 
   if (password.length < 8) {
-    return { error: "Пароль должен содержать минимум 8 символов." };
+    return { error: locale === "ro" ? "Parola trebuie să conțină cel puțin 8 caractere." : "Пароль должен содержать минимум 8 символов." };
   }
 
   if (password !== confirmPassword) {
-    return { error: "Пароли не совпадают." };
+    return { error: locale === "ro" ? "Parolele nu coincid." : "Пароли не совпадают." };
   }
 
   const supabase = await createClient();
@@ -45,7 +46,7 @@ export async function register(
   });
 
   if (error) {
-    return { error: "Регистрация не выполнена. Проверь введённые данные." };
+    return { error: locale === "ro" ? "Înregistrarea nu a reușit. Verifică datele introduse." : "Регистрация не выполнена. Проверь введённые данные." };
   }
 
   // Если email confirmation отключена, session создаётся сразу.

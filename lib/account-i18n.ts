@@ -38,7 +38,7 @@ export const accountText: Record<Locale, {
   },
   ro: {
     eyebrow: "CONT PERSONAL", title: "FC Edineț al meu", dashboard: "Prezentare", profile: "Profil",
-    favorites: "Favorite", settings: "Setări", logout: "Ieșire", memberSince: "Pe site-ul clubului din",
+    favorites: "Favorite", settings: "Setări", logout: "Deconectare", memberSince: "Pe site-ul clubului din",
     role: "Rol", city: "Oraș", notSet: "Nespecificat", favoritePlayers: "Jucători favoriți",
     favoriteMatches: "Meciuri salvate", editProfile: "Editează profilul", manageSettings: "Setările contului",
     openFavorites: "Deschide favoritele", profileTitle: "Profilul meu", profileDescription: "Nume, nume afișat, oraș și fotografia de profil.",
@@ -47,7 +47,7 @@ export const accountText: Record<Locale, {
     save: "Salvează", saving: "Se salvează...", removeAvatar: "Șterge fotografia", settingsTitle: "Setări",
     settingsDescription: "Limba contului și viitoarele notificări ale clubului.", language: "Limba preferată", languageHint: "După salvare, interfața va trece la limba selectată.",
     notifications: "Notificările clubului", notificationsHint: "Preferința este salvată acum. Notificările email/push vor fi conectate într-o etapă viitoare.",
-    ru: "Русский", ro: "Română", favoritesTitle: "Favoritele mele", favoritesDescription: "Jucătorii și meciurile pe care vrei să le urmărești.",
+    ru: "Rusă", ro: "Română", favoritesTitle: "Favoritele mele", favoritesDescription: "Jucătorii și meciurile pe care vrei să le urmărești.",
     players: "Jucători", matches: "Meciuri", noPlayers: "Nu ai adăugat încă jucători la favorite.", noMatches: "Nu ai salvat încă niciun meci.",
     browsePlayers: "Deschide lotul", browseMatches: "Deschide calendarul", addPlayer: "♡ Adaugă la favorite", removePlayer: "♥ În favorite",
     followMatch: "☆ Urmărește meciul", removeMatch: "★ Meci salvat", loginToFavorite: "Autentifică-te pentru a adăuga la favorite",

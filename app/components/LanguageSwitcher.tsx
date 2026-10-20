@@ -10,12 +10,13 @@ export default function LanguageSwitcher({ locale }: { locale: Locale }) {
   }
 
   return (
-    <div className="languageSwitch" aria-label="Language / Limbă">
+    <div className="languageSwitch" aria-label={locale === "ro" ? "Selectarea limbii" : "Выбор языка"}>
       <button
         type="button"
         className={locale === "ru" ? "active" : ""}
         onClick={() => change("ru")}
         aria-pressed={locale === "ru"}
+        aria-label={locale === "ro" ? "Limba rusă" : "Русский язык"}
       >
         RU
       </button>
@@ -25,6 +26,7 @@ export default function LanguageSwitcher({ locale }: { locale: Locale }) {
         className={locale === "ro" ? "active" : ""}
         onClick={() => change("ro")}
         aria-pressed={locale === "ro"}
+        aria-label={locale === "ro" ? "Limba română" : "Румынский язык"}
       >
         RO
       </button>

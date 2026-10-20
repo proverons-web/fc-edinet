@@ -229,9 +229,9 @@ export default async function Home() {
             {nextMatch ? <>
               <div className="fcRefCompetition">{nextMatch.competition?.name || competition?.name || "Liga 2"}{nextMatch.round ? <span>{nextMatch.round}</span> : null}</div>
               <div className="fcRefMatchTeams">
-                <ReferenceTeam team={nextMatch.home} />
+                <ReferenceTeam team={nextMatch.home} locale={locale} />
                 <div className="fcRefVs">VS</div>
-                <ReferenceTeam team={nextMatch.away} />
+                <ReferenceTeam team={nextMatch.away} locale={locale} />
               </div>
               <div className="fcRefMatchFacts">
                 <span><b>▣</b>{formatMatchDay(nextMatch.kickoff, locale)}</span>
@@ -287,9 +287,9 @@ export default async function Home() {
   );
 }
 
-function ReferenceTeam({ team }: { team: ClubMatch["home"] }) {
+function ReferenceTeam({ team, locale }: { team: ClubMatch["home"]; locale: Locale }) {
   const logo = team?.logo_url || (team?.is_club ? CLUB_LOGO : null);
-  return <div className="fcRefTeamBadge">{logo ? <img src={logo} alt="" /> : <span>{(team?.short_name || team?.name || "FC").slice(0,3).toUpperCase()}</span>}<strong>{team?.short_name || team?.name || "Команда"}</strong></div>;
+  return <div className="fcRefTeamBadge">{logo ? <img src={logo} alt="" /> : <span>{(team?.short_name || team?.name || "FC").slice(0,3).toUpperCase()}</span>}<strong>{team?.short_name || team?.name || (locale === "ro" ? "Echipă" : "Команда")}</strong></div>;
 }
 
 function ReferencePlayer({ player, locale }: { player: Player; locale: Locale }) {

@@ -159,7 +159,7 @@ const textByLocale = {
     leadersEyebrow: "LIDERII ECHIPEI",
     leadersTitle: "TOP-5 al sezonului",
     scorers: "Marcatori",
-    assistants: "Assisturi",
+    assistants: "Pase decisive",
     appearances: "Meciuri",
     minutes: "Minute",
     cleanSheets: "Meciuri fără gol primit",
@@ -167,9 +167,9 @@ const textByLocale = {
     tableEyebrow: "TOȚI JUCĂTORII",
     tableTitle: "Statistica sezonului",
     sort: "Sortare",
-    contribution: "G+A",
+    contribution: "Gol + pasă",
     starts: "Titular",
-    yellow: "GC",
+    yellow: "CG",
     red: "CR",
     extended: "Suplimentar",
     player: "Jucător",
@@ -178,7 +178,7 @@ const textByLocale = {
     noDataHint: "Datele vor apărea după ce statistica unui meci va fi marcată ca finalizată în panoul de administrare.",
     passAccuracy: "pase",
     saves: "intervenții",
-    tackles: "deposedări",
+    tackles: "deposedări reușite",
     interceptions: "intercepții",
     shots: "șuturi",
     shotsTarget: "pe poartă",
@@ -201,8 +201,8 @@ const textByLocale = {
 
 const sortLabels = {
   goals: { ru: "Голы", ro: "Goluri" },
-  assists: { ru: "Ассисты", ro: "Assisturi" },
-  contributions: { ru: "Гол + пас", ro: "Gol + assist" },
+  assists: { ru: "Ассисты", ro: "Pase decisive" },
+  contributions: { ru: "Гол + пас", ro: "Gol + pasă" },
   appearances: { ru: "Матчи", ro: "Meciuri" },
   minutes: { ru: "Минуты", ro: "Minute" },
   clean_sheets: { ru: "Сухие матчи", ro: "Meciuri fără gol" },
@@ -568,7 +568,7 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
     return b.minutes_played - a.minutes_played;
   })[0] ?? null;
 
-  const featureText = locale === "ro" ? { player: "Jucătorul sezonului", goals: "Goluri", assists: "Assisturi", matches: "Meciuri", minutes: "Minute", profile: "Profilul jucătorului" } : { player: "Игрок сезона", goals: "Голы", assists: "Ассисты", matches: "Матчи", minutes: "Минуты", profile: "Профиль игрока" };
+  const featureText = locale === "ro" ? { player: "Jucătorul sezonului", goals: "Goluri", assists: "Pase decisive", matches: "Meciuri", minutes: "Minute", profile: "Profilul jucătorului" } : { player: "Игрок сезона", goals: "Голы", assists: "Ассисты", matches: "Матчи", minutes: "Минуты", profile: "Профиль игрока" };
 
   const leaderboards = [
     { title: text.scorers, key: "goals" as const, rows: topRows(summaries, "goals"), value: (row: PlayerSummary) => row.goals },

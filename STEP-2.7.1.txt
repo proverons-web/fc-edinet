@@ -1,0 +1,20 @@
+FC EDINEȚ v2.7.1 — Phase 15 RU/RO QA consolidated on the v2.6.10 SEO hotfix base
+
+Changes:
+- keeps the v2.6.10 Open Graph TypeScript hotfix in lib/seo.ts
+- localized login/register server validation errors for RU and RO
+- auth forms now pass the active locale to server actions
+- corrected RO fallback team label on the home match module
+- improved language-switcher accessibility labels
+- normalized Romanian statistics terminology (pase decisive, gol + pasă, etc.)
+- corrected account wording in Romanian (Deconectare, Rusă)
+- hardened mobile wrapping for longer Romanian labels
+- deploy integrity check now verifies locale propagation for auth forms/actions
+
+No SQL migration required.
+
+Deployment:
+1. Extract to a clean folder.
+2. Copy only the working .env.local from the previous version.
+3. Run DEPLOY_FC_EDINET.bat.
+4. Verify /api/version -> 2.7.1.

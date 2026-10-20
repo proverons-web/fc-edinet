@@ -14,9 +14,10 @@ export async function login(
 ): Promise<AuthState> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
+  const locale = String(formData.get("locale") ?? "ru") === "ro" ? "ro" : "ru";
 
   if (!email || !password) {
-    return { error: "Введите email и пароль." };
+    return { error: locale === "ro" ? "Introdu emailul și parola." : "Введите email и пароль." };
   }
 
   const supabase = await createClient();
@@ -27,7 +28,9 @@ export async function login(
 
   if (error) {
     return {
-      error: "Не удалось войти. Проверь email, пароль и подтверждение почты.",
+      error: locale === "ro"
+        ? "Autentificarea nu a reușit. Verifică emailul, parola și confirmarea adresei de email."
+        : "Не удалось войти. Проверь email, пароль и подтверждение почты.",
     };
   }
 

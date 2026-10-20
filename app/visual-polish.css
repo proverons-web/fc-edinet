@@ -1503,3 +1503,14 @@ button:disabled:hover,[aria-disabled="true"]:hover{transform:none!important}
     transform-origin:var(--pro-hero-m-x,50%) var(--pro-hero-m-y,50%);
   }
 }
+
+
+/* =============================================================
+   FC EDINEȚ v2.7.0 — RU / RO QA / PHASE 15
+   Small-screen text resilience for longer Romanian labels.
+   ============================================================= */
+.mobileMenuInner a,.mobileMenuInner button,.globalFooterColumn a,.authSubmit,.publicMessageState h2,.publicErrorInner h1{overflow-wrap:anywhere}
+.authSubmit{white-space:normal;line-height:1.2}
+@media(max-width:980px){
+  .mobileMenuInner a{white-space:normal;line-height:1.25}
+}

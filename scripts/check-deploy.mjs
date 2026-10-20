@@ -71,6 +71,23 @@ for (const requiredSeoFile of ["app/sitemap.ts", "app/robots.ts", "app/opengraph
   }
 }
 
+// RU/RO release integrity: auth actions must receive the active locale so
+// validation errors cannot silently fall back to Russian on the RO site.
+for (const authPair of [
+  ["app/components/LoginForm.tsx", "app/login/actions.ts"],
+  ["app/components/RegisterForm.tsx", "app/register/actions.ts"],
+]) {
+  const [formFile, actionFile] = authPair;
+  const formSource = fs.readFileSync(path.join(cwd, formFile), "utf8");
+  const actionSource = fs.readFileSync(path.join(cwd, actionFile), "utf8");
+  if (!/name=["']locale["']/.test(formSource)) {
+    errors.push(`Locale field is missing from ${formFile}.`);
+  }
+  if (!/formData\.get\(["']locale["']\)/.test(actionSource)) {
+    errors.push(`Localized auth action does not read locale: ${actionFile}.`);
+  }
+}
+
 
 // Client-boundary hygiene: keep the full public translation dictionary out of
 // hydrated components. Passing small string subsets from server components
