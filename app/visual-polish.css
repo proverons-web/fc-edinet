@@ -337,3 +337,134 @@ body :where(h1,h2,h3,h4,h5,h6){text-wrap:balance}
   .fcRefDashboardSection{padding:18px 0 24px!important}
   .fcRefTeamSection{padding:34px 0 38px!important}
 }
+
+/* ============================================================
+   FC EDINEȚ v2.5.2 — HOME PAGE POLISH / PHASE 3
+   Stronger matchday hierarchy without changing CMS/data logic.
+   ============================================================ */
+
+/* HERO — preserve Builder positioning, improve presentation only. */
+.fcRefHero{isolation:isolate;background:#031a38}
+.fcRefHero:after{
+  content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(2,15,34,.42) 0%,rgba(2,15,34,.08) 48%,rgba(2,15,34,.20) 100%),
+    linear-gradient(0deg,rgba(2,14,31,.48) 0%,transparent 38%);
+}
+.fcRefHeroGrid,.fcRefHeroBottom{z-index:2}
+.fcRefHeroCopy{padding-left:0!important;border-left:0!important}
+.fcRefHeroKicker{
+  display:flex;align-items:center;gap:12px;margin-bottom:18px!important;
+  color:#e8f1fc!important;font-size:11px!important;font-weight:850!important;letter-spacing:.16em!important;
+  text-shadow:0 2px 12px rgba(0,0,0,.28)
+}
+.fcRefHeroKicker:before{content:"";display:block;width:34px;height:3px;background:var(--fc-ref-yellow)}
+.fcRefHeroCopy h1{
+  max-width:760px;font-family:var(--font-fce-display),Arial,sans-serif!important;
+  font-size:clamp(62px,6.7vw,104px)!important;line-height:.83!important;font-weight:900!important;
+  letter-spacing:-.055em!important;text-wrap:balance
+}
+.fcRefHeroCopy h1 span{margin-top:7px;color:var(--fc-ref-yellow)!important}
+.fcRefHeroCopy p{max-width:590px!important;margin-top:24px!important;font-size:17px!important;line-height:1.6!important;font-weight:550!important;color:#edf4fd!important}
+.fcRefHeroActions{margin-top:30px!important}
+.fcYellowButton,.fcGhostButton{border-radius:3px!important;font-family:var(--font-fce-display),Arial,sans-serif!important;font-weight:800!important;letter-spacing:.06em!important}
+.fcGhostButton{background:rgba(4,24,51,.28);backdrop-filter:blur(6px)}
+.fcGhostButton:hover{background:rgba(255,255,255,.10);border-color:#fff}
+
+/* NEXT MATCH — a true matchday module. */
+.fcRefNextMatch{
+  overflow:hidden;padding:0!important;
+  background:linear-gradient(155deg,rgba(3,22,50,.96),rgba(6,48,94,.93))!important;
+  border:1px solid rgba(169,202,239,.28)!important;border-radius:6px!important;
+  box-shadow:0 30px 80px rgba(0,12,32,.42)!important;backdrop-filter:blur(16px)!important
+}
+.fcRefNextMatch:before{content:"";display:block;height:5px;background:var(--fc-ref-yellow)}
+.fcRefMatchHead{padding:20px 22px 16px!important;border-bottom:1px solid rgba(255,255,255,.12)!important}
+.fcRefMatchHead strong{font-family:var(--font-fce-display),Arial,sans-serif!important;font-size:20px!important;font-weight:850!important;letter-spacing:.015em!important}
+.fcRefMatchHead a{color:#aecdEE!important;font-size:9px!important;letter-spacing:.08em!important}
+.fcRefCompetition{padding:17px 22px 12px!important;color:#96afd0!important;font-size:10px!important;letter-spacing:.10em!important}
+.fcRefCompetition span{color:#dbe8f7!important}
+.fcRefMatchTeams{padding:9px 22px 19px!important;grid-template-columns:minmax(0,1fr) 38px minmax(0,1fr)!important;gap:10px!important}
+.fcRefTeamBadge{gap:11px!important}.fcRefTeamBadge img{width:76px!important;height:86px!important}.fcRefTeamBadge>span{width:70px!important;height:70px!important;border-radius:6px!important}
+.fcRefTeamBadge strong{max-width:125px;font-family:var(--font-fce-display),Arial,sans-serif!important;font-size:13px!important;font-weight:800!important;line-height:1.1!important;text-wrap:balance}
+.fcRefVs{font-family:var(--font-fce-display),Arial,sans-serif!important;color:#738cab!important;font-size:16px!important;font-weight:800!important;letter-spacing:.08em}
+.fcRefMatchFacts{margin:0 22px;padding:15px 0!important;gap:10px!important;color:#bdd0e5!important;font-size:11px!important}
+.fcRefMatchFacts b{color:var(--fc-ref-yellow)!important}
+.fcRefMatchButton{width:calc(100% - 44px)!important;margin:8px 22px 22px!important;min-height:44px!important}
+.fcRefNoMatch{padding:38px 24px 42px!important}
+
+/* Hero ticker/footer line. */
+.fcRefHeroBottom{bottom:0!important;min-height:48px;width:min(calc(100% - 48px),1200px);padding:0 16px;border-top:1px solid rgba(255,255,255,.18);justify-content:flex-start!important}
+.fcRefHeroBottom span{color:#f1f6fc}.fcRefHeroBottom i{font-size:12px}.fcRefHeroBottom strong{margin-left:auto!important;color:#9fb6d2!important;font-style:normal!important}
+
+/* Announcement becomes a compact club bulletin. */
+.fcRefAnnouncement{border-bottom:1px solid #e9bf18}
+.fcRefAnnouncementInner{min-height:78px!important}.fcRefAnnouncementInner small{color:#705a00;font-size:9px!important}.fcRefAnnouncementInner strong{font-family:var(--font-fce-display),Arial,sans-serif;font-size:20px!important;font-weight:800}.fcRefAnnouncementInner a{display:inline-flex;align-items:center;min-height:38px;padding:0 15px;border:1px solid rgba(6,26,52,.22);border-radius:3px}
+
+/* NEWS + STANDINGS — editorial sports front page rather than admin dashboard. */
+.fcRefDashboardSection{padding:58px 0 62px!important;background:#f1f5f9!important;border-bottom:1px solid #dce5ee}
+.fcRefDashboard{grid-template-columns:1.12fr .92fr .92fr!important;gap:16px!important;border:0!important;align-items:stretch}
+.fcRefLeadColumn,.fcRefLatestColumn,.fcRefTableColumn{
+  padding:18px!important;background:#fff;border:1px solid #dbe4ed!important;border-radius:8px!important;box-shadow:0 12px 34px rgba(5,31,62,.055)
+}
+.fcRefLatestColumn,.fcRefTableColumn{border-left:1px solid #dbe4ed!important}
+.fcRefLeadNews{min-height:100%!important;border-radius:5px!important;box-shadow:none!important;background:#061b3a!important}
+.fcRefLeadNewsMedia{height:270px!important}.fcRefLeadNewsMedia:after{height:58%!important}
+.fcRefLeadNewsMedia>span{left:18px!important;bottom:16px!important;padding:7px 10px!important;border-radius:2px;font-size:9px!important;letter-spacing:.08em!important}
+.fcRefLeadNewsBody{padding:23px 24px 25px!important}
+.fcRefLeadNewsBody time{font-size:10px!important;letter-spacing:.05em}.fcRefLeadNewsBody h2{margin:10px 0 12px!important;font-family:var(--font-fce-display),Arial,sans-serif;font-size:clamp(25px,2vw,32px)!important;line-height:1.04!important;font-weight:850!important;letter-spacing:-.025em!important;text-wrap:balance}
+.fcRefLeadNewsBody p{font-size:13px!important;line-height:1.65!important;color:#c8d6e7!important}.fcRefLeadNewsBody b{font-size:10px!important;letter-spacing:.08em!important}
+.fcRefPanelTitle{min-height:54px!important;border-bottom:3px solid #0a4f9d!important}
+.fcRefPanelTitle h2{font-family:var(--font-fce-display),Arial,sans-serif!important;font-size:20px!important;font-weight:850!important;letter-spacing:-.01em!important}
+.fcRefPanelTitle a{font-size:9px!important;letter-spacing:.065em!important}
+.fcRefNewsRow{grid-template-columns:124px minmax(0,1fr)!important;gap:15px!important;padding:16px 0!important;min-height:116px!important}
+.fcRefNewsRow>div{height:84px!important;border-radius:4px!important}.fcRefNewsRow time{font-size:9px!important;letter-spacing:.03em}.fcRefNewsRow h3{margin-top:7px!important;font-family:var(--font-fce-display),Arial,sans-serif;font-size:15px!important;font-weight:760!important;line-height:1.22!important;letter-spacing:-.01em!important;text-wrap:balance}
+.fcRefNewsRow:hover>div img{transform:scale(1.04)}.fcRefNewsRow>div img{transition:transform .25s ease}
+.fcRefTableColumn .standingsTableWrap{margin-top:7px!important;border-radius:4px!important;box-shadow:none!important}
+.fcRefTableColumn .standingsTable{font-size:11px!important}.fcRefTableColumn .standingsTable th{height:40px!important;padding:0 6px!important;background:#071d3d!important;color:#b8c9dc!important;font-size:8px!important}.fcRefTableColumn .standingsTable td{padding:10px 6px!important}.fcRefTableColumn .standingsTable tr.club td{background:#0b4b98!important;color:#fff!important;box-shadow:none!important}.fcRefTableColumn .standingsTable tr.club td:first-child{box-shadow:inset 4px 0 0 var(--fc-ref-yellow)!important}
+
+/* TEAM — full-width broadcast cards, no cursive decorative copy. */
+.fcRefTeamSection{padding:70px 0 76px!important;background:linear-gradient(118deg,#021631 0%,#062c59 62%,#031a3a 100%)!important}
+.fcRefTeamSection:before{content:"FC EDINEȚ";position:absolute;left:50%;top:40px;transform:translateX(-50%);color:rgba(255,255,255,.032);font-family:var(--font-fce-display),Arial,sans-serif;font-size:clamp(90px,15vw,210px);font-weight:900;line-height:.75;letter-spacing:-.055em;white-space:nowrap;pointer-events:none}
+.fcRefTeamSection:after{right:-35px!important;bottom:-120px!important;width:390px!important;height:460px!important;opacity:.045!important}
+.fcRefTeamHead{align-items:flex-end!important;margin-bottom:32px!important}
+.fcRefTeamHead h2{font-family:var(--font-fce-display),Arial,sans-serif!important;font-size:clamp(32px,3vw,46px)!important;font-weight:850!important;letter-spacing:-.025em!important}
+.fcRefTeamHead p{margin-top:8px!important;color:#8fb0d2!important;font-size:10px!important;letter-spacing:.13em!important}
+.fcOutlineButton{min-height:42px!important;padding:0 18px!important;font-family:var(--font-fce-display),Arial,sans-serif!important;font-size:10px!important;font-weight:800!important}
+.fcRefPlayers{width:100%!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:16px!important}
+.fcRefPlayerCard{height:360px!important;border-radius:5px!important;border:1px solid rgba(255,255,255,.12)!important;box-shadow:0 18px 48px rgba(0,0,0,.20)!important}
+.fcRefPlayerPhoto img{transition:transform .35s ease,filter .35s ease}.fcRefPlayerCard:hover .fcRefPlayerPhoto img{transform:scale(1.045)!important;filter:saturate(1.04) contrast(1.03)}
+.fcRefPlayerShade{background:linear-gradient(180deg,transparent 28%,rgba(1,12,29,.18) 50%,rgba(1,12,29,.96) 100%)!important}
+.fcRefPlayerNumber{left:18px!important;bottom:58px!important;font-family:var(--font-fce-display),Arial,sans-serif!important;font-size:48px!important;font-weight:900!important;line-height:1!important;color:var(--fc-ref-yellow)!important;letter-spacing:-.05em!important}
+.fcRefPlayerMeta{left:18px!important;right:18px!important;bottom:17px!important}.fcRefPlayerMeta strong{font-family:var(--font-fce-display),Arial,sans-serif;font-size:17px!important;font-weight:800;line-height:1.05!important}.fcRefPlayerMeta span{margin-top:6px!important;color:#9fb4cb!important;font-size:9px!important;letter-spacing:.09em!important}
+.fcRefPlayerCard:after{content:"VIEW";position:absolute;right:15px;bottom:17px;color:#6f8baa;font-size:8px;font-weight:850;letter-spacing:.13em;opacity:0;transform:translateX(-5px);transition:.2s ease}.fcRefPlayerCard:hover:after{opacity:1;transform:none}
+.fcRefSignature{display:none!important}
+
+/* PARTNERS — clean premium logo rail. */
+.fcRefPartnersStrip{padding:30px 0!important;background:#fff!important;border-bottom:1px solid #dbe4ed!important}
+.fcRefPartnersInner{grid-template-columns:150px minmax(0,1fr) 205px!important;gap:30px!important}
+.fcRefPartnersInner>strong{font-family:var(--font-fce-display),Arial,sans-serif;font-size:13px!important;font-weight:800!important;letter-spacing:.04em!important;color:#092d59!important}
+.fcRefPartnerLogos{gap:34px!important;min-height:64px}.fcRefPartnerLogos a,.fcRefPartnerLogos span{height:56px!important;min-width:84px!important;opacity:.82;transition:opacity .18s ease,transform .18s ease}.fcRefPartnerLogos a:hover{opacity:1;transform:translateY(-2px)}.fcRefPartnerLogos img{max-width:125px!important;max-height:46px!important;filter:grayscale(.15) saturate(.85)!important}
+.fcRefPartnersInner>a{padding-left:22px!important;border-left:3px solid var(--fc-ref-yellow)!important;color:#1a4f87!important;font-size:9px!important;line-height:1.45!important;letter-spacing:.06em!important}
+
+@media(max-width:1180px){
+  .fcRefDashboard{grid-template-columns:1fr 1fr!important}.fcRefLeadColumn{grid-row:span 2}.fcRefTableColumn{grid-column:2}.fcRefLatestColumn,.fcRefTableColumn{border-left:1px solid #dbe4ed!important;border-top:1px solid #dbe4ed!important}
+  .fcRefHeroCopy h1{font-size:clamp(58px,7vw,82px)!important}
+  .fcRefPlayerCard{height:320px!important}
+  .fcRefPartnersInner{grid-template-columns:130px minmax(0,1fr) 180px!important}
+}
+@media(max-width:980px){
+  .fcRefHeroCopy{width:min(650px,76vw)!important}.fcRefNextMatch{width:min(var(--hero-match-tablet-width,520px),78vw)!important}
+  .fcRefDashboardSection{padding:44px 0 48px!important}.fcRefDashboard{grid-template-columns:1fr!important}.fcRefLeadColumn{grid-row:auto}.fcRefTableColumn{grid-column:auto}.fcRefLatestColumn,.fcRefTableColumn{border-left:1px solid #dbe4ed!important;border-top:1px solid #dbe4ed!important}
+  .fcRefPlayers{grid-template-columns:repeat(2,minmax(0,1fr))!important}.fcRefPlayerCard{height:390px!important}
+  .fcRefPartnersInner{grid-template-columns:1fr!important;gap:18px!important}.fcRefPartnersInner>strong,.fcRefPartnersInner>a{text-align:center}.fcRefPartnersInner>a{border-left:0!important;border-top:1px solid #e0e7ef;padding:16px 0 0!important}
+}
+@media(max-width:680px){
+  .fcRefHeroCopy{width:min(92vw,560px)!important;padding-inline:4px!important}.fcRefHeroKicker{font-size:9px!important;margin-bottom:14px!important}.fcRefHeroKicker:before{width:25px}.fcRefHeroCopy h1{font-size:clamp(44px,13.5vw,62px)!important;line-height:.88!important}.fcRefHeroCopy p{font-size:14px!important;line-height:1.55!important;margin-top:17px!important}.fcRefHeroActions{margin-top:21px!important}.fcYellowButton,.fcGhostButton{min-height:42px!important;padding:0 15px!important;font-size:9px!important}
+  .fcRefNextMatch{width:min(var(--hero-match-mobile-width,360px),94vw)!important}.fcRefMatchHead{padding:16px 16px 13px!important}.fcRefMatchHead strong{font-size:16px!important}.fcRefCompetition{padding:13px 16px 9px!important}.fcRefMatchTeams{padding:8px 14px 14px!important}.fcRefTeamBadge img{width:56px!important;height:64px!important}.fcRefTeamBadge strong{font-size:10px!important}.fcRefMatchFacts{margin:0 16px!important;font-size:9px!important}.fcRefMatchButton{width:calc(100% - 32px)!important;margin:7px 16px 16px!important}
+  .fcRefHeroBottom{width:calc(100% - 24px);min-height:38px;padding-inline:4px;gap:9px!important;font-size:6px!important;letter-spacing:.10em!important}.fcRefHeroBottom strong{display:none!important}
+  .fcRefAnnouncementInner{min-height:72px!important}.fcRefAnnouncementInner strong{font-size:17px!important}.fcRefAnnouncementInner a{font-size:8px!important;padding-inline:10px}
+  .fcRefDashboardSection{padding:32px 0 36px!important}.fcRefDashboard{gap:12px!important}.fcRefLeadColumn,.fcRefLatestColumn,.fcRefTableColumn{padding:12px!important;border-radius:6px!important}.fcRefLeadNewsMedia{height:220px!important}.fcRefLeadNewsBody{padding:19px 18px 21px!important}.fcRefLeadNewsBody h2{font-size:24px!important}.fcRefPanelTitle h2{font-size:17px!important}.fcRefNewsRow{grid-template-columns:96px minmax(0,1fr)!important;gap:11px!important;min-height:94px!important;padding:12px 0!important}.fcRefNewsRow>div{height:68px!important}.fcRefNewsRow h3{font-size:13px!important}
+  .fcRefTeamSection{padding:48px 0 52px!important}.fcRefTeamHead{align-items:flex-start!important;margin-bottom:24px!important}.fcRefTeamHead h2{font-size:30px!important}.fcRefPlayers{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}.fcRefPlayerCard{height:250px!important}.fcRefPlayerNumber{left:12px!important;bottom:49px!important;font-size:34px!important}.fcRefPlayerMeta{left:12px!important;right:10px!important;bottom:12px!important}.fcRefPlayerMeta strong{font-size:13px!important}.fcRefPlayerCard:after{display:none}
+  .fcRefPartnersStrip{padding:24px 0!important}.fcRefPartnerLogos{gap:18px!important}.fcRefPartnerLogos img{max-width:94px!important;max-height:36px!important}
+}

@@ -1,0 +1,16 @@
+FC EDINEȚ v2.5.2 — SITE-WIDE VISUAL POLISH / PHASE 3
+
+HOME PAGE POLISH
+- stronger Hero readability while preserving Site Builder positioning
+- sports display typography and yellow accent hierarchy
+- redesigned Next Match module
+- cleaner hero ticker and announcement bar
+- editorial News + Standings dashboard
+- stronger compact standings presentation
+- full-width broadcast-style Team section
+- removed cursive decorative signature
+- premium partner logo rail
+- responsive tablet/mobile polish
+
+No SQL migration required.
+Base: v2.5.1 FULL.
