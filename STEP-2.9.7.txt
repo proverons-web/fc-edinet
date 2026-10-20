@@ -1,0 +1,17 @@
+FC EDINEȚ v2.9.7 — Player Statistics Completion Fix
+
+Fixes:
+- calendar label rename is confirmed unrelated to player statistics
+- fixed regression introduced when the separate Complete button was removed
+- Save now automatically marks player statistics COMPLETE for a finished match when:
+  * 11 starters are saved
+  * at least one starting goalkeeper exists
+  * the competition is linked to a season
+- event-derived player_match_stats continue to sync on save/create/update/delete event
+- publishing a protocol performs an extra statistics sync and completes valid player statistics as a safety net
+- season/tournament totals (appearances, minutes, goals, assists, yellow/red cards) become visible again
+
+Recovery for matches saved in v2.9.5-v2.9.6:
+Open the affected finished match in Match Center and press Save once.
+
+No SQL migration required.

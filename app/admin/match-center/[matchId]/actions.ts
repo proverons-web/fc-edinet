@@ -320,6 +320,26 @@ export async function publishMatchProtocol(formData: FormData) {
     go(matchId, { error: `Перед публикацией таймлайн голов должен совпадать со счётом (${homeGoals}:${awayGoals} / ${match.home_score ?? 0}:${match.away_score ?? 0}).` });
   }
 
+  // Keep match statistics in sync before publication. This is intentionally
+  // independent from the navigation label “Календарь” and the /matches route.
+  await syncClubPlayerStatsFromEvents(supabase, userId, matchId);
+  const { data: clubLineup } = await supabase
+    .from("match_lineup_entries")
+    .select("lineup_role,position")
+    .eq("match_id", matchId)
+    .not("player_id", "is", null);
+  const starters = (clubLineup ?? []).filter((row) => row.lineup_role === "starter");
+  const hasGoalkeeper = starters.some((row) => row.position === "goalkeeper");
+  if (starters.length === 11 && hasGoalkeeper) {
+    await supabase.from("match_statistics_status").upsert({
+      match_id: matchId,
+      status: "complete",
+      completed_at: new Date().toISOString(),
+      completed_by: userId,
+      updated_by: userId,
+    }, { onConflict: "match_id" });
+  }
+
   const now = new Date().toISOString();
   const { error } = await supabase
     .from("match_reports")
@@ -927,7 +947,6 @@ async function syncClubPlayerStatsFromEvents(
 export async function saveClubSquadAndStats(formData: FormData) {
   const { supabase, userId } = await requireEditor();
   const matchId = text(formData, "match_id");
-  const intent = text(formData, "intent") === "complete" ? "complete" : "draft";
   if (!/^\d+$/.test(matchId)) redirect("/admin/match-center");
 
   const { data: match, error: matchError } = await supabase
@@ -946,17 +965,6 @@ export async function saveClubSquadAndStats(formData: FormData) {
   const clubSide: "home" | "away" | null = home?.is_club ? "home" : away?.is_club ? "away" : null;
   if (!clubSide) go(matchId, { error: "Не удалось определить FC Edineț в этом матче." });
   const clubTeamId = String(clubSide === "home" ? match.home_team_id : match.away_team_id);
-
-  if (intent === "complete") {
-    if (match.status !== "finished") go(matchId, { error: "Завершить статистику можно только у завершённого матча." });
-    if (!match.competition_id) go(matchId, { error: "У матча не указано соревнование." });
-    const { data: competition, error: competitionError } = await supabase
-      .from("competitions")
-      .select("id,season_id")
-      .eq("id", match.competition_id)
-      .maybeSingle();
-    if (competitionError || !competition?.season_id) go(matchId, { error: "Перед завершением привяжи соревнование к сезону." });
-  }
 
   const requestedIds: string[] = [];
   const requestedManualNames: string[] = [];
@@ -1045,10 +1053,24 @@ export async function saveClubSquadAndStats(formData: FormData) {
   }
 
   if (captainCount > 1) go(matchId, { error: "У FC Edineț можно отметить только одного капитана." });
-  if (intent === "complete") {
-    if (starterCount !== 11) go(matchId, { error: `Для завершения нужно указать ровно 11 игроков стартового состава. Сейчас: ${starterCount}.` });
-    if (goalkeeperCount < 1) go(matchId, { error: "Для завершения нужен хотя бы один вратарь в стартовом составе." });
+
+  let hasSeasonCompetition = false;
+  if (match.competition_id) {
+    const { data: competition, error: competitionError } = await supabase
+      .from("competitions")
+      .select("id,season_id")
+      .eq("id", match.competition_id)
+      .maybeSingle();
+    hasSeasonCompetition = !competitionError && Boolean(competition?.season_id);
   }
+
+  // v2.9.7: there is only one Save button. A valid lineup of a finished match
+  // becomes COMPLETE automatically so season/tournament aggregation includes it.
+  const completed =
+    match.status === "finished" &&
+    starterCount === 11 &&
+    goalkeeperCount >= 1 &&
+    hasSeasonCompetition;
 
   const formation = nullableText(formData, "formation", 40);
   const coachName = nullableText(formData, "coach_name", 160);
@@ -1076,7 +1098,6 @@ export async function saveClubSquadAndStats(formData: FormData) {
 
   await syncClubPlayerStatsFromEvents(supabase, userId, matchId);
 
-  const completed = intent === "complete";
   const { error: statusError } = await supabase.from("match_statistics_status").upsert({
     match_id: matchId,
     status: completed ? "complete" : "draft",
