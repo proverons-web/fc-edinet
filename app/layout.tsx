@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Inter, Roboto_Condensed } from "next/font/google";
 import "./globals.css";
 import "./visual-polish.css";
 import SiteHeader from "./components/SiteHeader";
@@ -7,6 +8,18 @@ import { getSiteUrlObject } from "@/lib/site-url";
 import { getLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
 import { defaultDesignSystem, designSystemCssVariables, normalizeDesignSystem } from "@/lib/design-system";
+
+const fceBodyFont = Inter({
+  subsets: ["latin", "latin-ext", "cyrillic"],
+  variable: "--font-fce-body",
+  display: "swap",
+});
+
+const fceDisplayFont = Roboto_Condensed({
+  subsets: ["latin", "latin-ext", "cyrillic"],
+  variable: "--font-fce-display",
+  display: "swap",
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -40,7 +53,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
   return (
     <html lang={locale}>
-      <body style={designSystemCssVariables(designSystem)}>
+      <body className={`${fceBodyFont.variable} ${fceDisplayFont.variable}`} style={designSystemCssVariables(designSystem)}>
         <SiteHeader />
         {children}
         <SiteFooter />

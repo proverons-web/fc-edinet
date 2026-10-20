@@ -17,6 +17,7 @@ export default async function SiteFooter() {
 
   return (
     <footer className={`footer globalFooter globalFooter-${config.background}`} style={{ paddingTop: config.padding_top, paddingBottom: config.padding_bottom }}>
+      <div className="globalFooterWordmark" aria-hidden="true">FC EDINEȚ</div>
       <div className="container footerGrid globalFooterGrid" style={{ "--footer-columns": String(Math.max(1, visibleColumns.length)) } as React.CSSProperties}>
         <div className="globalFooterBrand">
           <Link className="brand" href="/">

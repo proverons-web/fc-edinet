@@ -223,7 +223,7 @@ export function frameCssVariables(frames: ClubResponsiveFrames, elementKey: stri
   });
   return {...vars("d",d),...vars("t",t),...vars("m",m)} as CSSProperties;
 }
-function clubFontStack(value:ClubElementFrame["font_family"]){if(value==="arial-black")return '"Arial Black",Arial,Helvetica,sans-serif';if(value==="verdana")return 'Verdana,Geneva,sans-serif';if(value==="tahoma")return 'Tahoma,Verdana,sans-serif';if(value==="trebuchet")return '"Trebuchet MS",Arial,sans-serif';if(value==="georgia")return 'Georgia,"Times New Roman",serif';if(value==="times")return '"Times New Roman",Times,serif';if(value==="arial")return 'Arial,Helvetica,sans-serif';return 'inherit';}
+function clubFontStack(value:ClubElementFrame["font_family"]){if(value==="arial-black")return 'var(--font-fce-display),"Arial Black",Arial,Helvetica,sans-serif';if(value==="verdana")return 'Verdana,Geneva,sans-serif';if(value==="tahoma")return 'Tahoma,Verdana,sans-serif';if(value==="trebuchet")return '"Trebuchet MS",Arial,sans-serif';if(value==="georgia")return 'Georgia,"Times New Roman",serif';if(value==="times")return '"Times New Roman",Times,serif';if(value==="arial")return 'var(--font-fce-body),Arial,Helvetica,sans-serif';return 'inherit';}
 export function imageFocusCssVariables(section: ClubSectionConfig): CSSProperties {
   const focus = section.image_focus ?? defaultImageFocus();
   const zoom = section.image_zoom ?? {desktop:115,tablet:115,mobile:120};

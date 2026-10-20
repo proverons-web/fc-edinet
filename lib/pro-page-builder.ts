@@ -397,13 +397,13 @@ function normalizeResponsive(raw: unknown, fallback: ProResponsiveNumber, min: n
   };
 }
 function proFontStack(value: ProSectionConfig["text_font"]) {
-  if (value === "arial-black") return '"Arial Black",Arial,Helvetica,sans-serif';
+  if (value === "arial-black") return 'var(--font-fce-display),"Arial Black",Arial,Helvetica,sans-serif';
   if (value === "verdana") return 'Verdana,Geneva,sans-serif';
   if (value === "tahoma") return 'Tahoma,Verdana,sans-serif';
   if (value === "trebuchet") return '"Trebuchet MS",Arial,sans-serif';
   if (value === "georgia") return 'Georgia,"Times New Roman",serif';
   if (value === "times") return '"Times New Roman",Times,serif';
-  if (value === "arial") return 'Arial,Helvetica,sans-serif';
+  if (value === "arial") return 'var(--font-fce-body),Arial,Helvetica,sans-serif';
   return 'inherit';
 }
 function fontPreset(value: unknown, fallback: ProSectionConfig["text_font"]): ProSectionConfig["text_font"] { const allowed=["inherit","arial","arial-black","verdana","tahoma","trebuchet","georgia","times"]; return typeof value === "string" && allowed.includes(value) ? value as ProSectionConfig["text_font"] : fallback; }

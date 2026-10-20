@@ -6,8 +6,8 @@ import { heroLayerState, moveHeroLayer, updateHeroLayer } from "@/lib/hero-build
 
 const fontOptions: Array<{ value: HeroLayerFontFamily; label: string }> = [
   { value: "inherit", label: "Как в теме" },
-  { value: "arial", label: "Arial" },
-  { value: "arial-black", label: "Arial Black" },
+  { value: "arial", label: "Inter / FCE Body" },
+  { value: "arial-black", label: "Roboto Condensed / FCE Display" },
   { value: "verdana", label: "Verdana" },
   { value: "tahoma", label: "Tahoma" },
   { value: "trebuchet", label: "Trebuchet MS" },

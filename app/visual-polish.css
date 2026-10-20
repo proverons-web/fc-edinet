@@ -81,3 +81,102 @@ img{max-width:100%}
 .canvasSiteIframe{display:block;border:0;background:#fff;max-width:none!important}
 .canvasFullPreviewStage.fullPageMode .canvasIframeViewport{box-shadow:0 24px 60px rgba(13,41,74,.20)}
 .canvasFullPreviewStage.heroOnlyMode .canvasIframeViewport{box-shadow:0 18px 44px rgba(13,41,74,.16)}
+
+/* ============================================================
+   FC EDINEȚ v2.5.0 — DESIGN SYSTEM 2.0 / PHASE 1
+   Typography foundation + global Header / Footer polish.
+   ============================================================ */
+
+/* Stable cross-browser typography. The historical preset ids stay intact,
+   but "arial" now resolves to Inter and "arial-black" to Roboto Condensed. */
+html{font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{font-family:var(--ds-font-body,var(--font-fce-body),Arial,sans-serif)}
+body :where(h1,h2,h3,h4,h5,h6){text-wrap:balance}
+
+/* Public sports display typography: generous line boxes are deliberate for Cyrillic. */
+.globalHeader .brandText strong,
+.globalHeader .menu,
+.fcRefHeroCopy h1,
+.fcRefMatchHead strong,
+.fcRefVs,
+.fcRefNewsFallback,
+.fcRefPanelTitle h2,
+.fcRefTeamHead h2,
+.fcRefPlayerNumber,
+.globalFooter .brandText strong,
+.managedPageHero h1,
+.proManagedHero h1,
+.sectionHeading h2,
+.proSectionHeading h2,
+.groupHeading h2,
+.clubHero h1,
+.contentBuilderSection h2{
+  font-family:var(--font-fce-display),"Arial Narrow",Arial,sans-serif!important;
+  font-synthesis:none!important;
+}
+.sectionHeading h2,.proSectionHeading h2,.groupHeading h2,.contentBuilderSection h2{line-height:1.04!important;letter-spacing:-.025em!important}
+
+/* Header — one visual system across every public page. */
+.globalHeader{
+  z-index:120!important;
+  background:linear-gradient(90deg,rgba(2,18,43,.985) 0%,rgba(5,42,88,.985) 55%,rgba(2,21,48,.985) 100%)!important;
+  border-bottom:1px solid rgba(255,255,255,.1)!important;
+  box-shadow:0 10px 30px rgba(0,14,36,.16)!important;
+  backdrop-filter:blur(18px) saturate(125%);
+}
+.globalHeader:after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,var(--accent,#ffd328) 0 12%,rgba(255,211,40,.2) 32%,transparent 68%);pointer-events:none}
+.globalHeader .nav{min-height:var(--header-height,78px);gap:22px}
+.globalHeader .brand{position:relative;gap:12px;padding-right:6px}
+.globalHeader .globalBrandLogo{height:60px!important;max-height:60px!important;filter:drop-shadow(0 5px 10px rgba(0,0,0,.22));transition:transform .2s ease}
+.globalHeader .brand:hover .globalBrandLogo{transform:translateY(-1px) scale(1.015)}
+.globalHeader .brandText strong{font-size:25px!important;font-weight:850;line-height:.9!important;letter-spacing:.005em!important}
+.globalHeader .brandText small{margin-top:7px!important;font-family:var(--font-fce-body),Arial,sans-serif!important;font-size:8px!important;font-weight:800;letter-spacing:.19em!important;color:#a9bcd3!important}
+.globalHeader .menu{align-self:stretch;gap:2px!important;margin-left:auto;font-size:12px!important;font-weight:800!important;letter-spacing:.025em!important}
+.globalHeader .menu a{position:relative;display:flex;align-items:center;min-height:100%!important;padding:0 12px;opacity:.78!important;color:#e4edf8;border-left:1px solid transparent;border-right:1px solid transparent;transition:color .18s ease,background .18s ease,opacity .18s ease}
+.globalHeader .menu a:after{left:12px!important;right:12px!important;bottom:0!important;height:3px!important;background:var(--accent,#ffd328)!important;transform:scaleX(0);transform-origin:center;transition:transform .18s ease!important}
+.globalHeader .menu a:hover{opacity:1!important;color:#fff!important;background:rgba(255,255,255,.035)}
+.globalHeader .menu a:hover:after{transform:scaleX(.45)}
+.globalHeader .menu a.isActive,.globalHeader .menu a[aria-current="page"]{opacity:1!important;color:#fff!important;background:rgba(255,255,255,.055)}
+.globalHeader .menu a.isActive:after,.globalHeader .menu a[aria-current="page"]:after{transform:scaleX(1)!important}
+.globalHeader .searchButton{position:relative;width:40px!important;height:40px!important;border:1px solid rgba(255,255,255,.12)!important;background:rgba(255,255,255,.025)!important;transition:.18s ease}
+.globalHeader .searchButton:hover{border-color:rgba(255,211,40,.65)!important;color:var(--accent,#ffd328);background:rgba(255,211,40,.06)!important}
+.globalHeader .login{min-height:40px!important;padding:0 15px!important;border:1px solid rgba(255,255,255,.18)!important;background:rgba(255,255,255,.035)!important;font-family:var(--font-fce-body),Arial,sans-serif;font-size:10px!important;font-weight:850!important;letter-spacing:.05em}
+.globalHeader .login:hover{border-color:var(--accent,#ffd328)!important;color:var(--accent,#ffd328)!important}
+.accountMenuButton{border-radius:4px!important}
+
+/* Mobile navigation behaves like a club drawer, not a plain technical list. */
+.mobileMenuAbsolute{z-index:130!important;background:linear-gradient(180deg,#061b3b 0%,#03132c 100%)!important;border-top:2px solid var(--accent,#ffd328)!important;box-shadow:0 24px 50px rgba(0,11,31,.3)}
+.mobileMenuInner{padding-top:8px;padding-bottom:16px}
+.mobileMenu a{position:relative;padding:15px 4px!important;border-bottom:1px solid rgba(255,255,255,.075)!important;font-family:var(--font-fce-display),Arial,sans-serif;font-size:16px;font-weight:750!important;letter-spacing:.02em;text-transform:uppercase;color:#dce7f5}
+.mobileMenu a.isActive,.mobileMenu a[aria-current="page"]{padding-left:18px!important;color:#fff}
+.mobileMenu a.isActive:before,.mobileMenu a[aria-current="page"]:before{content:"";position:absolute;left:0;top:50%;width:8px;height:3px;background:var(--accent,#ffd328);transform:translateY(-50%)}
+
+/* Footer — stronger club identity, calmer information hierarchy. */
+.globalFooter{position:relative;isolation:isolate;padding-top:max(72px,var(--footer-pad-top,0px));background:linear-gradient(115deg,#01152f 0%,#04234a 58%,#021832 100%)!important;border-top:3px solid var(--accent,#ffd328)!important}
+.globalFooter:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.4),transparent 75%);pointer-events:none;z-index:-1}
+.globalFooterWordmark{position:absolute;left:50%;top:20px;z-index:-1;transform:translateX(-50%);width:min(1400px,94vw);overflow:hidden;color:rgba(255,255,255,.025);font-family:var(--font-fce-display),Arial,sans-serif;font-size:clamp(90px,14vw,210px);font-weight:900;line-height:.75;letter-spacing:-.055em;white-space:nowrap;text-align:center;pointer-events:none}
+.globalFooterGrid{position:relative;gap:56px!important;padding-top:18px}
+.globalFooterBrand{max-width:360px}
+.globalFooter .globalBrandLogo{height:94px!important;max-height:94px!important;filter:drop-shadow(0 8px 18px rgba(0,0,0,.22))}
+.globalFooter .brandText strong{font-size:31px!important;font-weight:850;line-height:.92!important;letter-spacing:0!important}
+.globalFooter .brandText small{margin-top:7px!important;font-family:var(--font-fce-body),Arial,sans-serif!important;font-size:9px!important;font-weight:800;letter-spacing:.2em!important;color:#8fa8c5!important}
+.globalFooterBrand p{max-width:340px!important;margin:22px 0 0;color:#9eb1c8!important;font-size:13px!important;line-height:1.72!important}
+.globalFooterColumn{gap:10px!important;padding-top:9px;border-top:1px solid rgba(255,255,255,.12)}
+.globalFooterColumn strong{margin-bottom:5px;color:#fff!important;font-family:var(--font-fce-display),Arial,sans-serif;font-size:13px!important;font-weight:800;letter-spacing:.07em!important}
+.globalFooterColumn a{position:relative;width:max-content;max-width:100%;padding:3px 0;color:#90a6bf!important;font-size:12px!important;line-height:1.45;transition:color .18s ease,transform .18s ease}
+.globalFooterColumn a:hover{color:#fff!important;transform:translateX(4px)}
+.footerSocialLinks{gap:8px!important;margin-top:22px!important}.footerSocialLinks a{padding:7px 10px!important;border:1px solid rgba(255,255,255,.12);border-radius:3px;color:#dce7f4!important;font-size:10px!important;text-transform:uppercase;letter-spacing:.04em}
+.globalFooter .footerBottom{margin-top:54px!important;padding-top:20px!important;border-top:1px solid rgba(255,255,255,.09)!important;color:#7188a3!important;font-size:10px!important;letter-spacing:.035em;text-transform:uppercase}
+
+@media(max-width:1220px){
+  .globalHeader .menu{font-size:11px!important}.globalHeader .menu a{padding-inline:8px}.globalHeader .brandText{display:none!important}
+  .globalFooterGrid{gap:34px!important}
+}
+@media(max-width:980px){
+  .globalHeader .brandText{display:block!important}.globalHeader .menu{display:none!important}.globalHeader .menuToggle{display:grid!important;place-items:center;border-radius:2px!important}
+  .globalFooterGrid{grid-template-columns:1.35fr repeat(2,minmax(130px,1fr))!important}.globalFooterColumn:last-child{grid-column:2/4}
+}
+@media(max-width:680px){
+  .globalHeader .nav{min-height:var(--header-height-mobile,62px)!important}.globalHeader .globalBrandLogo{height:48px!important;max-height:48px!important}.globalHeader .brandText strong{font-size:21px!important}.globalHeader .brandText small{font-size:7px!important;margin-top:5px!important}
+  .globalFooter{padding-top:62px!important}.globalFooterWordmark{top:28px;font-size:92px}.globalFooterGrid{grid-template-columns:1fr!important;gap:34px!important}.globalFooterColumn:last-child{grid-column:auto}.globalFooterBrand{max-width:none}.globalFooter .globalBrandLogo{height:78px!important}.globalFooter .footerBottom{align-items:flex-start;flex-direction:column;gap:8px;margin-top:38px!important}
+}

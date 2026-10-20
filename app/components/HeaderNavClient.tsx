@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { logout } from "@/app/account/actions";
 import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 import { publicText, type Locale } from "@/lib/i18n";
@@ -31,6 +32,7 @@ export default function HeaderNavClient({
   showAdminLink?: boolean;
   showLanguageMobile?: boolean;
 }) {
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const text = publicText[locale].nav;
@@ -46,12 +48,13 @@ export default function HeaderNavClient({
   };
   const order = navOrder?.length ? navOrder : Object.keys(linkMap) as HeaderNavKey[];
   const links = order.filter((key) => navVisibility?.[key] !== false).map((key) => linkMap[key]);
+  const isActive = (href: string) => href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
   return (
     <>
       <nav className="menu">
-        <Link href="/">{locale === "ro" ? "Acasă" : "Главная"}</Link>
-        {links.map((link) => <Link key={link.href} href={link.href}>{link.label}</Link>)}
+        <Link href="/" className={isActive("/") ? "isActive" : undefined} aria-current={isActive("/") ? "page" : undefined}>{locale === "ro" ? "Acasă" : "Главная"}</Link>
+        {links.map((link) => <Link key={link.href} href={link.href} className={isActive(link.href) ? "isActive" : undefined} aria-current={isActive(link.href) ? "page" : undefined}>{link.label}</Link>)}
         {showAdminLink && isStaff && <Link href="/admin">{text.admin}</Link>}
       </nav>
 
@@ -78,8 +81,8 @@ export default function HeaderNavClient({
       </div>
 
       {menuOpen && <div className="mobileMenu mobileMenuAbsolute"><div className="container mobileMenuInner">
-        <Link href="/" onClick={() => setMenuOpen(false)}>{locale === "ro" ? "Acasă" : "Главная"}</Link>
-        {links.map((link) => <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)}>{link.label}</Link>)}
+        <Link href="/" className={isActive("/") ? "isActive" : undefined} aria-current={isActive("/") ? "page" : undefined} onClick={() => setMenuOpen(false)}>{locale === "ro" ? "Acasă" : "Главная"}</Link>
+        {links.map((link) => <Link key={link.href} href={link.href} className={isActive(link.href) ? "isActive" : undefined} aria-current={isActive(link.href) ? "page" : undefined} onClick={() => setMenuOpen(false)}>{link.label}</Link>)}
         {showAdminLink && isStaff && <Link href="/admin" onClick={() => setMenuOpen(false)}>{text.admin}</Link>}
         {showAccount && (isAuthenticated ? <>
           <Link href="/account" onClick={() => setMenuOpen(false)}>{account.dashboard}</Link>
