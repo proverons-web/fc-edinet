@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent, type RefObject } from "react";
 
 type Item = { key: string; label: string; preview: string; design: string; content: string };
 type PreviewDevice = "desktop" | "tablet" | "mobile";
@@ -83,6 +83,8 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, mode }: P
   const [zoom, setZoom] = useState(75);
   const [fit, setFit] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
+  const [editorState, setEditorState] = useState<"saved" | "unsaved" | "saving">("saved");
+  const editorRef = useRef<HTMLIFrameElement | null>(null);
   const liveRef = useRef<HTMLIFrameElement | null>(null);
   const fullscreenRef = useRef<HTMLIFrameElement | null>(null);
   const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -92,7 +94,52 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, mode }: P
   useEffect(() => {
     setFullscreen(false);
     setFit(true);
-  }, [selected.key]);
+    setEditorState("saved");
+  }, [selected.key, mode]);
+
+  useEffect(() => {
+    const frame = editorRef.current;
+    if (!frame) return;
+
+    const bindEditorEvents = () => {
+      try {
+        const doc = frame.contentDocument;
+        if (!doc) return;
+        const markDirty = () => setEditorState("unsaved");
+        const markSaving = () => setEditorState("saving");
+        doc.addEventListener("input", markDirty, true);
+        doc.addEventListener("change", markDirty, true);
+        doc.addEventListener("submit", markSaving, true);
+        return () => {
+          doc.removeEventListener("input", markDirty, true);
+          doc.removeEventListener("change", markDirty, true);
+          doc.removeEventListener("submit", markSaving, true);
+        };
+      } catch {
+        return;
+      }
+    };
+
+    let cleanup: (() => void) | undefined;
+    const onLoad = () => {
+      cleanup?.();
+      cleanup = bindEditorEvents();
+      setEditorState((state) => state === "saving" ? "saved" : state);
+    };
+    frame.addEventListener("load", onLoad);
+    cleanup = bindEditorEvents();
+    return () => { cleanup?.(); frame.removeEventListener("load", onLoad); };
+  }, [editorUrl]);
+
+  useEffect(() => {
+    const beforeUnload = (event: BeforeUnloadEvent) => {
+      if (editorState !== "unsaved") return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", beforeUnload);
+    return () => window.removeEventListener("beforeunload", beforeUnload);
+  }, [editorState]);
 
   useEffect(() => {
     if (mode !== "content") return;
@@ -144,6 +191,11 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, mode }: P
     };
   }, [selected.key]);
 
+  const confirmNavigation = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (editorState !== "unsaved") return;
+    if (!window.confirm("Есть несохранённые изменения. Покинуть страницу и потерять их?")) event.preventDefault();
+  };
+
   const changeZoom = (value: number) => {
     setZoom(Math.min(100, Math.max(25, value)));
     setFit(false);
@@ -169,7 +221,7 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, mode }: P
         <aside className="unifiedBuilderSidebar">
           <strong>СТРАНИЦЫ</strong>
           {pages.map((page) => (
-            <Link key={page.key} className={page.key === selected.key ? "active" : ""} href={`/admin/site-builder?page=${page.key}&mode=${mode}`}>
+            <Link key={page.key} className={page.key === selected.key ? "active" : ""} href={`/admin/site-builder?page=${page.key}&mode=${mode}`} onClick={confirmNavigation}>
               {page.label}
             </Link>
           ))}
@@ -184,9 +236,14 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, mode }: P
           <div className="unifiedBuilderTop">
             <div><b>{selected.label}</b><span>{selected.preview}</span></div>
             <nav>
-              <Link className={mode === "design" ? "active" : ""} href={`/admin/site-builder?page=${selected.key}&mode=design`}>Дизайн</Link>
-              <Link className={mode === "content" ? "active" : ""} href={`/admin/site-builder?page=${selected.key}&mode=content`}>Контент</Link>
+              <Link className={mode === "design" ? "active" : ""} href={`/admin/site-builder?page=${selected.key}&mode=design`} onClick={confirmNavigation}>Дизайн</Link>
+              <Link className={mode === "content" ? "active" : ""} href={`/admin/site-builder?page=${selected.key}&mode=content`} onClick={confirmNavigation}>Контент</Link>
             </nav>
+          </div>
+
+          <div className="unifiedBuilderSaveStrip" aria-live="polite">
+            <span className={`builderSaveState ${editorState}`}><i />{editorState === "saved" ? "Все изменения сохранены" : editorState === "saving" ? "Сохранение…" : "Есть несохранённые изменения"}</span>
+            <small>{editorState === "unsaved" ? "Сохрани изменения в редакторе перед переходом на другую страницу." : "Site Builder отслеживает изменения внутри текущего редактора."}</small>
           </div>
 
           <div className="unifiedBuilderToolbar" aria-label="Preview controls">
@@ -213,7 +270,7 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, mode }: P
           <div className="unifiedBuilderSplit">
             <section>
               <header><span>РЕДАКТОР</span><a href={editorUrl} target="_blank" rel="noreferrer">На весь экран ↗</a></header>
-              <iframe title={`Редактор ${selected.label}`} src={editorUrl} />
+              <iframe ref={editorRef} title={`Редактор ${selected.label}`} src={editorUrl} />
             </section>
             <section className="unifiedBuilderPreviewPanel">
               <header>

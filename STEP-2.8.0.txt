@@ -1,0 +1,20 @@
+FC EDINEȚ v2.8.0 — ADMIN UX OVERHAUL / PHASE 16
+
+Changes:
+- dedicated private admin shell with sidebar navigation and compact topbar
+- public site header/footer hidden while working inside the admin center
+- role-aware admin navigation groups: Main, Content, Management, System
+- redesigned admin dashboard with clear content/site/management/system sections
+- Site Builder promoted as the primary visual editing workflow
+- Site Builder now tracks Saved / Unsaved / Saving state from embedded editor forms
+- unsaved-change warning before switching Builder page/mode or closing the browser tab
+- consistent admin spacing, cards, filters, controls and responsive behavior
+- existing routes, server actions, renderers and Supabase schema preserved
+
+No SQL migration required.
+
+Deployment:
+1. Copy .env.local from the previous working version.
+2. Run DEPLOY_FC_EDINET.bat.
+3. Verify /api/version -> 2.8.0.
+4. Sign in and QA /admin, /admin/site-builder, News, Matches, Match Center, Media and Users (admin role).
