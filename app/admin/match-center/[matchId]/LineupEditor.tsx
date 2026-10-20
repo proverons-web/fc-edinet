@@ -256,8 +256,7 @@ function LineupGroup({
               <select className="matchLineupPosition" name={`${role}_${slot}_position`} defaultValue={entry?.position ?? ""}>
                 <option value="">Поз.</option>
                 {POSITION_OPTIONS.map(([value, label]) => {
-                  const optionTone = value === "goalkeeper" ? "#fff2bf" : value === "defender" ? "#e7f1ff" : value === "midfielder" ? "#e7f7ee" : "#fdeaea";
-                  return <option value={value} key={value} style={{ backgroundColor: optionTone }}>{label}</option>;
+                  return <option value={value} key={value}>{label}</option>;
                 })}
               </select>
               <label className="matchLineupCaptain">

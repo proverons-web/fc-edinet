@@ -238,30 +238,22 @@ function SquadList({
                   {players.map((option) => {
                     const id = String(option.id);
                     const usedElsewhere = selectedIds.has(id) && id !== local?.playerId;
-                    const optionTone = option.position === "goalkeeper"
-                      ? "#fff2bf"
-                      : option.position === "defender"
-                        ? "#e7f1ff"
-                        : option.position === "midfielder"
-                          ? "#e7f7ee"
-                          : option.position === "forward"
-                            ? "#fdeaea"
-                            : "#ffffff";
                     return (
-                      <option value={id} disabled={usedElsewhere} key={id} style={{ backgroundColor: optionTone, color: "#102f50" }}>
+                      <option value={id} disabled={usedElsewhere} key={id}>
                         {option.last_name} {option.first_name}{option.shirt_number != null ? ` · #${option.shirt_number}` : ""}{!option.is_active ? " · временный/архив" : ""}
                       </option>
                     );
                   })}
                 </select>
-                <input
-                  name={`${role}_${slot}_player_name`}
-                  value={local?.manualName ?? ""}
-                  disabled={Boolean(local?.playerId)}
-                  onChange={(event) => patch(key, { manualName: event.target.value })}
-                  placeholder="или ввести ФИО вручную"
-                  maxLength={120}
-                />
+                {!local?.playerId && (
+                  <input
+                    name={`${role}_${slot}_player_name`}
+                    value={local?.manualName ?? ""}
+                    onChange={(event) => patch(key, { manualName: event.target.value })}
+                    placeholder="ФИО вручную, если игрока нет в базе"
+                    maxLength={120}
+                  />
+                )}
               </div>
               <select
                 className="matchCenterCompactPosition"
@@ -272,8 +264,7 @@ function SquadList({
               >
                 <option value="">Позиция</option>
                 {POSITION_OPTIONS.map(([value, label]) => {
-                  const optionTone = value === "goalkeeper" ? "#fff2bf" : value === "defender" ? "#e7f1ff" : value === "midfielder" ? "#e7f7ee" : "#fdeaea";
-                  return <option value={value} key={value} style={{ backgroundColor: optionTone }}>{label}</option>;
+                  return <option value={value} key={value}>{label}</option>;
                 })}
               </select>
               <label className="matchCenterCaptainToggle" title="Капитан">

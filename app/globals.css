@@ -3265,3 +3265,58 @@ body:has(.adminEmbedded){background:#f3f6fa}
 .matchCenterLineupsGrid .matchLineupFooter{padding-top:12px}
 .matchCenterLineupsGrid .matchLineupFooter span{font-size:8.5px;line-height:1.45}
 .matchCenterSquadCompactRow select option{font-weight:750}
+
+/* ============================================================
+   FC EDINEȚ v2.9.3 — Match Center data-aware layout fix
+   ============================================================ */
+/* Use the actual content density: opponent rows need ~500px, club rows ~650px. */
+.matchCenterLineupsGrid.club-home{grid-template-columns:minmax(500px,.44fr) minmax(650px,.56fr)}
+.matchCenterLineupsGrid.club-away{grid-template-columns:minmax(500px,.44fr) minmax(650px,.56fr)}
+.matchCenterLineupsGrid.club-home>.club{grid-column:1}.matchCenterLineupsGrid.club-home>.opponent{grid-column:2}
+.matchCenterLineupsGrid.club-away>.opponent{grid-column:1}.matchCenterLineupsGrid.club-away>.club{grid-column:2}
+
+/* Do not force artificial equal header heights; let both cards flow naturally. */
+.matchCenterLineupsGrid .statisticsPanelHead.matchCenterSectionHead,
+.matchCenterLineupsGrid .matchLineupPanel>.statisticsPanelHead{min-height:116px;padding-bottom:12px}
+.matchCenterLineupsGrid .statisticsPanelHead h2{font-size:21px;line-height:1.06}
+.matchCenterLineupsGrid .statisticsPanelHead p:not(.eyebrow){font-size:10px;line-height:1.45}
+
+/* Club row: name gets priority, secondary controls have fixed compact widths. */
+.matchCenterSquadCompactRow{grid-template-columns:28px minmax(0,1fr) 110px 38px 92px;gap:7px;min-height:52px;padding:6px 8px;overflow:hidden}
+.matchCenterPlayerPick{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;min-width:0}
+.matchCenterPlayerPick select,.matchCenterPlayerPick input{width:100%;min-width:0;height:36px;padding:0 10px;font-size:11px}
+.matchCenterPlayerPick select{font-size:11.5px;font-weight:850;white-space:nowrap;text-overflow:ellipsis}
+.matchCenterPlayerPick input{font-weight:750}
+.matchCenterCompactPosition{height:36px;font-size:9px;padding:0 7px}
+.matchCenterCaptainToggle{height:36px}
+.matchCenterAutoStats{justify-content:flex-start;overflow:hidden}
+.matchCenterAutoStats span{padding:0 5px;font-size:7.8px}
+
+/* Opponent row is intentionally denser, but name stays readable. */
+.matchCenterLineupsGrid .matchLineupRow{grid-template-columns:24px minmax(175px,1fr) 42px 58px 32px 54px;gap:5px;min-height:46px;padding:5px 6px;overflow:hidden}
+.matchCenterLineupsGrid .matchLineupPlayerField{min-width:0}
+.matchCenterLineupsGrid .matchLineupPlayerField input{height:34px;min-width:0;font-size:10px;text-overflow:ellipsis}
+.matchCenterLineupsGrid .matchLineupNumber,.matchCenterLineupsGrid .matchLineupPosition{height:34px;padding-left:5px;padding-right:5px}
+
+/* Position is conveyed by the row, not unreliable native <option> styling. */
+.matchCenterSquadCompactRow.position-goalkeeper,.matchLineupRow.position-goalkeeper{background:#fff8dd;border-color:#ead79a}
+.matchCenterSquadCompactRow.position-defender,.matchLineupRow.position-defender{background:#f0f6fd;border-color:#c9dced}
+.matchCenterSquadCompactRow.position-midfielder,.matchLineupRow.position-midfielder{background:#f0f8f4;border-color:#c7e2d2}
+.matchCenterSquadCompactRow.position-forward,.matchLineupRow.position-forward{background:#fdf2f2;border-color:#eccdcd}
+
+@media(max-width:1320px){
+  .matchCenterLineupsGrid.club-home,.matchCenterLineupsGrid.club-away{grid-template-columns:minmax(430px,.43fr) minmax(570px,.57fr)}
+  .matchCenterSquadCompactRow{grid-template-columns:28px minmax(0,1fr) 100px 36px 82px}
+  .matchCenterLineupsGrid .matchLineupRow{grid-template-columns:24px minmax(155px,1fr) 40px 54px 30px 48px}
+}
+@media(max-width:1080px){
+  .matchCenterLineupsGrid.club-home,.matchCenterLineupsGrid.club-away{grid-template-columns:1fr}
+  .matchCenterLineupsGrid.club-home>.club,.matchCenterLineupsGrid.club-home>.opponent,
+  .matchCenterLineupsGrid.club-away>.club,.matchCenterLineupsGrid.club-away>.opponent{grid-column:auto}
+  .matchCenterSquadCompactRow{grid-template-columns:28px minmax(0,1fr) 110px 38px 96px}
+}
+@media(max-width:720px){
+  .matchCenterSquadCompactRow{grid-template-columns:28px minmax(0,1fr) 86px 36px}
+  .matchCenterAutoStats{grid-column:2/-1}
+  .matchCenterLineupsGrid .matchLineupRow{grid-template-columns:24px minmax(0,1fr) 40px 56px 30px}
+}
