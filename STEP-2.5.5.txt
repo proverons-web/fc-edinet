@@ -1,0 +1,6 @@
+FC Edineț v2.5.5 — Phase 6: News editorial redesign.
+- Editorial /news layout with lead story + two secondary stories + archive grid.
+- Category navigation restyled.
+- News article page redesigned for long-form reading.
+- Existing news data, categories, safe-zone crop settings, comments and admin workflows preserved.
+- No SQL migration required.

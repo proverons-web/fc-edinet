@@ -10,6 +10,7 @@ import { getLocale } from "@/lib/locale";
 import { localized, publicText } from "@/lib/i18n";
 import { getPublishedSitePageDesign } from "@/lib/page-design";
 import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
+import { newsCoverStyle } from "@/lib/news-cover";
 
 export const dynamic = "force-dynamic";
 type PageProps = {
@@ -93,7 +94,10 @@ export default async function NewsArticlePage({ params, searchParams }: PageProp
   const category = localized(article.category?.name, article.category?.name_ro, locale) || text.defaultCategory;
   const paragraphs = content.split(/\n\s*\n/g).map((p) => p.trim()).filter(Boolean);
 
-  return <main><article>
+  const articleStoryLabel = locale === "ro" ? "POVESTEA CLUBULUI" : "ИСТОРИЯ КЛУБА";
+  const articleInfoLabel = locale === "ro" ? "DETALII" : "ДЕТАЛИ";
+
+  return <main className="newsArticlePage"><article>
     <PageHeroShell design={design} className="articleHeader" contentClassName="container articleHeaderInner" contentImageUrl={article.cover_image_url}>
       <>
         {heroLayerVisible(design.layer_config,"navigation") && <div className="articleHeroNavigation" style={heroLayerStyle(design.layer_config,"navigation")}><Link className="articleBack" href="/news">{text.back}</Link>{design.show_eyebrow && <div className="articleMeta"><span>{category}</span><time>{formatNewsDate(article.published_at, locale)}</time></div>}</div>}
@@ -101,10 +105,10 @@ export default async function NewsArticlePage({ params, searchParams }: PageProp
         {heroLayerVisible(design.layer_config,"author") && <div className="articleAuthor" style={heroLayerStyle(design.layer_config,"author")}>{text.author}: <strong>{article.author_name || "FC Edineț"}</strong></div>}
       </>
     </PageHeroShell>
-    <div className="container articleLayout"><div className="articleMain">
-      {article.cover_image_url ? <img className="articleCover" src={article.cover_image_url} alt={title} /> : <div className="articleCoverFallback">FC EDINEȚ</div>}
-      <div className="articleContent">{paragraphs.length ? paragraphs.map((p, i) => <p key={i}>{p}</p>) : <p>{text.emptyText}</p>}</div>
-    </div><aside className="articleAside"><div className="articleInfoBox">
+    <div className="container articleLayout articleEditorialLayout"><div className="articleMain">
+      {article.cover_image_url ? <div className="articleCoverFrame"><img className="articleCover newsCoverManaged" src={article.cover_image_url} alt={title} style={newsCoverStyle(article)} /><span>{category}</span></div> : <div className="articleCoverFallback">FC EDINEȚ</div>}
+      <div className="articleContent"><div className="articleStoryKicker"><span>{articleStoryLabel}</span><i></i></div>{paragraphs.length ? paragraphs.map((p, i) => <p key={i}>{p}</p>) : <p>{text.emptyText}</p>}</div>
+    </div><aside className="articleAside"><div className="articleInfoBox articleEditorialInfo"><b>{articleInfoLabel}</b>
       <small>{text.category}</small><strong>{category}</strong><small>{text.published}</small><strong>{formatNewsDate(article.published_at, locale)}</strong><small>{text.author.toUpperCase()}</small><strong>{article.author_name || "FC Edineț"}</strong>
     </div></aside></div>
   </article>

@@ -176,7 +176,7 @@ export default async function AdminPage() {
             <AdminModule
               title="Редактор сайта"
               text="Единый центр: Главная, Клуб, Новости, Команда, Матчи, Таблица, Медиа, Партнёры и Академия. Дизайн + контент + Live Preview."
-              badge={profile.role === "editor" || profile.role === "admin" ? "v2.5.4" : "Editor/Admin"}
+              badge={profile.role === "editor" || profile.role === "admin" ? "v2.5.5" : "Editor/Admin"}
               href={profile.role === "editor" || profile.role === "admin" ? "/admin/site-builder" : undefined}
             />
             <AdminModule
