@@ -1,10 +1,15 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { publicText, type Locale } from "@/lib/i18n";
 
-export default function PhotoShareButton({ photoId, title, compact = false, locale }: { photoId: string | number; title: string; compact?: boolean; locale: Locale; }) {
-  const text = publicText[locale].media;
+type PhotoShareText = {
+  share: string;
+  copied: string;
+  copyLink: string;
+  close: string;
+};
+
+export default function PhotoShareButton({ photoId, title, compact = false, text }: { photoId: string | number; title: string; compact?: boolean; text: PhotoShareText; }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const menuId = useId();

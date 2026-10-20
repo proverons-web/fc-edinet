@@ -65,6 +65,33 @@ if (!fs.existsSync(officialCrestPath)) {
   errors.push("Official crest is missing: public/brand/fc-edinet-crest.png");
 }
 
+
+// Client-boundary hygiene: keep the full public translation dictionary out of
+// hydrated components. Passing small string subsets from server components
+// prevents an accidental site-wide i18n payload from entering public JS bundles.
+function walkSource(dir) {
+  const entries = fs.existsSync(dir) ? fs.readdirSync(dir, { withFileTypes: true }) : [];
+  const files = [];
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) files.push(...walkSource(full));
+    else if (/\.(?:ts|tsx)$/.test(entry.name)) files.push(full);
+  }
+  return files;
+}
+
+for (const file of walkSource(path.join(cwd, "app"))) {
+  const source = fs.readFileSync(file, "utf8");
+  const isClient = /^\s*["']use client["'];?/m.test(source.slice(0, 160));
+  if (!isClient) continue;
+  if (/import\s*\{[^}]*\bpublicText\b[^}]*\}\s*from\s*["']@\/lib\/i18n["']/.test(source)) {
+    warnings.push(`Client component imports full publicText dictionary: ${path.relative(cwd, file)}. Pass localized labels from a server component instead.`);
+  }
+  if (/\bdebugger\s*;/.test(source)) {
+    errors.push(`Debugger statement found in client component: ${path.relative(cwd, file)}.`);
+  }
+}
+
 const supabaseUrl = readValue("NEXT_PUBLIC_SUPABASE_URL");
 const publishableKey = readValue(
   "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"

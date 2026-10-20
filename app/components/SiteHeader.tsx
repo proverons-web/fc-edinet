@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import HeaderNavClient from "@/app/components/HeaderNavClient";
 import LanguageSwitcher from "@/app/components/LanguageSwitcher";
@@ -6,12 +7,14 @@ import type { Profile } from "@/lib/types";
 import { staffRoles } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { publicText } from "@/lib/i18n";
+import { accountText } from "@/lib/account-i18n";
 import { defaultHeaderDesign, localizedValue, normalizeHeaderDesign } from "@/lib/global-design";
 import { getGlobalDesignConfigs } from "@/lib/site-global-designs";
 
 export default async function SiteHeader() {
   const locale = await getLocale();
   const text = publicText[locale];
+  const account = accountText[locale];
   const supabase = await createClient();
   const [{ data: claimsData }, globalDesigns] = await Promise.all([
     supabase.auth.getClaims(),
@@ -40,7 +43,7 @@ export default async function SiteHeader() {
         </div>
       </div>}
 
-      <header className={headerClass} style={{ "--header-height": `${design.height_desktop}px`, "--header-height-mobile": `${design.height_mobile}px` } as React.CSSProperties}>
+      <header className={headerClass} style={{ "--header-height": `${design.height_desktop}px`, "--header-height-mobile": `${design.height_mobile}px` } as CSSProperties}>
         <div className="container nav">
           <Link className="brand" href="/">
             <img className="globalBrandLogo" src={design.logo_mode === "image" && design.logo_url ? design.logo_url : "/brand/fc-edinet-crest.png"} alt="FC Edineț" decoding="async" style={{ width: Math.max(design.logo_width, 42) }} />
@@ -51,6 +54,30 @@ export default async function SiteHeader() {
             isAuthenticated={isAuthenticated}
             isStaff={isStaff}
             locale={locale}
+            labels={{
+              home: locale === "ro" ? "Acasă" : "Главная",
+              search: locale === "ro" ? "Căutare" : "Поиск",
+              admin: text.nav.admin,
+              login: text.nav.login,
+              account: text.nav.account,
+              openMenu: text.nav.openMenu,
+              nav: {
+                news: text.nav.news,
+                team: text.nav.team,
+                statistics: text.nav.statistics,
+                matches: text.nav.matches,
+                standings: text.nav.standings,
+                club: text.nav.club,
+                academy: text.nav.academy,
+                media: text.nav.media,
+                partners: text.nav.partners,
+              },
+              dashboard: account.dashboard,
+              profile: account.profile,
+              favorites: account.favorites,
+              settings: account.settings,
+              logout: account.logout,
+            }}
             accountName={profile?.display_name || profile?.full_name || null}
             navOrder={design.nav_order}
             navVisibility={design.nav_visibility}

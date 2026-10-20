@@ -1,0 +1,10 @@
+FC Edineț v2.6.6 — Phase 13.3: Runtime + Client Boundary + Legacy CSS cleanup.
+
+- Removed the large publicText dictionary from public client components. Header and media interactions now receive only the localized strings they actually need from server components.
+- HeaderNavClient no longer imports publicText/accountText at runtime, reducing client-side JavaScript payload.
+- MediaGallery and PhotoShareButton no longer import the site-wide i18n dictionary on the client.
+- Media lightbox now uses its own React ref instead of a document-wide querySelector, making multiple gallery instances safer and avoiding unnecessary DOM lookup.
+- Global error logging is development-only, avoiding duplicate production console noise while preserving local diagnostics.
+- Added explicit type=button to the header search control and hid the account chevron from assistive technology.
+- Removed obsolete responsive Hero CSS selectors left behind after the v2.6.4 <picture>/<source> migration. Current responsive Hero classes remain untouched.
+- No database migration required.
