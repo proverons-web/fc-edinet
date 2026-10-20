@@ -78,6 +78,7 @@ function PreviewViewport({
 export default function UnifiedSiteBuilderClient({ pages, selectedKey, mode }: Props) {
   const selected = pages.find((page) => page.key === selectedKey) ?? pages[0];
   const editorUrl = mode === "design" ? selected.design : selected.content;
+  const embeddedEditorUrl = `${editorUrl}${editorUrl.includes("?") ? "&" : "?"}embedded=1`;
   const [previewVersion, setPreviewVersion] = useState(0);
   const [device, setDevice] = useState<PreviewDevice>("desktop");
   const [zoom, setZoom] = useState(75);
@@ -270,7 +271,7 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, mode }: P
           <div className="unifiedBuilderSplit">
             <section>
               <header><span>РЕДАКТОР</span><a href={editorUrl} target="_blank" rel="noreferrer">На весь экран ↗</a></header>
-              <iframe ref={editorRef} title={`Редактор ${selected.label}`} src={editorUrl} />
+              <iframe ref={editorRef} title={`Редактор ${selected.label}`} src={embeddedEditorUrl} />
             </section>
             <section className="unifiedBuilderPreviewPanel">
               <header>

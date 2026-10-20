@@ -122,6 +122,7 @@ const publishableKey = readValue(
 const siteUrl = readValue("NEXT_PUBLIC_SITE_URL");
 const openaiKey = readValue("OPENAI_API_KEY");
 const translationModel = readValue("OPENAI_TRANSLATION_MODEL") || "gpt-5.6-luna";
+const supabaseAdminSecret = readValue("SUPABASE_SECRET_KEY") || readValue("SUPABASE_SERVICE_ROLE_KEY");
 
 if (!supabaseUrl) {
   errors.push("NEXT_PUBLIC_SUPABASE_URL is missing.");
@@ -158,6 +159,12 @@ if (!publishableKey) {
 if (!openaiKey) {
   warnings.push(
     "OPENAI_API_KEY is not set. Site will work, but automatic RU -> RO translation will be disabled."
+  );
+}
+
+if (!supabaseAdminSecret) {
+  warnings.push(
+    "SUPABASE_SECRET_KEY is not set. Admin user creation will use the email-confirmation fallback and user blocking will be disabled."
   );
 }
 
@@ -210,6 +217,9 @@ console.log(
 );
 console.log(
   `RU -> RO translation: ${openaiKey ? `configured (${translationModel})` : "disabled"}`
+);
+console.log(
+  `Admin user management: ${supabaseAdminSecret ? "full (server secret configured)" : "fallback mode"}`
 );
 
 if (warnings.length > 0) {

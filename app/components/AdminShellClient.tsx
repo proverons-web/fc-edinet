@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import type { UserRole } from "@/lib/types";
 
@@ -58,9 +58,12 @@ export default function AdminShellClient({
   roleLabel: string;
 }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  if (pathname.includes("/preview")) return children;
+  if (pathname.includes("/preview") || searchParams.get("embedded") === "1") {
+    return <div className="adminEmbedded">{children}</div>;
+  }
 
   const isActive = (href: string) => href === "/admin" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 
