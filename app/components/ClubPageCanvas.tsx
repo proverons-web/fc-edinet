@@ -159,7 +159,7 @@ export default function ClubPageCanvas({
               <div className="sectionHeading clubBuilderLooseHeading"><div><p className="eyebrow blue">{text.people}</p><h2>{text.leadership}</h2></div></div>
             </ManualFrame>
             <ManualFrame section={section} elementKey="leadership-grid" breakpoint={breakpoint} builderMode={builderMode} selected={selected} onSelect={selectElement} onChange={patchFrame}>
-              {leaders.length ? <div className={`clubLeadershipGrid clubLeadershipVariant-${section.variant}`} style={{"--leadership-cols":section.columns ?? 3} as CSSProperties}>{leaders.map((leader)=><LeaderCard key={leader.id} leader={leader} locale={locale}/>)}</div> : <div className="adminEmpty">{text.leadershipEmpty}</div>}
+              {leaders.length ? <div className={`clubLeadershipGrid clubLeadershipVariant-${section.variant}${leaders.length === 1 ? " clubLeadershipGrid-single" : ""}`} style={{"--leadership-cols":section.columns ?? 3} as CSSProperties}>{leaders.map((leader)=><LeaderCard key={leader.id} leader={leader} locale={locale}/>)}</div> : <div className="adminEmpty">{text.leadershipEmpty}</div>}
             </ManualFrame>
           </>}
           {section.key === "achievements" && <>
@@ -197,7 +197,7 @@ export default function ClubPageCanvas({
       case "leadership":
         return <section {...common} className={`${common.className} clubLeadershipSection`}><BuilderInner>
           <Selectable builderMode={builderMode} selected={selected} sectionKey="leadership" elementKey="leadership-heading" onSelect={selectElement}><div className="sectionHeading"><div><p className="eyebrow blue">{text.people}</p><h2>{text.leadership}</h2></div></div></Selectable>
-          <Selectable builderMode={builderMode} selected={selected} sectionKey="leadership" elementKey="leadership-grid" onSelect={selectElement}>{leaders.length ? <div className={`clubLeadershipGrid clubLeadershipVariant-${section.variant}`} style={{"--leadership-cols":section.columns ?? 3} as CSSProperties}>{leaders.map((leader)=><LeaderCard key={leader.id} leader={leader} locale={locale}/>)}</div> : <div className="adminEmpty">{text.leadershipEmpty}</div>}</Selectable>
+          <Selectable builderMode={builderMode} selected={selected} sectionKey="leadership" elementKey="leadership-grid" onSelect={selectElement}>{leaders.length ? <div className={`clubLeadershipGrid clubLeadershipVariant-${section.variant}${leaders.length === 1 ? " clubLeadershipGrid-single" : ""}`} style={{"--leadership-cols":section.columns ?? 3} as CSSProperties}>{leaders.map((leader)=><LeaderCard key={leader.id} leader={leader} locale={locale}/>)}</div> : <div className="adminEmpty">{text.leadershipEmpty}</div>}</Selectable>
         </BuilderInner></section>;
       case "achievements":
         return <section {...common} className={`${common.className} clubAchievementsSection`}><BuilderInner>
@@ -333,7 +333,7 @@ function Selectable({builderMode,selected,sectionKey,elementKey,onSelect,childre
   return <div className={`clubTemplateSelectable ${active?"is-selected":""}`} onClick={(e)=>{e.preventDefault();e.stopPropagation();onSelect(sectionKey,elementKey);}}>{children}</div>;
 }
 
-function LeaderCard({leader,locale}:{leader:ClubLeader;locale:Locale}) { return <article className="clubLeaderCard"><div className="clubLeaderPhoto">{leader.photo_url ? <img src={leader.photo_url} alt={leader.name}/> : <span>FCE</span>}</div><div><span>{localized(leader.role, leader.role_ro, locale)}</span><h3>{leader.name}</h3>{localized(leader.bio, leader.bio_ro, locale) && <p>{localized(leader.bio, leader.bio_ro, locale)}</p>}</div></article>; }
+function LeaderCard({leader,locale}:{leader:ClubLeader;locale:Locale}) { const hasPhoto=Boolean(leader.photo_url); return <article className={`clubLeaderCard${hasPhoto ? " has-photo" : " no-photo"}`}><div className="clubLeaderPhoto">{hasPhoto ? <img src={leader.photo_url!} alt={leader.name}/> : <><img className="clubLeaderPlaceholderCrest" src="/brand/fc-edinet-crest.png" alt="" aria-hidden="true"/><span>FC EDINEȚ</span></>}</div><div className="clubLeaderBody"><span className="clubLeaderRole">{localized(leader.role, leader.role_ro, locale)}</span><h3>{leader.name}</h3>{localized(leader.bio, leader.bio_ro, locale) && <p>{localized(leader.bio, leader.bio_ro, locale)}</p>}</div></article>; }
 function AchievementList({items,locale,variant}:{items:ClubAchievement[];locale:Locale;variant:string}) { return <div className={`clubTimeline clubAchievementsVariant-${variant}`}>{items.map((item)=><article key={item.id}><div className="clubTimelineYear">{item.year || "—"}</div><div><h3>{localized(item.title,item.title_ro,locale)}</h3>{localized(item.description,item.description_ro,locale)&&<p>{localized(item.description,item.description_ro,locale)}</p>}</div></article>)}</div>; }
 function Fact({label,value}:{label:string;value:string}) { return <div className="clubFact"><span>{label}</span><strong>{value}</strong></div>; }
 function Contact({label,value}:{label:string;value:string|null|undefined}) { return <div className="clubContactRow"><span>{label}</span><strong>{value || "—"}</strong></div>; }

@@ -2608,7 +2608,8 @@ html,body,button,input,select,textarea{font-synthesis:none;text-rendering:geomet
   --club-line:#dbe4ee;
   background:var(--club-paper);
   color:var(--club-text);
-  overflow:hidden;
+  overflow-x:clip;
+  overflow-y:visible;
 }
 .clubPageDocument .contentBuilderSection{position:relative;isolation:isolate;scroll-margin-top:calc(var(--club-header-offset,78px) + var(--club-subnav-height,64px) + 18px)}
 .clubPageDocument .contentBuilderSection:before{content:"";position:absolute;inset:0;pointer-events:none;z-index:-1;background-image:linear-gradient(90deg,rgba(13,99,200,.035) 1px,transparent 1px),linear-gradient(rgba(13,99,200,.028) 1px,transparent 1px);background-size:72px 72px;mask-image:linear-gradient(to bottom,transparent,black 22%,black 78%,transparent)}
@@ -2723,4 +2724,212 @@ html,body,button,input,select,textarea{font-synthesis:none;text-rendering:geomet
   .clubPageDocument .clubStadiumVariant-cinematic .clubStadiumInfo{width:calc(100% - 20px);margin:-44px 10px 0;padding:22px}.clubPageDocument .clubStadiumFacts{grid-template-columns:1fr}
   .clubPageDocument .clubLeadershipSection .contentBuilderInner{padding-inline:0}.clubPageDocument .clubLeadershipGrid{grid-template-columns:1fr;gap:20px}.clubPageDocument .clubLeaderCard>div:last-child{padding:24px 22px 28px}.clubPageDocument .clubLeadershipVariant-compact .clubLeaderCard{grid-template-columns:110px 1fr}.clubPageDocument .clubLeadershipVariant-compact .clubLeaderCard>div:last-child{padding:22px 20px}
   .clubPageDocument .clubTimeline article{grid-template-columns:1fr;gap:10px;padding:25px 0}.clubPageDocument .clubTimeline article:before{display:none}.clubPageDocument .clubAchievementsVariant-cards{grid-template-columns:1fr}
+}
+
+
+/* ===== FC EDINET v2.4.4 — CLUB PAGE FIX: TRUE STICKY NAV + LEADERSHIP REDESIGN ===== */
+/* Do not put overflow:hidden/auto on the club page wrapper: it breaks position:sticky. */
+.clubPageDocument{
+  --club-header-offset:0px;
+  --club-subnav-height:64px;
+  overflow-x:clip!important;
+  overflow-y:visible!important;
+}
+
+/* Persistent section navigation. It stays under a sticky global header, or at viewport top when the global header is not sticky. */
+.clubPageDocument>.clubSectionNav{
+  position:sticky!important;
+  top:var(--club-header-offset,0px)!important;
+  z-index:80!important;
+  width:100%;
+  isolation:isolate;
+  transform:translateZ(0);
+  will-change:transform;
+}
+.clubSectionNavInner{position:relative;z-index:2}
+.clubSectionNavLinks{min-width:0;flex:1}
+.clubSectionNavLinks a{line-height:1.35!important;padding-top:10px;padding-bottom:10px}
+.clubSectionNavLinks a span{line-height:1.2!important}
+.clubPageDocument .contentBuilderSection{scroll-margin-top:calc(var(--club-header-offset,0px) + var(--club-subnav-height,64px) + 24px)!important}
+
+/* Safer Cyrillic typography: no ultra-tight line boxes on real headings. */
+.clubPageDocument .sectionHeading h2,
+.clubPageDocument .clubAboutCopy h2,
+.clubPageDocument .clubHistoryContent h2{
+  line-height:1.08!important;
+  letter-spacing:-.025em!important;
+  padding-bottom:.05em;
+  text-wrap:balance;
+}
+.clubPageDocument .clubRichHeading{line-height:1.22!important;letter-spacing:-.015em!important;text-wrap:balance}
+.clubPageDocument .clubRichSubheading{line-height:1.45!important}
+.clubPageDocument .clubLeaderCard h3{line-height:1.18!important;letter-spacing:-.015em!important;text-wrap:balance}
+
+/* Leadership must remain legible regardless of the background selected in the old Page Builder. */
+.clubPageDocument .clubLeadershipSection{
+  position:relative;
+  overflow:clip;
+  background:linear-gradient(180deg,#f7fafd 0%,#edf3f9 100%)!important;
+  color:#163654!important;
+  padding-top:max(var(--content-pad-top),96px)!important;
+  padding-bottom:max(var(--content-pad-bottom),108px)!important;
+}
+.clubPageDocument .clubLeadershipSection:after{
+  content:"";
+  position:absolute;
+  width:480px;
+  height:480px;
+  right:-180px;
+  top:-120px;
+  background:url('/brand/fc-edinet-crest.png') center/contain no-repeat;
+  opacity:.025;
+  filter:grayscale(1);
+  pointer-events:none;
+}
+.clubPageDocument .clubLeadershipSection .contentBuilderInner{
+  position:relative;
+  z-index:1;
+  width:min(calc(100% - 64px),1180px);
+  padding-inline:0!important;
+}
+.clubPageDocument .clubLeadershipSection .sectionHeading{
+  margin:0 0 46px!important;
+  padding:0!important;
+}
+.clubPageDocument .clubLeadershipSection .sectionHeading h2,
+.clubPageDocument .clubLeadershipSection .clubBuilderLooseHeading h2{
+  color:#071d39!important;
+  margin-top:12px!important;
+}
+.clubPageDocument .clubLeadershipSection .eyebrow{color:#0d63c8!important}
+
+.clubPageDocument .clubLeadershipGrid{
+  gap:26px!important;
+  margin-top:0!important;
+}
+.clubPageDocument .clubLeadershipGrid-single{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  max-width:1080px;
+  margin-inline:auto!important;
+}
+.clubPageDocument .clubLeadershipGrid-single .clubLeaderCard,
+.clubPageDocument .clubLeadershipGrid-single.clubLeadershipVariant-compact .clubLeaderCard{
+  display:grid!important;
+  grid-template-columns:250px minmax(0,1fr)!important;
+  grid-template-rows:auto!important;
+  min-height:330px;
+  overflow:hidden;
+  border:1px solid #d9e4ef!important;
+  border-radius:14px!important;
+  background:#fff!important;
+  box-shadow:0 28px 75px rgba(8,38,73,.11)!important;
+}
+.clubPageDocument .clubLeadershipGrid-single .clubLeaderPhoto{
+  position:relative;
+  min-height:330px;
+  height:100%;
+  aspect-ratio:auto!important;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  overflow:hidden;
+  border-radius:0!important;
+  background:linear-gradient(150deg,#071a36 0%,#0b3f79 100%)!important;
+}
+.clubPageDocument .clubLeadershipGrid-single .clubLeaderPhoto:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at 50% 34%,rgba(255,255,255,.14),transparent 42%),linear-gradient(135deg,transparent 0 48%,rgba(255,212,41,.92) 48% 50%,transparent 50%);
+  pointer-events:none;
+}
+.clubPageDocument .clubLeadershipGrid-single .clubLeaderPhoto>img:not(.clubLeaderPlaceholderCrest){
+  width:100%;height:100%;object-fit:cover;position:absolute;inset:0;
+}
+.clubPageDocument .clubLeaderPlaceholderCrest{
+  position:relative!important;
+  inset:auto!important;
+  width:108px!important;
+  height:128px!important;
+  object-fit:contain!important;
+  opacity:.96;
+  filter:none!important;
+  z-index:1;
+}
+.clubPageDocument .clubLeadershipGrid-single .clubLeaderPhoto>span{
+  position:relative;
+  z-index:1;
+  color:#d6e5f7!important;
+  font:900 10px/1.2 Arial,Helvetica,sans-serif!important;
+  letter-spacing:.18em!important;
+}
+.clubPageDocument .clubLeadershipGrid-single .clubLeaderBody,
+.clubPageDocument .clubLeadershipGrid-single.clubLeadershipVariant-compact .clubLeaderBody{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:48px 54px 50px!important;
+  border:0!important;
+  border-left:6px solid var(--club-yellow)!important;
+  background:#fff;
+}
+.clubPageDocument .clubLeadershipGrid-single .clubLeaderBody:before{
+  content:"РУКОВОДСТВО";
+  position:absolute;
+  top:28px;
+  right:34px;
+  color:#e8eef5;
+  font:950 11px/1 Arial,Helvetica,sans-serif;
+  letter-spacing:.18em;
+}
+.clubPageDocument[data-locale="ro"] .clubLeadershipGrid-single .clubLeaderBody:before{content:"CONDUCERE"}
+.clubPageDocument .clubLeadershipGrid-single .clubLeaderRole{
+  align-self:flex-start;
+  margin:0 0 13px!important;
+  padding:7px 10px;
+  border-radius:999px;
+  background:#edf5ff;
+  color:#0d63c8!important;
+  font-size:9px!important;
+  line-height:1.2!important;
+  letter-spacing:.13em!important;
+}
+.clubPageDocument .clubLeadershipGrid-single .clubLeaderCard h3{
+  margin:0 0 20px!important;
+  color:#071d39!important;
+  font-size:clamp(30px,3.1vw,44px)!important;
+}
+.clubPageDocument .clubLeadershipGrid-single .clubLeaderCard p{
+  max-width:740px;
+  margin:0!important;
+  color:#536b84!important;
+  font-size:16px!important;
+  line-height:1.85!important;
+}
+.clubPageDocument .clubLeadershipGrid-single .clubLeaderCard:after{display:none!important}
+
+/* Multi-person fallback remains compact and consistent. */
+.clubPageDocument .clubLeadershipGrid:not(.clubLeadershipGrid-single) .clubLeaderCard{
+  border-radius:10px!important;
+  border:1px solid #dce6ef!important;
+  background:#fff!important;
+  box-shadow:0 16px 42px rgba(8,38,73,.08)!important;
+}
+.clubPageDocument .clubLeadershipGrid:not(.clubLeadershipGrid-single) .clubLeaderBody{padding:28px 28px 32px!important}
+
+@media(max-width:760px){
+  .clubPageDocument .clubLeadershipSection{padding-top:max(var(--content-pad-top),72px)!important;padding-bottom:max(var(--content-pad-bottom),78px)!important}
+  .clubPageDocument .clubLeadershipSection .contentBuilderInner{width:min(calc(100% - 32px),1180px)}
+  .clubPageDocument .clubLeadershipSection .sectionHeading{margin-bottom:30px!important}
+  .clubPageDocument .clubLeadershipGrid-single .clubLeaderCard,
+  .clubPageDocument .clubLeadershipGrid-single.clubLeadershipVariant-compact .clubLeaderCard{grid-template-columns:1fr!important;min-height:0}
+  .clubPageDocument .clubLeadershipGrid-single .clubLeaderPhoto{min-height:230px;height:230px}
+  .clubPageDocument .clubLeadershipGrid-single .clubLeaderBody,
+  .clubPageDocument .clubLeadershipGrid-single.clubLeadershipVariant-compact .clubLeaderBody{padding:34px 26px 36px!important;border-left:0!important;border-top:6px solid var(--club-yellow)!important}
+  .clubPageDocument .clubLeadershipGrid-single .clubLeaderBody:before{display:none}
+  .clubPageDocument .clubLeadershipGrid-single .clubLeaderCard p{font-size:15px!important;line-height:1.75!important}
 }
