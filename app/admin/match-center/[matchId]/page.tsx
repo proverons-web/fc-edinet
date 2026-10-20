@@ -9,7 +9,6 @@ import type {
   MatchLineupEntry,
   MatchLineupSetting,
   MatchReport,
-  MatchTeamStatistic,
   Player,
 } from "@/lib/types";
 import {
@@ -21,6 +20,7 @@ import {
   updateMatchEvent,
 } from "./actions";
 import LineupEditor from "./LineupEditor";
+import ClubSquadStatsEditor from "./ClubSquadStatsEditor";
 
 export const metadata = { title: "Матч-центр — Админ" };
 export const dynamic = "force-dynamic";
@@ -117,13 +117,8 @@ export default async function MatchCenterMatchPage({
   if (matchError || !matchData) notFound();
   const match = matchData as unknown as ClubMatch;
 
-  const [reportResult, teamStatsResult, progressResult, playersResult, eventsResult, lineupSettingsResult, lineupEntriesResult] = await Promise.all([
+  const [reportResult, progressResult, playersResult, eventsResult, lineupSettingsResult, lineupEntriesResult, playerStatsResult] = await Promise.all([
     supabase.from("match_reports").select("*").eq("match_id", matchId).maybeSingle(),
-    supabase
-      .from("match_team_statistics")
-      .select("*")
-      .eq("match_id", matchId)
-      .order("side"),
     supabase
       .from("match_center_progress")
       .select("*")
@@ -154,25 +149,42 @@ export default async function MatchCenterMatchPage({
       .order("side")
       .order("lineup_role")
       .order("slot_number"),
+    supabase
+      .from("player_match_stats")
+      .select("player_id,appearance,position,is_captain,minutes_played,goals,assists,yellow_cards,red_cards")
+      .eq("match_id", matchId),
   ]);
 
   const loadError =
-    reportResult.error || teamStatsResult.error || progressResult.error || playersResult.error || eventsResult.error || lineupSettingsResult.error || lineupEntriesResult.error;
+    reportResult.error || progressResult.error || playersResult.error || eventsResult.error || lineupSettingsResult.error || lineupEntriesResult.error || playerStatsResult.error;
   if (loadError) {
     return <MatchCenterMigrationRequired message={loadError.message} />;
   }
 
   const report = (reportResult.data as MatchReport | null) ?? null;
-  const teamStats = (teamStatsResult.data ?? []) as MatchTeamStatistic[];
   const progress = (progressResult.data as MatchCenterProgress | null) ?? null;
   const players = (playersResult.data ?? []) as Player[];
   const events = (eventsResult.data ?? []) as MatchEvent[];
   const lineupSettings = (lineupSettingsResult.data ?? []) as MatchLineupSetting[];
   const lineupEntries = (lineupEntriesResult.data ?? []) as MatchLineupEntry[];
 
-  const homeFoundation = teamStats.find((row) => row.side === "home") ?? null;
-  const awayFoundation = teamStats.find((row) => row.side === "away") ?? null;
-  const foundationReady = Boolean(homeFoundation && awayFoundation);
+  const playerStats = (playerStatsResult.data ?? []) as Array<{
+    player_id: string | number;
+    appearance: "starter" | "substitute";
+    position: string | null;
+    is_captain: boolean;
+    minutes_played: number;
+    goals: number;
+    assists: number;
+    yellow_cards: number;
+    red_cards: number;
+  }>;
+  const clubSide: "home" | "away" | null = match.home?.is_club ? "home" : match.away?.is_club ? "away" : null;
+  const opponentSide: "home" | "away" = clubSide === "home" ? "away" : "home";
+  const clubLineupEntries = clubSide ? lineupEntries.filter((row) => row.side === clubSide) : [];
+  const clubLineupSetting = clubSide ? lineupSettings.find((row) => row.side === clubSide) ?? null : null;
+  const clubLineupPlayerIds = new Set(clubLineupEntries.map((row) => row.player_id ? String(row.player_id) : "").filter(Boolean));
+  const eventPlayers = clubLineupPlayerIds.size > 0 ? players.filter((player) => clubLineupPlayerIds.has(String(player.id))) : players;
   const reportHasMetadata = Boolean(progress?.report_has_metadata);
 
   const homeGoalsFromTimeline = events.filter(
@@ -191,7 +203,7 @@ export default async function MatchCenterMatchPage({
       <section className="adminHero compactAdminHero matchCenterHero">
         <div className="container adminHeroInner">
           <div>
-            <p className="eyebrow">FC EDINEȚ • MATCH CENTER v2.3.8</p>
+            <p className="eyebrow">FC EDINEȚ • MATCH CENTER</p>
             <h1>
               {match.home?.name ?? "—"}{" "}
               <b>
@@ -224,6 +236,8 @@ export default async function MatchCenterMatchPage({
           {saved === "lineup-home" && <div className="statisticsSuccess matchCenterNotice">Состав хозяев сохранён.</div>}
           {saved === "lineup-away" && <div className="statisticsSuccess matchCenterNotice">Состав гостей сохранён.</div>}
           {saved === "lineup-imported" && <div className="statisticsSuccess matchCenterNotice">Состав FC Edineț импортирован из статистики игроков.</div>}
+          {saved === "squad-draft" && <div className="statisticsSuccess matchCenterNotice">Состав и статистика FC Edineț сохранены как черновик.</div>}
+          {saved === "squad-complete" && <div className="statisticsSuccess matchCenterNotice">Состав и статистика FC Edineț завершены. Сезонные итоги обновлены автоматически.</div>}
           {saved === "published" && <div className="statisticsSuccess matchCenterNotice">Публичный протокол матча опубликован.</div>}
           {saved === "unpublished" && <div className="matchCenterNotice practicalMutedNotice">Публичный протокол снят с публикации.</div>}
 
@@ -245,16 +259,10 @@ export default async function MatchCenterMatchPage({
               detail={report?.status === "complete" ? "Статус: готово" : "Статус: черновик"}
             />
             <ProgressCard
-              label="Игроки"
+              label="FC Edineț"
               value={stateLabel(progress?.player_stats_status ?? "empty")}
               tone={progress?.player_stats_status === "complete" ? "ready" : progress?.player_stats_status === "draft" ? "draft" : "empty"}
-              detail="Ветка v2.2"
-            />
-            <ProgressCard
-              label="Расширенные цифры"
-              value={(progress?.team_stats_filled ?? 0) > 0 ? "Есть данные" : "Необязательно"}
-              tone={(progress?.team_stats_filled ?? 0) > 0 ? "draft" : "ready"}
-              detail="xG, владение, удары и т.п. можно не заполнять"
+              detail={`${playerStats.length} игроков со статистикой`}
             />
             <ProgressCard
               label="События"
@@ -277,7 +285,7 @@ export default async function MatchCenterMatchPage({
                 <div>
                   <p className="eyebrow blue">ОСНОВА ОТЧЁТА</p>
                   <h2>Данные матча</h2>
-                  <p>Практический протокол: заполняй только то, что реально известно. Судья, посещаемость, погода и MVP необязательны.</p>
+                  <p>Сохрани основные данные матча. Судья, посещаемость, погода и MVP необязательны.</p>
                 </div>
                 <span className={`statisticsState ${reportHasMetadata ? "draft" : "empty"}`}>
                   {reportHasMetadata ? "Основа сохранена" : "Не заполнено"}
@@ -348,22 +356,28 @@ export default async function MatchCenterMatchPage({
                 )}
               </section>
 
-              <section className="statisticsPanel matchCenterRoadmap">
-                <p className="eyebrow blue">ВЕТКА v2.3</p>
-                <RoadmapStep version="v2.3.1" title="События / таймлайн ✓" />
-                <RoadmapStep version="v2.3.8" title="Составы и замены ✓" />
-                <RoadmapStep version="v2.3.8" title="Практический протокол + публичная страница ✓" />
-                <RoadmapStep version="опционально" title="Расширенные цифры, если когда-нибудь появятся" />
-              </section>
-
-              <section className="statisticsPanel">
-                <p className="eyebrow blue">СТАТИСТИКА ИГРОКОВ</p>
-                <h3>{stateLabel(progress?.player_stats_status ?? "empty")}</h3>
-                <p className="matchCenterHelp">Игроки остаются в проверенной системе v2.2 и связаны с этим же match_id.</p>
-                <Link className="rowAction" href={`/admin/statistics/${match.id}`}>Открыть игроков →</Link>
+              <section className="statisticsPanel matchCenterSeasonSyncCard">
+                <p className="eyebrow blue">СЕЗОННАЯ СТАТИСТИКА</p>
+                <h3>Считается автоматически</h3>
+                <p className="matchCenterHelp">Матчи, старты, минуты, голы, ассисты и карточки FC Edineț записываются по этому матчу и затем суммируются отдельно по сезону и соревнованию.</p>
+                <Link className="rowAction" href="/admin/statistics">Открыть сводную статистику →</Link>
               </section>
             </aside>
           </div>
+
+          {clubSide ? (
+            <ClubSquadStatsEditor
+              matchId={String(match.id)}
+              players={players}
+              entries={clubLineupEntries}
+              stats={playerStats}
+              formation={clubLineupSetting?.formation ?? null}
+              coachName={clubLineupSetting?.coach_name ?? null}
+              currentStatus={(progress?.player_stats_status ?? "empty") as "empty" | "draft" | "complete"}
+            />
+          ) : (
+            <div className="formError matchCenterNotice">Не удалось определить сторону FC Edineț в этом матче.</div>
+          )}
 
           <LineupEditor
             match={match}
@@ -371,12 +385,13 @@ export default async function MatchCenterMatchPage({
             settings={lineupSettings}
             entries={lineupEntries}
             events={events}
+            onlySide={opponentSide}
           />
 
           <section className="statisticsPanel matchEventEditor">
             <div className="statisticsPanelHead">
               <div>
-                <p className="eyebrow blue">v2.3.1 • СОБЫТИЯ МАТЧА</p>
+                <p className="eyebrow blue">СОБЫТИЯ МАТЧА</p>
                 <h2>Добавить событие</h2>
                 <p>
                   Голы, карточки, замены, пенальти, VAR и другие эпизоды. Для игрока FC Edineț выбирай футболиста из списка;
@@ -390,7 +405,7 @@ export default async function MatchCenterMatchPage({
               <input type="hidden" name="match_id" value={String(match.id)} />
               <EventFields
                 match={match}
-                players={players}
+                players={eventPlayers}
                 defaults={{ event_type: "goal", minute: 0, stoppage_minute: 0, sort_order: 0 }}
               />
               <div className="matchEventFormFooter">
@@ -444,7 +459,7 @@ export default async function MatchCenterMatchPage({
                             <form action={updateMatchEvent} className="matchEventEditForm">
                               <input type="hidden" name="match_id" value={String(match.id)} />
                               <input type="hidden" name="event_id" value={String(event.id)} />
-                              <EventFields match={match} players={players} defaults={event} compact />
+                              <EventFields match={match} players={eventPlayers} defaults={event} compact />
                               <button className="rowAction" type="submit">Сохранить изменения</button>
                             </form>
                           </details>
@@ -590,15 +605,6 @@ function TeamFoundation({
   );
 }
 
-function RoadmapStep({ version, title }: { version: string; title: string }) {
-  return (
-    <div className="matchCenterRoadmapRow">
-      <span>{version}</span>
-      <strong>{title}</strong>
-    </div>
-  );
-}
-
 function MatchCenterMigrationRequired({ message }: { message: string }) {
   return (
     <main className="adminPage matchCenterPage">
@@ -607,7 +613,7 @@ function MatchCenterMigrationRequired({ message }: { message: string }) {
           <div>
             <p className="eyebrow">FC EDINEȚ • MATCH CENTER</p>
             <h1>Нужна миграция 045</h1>
-            <p>Слой стартовых составов v2.3.8 ещё не создан в Supabase.</p>
+            <p>Не найден слой данных стартовых составов.</p>
           </div>
           <Link href="/admin/matches" className="adminBack">← Матчи</Link>
         </div>

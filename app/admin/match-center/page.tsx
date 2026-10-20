@@ -86,9 +86,9 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
       <section className="adminHero compactAdminHero">
         <div className="container adminHeroInner">
           <div>
-            <p className="eyebrow">FC EDINEȚ • MATCH CENTER v2.3.8</p>
+            <p className="eyebrow">FC EDINEȚ • MATCH CENTER</p>
             <h1>Матч-центр</h1>
-            <p>Единая точка для отчёта, событий, составов, командных цифр и связи со статистикой игроков.</p>
+            <p>Единая точка для состава, событий, статистики игроков, отчёта и публикации протокола.</p>
           </div>
           <div className="adminHeroActions">
             <Link href="/admin" className="adminBack">← Админка</Link>
@@ -109,11 +109,11 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
           <section className="statisticsPanel matchCenterIntro">
             <div className="statisticsPanelHead">
               <div>
-                <p className="eyebrow blue">v2.3.8 • ПРАКТИЧЕСКИЙ ПРОТОКОЛ</p>
+                <p className="eyebrow blue">МАТЧ-ЦЕНТР</p>
                 <h2>Матч-центр собирает матч целиком</h2>
                 <p>
-                  Внутри матча теперь есть стартовые составы и запасные для HOME/AWAY, схема, капитан и отметки реальных замен из таймлайна.
-                  Для FC Edineț состав можно импортировать из уже заполненной статистики игроков одной кнопкой.
+                  Сначала выбери состав FC Edineț и соперника, затем внеси минуты, голы, ассисты и карточки, добавь события и опубликуй протокол.
+                  Матчевая статистика FC Edineț автоматически участвует в итогах сезона и конкретного соревнования.
                 </p>
               </div>
               <span className="matchCenterVersionBadge">MATCH CENTER</span>
@@ -169,11 +169,6 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
                         tone={progress?.player_stats_status === "complete" ? "ready" : progress?.player_stats_status === "draft" ? "draft" : "empty"}
                       />
                       <WorkflowChip
-                        label="Доп. цифры"
-                        value={(progress?.team_stats_filled ?? 0) > 0 ? "есть" : "необяз."}
-                        tone={(progress?.team_stats_filled ?? 0) > 0 ? "draft" : "ready"}
-                      />
-                      <WorkflowChip
                         label="События"
                         value={String(progress?.events_count ?? 0)}
                         tone={(progress?.events_count ?? 0) > 0 ? "draft" : "empty"}
@@ -188,7 +183,7 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
                     <div className="matchCenterRowActions">
                       <Link href={`/admin/match-center/${match.id}`} className="primaryButton">Открыть матч-центр</Link>
                       {match.status === "finished" && (
-                        <Link href={`/admin/statistics/${match.id}`} className="rowAction muted">Игроки</Link>
+                        <Link href={`/admin/match-center/${match.id}#squad-stats`} className="rowAction muted">Состав и статистика</Link>
                       )}
                     </div>
                   </article>
@@ -240,7 +235,7 @@ function MatchCenterMigrationRequired({ message }: { message: string }) {
           <div>
             <p className="eyebrow">FC EDINEȚ • MATCH CENTER</p>
             <h1>Нужна миграция 045</h1>
-            <p>Код v2.3.8 уже установлен, но таблицы составов из migration 045 ещё не созданы.</p>
+            <p>Интерфейс матч-центра установлен, но таблицы составов в базе ещё не созданы.</p>
           </div>
           <Link href="/admin" className="adminBack">← Админка</Link>
         </div>

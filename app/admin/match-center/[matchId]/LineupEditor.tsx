@@ -54,21 +54,23 @@ export default function LineupEditor({
   settings,
   entries,
   events,
+  onlySide,
 }: {
   match: ClubMatch;
   players: Player[];
   settings: MatchLineupSetting[];
   entries: MatchLineupEntry[];
   events: MatchEvent[];
+  onlySide?: "home" | "away";
 }) {
   return (
     <section className="statisticsPanel matchLineupPanel" id="lineups">
       <div className="statisticsPanelHead">
         <div>
-          <p className="eyebrow blue">v2.3.7 • СОСТАВЫ</p>
-          <h2>Стартовые составы и запасные</h2>
+          <p className="eyebrow blue">СОПЕРНИК</p>
+          <h2>Состав соперника</h2>
           <p>
-            Заполни старт, скамейку, схему и капитана для обеих команд. Замены из таймлайна автоматически отмечаются рядом с игроками.
+            Для соперника достаточно вручную указать имена, номера и при необходимости схему. Пустые строки не сохраняются.
           </p>
         </div>
         <span className="matchCenterVersionBadge">
@@ -76,29 +78,33 @@ export default function LineupEditor({
         </span>
       </div>
 
-      <div className="matchLineupTeams">
-        <TeamLineup
-          side="home"
-          teamName={match.home?.name ?? "Хозяева"}
-          teamId={match.home_team_id}
-          isClub={Boolean(match.home?.is_club)}
-          players={players}
-          setting={settings.find((row) => row.side === "home") ?? null}
-          entries={entries}
-          events={events.filter((event) => String(event.team_id) === String(match.home_team_id))}
-          matchId={String(match.id)}
-        />
-        <TeamLineup
-          side="away"
-          teamName={match.away?.name ?? "Гости"}
-          teamId={match.away_team_id}
-          isClub={Boolean(match.away?.is_club)}
-          players={players}
-          setting={settings.find((row) => row.side === "away") ?? null}
-          entries={entries}
-          events={events.filter((event) => String(event.team_id) === String(match.away_team_id))}
-          matchId={String(match.id)}
-        />
+      <div className="matchLineupTeams singleOpponent">
+        {(!onlySide || onlySide === "home") && (
+          <TeamLineup
+            side="home"
+            teamName={match.home?.name ?? "Хозяева"}
+            teamId={match.home_team_id}
+            isClub={Boolean(match.home?.is_club)}
+            players={players}
+            setting={settings.find((row) => row.side === "home") ?? null}
+            entries={entries}
+            events={events.filter((event) => String(event.team_id) === String(match.home_team_id))}
+            matchId={String(match.id)}
+          />
+        )}
+        {(!onlySide || onlySide === "away") && (
+          <TeamLineup
+            side="away"
+            teamName={match.away?.name ?? "Гости"}
+            teamId={match.away_team_id}
+            isClub={Boolean(match.away?.is_club)}
+            players={players}
+            setting={settings.find((row) => row.side === "away") ?? null}
+            entries={entries}
+            events={events.filter((event) => String(event.team_id) === String(match.away_team_id))}
+            matchId={String(match.id)}
+          />
+        )}
       </div>
     </section>
   );

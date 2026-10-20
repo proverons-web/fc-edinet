@@ -1,0 +1,19 @@
+FC EDINEȚ v2.9.0 — Match Center 2.0
+
+Main changes:
+- unified FC Edineț lineup + player statistics editor inside Match Center
+- starter and substitute selection from the existing players database
+- opponent lineup remains fast manual entry
+- minutes, goals, assists, yellow cards and red cards are entered in the same squad table
+- one save updates both match_lineup_entries and player_match_stats
+- existing season/competition aggregation continues through player_season_statistics
+- legacy per-match statistics entry route redirects to Match Center
+- removed branch/version roadmap blocks and advanced-metrics prompts from Match Center UI
+- no new SQL migration required
+
+Deployment:
+1. Extract into a fresh folder.
+2. Copy only .env.local from the previous working version.
+3. Run DEPLOY_FC_EDINET.bat.
+4. Verify /api/version -> 2.9.0.
+5. Open Admin -> Match Center and test one finished match as draft before completing.

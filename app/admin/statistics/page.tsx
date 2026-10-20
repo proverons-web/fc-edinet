@@ -486,7 +486,7 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
                       <small>{issue.issue_type}</small>
                     </div>
                     {issue.match_id != null && (
-                      <Link href={`/admin/statistics/${issue.match_id}`} className="rowAction muted">Открыть матч</Link>
+                      <Link href={`/admin/match-center/${issue.match_id}#squad-stats`} className="rowAction muted">Открыть матч</Link>
                     )}
                   </article>
                 ))}
@@ -783,8 +783,8 @@ export default async function AdminStatisticsPage({ searchParams }: PageProps) {
                       </div>
                       <div className="statisticsMatchActions">
                         <Link href={`/admin/match-center/${match.id}`} className="rowAction muted">Матч-центр</Link>
-                        <Link href={`/admin/statistics/${match.id}`} className="rowAction statisticsEntryLink">
-                          {state === "complete" ? "Редактировать" : state === "draft" ? "Продолжить" : "Ввести статистику"}
+                        <Link href={`/admin/match-center/${match.id}#squad-stats`} className="rowAction statisticsEntryLink">
+                          {state === "complete" ? "Открыть в матч-центре" : state === "draft" ? "Продолжить в матч-центре" : "Заполнить в матч-центре"}
                         </Link>
                       </div>
                     </article>
