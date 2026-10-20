@@ -1,0 +1,23 @@
+FC EDINEȚ v2.9.1 — Match Center 2.1
+
+Changes:
+- lineups moved to the top of Match Center; report foundation follows below
+- HOME / AWAY lineups are displayed as two columns on wide screens
+- FC Edineț player dropdown sorted by surname
+- selecting a registered player auto-fills the saved club position
+- manual full-name entry supported for players not present in the club database
+- position-based row accents for goalkeeper / defender / midfielder / forward
+- player minutes are calculated from starting lineup + substitution events
+- goals, assists, own goals, penalties and cards are synchronized from match events into player_match_stats
+- event create/update/delete re-syncs player match statistics automatically
+- saved manual opponent lineup players become selectable in match events
+- event participant controls now use saved lineups for both teams
+- timeline is narrower and visually separates FC Edineț from the opponent
+
+No SQL migration required.
+
+Deploy:
+1. Extract to a fresh folder.
+2. Copy only .env.local from the previous working version.
+3. Run DEPLOY_FC_EDINET.bat.
+4. Verify /api/version -> 2.9.1.

@@ -18,7 +18,7 @@ type ExistingStat = {
 
 type RowState = {
   playerId: string;
-  played: boolean;
+  manualName: string;
   position: string;
   captain: boolean;
 };
@@ -46,6 +46,8 @@ export default function ClubSquadStatsEditor({
   formation,
   coachName,
   currentStatus,
+  teamName,
+  sideLabel,
 }: {
   matchId: string;
   players: Player[];
@@ -54,7 +56,18 @@ export default function ClubSquadStatsEditor({
   formation: string | null;
   coachName: string | null;
   currentStatus: "empty" | "draft" | "complete";
+  teamName: string;
+  sideLabel: "ХОЗЯЕВА" | "ГОСТИ";
 }) {
+  const sortedPlayers = useMemo(() => {
+    const collator = new Intl.Collator("ru", { sensitivity: "base" });
+    return [...players].sort((a, b) => {
+      const last = collator.compare(a.last_name || "", b.last_name || "");
+      if (last !== 0) return last;
+      return collator.compare(a.first_name || "", b.first_name || "");
+    });
+  }, [players]);
+
   const statByPlayer = useMemo(() => new Map(stats.map((row) => [String(row.player_id), row])), [stats]);
   const starterMap = useMemo(() => bySlot(entries, "starter"), [entries]);
   const substituteMap = useMemo(() => bySlot(entries, "substitute"), [entries]);
@@ -70,7 +83,7 @@ export default function ClubSquadStatsEditor({
         const stat = playerId ? statByPlayer.get(playerId) : undefined;
         next[`${role}-${slot}`] = {
           playerId,
-          played: role === "starter" ? Boolean(playerId) : Boolean(stat),
+          manualName: playerId ? "" : entry?.player_name ?? "",
           position: stat?.position || entry?.position || "",
           captain: Boolean(stat?.is_captain ?? entry?.is_captain),
         };
@@ -80,9 +93,8 @@ export default function ClubSquadStatsEditor({
   });
 
   const selectedIds = new Set(Object.values(state).map((row) => row.playerId).filter(Boolean));
-  const startersCount = Object.entries(state).filter(([key, row]) => key.startsWith("starter-") && row.playerId).length;
-  const benchCount = Object.entries(state).filter(([key, row]) => key.startsWith("substitute-") && row.playerId).length;
-  const playedSubs = Object.entries(state).filter(([key, row]) => key.startsWith("substitute-") && row.playerId && row.played).length;
+  const startersCount = Object.entries(state).filter(([key, row]) => key.startsWith("starter-") && (row.playerId || row.manualName.trim())).length;
+  const benchCount = Object.entries(state).filter(([key, row]) => key.startsWith("substitute-") && (row.playerId || row.manualName.trim())).length;
 
   function patch(key: string, changes: Partial<RowState>) {
     setState((current) => {
@@ -91,33 +103,31 @@ export default function ClubSquadStatsEditor({
         for (const id of Object.keys(next)) next[id] = { ...next[id], captain: false };
       }
       const merged = { ...next[key], ...changes };
-      if (!merged.playerId) {
-        merged.played = false;
+      if (!merged.playerId && !merged.manualName.trim()) {
         merged.captain = false;
         merged.position = "";
       }
-      if (key.startsWith("starter-") && merged.playerId) merged.played = true;
       next[key] = merged;
       return next;
     });
   }
 
   return (
-    <section className="statisticsPanel matchCenterUnifiedSquad" id="squad-stats">
+    <section className="statisticsPanel matchCenterUnifiedSquad matchCenterTeamColumn club" id="squad-stats">
       <div className="statisticsPanelHead matchCenterSectionHead">
         <div>
-          <p className="eyebrow blue">FC EDINEȚ</p>
-          <h2>Состав и статистика игроков</h2>
-          <p>Один экран для стартового состава, запасных и сезонной статистики. После сохранения цифры автоматически участвуют в статистике сезона и соревнования.</p>
+          <p className="eyebrow blue">{sideLabel} • FC EDINEȚ</p>
+          <h2>{teamName}</h2>
+          <p>Выбери состав. Позиция подставится из карточки игрока. Минуты, голы, ассисты и карточки рассчитываются из событий матча.</p>
         </div>
         <span className={`statisticsState ${currentStatus}`}>{currentStatus === "complete" ? "Готово" : currentStatus === "draft" ? "Черновик" : "Не заполнено"}</span>
       </div>
 
       <form action={saveClubSquadAndStats}>
         <input type="hidden" name="match_id" value={matchId} />
-        <div className="matchCenterSquadMeta">
+        <div className="matchCenterSquadMeta compact">
           <label className="fieldGroup">
-            <span>Схема FC Edineț</span>
+            <span>Схема</span>
             <input name="formation" defaultValue={formation ?? ""} placeholder="4-3-3" maxLength={40} />
           </label>
           <label className="fieldGroup">
@@ -127,15 +137,14 @@ export default function ClubSquadStatsEditor({
           <div className="matchCenterSquadSummary">
             <span><b>{startersCount}</b>/11 старт</span>
             <span><b>{benchCount}</b> запасных</span>
-            <span><b>{playedSubs}</b> вышли</span>
           </div>
         </div>
 
-        <SquadTable
+        <SquadList
           title="Стартовый состав"
           role="starter"
           slots={11}
-          players={players}
+          players={sortedPlayers}
           entries={starterMap}
           statByPlayer={statByPlayer}
           state={state}
@@ -146,13 +155,13 @@ export default function ClubSquadStatsEditor({
         <details className="matchCenterBenchDetails" open={benchCount > 0}>
           <summary>
             <span>Запасные</span>
-            <small>{benchCount} выбрано • {playedSubs} вышли на поле</small>
+            <small>{benchCount} выбрано</small>
           </summary>
-          <SquadTable
+          <SquadList
             title=""
             role="substitute"
             slots={12}
-            players={players}
+            players={sortedPlayers}
             entries={substituteMap}
             statByPlayer={statByPlayer}
             state={state}
@@ -161,14 +170,14 @@ export default function ClubSquadStatsEditor({
           />
         </details>
 
-        <div className="matchCenterUnifiedSaveBar">
+        <div className="matchCenterUnifiedSaveBar compact">
           <div>
-            <strong>Сохраняется сразу в состав и статистику игроков</strong>
-            <span>Матчи, старты, минуты, голы, ассисты и карточки затем агрегируются по сезону и соревнованию.</span>
+            <strong>Статистика считается из событий</strong>
+            <span>Замена задаёт минуты, гол/ассист и карточки попадают в сезон автоматически.</span>
           </div>
           <div>
-            <button className="rowAction muted" type="submit" name="intent" value="draft">Сохранить черновик</button>
-            <button className="primaryButton" type="submit" name="intent" value="complete">Сохранить и завершить</button>
+            <button className="rowAction muted" type="submit" name="intent" value="draft">Сохранить</button>
+            <button className="primaryButton" type="submit" name="intent" value="complete">Завершить</button>
           </div>
         </div>
       </form>
@@ -176,7 +185,7 @@ export default function ClubSquadStatsEditor({
   );
 }
 
-function SquadTable({
+function SquadList({
   title,
   role,
   slots,
@@ -198,56 +207,78 @@ function SquadTable({
   patch: (key: string, changes: Partial<RowState>) => void;
 }) {
   return (
-    <div className="matchCenterSquadTableWrap">
+    <div className="matchCenterSquadTableWrap compact">
       {title && <h3>{title}</h3>}
-      <div className="matchCenterSquadTable">
-        <div className={`matchCenterSquadTableHead ${role}`} aria-hidden="true">
-          <span>#</span><span>Игрок</span><span>Поз.</span>{role === "substitute" && <span>Играл</span>}<span>Мин</span><span>Г</span><span>А</span><span>ЖК</span><span>КК</span><span>Кап.</span>
-        </div>
+      <div className="matchCenterSquadList">
         {Array.from({ length: slots }, (_, index) => index + 1).map((slot) => {
           const key = `${role}-${slot}`;
           const local = state[key];
           const entry = entries.get(slot);
           const stat = local?.playerId ? statByPlayer.get(local.playerId) : undefined;
           const player = local?.playerId ? players.find((item) => String(item.id) === local.playerId) : undefined;
-          const disabledStats = !local?.playerId || (role === "substitute" && !local.played);
+          const hasPlayer = Boolean(local?.playerId || local?.manualName.trim());
+          const positionClass = local?.position ? `position-${local.position}` : "position-empty";
           return (
-            <div className={`matchCenterSquadRow ${role} ${local?.playerId ? "filled" : "empty"}`} key={key}>
+            <div className={`matchCenterSquadCompactRow ${role} ${hasPlayer ? "filled" : "empty"} ${positionClass}`} key={key}>
               <span className="matchCenterSquadSlot">{slot}</span>
+              <div className="matchCenterPlayerPick">
+                <select
+                  name={`${role}_${slot}_player_id`}
+                  value={local?.playerId ?? ""}
+                  onChange={(event) => {
+                    const selected = players.find((item) => String(item.id) === event.target.value);
+                    patch(key, {
+                      playerId: event.target.value,
+                      manualName: event.target.value ? "" : local?.manualName ?? "",
+                      position: selected?.position ?? (event.target.value ? "" : local?.position ?? ""),
+                    });
+                  }}
+                >
+                  <option value="">— выбрать по фамилии —</option>
+                  {players.map((option) => {
+                    const id = String(option.id);
+                    const usedElsewhere = selectedIds.has(id) && id !== local?.playerId;
+                    return (
+                      <option value={id} disabled={usedElsewhere} key={id}>
+                        {option.last_name} {option.first_name}{option.shirt_number != null ? ` · #${option.shirt_number}` : ""}{!option.is_active ? " · архив" : ""}
+                      </option>
+                    );
+                  })}
+                </select>
+                <input
+                  name={`${role}_${slot}_player_name`}
+                  value={local?.manualName ?? ""}
+                  disabled={Boolean(local?.playerId)}
+                  onChange={(event) => patch(key, { manualName: event.target.value })}
+                  placeholder="или ввести ФИО вручную"
+                  maxLength={120}
+                />
+              </div>
               <select
-                name={`${role}_${slot}_player_id`}
-                value={local?.playerId ?? ""}
-                onChange={(event) => {
-                  const selected = players.find((item) => String(item.id) === event.target.value);
-                  patch(key, { playerId: event.target.value, position: selected?.position ?? "", played: role === "starter" ? Boolean(event.target.value) : false });
-                }}
+                className="matchCenterCompactPosition"
+                name={`${role}_${slot}_position`}
+                value={local?.position ?? ""}
+                disabled={!hasPlayer}
+                onChange={(event) => patch(key, { position: event.target.value })}
               >
-                <option value="">— выбрать —</option>
-                {players.map((option) => {
-                  const id = String(option.id);
-                  const usedElsewhere = selectedIds.has(id) && id !== local?.playerId;
-                  return <option value={id} disabled={usedElsewhere} key={id}>{option.shirt_number != null ? `#${option.shirt_number} ` : ""}{option.first_name} {option.last_name}{!option.is_active ? " · архив" : ""}</option>;
-                })}
-              </select>
-              <select name={`${role}_${slot}_position`} value={local?.position ?? ""} disabled={!local?.playerId} onChange={(event) => patch(key, { position: event.target.value })}>
-                <option value="">—</option>
+                <option value="">Позиция</option>
                 {POSITION_OPTIONS.map(([value, label]) => <option value={value} key={value}>{label}</option>)}
               </select>
-              {role === "substitute" && (
-                <label className="matchCenterPlayedToggle" title="Игрок вышел на поле">
-                  <input type="checkbox" name={`${role}_${slot}_played`} checked={Boolean(local?.played)} disabled={!local?.playerId} onChange={(event) => patch(key, { played: event.target.checked })} />
-                  <span>{local?.played ? "Да" : "Нет"}</span>
-                </label>
-              )}
-              <CompactNumber name={`${role}_${slot}_minutes`} value={stat?.minutes_played ?? (role === "starter" && local?.playerId ? 90 : 0)} max={130} disabled={disabledStats} />
-              <CompactNumber name={`${role}_${slot}_goals`} value={stat?.goals ?? 0} max={20} disabled={disabledStats} />
-              <CompactNumber name={`${role}_${slot}_assists`} value={stat?.assists ?? 0} max={20} disabled={disabledStats} />
-              <CompactNumber name={`${role}_${slot}_yellow`} value={stat?.yellow_cards ?? 0} max={2} disabled={disabledStats} />
-              <CompactNumber name={`${role}_${slot}_red`} value={stat?.red_cards ?? 0} max={1} disabled={disabledStats} />
               <label className="matchCenterCaptainToggle" title="Капитан">
-                <input type="checkbox" name={`${role}_${slot}_captain`} checked={Boolean(local?.captain)} disabled={!local?.playerId} onChange={(event) => patch(key, { captain: event.target.checked })} />
+                <input type="checkbox" name={`${role}_${slot}_captain`} checked={Boolean(local?.captain)} disabled={!hasPlayer} onChange={(event) => patch(key, { captain: event.target.checked })} />
                 <span>C</span>
               </label>
+              <div className="matchCenterAutoStats" aria-label="Автоматическая статистика">
+                {local?.playerId && stat ? (
+                  <>
+                    <span title="Минуты">{stat.minutes_played}′</span>
+                    {stat.goals > 0 && <span title="Голы">⚽ {stat.goals}</span>}
+                    {stat.assists > 0 && <span title="Ассисты">A {stat.assists}</span>}
+                    {stat.yellow_cards > 0 && <span className="yellow" title="Жёлтые карточки">ЖК {stat.yellow_cards}</span>}
+                    {stat.red_cards > 0 && <span className="red" title="Красные карточки">КК {stat.red_cards}</span>}
+                  </>
+                ) : hasPlayer ? <span className="muted">из событий</span> : null}
+              </div>
               <input type="hidden" name={`${role}_${slot}_shirt_number`} value={player?.shirt_number ?? entry?.shirt_number ?? ""} />
             </div>
           );
@@ -255,8 +286,4 @@ function SquadTable({
       </div>
     </div>
   );
-}
-
-function CompactNumber({ name, value, max, disabled }: { name: string; value: number; max: number; disabled: boolean }) {
-  return <input className="matchCenterStatInput" name={name} type="number" min={0} max={max} step={1} defaultValue={value} disabled={disabled} />;
 }

@@ -21,6 +21,7 @@ import {
 } from "./actions";
 import LineupEditor from "./LineupEditor";
 import ClubSquadStatsEditor from "./ClubSquadStatsEditor";
+import EventFields, { type EventParticipantOption } from "./EventFields";
 
 export const metadata = { title: "Матч-центр — Админ" };
 export const dynamic = "force-dynamic";
@@ -183,8 +184,14 @@ export default async function MatchCenterMatchPage({
   const opponentSide: "home" | "away" = clubSide === "home" ? "away" : "home";
   const clubLineupEntries = clubSide ? lineupEntries.filter((row) => row.side === clubSide) : [];
   const clubLineupSetting = clubSide ? lineupSettings.find((row) => row.side === clubSide) ?? null : null;
-  const clubLineupPlayerIds = new Set(clubLineupEntries.map((row) => row.player_id ? String(row.player_id) : "").filter(Boolean));
-  const eventPlayers = clubLineupPlayerIds.size > 0 ? players.filter((player) => clubLineupPlayerIds.has(String(player.id))) : players;
+  const eventParticipants: EventParticipantOption[] = lineupEntries
+    .filter((entry) => Boolean(entry.player_name))
+    .map((entry) => ({
+      teamId: String(entry.team_id),
+      ref: entry.player_id ? `db:${entry.player_id}` : `manual:${entry.player_name}`,
+      label: `${entry.shirt_number != null ? `#${entry.shirt_number} · ` : ""}${entry.player_name}${entry.lineup_role === "substitute" ? " · запас" : ""}`,
+    }))
+    .filter((item, index, all) => all.findIndex((candidate) => candidate.teamId === item.teamId && candidate.ref === item.ref) === index);
   const reportHasMetadata = Boolean(progress?.report_has_metadata);
 
   const homeGoalsFromTimeline = events.filter(
@@ -278,6 +285,51 @@ export default async function MatchCenterMatchPage({
             />
           </section>
 
+          <section className="matchCenterLineupsStage" id="lineups">
+            <div className="statisticsPanelHead matchCenterLineupsStageHead">
+              <div>
+                <p className="eyebrow blue">СОСТАВЫ</p>
+                <h2>Хозяева и гости</h2>
+                <p>Сначала сохрани оба состава. После этого все сохранённые игроки — в том числе введённые вручную — доступны в событиях матча.</p>
+              </div>
+            </div>
+            <div className="matchCenterLineupsGrid">
+              {clubSide === "home" ? (
+                <>
+                  <ClubSquadStatsEditor
+                    matchId={String(match.id)}
+                    players={players}
+                    entries={clubLineupEntries}
+                    stats={playerStats}
+                    formation={clubLineupSetting?.formation ?? null}
+                    coachName={clubLineupSetting?.coach_name ?? null}
+                    currentStatus={(progress?.player_stats_status ?? "empty") as "empty" | "draft" | "complete"}
+                    teamName={match.home?.name ?? "FC Edineț"}
+                    sideLabel="ХОЗЯЕВА"
+                  />
+                  <LineupEditor match={match} players={players} settings={lineupSettings} entries={lineupEntries} events={events} onlySide="away" />
+                </>
+              ) : clubSide === "away" ? (
+                <>
+                  <LineupEditor match={match} players={players} settings={lineupSettings} entries={lineupEntries} events={events} onlySide="home" />
+                  <ClubSquadStatsEditor
+                    matchId={String(match.id)}
+                    players={players}
+                    entries={clubLineupEntries}
+                    stats={playerStats}
+                    formation={clubLineupSetting?.formation ?? null}
+                    coachName={clubLineupSetting?.coach_name ?? null}
+                    currentStatus={(progress?.player_stats_status ?? "empty") as "empty" | "draft" | "complete"}
+                    teamName={match.away?.name ?? "FC Edineț"}
+                    sideLabel="ГОСТИ"
+                  />
+                </>
+              ) : (
+                <div className="formError matchCenterNotice">Не удалось определить сторону FC Edineț в этом матче.</div>
+              )}
+            </div>
+          </section>
+
           <div className="matchCenterLayout">
             <form action={saveMatchReportFoundation} className="statisticsPanel matchCenterForm">
               <input type="hidden" name="match_id" value={String(match.id)} />
@@ -365,37 +417,14 @@ export default async function MatchCenterMatchPage({
             </aside>
           </div>
 
-          {clubSide ? (
-            <ClubSquadStatsEditor
-              matchId={String(match.id)}
-              players={players}
-              entries={clubLineupEntries}
-              stats={playerStats}
-              formation={clubLineupSetting?.formation ?? null}
-              coachName={clubLineupSetting?.coach_name ?? null}
-              currentStatus={(progress?.player_stats_status ?? "empty") as "empty" | "draft" | "complete"}
-            />
-          ) : (
-            <div className="formError matchCenterNotice">Не удалось определить сторону FC Edineț в этом матче.</div>
-          )}
-
-          <LineupEditor
-            match={match}
-            players={players}
-            settings={lineupSettings}
-            entries={lineupEntries}
-            events={events}
-            onlySide={opponentSide}
-          />
-
           <section className="statisticsPanel matchEventEditor">
             <div className="statisticsPanelHead">
               <div>
                 <p className="eyebrow blue">СОБЫТИЯ МАТЧА</p>
                 <h2>Добавить событие</h2>
                 <p>
-                  Голы, карточки, замены, пенальти, VAR и другие эпизоды. Для игрока FC Edineț выбирай футболиста из списка;
-                  для соперника введи имя вручную.
+                  Голы, карточки, замены и другие эпизоды. Игроки выбираются из сохранённых составов обеих команд.
+                  Замены автоматически пересчитывают игровое время, а голы и карточки — статистику сезона.
                 </p>
               </div>
               <span className="matchCenterVersionBadge">{events.length} событий</span>
@@ -404,13 +433,16 @@ export default async function MatchCenterMatchPage({
             <form action={createMatchEvent} className="matchEventForm">
               <input type="hidden" name="match_id" value={String(match.id)} />
               <EventFields
-                match={match}
-                players={eventPlayers}
+                homeTeamId={String(match.home_team_id)}
+                awayTeamId={String(match.away_team_id)}
+                homeTeamName={match.home?.name ?? "Хозяева"}
+                awayTeamName={match.away?.name ?? "Гости"}
+                participants={eventParticipants}
                 defaults={{ event_type: "goal", minute: 0, stoppage_minute: 0, sort_order: 0 }}
               />
               <div className="matchEventFormFooter">
                 <p>
-                  Для автогола в поле «Команда» выбирай команду, <b>которой засчитан гол</b>, а имя автора автогола введи в поле игрока.
+                  Для автогола в поле «Команда» выбирай команду, <b>которой засчитан гол</b>. Для обычного гола вторым игроком можно указать ассистента.
                 </p>
                 <button className="primaryButton" type="submit">+ Добавить событие</button>
               </div>
@@ -437,9 +469,10 @@ export default async function MatchCenterMatchPage({
               <div className="matchTimeline">
                 {events.map((event) => {
                   const isHome = String(event.team_id) === String(match.home_team_id);
+                  const isClubEvent = clubSide === "home" ? isHome : clubSide === "away" ? !isHome : false;
                   const teamName = isHome ? match.home?.name : match.away?.name;
                   return (
-                    <article className={`matchTimelineEvent ${isHome ? "home" : "away"}`} key={event.id}>
+                    <article className={`matchTimelineEvent ${isHome ? "home" : "away"} ${isClubEvent ? "club-event" : "opponent-event"}`} key={event.id}>
                       <div className="matchTimelineMinute">{eventMinute(event)}</div>
                       <div className="matchTimelineRail"><span>{EVENT_ICONS[event.event_type]}</span></div>
                       <div className="matchTimelineCard">
@@ -459,7 +492,15 @@ export default async function MatchCenterMatchPage({
                             <form action={updateMatchEvent} className="matchEventEditForm">
                               <input type="hidden" name="match_id" value={String(match.id)} />
                               <input type="hidden" name="event_id" value={String(event.id)} />
-                              <EventFields match={match} players={eventPlayers} defaults={event} compact />
+                              <EventFields
+                                homeTeamId={String(match.home_team_id)}
+                                awayTeamId={String(match.away_team_id)}
+                                homeTeamName={match.home?.name ?? "Хозяева"}
+                                awayTeamName={match.away?.name ?? "Гости"}
+                                participants={eventParticipants}
+                                defaults={event}
+                                compact
+                              />
                               <button className="rowAction" type="submit">Сохранить изменения</button>
                             </form>
                           </details>
@@ -479,82 +520,6 @@ export default async function MatchCenterMatchPage({
         </div>
       </section>
     </main>
-  );
-}
-
-function EventFields({
-  match,
-  players,
-  defaults,
-  compact = false,
-}: {
-  match: ClubMatch;
-  players: Player[];
-  defaults: Partial<MatchEvent> & { event_type?: MatchEventType; minute?: number; stoppage_minute?: number; sort_order?: number };
-  compact?: boolean;
-}) {
-  return (
-    <div className={`matchEventFields ${compact ? "compact" : ""}`}>
-      <label className="fieldGroup">
-        <span>Тип события</span>
-        <select name="event_type" defaultValue={defaults.event_type ?? "goal"}>
-          {Object.entries(EVENT_LABELS).map(([value, label]) => <option value={value} key={value}>{label}</option>)}
-        </select>
-      </label>
-      <label className="fieldGroup">
-        <span>Команда</span>
-        <select name="team_id" defaultValue={defaults.team_id != null ? String(defaults.team_id) : String(match.home_team_id)}>
-          <option value={String(match.home_team_id)}>HOME · {match.home?.name ?? "Хозяева"}</option>
-          <option value={String(match.away_team_id)}>AWAY · {match.away?.name ?? "Гости"}</option>
-        </select>
-      </label>
-      <label className="fieldGroup">
-        <span>Минута</span>
-        <input name="minute" type="number" min={0} max={130} step={1} defaultValue={defaults.minute ?? 0} />
-      </label>
-      <label className="fieldGroup">
-        <span>Добавленное время</span>
-        <input name="stoppage_minute" type="number" min={0} max={30} step={1} defaultValue={defaults.stoppage_minute ?? 0} placeholder="0" />
-      </label>
-      <label className="fieldGroup">
-        <span>Игрок FC Edineț</span>
-        <select name="player_id" defaultValue={defaults.player_id ?? ""}>
-          <option value="">— не выбирать —</option>
-          {players.map((player) => (
-            <option value={String(player.id)} key={player.id}>
-              {player.shirt_number != null ? `#${player.shirt_number} ` : ""}{player.first_name} {player.last_name}{!player.is_active ? " · архив" : ""}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="fieldGroup">
-        <span>Или имя игрока вручную</span>
-        <input name="player_name" maxLength={120} defaultValue={defaults.player_id ? "" : defaults.player_name ?? ""} placeholder="Игрок соперника" />
-      </label>
-      <label className="fieldGroup">
-        <span>Второй игрок FC Edineț</span>
-        <select name="related_player_id" defaultValue={defaults.related_player_id ?? ""}>
-          <option value="">— для замены —</option>
-          {players.map((player) => (
-            <option value={String(player.id)} key={player.id}>
-              {player.shirt_number != null ? `#${player.shirt_number} ` : ""}{player.first_name} {player.last_name}{!player.is_active ? " · архив" : ""}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="fieldGroup">
-        <span>Или второе имя вручную</span>
-        <input name="related_player_name" maxLength={120} defaultValue={defaults.related_player_id ? "" : defaults.related_player_name ?? ""} placeholder="Кто вышел на поле" />
-      </label>
-      <label className="fieldGroup matchEventDescription">
-        <span>Комментарий</span>
-        <input name="description" maxLength={500} defaultValue={defaults.description ?? ""} placeholder="Необязательно" />
-      </label>
-      <label className="fieldGroup matchEventSortOrder">
-        <span>Порядок на той же минуте</span>
-        <input name="sort_order" type="number" min={-1000} max={1000} step={1} defaultValue={defaults.sort_order ?? 0} />
-      </label>
-    </div>
   );
 }
 

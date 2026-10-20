@@ -129,35 +129,46 @@ async function buildEventPayload(
     matchId,
   );
 
-  const playerId = text(formData, "player_id") || null;
-  const manualPlayerName = nullableText(formData, "player_name", 120);
-  const relatedPlayerId = text(formData, "related_player_id") || null;
-  const manualRelatedName = nullableText(formData, "related_player_name", 120);
+  function parseParticipantRef(value: string) {
+    if (!value) return { playerId: null as string | null, manualName: null as string | null };
+    if (value.startsWith("db:")) return { playerId: value.slice(3) || null, manualName: null };
+    if (value.startsWith("manual:")) return { playerId: null, manualName: value.slice(7).trim().slice(0, 120) || null };
+    return { playerId: value, manualName: null };
+  }
+
+  const primaryRef = text(formData, "player_ref");
+  const relatedRef = text(formData, "related_player_ref");
+  const primary = primaryRef
+    ? parseParticipantRef(primaryRef)
+    : { playerId: text(formData, "player_id") || null, manualName: nullableText(formData, "player_name", 120) };
+  const related = relatedRef
+    ? parseParticipantRef(relatedRef)
+    : { playerId: text(formData, "related_player_id") || null, manualName: nullableText(formData, "related_player_name", 120) };
 
   const player = await resolvePlayerName(
     supabase,
-    playerId,
-    manualPlayerName,
+    primary.playerId,
+    primary.manualName,
     matchId,
     "Основной игрок",
   );
   const relatedPlayer = await resolvePlayerName(
     supabase,
-    relatedPlayerId,
-    manualRelatedName,
+    related.playerId,
+    related.manualName,
     matchId,
     "Связанный игрок",
   );
 
   if (PLAYER_REQUIRED.has(eventType) && !player.name) {
     go(matchId, {
-      error: "Для этого события укажи игрока: выбери футболиста FC Edineț или введи имя вручную.",
+      error: "Для этого события выбери игрока из сохранённого состава команды.",
     });
   }
 
   if (eventType === "substitution" && !relatedPlayer.name) {
     go(matchId, {
-      error: "Для замены укажи второго игрока: кто вышел на поле.",
+      error: "Для замены выбери игрока, который вышел на поле.",
     });
   }
 
@@ -360,7 +371,10 @@ export async function createMatchEvent(formData: FormData) {
     go(matchId, { error: `Не удалось добавить событие: ${error.message}` });
   }
 
+  await syncClubPlayerStatsFromEvents(supabase, userId, matchId);
   revalidateMatchCenter(matchId);
+  revalidatePath("/admin/statistics");
+  revalidatePath("/statistics");
   go(matchId, { saved: "event" });
 }
 
@@ -392,12 +406,15 @@ export async function updateMatchEvent(formData: FormData) {
     go(matchId, { error: `Не удалось изменить событие: ${error.message}` });
   }
 
+  await syncClubPlayerStatsFromEvents(supabase, userId, matchId);
   revalidateMatchCenter(matchId);
+  revalidatePath("/admin/statistics");
+  revalidatePath("/statistics");
   go(matchId, { saved: "event-updated" });
 }
 
 export async function deleteMatchEvent(formData: FormData) {
-  const { supabase } = await requireEditor();
+  const { supabase, userId } = await requireEditor();
   const matchId = text(formData, "match_id");
   const eventId = text(formData, "event_id");
   if (!/^\d+$/.test(matchId) || !/^\d+$/.test(eventId)) redirect("/admin/match-center");
@@ -412,7 +429,10 @@ export async function deleteMatchEvent(formData: FormData) {
     go(matchId, { error: `Не удалось удалить событие: ${error.message}` });
   }
 
+  await syncClubPlayerStatsFromEvents(supabase, userId, matchId);
   revalidateMatchCenter(matchId);
+  revalidatePath("/admin/statistics");
+  revalidatePath("/statistics");
   go(matchId, { saved: "event-deleted" });
 }
 
@@ -650,6 +670,200 @@ export async function importClubLineupFromPlayerStats(formData: FormData) {
   go(matchId, { saved: "lineup-imported" });
 }
 
+
+async function syncClubPlayerStatsFromEvents(
+  supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"],
+  userId: string,
+  matchId: string,
+) {
+  const { data: match, error: matchError } = await supabase
+    .from("matches")
+    .select(`
+      id,home_team_id,away_team_id,
+      home:teams!matches_home_team_id_fkey(id,is_club),
+      away:teams!matches_away_team_id_fkey(id,is_club)
+    `)
+    .eq("id", matchId)
+    .maybeSingle();
+  if (matchError || !match) return;
+
+  const home = Array.isArray(match.home) ? match.home[0] : match.home;
+  const away = Array.isArray(match.away) ? match.away[0] : match.away;
+  const clubSide: "home" | "away" | null = home?.is_club ? "home" : away?.is_club ? "away" : null;
+  if (!clubSide) return;
+  const clubTeamId = String(clubSide === "home" ? match.home_team_id : match.away_team_id);
+
+  const [lineupResult, eventsResult, existingResult] = await Promise.all([
+    supabase
+      .from("match_lineup_entries")
+      .select("player_id,lineup_role,position,is_captain")
+      .eq("match_id", matchId)
+      .eq("side", clubSide),
+    supabase
+      .from("match_events")
+      .select("player_id,related_player_id,event_type,minute,stoppage_minute,sort_order")
+      .eq("match_id", matchId)
+      .eq("team_id", clubTeamId)
+      .order("minute", { ascending: true })
+      .order("stoppage_minute", { ascending: true })
+      .order("sort_order", { ascending: true }),
+    supabase.from("player_match_stats").select("*").eq("match_id", matchId),
+  ]);
+
+  if (lineupResult.error || eventsResult.error || existingResult.error) return;
+
+  const lineup = (lineupResult.data ?? []).filter((row) => row.player_id);
+  const events = eventsResult.data ?? [];
+  const existingByPlayer = new Map(
+    (existingResult.data ?? []).map((row) => [String(row.player_id), row as Record<string, unknown>]),
+  );
+
+  type Runtime = {
+    playerId: string;
+    appearance: "starter" | "substitute";
+    position: string | null;
+    isCaptain: boolean;
+    enteredAt: number | null;
+    minutes: number;
+    appeared: boolean;
+    goals: number;
+    assists: number;
+    ownGoals: number;
+    penaltiesScored: number;
+    penaltiesMissed: number;
+    yellow: number;
+    red: number;
+  };
+
+  const runtime = new Map<string, Runtime>();
+  for (const row of lineup) {
+    const playerId = String(row.player_id);
+    const starter = row.lineup_role === "starter";
+    runtime.set(playerId, {
+      playerId,
+      appearance: starter ? "starter" : "substitute",
+      position: typeof row.position === "string" ? row.position : null,
+      isCaptain: Boolean(row.is_captain),
+      enteredAt: starter ? 0 : null,
+      minutes: 0,
+      appeared: starter,
+      goals: 0,
+      assists: 0,
+      ownGoals: 0,
+      penaltiesScored: 0,
+      penaltiesMissed: 0,
+      yellow: 0,
+      red: 0,
+    });
+  }
+
+  let duration = 90;
+  if (events.some((event) => Number(event.minute ?? 0) > 105)) duration = 120;
+
+  for (const event of events) {
+    const minute = Math.max(0, Math.min(duration, Number(event.minute ?? 0)));
+    const primaryId = event.player_id ? String(event.player_id) : null;
+    const relatedId = event.related_player_id ? String(event.related_player_id) : null;
+
+    if (event.event_type === "substitution") {
+      if (primaryId) {
+        const outgoing = runtime.get(primaryId);
+        if (outgoing?.enteredAt != null) {
+          outgoing.minutes += Math.max(0, minute - outgoing.enteredAt);
+          outgoing.enteredAt = null;
+        }
+      }
+      if (relatedId) {
+        const incoming = runtime.get(relatedId);
+        if (incoming && incoming.enteredAt == null) {
+          incoming.enteredAt = minute;
+          incoming.appeared = true;
+        }
+      }
+      continue;
+    }
+
+    if (primaryId) {
+      const player = runtime.get(primaryId);
+      if (player) {
+        if (event.event_type === "goal") player.goals += 1;
+        if (event.event_type === "penalty_goal") {
+          player.goals += 1;
+          player.penaltiesScored += 1;
+        }
+        if (event.event_type === "own_goal") player.ownGoals += 1;
+        if (event.event_type === "penalty_miss") player.penaltiesMissed += 1;
+        if (event.event_type === "yellow_card") player.yellow += 1;
+        if (event.event_type === "red_card") player.red += 1;
+      }
+    }
+
+    if ((event.event_type === "goal" || event.event_type === "penalty_goal") && relatedId) {
+      const assister = runtime.get(relatedId);
+      if (assister) assister.assists += 1;
+    }
+  }
+
+  for (const player of runtime.values()) {
+    if (player.enteredAt != null) {
+      player.minutes += Math.max(0, duration - player.enteredAt);
+      player.enteredAt = null;
+    }
+  }
+
+  const statsRows: Record<string, unknown>[] = [];
+  for (const player of runtime.values()) {
+    if (!player.appeared) continue;
+    const previous = existingByPlayer.get(player.playerId) ?? {};
+    const previousNumber = (key: string) => {
+      const value = Number(previous[key] ?? 0);
+      return Number.isFinite(value) ? value : 0;
+    };
+    statsRows.push({
+      match_id: matchId,
+      player_id: player.playerId,
+      appearance: player.appearance,
+      position: player.position,
+      is_captain: player.isCaptain,
+      minutes_played: Math.max(0, Math.min(130, player.minutes)),
+      goals: player.goals,
+      assists: player.assists,
+      own_goals: player.ownGoals,
+      penalties_scored: player.penaltiesScored,
+      penalties_missed: player.penaltiesMissed,
+      yellow_cards: Math.min(2, player.yellow),
+      red_cards: Math.min(1, player.red),
+      goals_conceded: previousNumber("goals_conceded"),
+      saves: previousNumber("saves"),
+      clean_sheet: Boolean(previous.clean_sheet),
+      penalties_saved: previousNumber("penalties_saved"),
+      shots: previousNumber("shots"),
+      shots_on_target: previousNumber("shots_on_target"),
+      passes_attempted: previousNumber("passes_attempted"),
+      passes_completed: previousNumber("passes_completed"),
+      key_passes: previousNumber("key_passes"),
+      tackles_won: previousNumber("tackles_won"),
+      interceptions: previousNumber("interceptions"),
+      clearances: previousNumber("clearances"),
+      blocks: previousNumber("blocks"),
+      fouls_committed: previousNumber("fouls_committed"),
+      fouls_won: previousNumber("fouls_won"),
+      notes: typeof previous.notes === "string" ? previous.notes : null,
+      created_by: previous.created_by || userId,
+      updated_by: userId,
+    });
+  }
+
+  const selectedIds = new Set(statsRows.map((row) => String(row.player_id)));
+  const staleIds = [...existingByPlayer.keys()].filter((id) => !selectedIds.has(id));
+  if (staleIds.length > 0) {
+    await supabase.from("player_match_stats").delete().eq("match_id", matchId).in("player_id", staleIds);
+  }
+  if (statsRows.length > 0) {
+    await supabase.from("player_match_stats").upsert(statsRows, { onConflict: "match_id,player_id" });
+  }
+}
+
 export async function saveClubSquadAndStats(formData: FormData) {
   const { supabase, userId } = await requireEditor();
   const matchId = text(formData, "match_id");
@@ -692,7 +906,6 @@ export async function saveClubSquadAndStats(formData: FormData) {
       if (playerId) requestedIds.push(playerId);
     }
   }
-
   if (new Set(requestedIds).size !== requestedIds.length) {
     go(matchId, { error: "Один игрок не может быть одновременно указан в нескольких строках состава." });
   }
@@ -703,15 +916,7 @@ export async function saveClubSquadAndStats(formData: FormData) {
   if (playersError) go(matchId, { error: `Не удалось проверить игроков: ${playersError.message}` });
   const playerMap = new Map((players ?? []).map((player) => [String(player.id), player]));
 
-  const { data: existingDetailedRows, error: existingDetailedError } = await supabase
-    .from("player_match_stats")
-    .select("*")
-    .eq("match_id", matchId);
-  if (existingDetailedError) go(matchId, { error: `Не удалось загрузить сохранённую статистику: ${existingDetailedError.message}` });
-  const existingDetailedByPlayer = new Map((existingDetailedRows ?? []).map((row) => [String(row.player_id), row as Record<string, unknown>]));
-
   const lineupRows: Record<string, unknown>[] = [];
-  const statsRows: Record<string, unknown>[] = [];
   let starterCount = 0;
   let goalkeeperCount = 0;
   let captainCount = 0;
@@ -720,22 +925,32 @@ export async function saveClubSquadAndStats(formData: FormData) {
     const max = role === "starter" ? 11 : 12;
     for (let slot = 1; slot <= max; slot += 1) {
       const prefix = `${role}_${slot}`;
-      const playerId = text(formData, `${prefix}_player_id`);
-      if (!playerId) continue;
-      const player = playerMap.get(playerId);
-      if (!player) go(matchId, { error: `Игрок в строке ${slot} не найден.` });
+      const playerId = text(formData, `${prefix}_player_id`) || null;
+      const manualName = nullableText(formData, `${prefix}_player_name`, 120);
+      const player = playerId ? playerMap.get(playerId) : null;
+      if (playerId && !player) go(matchId, { error: `Игрок в строке ${slot} не найден.` });
+      const playerName = player ? `${player.first_name} ${player.last_name}`.trim() : manualName;
+      if (!playerName) continue;
 
       const positionRaw = text(formData, `${prefix}_position`);
       const position = LINEUP_POSITIONS.has(positionRaw)
         ? positionRaw
-        : LINEUP_POSITIONS.has(String(player.position))
-          ? String(player.position)
+        : LINEUP_POSITIONS.has(String(player?.position ?? ""))
+          ? String(player?.position)
           : null;
       const isCaptain = formData.get(`${prefix}_captain`) === "on";
-      const played = role === "starter" || formData.get(`${prefix}_played`) === "on";
+      const shirtRaw = text(formData, `${prefix}_shirt_number`);
+      let shirtNumber = player?.shirt_number ?? null;
+      if (shirtRaw) {
+        const parsed = Number(shirtRaw);
+        if (!Number.isInteger(parsed) || parsed < 0 || parsed > 99) {
+          go(matchId, { error: `Номер игрока ${playerName}: допустимо от 0 до 99.` });
+        }
+        shirtNumber = parsed;
+      }
 
       if (role === "starter") starterCount += 1;
-      if (played && position === "goalkeeper") goalkeeperCount += 1;
+      if (role === "starter" && position === "goalkeeper") goalkeeperCount += 1;
       if (isCaptain) captainCount += 1;
 
       lineupRows.push({
@@ -745,63 +960,21 @@ export async function saveClubSquadAndStats(formData: FormData) {
         lineup_role: role,
         slot_number: slot,
         player_id: playerId,
-        player_name: `${player.first_name} ${player.last_name}`.trim(),
-        shirt_number: player.shirt_number,
+        player_name: playerName,
+        shirt_number: shirtNumber,
         position,
         is_captain: isCaptain,
         sort_order: slot,
         created_by: userId,
         updated_by: userId,
       });
-
-      if (played) {
-        const previous = existingDetailedByPlayer.get(playerId) ?? {};
-        const previousNumber = (key: string) => {
-          const value = Number(previous[key] ?? 0);
-          return Number.isFinite(value) ? value : 0;
-        };
-        statsRows.push({
-          match_id: matchId,
-          player_id: playerId,
-          appearance: role,
-          position,
-          is_captain: isCaptain,
-          minutes_played: parseWholeNumber(formData, `${prefix}_minutes`, 0, 130, "Минуты", matchId),
-          goals: parseWholeNumber(formData, `${prefix}_goals`, 0, 20, "Голы", matchId),
-          assists: parseWholeNumber(formData, `${prefix}_assists`, 0, 20, "Ассисты", matchId),
-          yellow_cards: parseWholeNumber(formData, `${prefix}_yellow`, 0, 2, "Жёлтые карточки", matchId),
-          red_cards: parseWholeNumber(formData, `${prefix}_red`, 0, 1, "Красные карточки", matchId),
-          own_goals: previousNumber("own_goals"),
-          penalties_scored: previousNumber("penalties_scored"),
-          penalties_missed: previousNumber("penalties_missed"),
-          goals_conceded: previousNumber("goals_conceded"),
-          saves: previousNumber("saves"),
-          clean_sheet: Boolean(previous.clean_sheet),
-          penalties_saved: previousNumber("penalties_saved"),
-          shots: previousNumber("shots"),
-          shots_on_target: previousNumber("shots_on_target"),
-          passes_attempted: previousNumber("passes_attempted"),
-          passes_completed: previousNumber("passes_completed"),
-          key_passes: previousNumber("key_passes"),
-          tackles_won: previousNumber("tackles_won"),
-          interceptions: previousNumber("interceptions"),
-          clearances: previousNumber("clearances"),
-          blocks: previousNumber("blocks"),
-          fouls_committed: previousNumber("fouls_committed"),
-          fouls_won: previousNumber("fouls_won"),
-          notes: typeof previous.notes === "string" ? previous.notes : null,
-          created_by: previous.created_by || userId,
-          updated_by: userId,
-        });
-      }
     }
   }
 
   if (captainCount > 1) go(matchId, { error: "У FC Edineț можно отметить только одного капитана." });
   if (intent === "complete") {
-    if (starterCount !== 11) go(matchId, { error: `Для завершения нужно выбрать ровно 11 игроков стартового состава. Сейчас: ${starterCount}.` });
-    if (goalkeeperCount < 1) go(matchId, { error: "Для завершения отметь в составе хотя бы одного вратаря." });
-    if (statsRows.length < 11) go(matchId, { error: "Для завершения статистики должно быть не меньше 11 сыгравших футболистов." });
+    if (starterCount !== 11) go(matchId, { error: `Для завершения нужно указать ровно 11 игроков стартового состава. Сейчас: ${starterCount}.` });
+    if (goalkeeperCount < 1) go(matchId, { error: "Для завершения нужен хотя бы один вратарь в стартовом составе." });
   }
 
   const formation = nullableText(formData, "formation", 40);
@@ -817,25 +990,18 @@ export async function saveClubSquadAndStats(formData: FormData) {
   }, { onConflict: "match_id,side" });
   if (settingsError) go(matchId, { error: `Не удалось сохранить настройки состава: ${settingsError.message}` });
 
-  const { error: lineupDeleteError } = await supabase.from("match_lineup_entries").delete().eq("match_id", matchId).eq("side", clubSide);
+  const { error: lineupDeleteError } = await supabase
+    .from("match_lineup_entries")
+    .delete()
+    .eq("match_id", matchId)
+    .eq("side", clubSide);
   if (lineupDeleteError) go(matchId, { error: `Не удалось обновить состав: ${lineupDeleteError.message}` });
-  if (lineupRows.length) {
+  if (lineupRows.length > 0) {
     const { error: lineupInsertError } = await supabase.from("match_lineup_entries").insert(lineupRows);
     if (lineupInsertError) go(matchId, { error: `Не удалось сохранить состав: ${lineupInsertError.message}` });
   }
 
-  const { data: existingStats, error: existingStatsError } = await supabase.from("player_match_stats").select("player_id").eq("match_id", matchId);
-  if (existingStatsError) go(matchId, { error: `Не удалось открыть статистику игроков: ${existingStatsError.message}` });
-  const selectedStatsIds = new Set(statsRows.map((row) => String(row.player_id)));
-  const toDelete = (existingStats ?? []).map((row) => String(row.player_id)).filter((id) => !selectedStatsIds.has(id));
-  if (toDelete.length) {
-    const { error: statsDeleteError } = await supabase.from("player_match_stats").delete().eq("match_id", matchId).in("player_id", toDelete);
-    if (statsDeleteError) go(matchId, { error: `Не удалось обновить статистику состава: ${statsDeleteError.message}` });
-  }
-  if (statsRows.length) {
-    const { error: statsUpsertError } = await supabase.from("player_match_stats").upsert(statsRows, { onConflict: "match_id,player_id" });
-    if (statsUpsertError) go(matchId, { error: `Не удалось сохранить статистику игроков: ${statsUpsertError.message}` });
-  }
+  await syncClubPlayerStatsFromEvents(supabase, userId, matchId);
 
   const completed = intent === "complete";
   const { error: statusError } = await supabase.from("match_statistics_status").upsert({
@@ -854,3 +1020,4 @@ export async function saveClubSquadAndStats(formData: FormData) {
   revalidatePath("/team");
   go(matchId, { saved: completed ? "squad-complete" : "squad-draft" });
 }
+

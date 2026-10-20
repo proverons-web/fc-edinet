@@ -3147,3 +3147,45 @@ body:has(.adminEmbedded){background:#f3f6fa}
 .matchCenterSeasonSyncCard{background:linear-gradient(145deg,#f7fbff,#fff)}
 @media(max-width:1120px){.matchCenterSquadMeta{grid-template-columns:1fr 1fr}.matchCenterSquadSummary{grid-column:1/-1;justify-content:flex-start}.matchCenterSquadTableWrap{overflow-x:auto;-webkit-overflow-scrolling:touch}}
 @media(max-width:720px){.matchCenterSquadMeta{grid-template-columns:1fr}.matchCenterSquadSummary{grid-column:auto}.matchCenterUnifiedSaveBar{position:static;align-items:stretch;flex-direction:column}.matchCenterUnifiedSaveBar>div:last-child{display:grid;grid-template-columns:1fr}.matchCenterSquadTable{min-width:920px}}
+
+/* ============================================================
+   FC EDINEȚ v2.9.1 — Match Center 2.1
+   Two-column lineups + event-driven player statistics
+   ============================================================ */
+.matchCenterLineupsStage{display:grid;gap:14px;margin-bottom:18px}
+.matchCenterLineupsStageHead{padding:0 2px}
+.matchCenterLineupsGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+.matchCenterLineupsGrid>.statisticsPanel{margin:0;min-width:0}
+.matchCenterTeamColumn{border-top:3px solid #0d63c8}
+.matchCenterSquadMeta.compact{grid-template-columns:minmax(110px,.6fr) minmax(150px,1fr);gap:9px;margin-bottom:12px}
+.matchCenterSquadMeta.compact .matchCenterSquadSummary{grid-column:1/-1;justify-content:flex-start;min-height:0}
+.matchCenterSquadList{display:grid;gap:5px}
+.matchCenterSquadCompactRow{position:relative;display:grid;grid-template-columns:28px minmax(190px,1fr) 104px 38px minmax(105px,.65fr);gap:6px;align-items:center;min-height:52px;padding:6px 7px;border:1px solid #e1e8ef;border-left:5px solid #d6e0ea;border-radius:9px;background:#fff}
+.matchCenterSquadCompactRow.filled{background:#fbfdff}
+.matchCenterSquadCompactRow.position-goalkeeper,.matchLineupRow.position-goalkeeper{border-left-color:#d39a18;background:linear-gradient(90deg,rgba(255,210,72,.13),#fff 26%)}
+.matchCenterSquadCompactRow.position-defender,.matchLineupRow.position-defender{border-left-color:#2676d2;background:linear-gradient(90deg,rgba(38,118,210,.09),#fff 26%)}
+.matchCenterSquadCompactRow.position-midfielder,.matchLineupRow.position-midfielder{border-left-color:#2b9a65;background:linear-gradient(90deg,rgba(43,154,101,.09),#fff 26%)}
+.matchCenterSquadCompactRow.position-forward,.matchLineupRow.position-forward{border-left-color:#d14f4f;background:linear-gradient(90deg,rgba(209,79,79,.08),#fff 26%)}
+.matchCenterPlayerPick{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(115px,.75fr);gap:5px;min-width:0}
+.matchCenterPlayerPick select,.matchCenterPlayerPick input,.matchCenterCompactPosition{width:100%;min-width:0;height:34px;border:1px solid #d9e3ec;border-radius:8px;background:#fff;padding:0 8px;color:#17395f;font-size:10px;font-weight:700}
+.matchCenterPlayerPick select{font-size:10.5px;font-weight:800}
+.matchCenterPlayerPick input:disabled{background:#f3f6f8;color:#a2adba}
+.matchCenterCompactPosition{font-size:9px;font-weight:800}
+.matchCenterAutoStats{display:flex;align-items:center;gap:4px;flex-wrap:wrap;min-height:30px}
+.matchCenterAutoStats span{display:inline-flex;align-items:center;min-height:23px;padding:0 6px;border-radius:999px;background:#edf4fb;color:#315c86;font-size:8px;font-weight:900;white-space:nowrap}
+.matchCenterAutoStats .yellow{background:#fff5cc;color:#876500}.matchCenterAutoStats .red{background:#fde4e4;color:#a73333}.matchCenterAutoStats .muted{background:#f3f5f7;color:#8a98a7;font-weight:800}
+.matchCenterUnifiedSaveBar.compact{position:static;margin-top:12px;padding:10px 11px}.matchCenterUnifiedSaveBar.compact strong{font-size:10px}.matchCenterUnifiedSaveBar.compact span{font-size:8px}
+.matchCenterLineupsGrid .matchLineupPanel{margin:0;min-width:0}.matchCenterLineupsGrid .matchLineupTeams.singleOpponent{display:block}.matchCenterLineupsGrid .matchLineupTeam{height:auto}
+.matchCenterLineupsGrid .matchLineupRow{grid-template-columns:24px minmax(160px,1fr) 45px 60px 32px 58px;border-left:5px solid #d6e0ea}
+.matchCenterLineupsGrid .matchLineupPlayerField{grid-template-columns:minmax(0,1fr)}
+.matchCenterLineupsGrid .matchLineupPlayerField input{font-size:9.5px;font-weight:700}
+.matchEventFields{grid-template-columns:minmax(150px,.85fr) minmax(180px,1fr) 82px 82px minmax(200px,1.25fr) minmax(200px,1.25fr)}
+.matchEventFields .matchEventParticipantField{grid-column:span 1}.matchEventFields .matchEventParticipantField small{display:block;margin-top:4px;color:#8998a7;font-size:7.5px}
+.matchEventFields .matchEventDescription{grid-column:span 5}.matchEventFields .matchEventSortOrder{grid-column:span 1}
+.matchEventFields.compact{grid-template-columns:repeat(2,minmax(0,1fr))}.matchEventFields.compact .matchEventDescription,.matchEventFields.compact .matchEventSortOrder{grid-column:auto}
+.matchTimeline{max-width:880px;margin-inline:auto;gap:3px}.matchTimeline:before{left:65px}.matchTimelineEvent{grid-template-columns:42px 46px minmax(0,1fr);min-height:68px}.matchTimelineMinute{padding-top:13px;font-size:12px}.matchTimelineRail{padding-top:8px}.matchTimelineRail span{min-width:27px;height:27px;border-width:3px;font-size:8px}.matchTimelineCard{margin:3px 0 7px;padding:9px 11px;border-radius:10px}.matchTimelineEventHead strong{font-size:11px}.matchTimelineEventHead>span{font-size:10px}
+.matchTimelineEvent.club-event .matchTimelineRail span{background:#e6f1ff;color:#0d63c8;box-shadow:0 0 0 1px #b8d5f4}.matchTimelineEvent.club-event .matchTimelineCard{border-left:4px solid #0d63c8;background:#f8fbff}
+.matchTimelineEvent.opponent-event .matchTimelineRail span{background:#fff2d8;color:#a56700;box-shadow:0 0 0 1px #edcf98}.matchTimelineEvent.opponent-event .matchTimelineCard{border-left:4px solid #d49625;background:#fffdfa}
+@media(max-width:1380px){.matchCenterLineupsGrid{grid-template-columns:1fr}.matchCenterSquadCompactRow{grid-template-columns:28px minmax(220px,1fr) 110px 38px minmax(130px,.7fr)}}
+@media(max-width:980px){.matchEventFields{grid-template-columns:repeat(2,minmax(0,1fr))}.matchEventFields .matchEventDescription{grid-column:span 2}.matchEventFields .matchEventSortOrder{grid-column:auto}}
+@media(max-width:720px){.matchCenterSquadCompactRow{grid-template-columns:28px minmax(0,1fr) 82px 36px}.matchCenterPlayerPick{grid-column:2/-1;grid-template-columns:1fr}.matchCenterCompactPosition{grid-column:2}.matchCenterCaptainToggle{grid-column:3}.matchCenterAutoStats{grid-column:2/-1}.matchEventFields,.matchEventFields.compact{grid-template-columns:1fr}.matchEventFields .matchEventDescription,.matchEventFields.compact .matchEventDescription{grid-column:auto}.matchTimeline{max-width:none}.matchTimeline:before{left:50px}.matchTimelineEvent{grid-template-columns:32px 36px minmax(0,1fr)}}

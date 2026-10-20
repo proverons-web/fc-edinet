@@ -139,7 +139,7 @@ function TeamLineup({
     <article className={`matchLineupTeam ${isClub ? "club" : "opponent"}`}>
       <header className="matchLineupTeamHead">
         <div>
-          <small>{side === "home" ? "HOME" : "AWAY"}{isClub ? " • FC EDINEȚ" : ""}</small>
+          <small>{side === "home" ? "ХОЗЯЕВА" : "ГОСТИ"}{isClub ? " • FC EDINEȚ" : ""}</small>
           <h3>{teamName}</h3>
           <span>{starterCount}/11 старт • {subCount} запасных</span>
         </div>
@@ -226,7 +226,7 @@ function LineupGroup({
           const entry = map.get(slot);
           const notes = entry ? substitutionNotes(entry, events) : [];
           return (
-            <div className={`matchLineupRow ${entry ? "filled" : ""}`} key={`${role}-${slot}`}>
+            <div className={`matchLineupRow ${entry ? "filled" : ""} position-${entry?.position ?? "empty"}`} key={`${role}-${slot}`}>
               <span className="matchLineupSlot">{slot}</span>
               <div className="matchLineupPlayerField">
                 {isClub ? (
