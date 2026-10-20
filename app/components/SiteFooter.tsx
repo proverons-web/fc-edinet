@@ -1,15 +1,14 @@
 import Link from "next/link";
 import { getLocale } from "@/lib/locale";
 import { publicText } from "@/lib/i18n";
-import { createClient } from "@/lib/supabase/server";
 import { defaultFooterDesign, localizedValue, normalizeFooterDesign } from "@/lib/global-design";
+import { getGlobalDesignConfigs } from "@/lib/site-global-designs";
 
 export default async function SiteFooter() {
   const locale = await getLocale();
   const fallbackText = publicText[locale].footer;
-  const supabase = await createClient();
-  const { data: row } = await supabase.from("site_global_designs").select("config").eq("component_key", "footer").maybeSingle();
-  const config = normalizeFooterDesign(row?.config, defaultFooterDesign);
+  const globalDesigns = await getGlobalDesignConfigs();
+  const config = normalizeFooterDesign(globalDesigns.footer, defaultFooterDesign);
   const visibleColumns = config.columns.filter((column) => column.visible);
   const social = [
     ["Facebook", config.facebook_url], ["Instagram", config.instagram_url], ["YouTube", config.youtube_url], ["TikTok", config.tiktok_url],
@@ -21,7 +20,7 @@ export default async function SiteFooter() {
       <div className="container footerGrid globalFooterGrid" style={{ "--footer-columns": String(Math.max(1, visibleColumns.length)) } as React.CSSProperties}>
         <div className="globalFooterBrand">
           <Link className="brand" href="/">
-            <img className="globalBrandLogo" src={config.logo_mode === "image" && config.logo_url ? config.logo_url : "/brand/fc-edinet-crest.png"} alt="FC Edineț" style={{ width: Math.max(config.logo_width, 54) }} />
+            <img className="globalBrandLogo" src={config.logo_mode === "image" && config.logo_url ? config.logo_url : "/brand/fc-edinet-crest.png"} alt="FC Edineț" loading="lazy" decoding="async" style={{ width: Math.max(config.logo_width, 54) }} />
             <span className="brandText"><strong>{config.brand_name}</strong><small>{config.brand_subtitle}</small></span>
           </Link>
           {config.show_about && <p>{localizedValue(config.about_ru, config.about_ro, locale) || fallbackText.about}</p>}

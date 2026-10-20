@@ -46,7 +46,7 @@ export default function MediaGallery({ photos, albumTitle, locale }: { photos: M
   return <>
     <div className="mediaMasonry">
       {photos.map((photo, index) => <button ref={(node) => { openerRefs.current[index] = node; }} type="button" className="mediaPhotoTile" key={photo.id} onClick={() => setActiveIndex(index)} aria-label={`${text.openPhoto} ${index + 1}`}>
-        <img src={photo.thumb_url} alt={photo.caption || `${albumTitle} — фото ${index + 1}`} loading="lazy" />
+        <img src={photo.thumb_url} alt={photo.caption || `${albumTitle} — фото ${index + 1}`} loading="lazy" decoding="async" />
         <span className="mediaPhotoHover"><b>{text.open}</b><small>{index + 1} / {photos.length}</small></span>
       </button>)}
     </div>

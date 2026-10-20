@@ -13,7 +13,7 @@ export default function NewsCard({ article, locale = "ru" }: { article: NewsArti
     <article className="newsDbCard">
       <Link href={`/news/${article.slug}`} className="newsDbMedia">
         {article.cover_image_url ? (
-          <img className="newsCoverManaged" src={article.cover_image_url} alt={title} style={newsCoverStyle(article)} />
+          <img className="newsCoverManaged" src={article.cover_image_url} alt={title} style={newsCoverStyle(article)} loading="lazy" decoding="async" />
         ) : (
           <span>FC EDINEȚ</span>
         )}

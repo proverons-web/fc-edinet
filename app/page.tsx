@@ -196,10 +196,10 @@ export default async function Home() {
             <picture>
               {hero?.mobile_background_image_url && <source media="(max-width: 680px)" srcSet={hero.mobile_background_image_url} />}
               {hero?.tablet_background_image_url && <source media="(max-width: 980px)" srcSet={hero.tablet_background_image_url} />}
-              <img src={heroBaseImage} alt="" />
+              <img src={heroBaseImage} alt="" loading="eager" decoding="async" fetchPriority="high" />
             </picture>
           ) : (
-            <div className="fcRefHeroFallback"><img src={CLUB_LOGO} alt="" /></div>
+            <div className="fcRefHeroFallback"><img src={CLUB_LOGO} alt="" decoding="async" fetchPriority="high" /></div>
           )}
           <span className="fcRefHeroOverlay" />
         </div>
@@ -249,14 +249,14 @@ export default async function Home() {
           {sectionEnabled("news") && <>
             <div className="fcRefLeadColumn">
               {leadNews ? <Link href={`/news/${leadNews.slug}`} className="fcRefLeadNews">
-                <div className="fcRefLeadNewsMedia">{leadNews.cover_image_url ? <img className="newsCoverManaged" src={leadNews.cover_image_url} alt="" style={newsCoverStyle(leadNews)} /> : <div className="fcRefNewsFallback">FC EDINEȚ</div>}<span>{locale === "ro" ? "ȘTIREA PRINCIPALĂ" : "ГЛАВНАЯ НОВОСТЬ"}</span></div>
+                <div className="fcRefLeadNewsMedia">{leadNews.cover_image_url ? <img className="newsCoverManaged" src={leadNews.cover_image_url} alt="" style={newsCoverStyle(leadNews)} loading="lazy" decoding="async" /> : <div className="fcRefNewsFallback">FC EDINEȚ</div>}<span>{locale === "ro" ? "ȘTIREA PRINCIPALĂ" : "ГЛАВНАЯ НОВОСТЬ"}</span></div>
                 <div className="fcRefLeadNewsBody"><time>{formatNewsDate(leadNews.published_at, locale)}</time><h2>{localized(leadNews.title, leadNews.title_ro, locale)}</h2>{localized(leadNews.excerpt, leadNews.excerpt_ro, locale) && <p>{localized(leadNews.excerpt, leadNews.excerpt_ro, locale)}</p>}<b>{locale === "ro" ? "CITEȘTE" : "ЧИТАТЬ ДАЛЬШЕ"} →</b></div>
               </Link> : <div className="fcRefEmptyCard">{locale === "ro" ? "Publică prima știre." : "Опубликуй первую новость."}</div>}
             </div>
 
             <div className="fcRefLatestColumn">
               <div className="fcRefPanelTitle"><h2>{locale === "ro" ? "ULTIMELE ȘTIRI" : "ПОСЛЕДНИЕ НОВОСТИ"}</h2><Link href="/news">{locale === "ro" ? "TOATE ȘTIRILE" : "ВСЕ НОВОСТИ"} →</Link></div>
-              <div className="fcRefNewsList">{latestNews.length ? latestNews.map((article) => <Link key={article.id} href={`/news/${article.slug}`} className="fcRefNewsRow"><div>{article.cover_image_url ? <img className="newsCoverManaged" src={article.cover_image_url} alt="" style={newsCoverStyle(article)} /> : <span>FCE</span>}</div><section><time>{formatNewsDate(article.published_at, locale)}</time><h3>{localized(article.title, article.title_ro, locale)}</h3></section></Link>) : <div className="fcRefEmptyCard compact">{locale === "ro" ? "Nu sunt alte știri." : "Других новостей пока нет."}</div>}</div>
+              <div className="fcRefNewsList">{latestNews.length ? latestNews.map((article) => <Link key={article.id} href={`/news/${article.slug}`} className="fcRefNewsRow"><div>{article.cover_image_url ? <img className="newsCoverManaged" src={article.cover_image_url} alt="" style={newsCoverStyle(article)} loading="lazy" decoding="async" /> : <span>FCE</span>}</div><section><time>{formatNewsDate(article.published_at, locale)}</time><h3>{localized(article.title, article.title_ro, locale)}</h3></section></Link>) : <div className="fcRefEmptyCard compact">{locale === "ro" ? "Nu sunt alte știri." : "Других новостей пока нет."}</div>}</div>
             </div>
           </>}
 
@@ -275,7 +275,7 @@ export default async function Home() {
         </div>
       </section>}
 
-      {sectionEnabled("partners") && <section className="fcRefPartnersStrip"><div className="container fcRefPartnersInner"><strong>{locale === "ro" ? "PARTENERII NOȘTRI" : "НАШИ ПАРТНЁРЫ"}</strong><div className="fcRefPartnerLogos">{partners.map((partner) => partner.website_url ? <a key={partner.id} href={partner.website_url} target="_blank" rel="noreferrer"><img src={partner.logo_url} alt={partner.name}/></a> : <span key={partner.id}><img src={partner.logo_url} alt={partner.name}/></span>)}</div><Link href="/partners">{locale === "ro" ? "ÎMPREUNĂ CONSTRUIM MAI MULT" : "ВМЕСТЕ СТРОИМ БОЛЬШЕ"}</Link></div></section>}
+      {sectionEnabled("partners") && <section className="fcRefPartnersStrip"><div className="container fcRefPartnersInner"><strong>{locale === "ro" ? "PARTENERII NOȘTRI" : "НАШИ ПАРТНЁРЫ"}</strong><div className="fcRefPartnerLogos">{partners.map((partner) => partner.website_url ? <a key={partner.id} href={partner.website_url} target="_blank" rel="noreferrer"><img src={partner.logo_url} alt={partner.name} loading="lazy" decoding="async"/></a> : <span key={partner.id}><img src={partner.logo_url} alt={partner.name} loading="lazy" decoding="async"/></span>)}</div><Link href="/partners">{locale === "ro" ? "ÎMPREUNĂ CONSTRUIM MAI MULT" : "ВМЕСТЕ СТРОИМ БОЛЬШЕ"}</Link></div></section>}
     </main>
   );
 }
@@ -291,7 +291,7 @@ function ReferencePlayer({ player, locale }: { player: Player; locale: Locale })
     ? { goalkeeper: "PORTAR", defender: "FUNDAȘ", midfielder: "MIJLOCAȘ", forward: "ATACANT" }
     : { goalkeeper: "ВРАТАРЬ", defender: "ЗАЩИТНИК", midfielder: "ПОЛУЗАЩИТНИК", forward: "НАПАДАЮЩИЙ" };
   return <Link href={`/team/${player.slug}`} className="fcRefPlayerCard">
-    <div className="fcRefPlayerPhoto">{player.photo_url ? <img src={player.photo_url} alt={fullName}/> : <span>FC EDINEȚ</span>}</div>
+    <div className="fcRefPlayerPhoto">{player.photo_url ? <img src={player.photo_url} alt={fullName} loading="lazy" decoding="async"/> : <span>FC EDINEȚ</span>}</div>
     <div className="fcRefPlayerShade"/>
     <div className="fcRefPlayerNumber">{player.shirt_number ?? "—"}</div>
     <div className="fcRefPlayerMeta"><strong>{fullName}</strong><span>{positionMap[player.position as keyof typeof positionMap] ?? player.position}</span></div>

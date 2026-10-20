@@ -1446,3 +1446,60 @@ button:disabled:hover,[aria-disabled="true"]:hover{transform:none!important}
   .articleHeroNavigation,.mediaAlbumNavigation{align-items:flex-start}
   .articleHeroNavigation .publicBackLink,.mediaAlbumNavigation .publicBackLink{width:100%}
 }
+
+/* ==========================================================
+   FC EDINEȚ v2.6.4 — PERFORMANCE / RESPONSIVE MEDIA
+   ========================================================== */
+.managedPageHeroMedia picture,
+.proManagedHeroMedia picture{
+  position:absolute;
+  inset:0;
+  display:block;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+}
+.managedPageHeroResponsive{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:var(--page-hero-desktop-x,50%) var(--page-hero-desktop-y,50%);
+  transform:scale(var(--page-hero-desktop-zoom,1));
+  transform-origin:var(--page-hero-desktop-x,50%) var(--page-hero-desktop-y,50%);
+}
+.proHeroImageResponsive{
+  display:block!important;
+  object-position:var(--pro-hero-d-x,50%) var(--pro-hero-d-y,50%);
+  transform:scale(var(--pro-hero-d-z,1));
+  transform-origin:var(--pro-hero-d-x,50%) var(--pro-hero-d-y,50%);
+}
+@media(max-width:980px) and (min-width:681px){
+  .managedPageHeroResponsive{
+    object-position:var(--page-hero-tablet-x,50%) var(--page-hero-tablet-y,50%);
+    transform:scale(var(--page-hero-tablet-zoom,1));
+    transform-origin:var(--page-hero-tablet-x,50%) var(--page-hero-tablet-y,50%);
+  }
+}
+@media(max-width:680px){
+  .managedPageHeroResponsive{
+    object-position:var(--page-hero-mobile-x,50%) var(--page-hero-mobile-y,50%);
+    transform:scale(var(--page-hero-mobile-zoom,1));
+    transform-origin:var(--page-hero-mobile-x,50%) var(--page-hero-mobile-y,50%);
+  }
+}
+@container (max-width:1000px){
+  .proHeroImageResponsive{
+    object-position:var(--pro-hero-t-x,50%) var(--pro-hero-t-y,50%);
+    transform:scale(var(--pro-hero-t-z,1));
+    transform-origin:var(--pro-hero-t-x,50%) var(--pro-hero-t-y,50%);
+  }
+}
+@container (max-width:560px){
+  .proHeroImageResponsive{
+    object-position:var(--pro-hero-m-x,50%) var(--pro-hero-m-y,50%);
+    transform:scale(var(--pro-hero-m-z,1));
+    transform-origin:var(--pro-hero-m-x,50%) var(--pro-hero-m-y,50%);
+  }
+}

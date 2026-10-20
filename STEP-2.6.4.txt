@@ -1,0 +1,10 @@
+FC EDINEȚ v2.6.4 — PHASE 13 / PERFORMANCE + TECHNICAL CLEANUP
+
+- PageHeroShell now uses one responsive <picture> instead of three parallel desktop/tablet/mobile <img> elements.
+- Managed Pro Page heroes (Media / Partners / Academy) use responsive <picture> sources as well.
+- Critical hero media is eager + high fetch priority; below-fold cards, player photos, album covers, partner logos and video thumbnails use lazy loading/async decoding where appropriate.
+- Root layout, Header and Footer now share one request-cached site_global_designs loader instead of three separate database reads.
+- Header/Footer logo decoding was tuned without changing the official crest asset.
+- Existing visual editor focus/zoom variables and public responsive styling are preserved.
+- No SQL migration required.
+- Local npm install was attempted for build validation but timed out in this environment; no successful Next build is claimed.

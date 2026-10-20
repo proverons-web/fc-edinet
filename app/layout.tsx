@@ -6,8 +6,8 @@ import SiteHeader from "./components/SiteHeader";
 import SiteFooter from "./components/SiteFooter";
 import { getSiteUrlObject } from "@/lib/site-url";
 import { getLocale } from "@/lib/locale";
-import { createClient } from "@/lib/supabase/server";
 import { defaultDesignSystem, designSystemCssVariables, normalizeDesignSystem } from "@/lib/design-system";
+import { getGlobalDesignConfigs } from "@/lib/site-global-designs";
 
 const fceBodyFont = Inter({
   subsets: ["latin", "latin-ext", "cyrillic"],
@@ -47,9 +47,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const locale = await getLocale();
-  const supabase = await createClient();
-  const { data: designRow } = await supabase.from("site_global_designs").select("config").eq("component_key", "design_system").maybeSingle();
-  const designSystem = normalizeDesignSystem(designRow?.config, defaultDesignSystem);
+  const globalDesigns = await getGlobalDesignConfigs();
+  const designSystem = normalizeDesignSystem(globalDesigns.design_system, defaultDesignSystem);
 
   return (
     <html lang={locale}>

@@ -7,17 +7,18 @@ import { staffRoles } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { publicText } from "@/lib/i18n";
 import { defaultHeaderDesign, localizedValue, normalizeHeaderDesign } from "@/lib/global-design";
+import { getGlobalDesignConfigs } from "@/lib/site-global-designs";
 
 export default async function SiteHeader() {
   const locale = await getLocale();
   const text = publicText[locale];
   const supabase = await createClient();
-  const [{ data: claimsData }, { data: designRow }] = await Promise.all([
+  const [{ data: claimsData }, globalDesigns] = await Promise.all([
     supabase.auth.getClaims(),
-    supabase.from("site_global_designs").select("config").eq("component_key", "header").maybeSingle(),
+    getGlobalDesignConfigs(),
   ]);
   const userId = claimsData?.claims?.sub;
-  const design = normalizeHeaderDesign(designRow?.config, defaultHeaderDesign);
+  const design = normalizeHeaderDesign(globalDesigns.header, defaultHeaderDesign);
 
   let profile: Profile | null = null;
   if (userId) {
@@ -42,7 +43,7 @@ export default async function SiteHeader() {
       <header className={headerClass} style={{ "--header-height": `${design.height_desktop}px`, "--header-height-mobile": `${design.height_mobile}px` } as React.CSSProperties}>
         <div className="container nav">
           <Link className="brand" href="/">
-            <img className="globalBrandLogo" src={design.logo_mode === "image" && design.logo_url ? design.logo_url : "/brand/fc-edinet-crest.png"} alt="FC Edineț" style={{ width: Math.max(design.logo_width, 42) }} />
+            <img className="globalBrandLogo" src={design.logo_mode === "image" && design.logo_url ? design.logo_url : "/brand/fc-edinet-crest.png"} alt="FC Edineț" decoding="async" style={{ width: Math.max(design.logo_width, 42) }} />
             {design.show_brand_text && <span className="brandText"><strong>{design.brand_name}</strong><small>{design.brand_subtitle}</small></span>}
           </Link>
 

@@ -63,9 +63,18 @@ export default function PageHeroShell({
     <section className={`${className} managedPageHero heroBuilderShell align-${design.text_alignment}`} style={style}>
       {hasMedia && desktopSrc && tabletSrc && mobileSrc && (
         <div className="managedPageHeroMedia" aria-hidden="true">
-          <img className="managedPageHeroDesktop" src={desktopSrc} alt="" />
-          <img className="managedPageHeroTablet" src={tabletSrc} alt="" />
-          <img className="managedPageHeroMobile" src={mobileSrc} alt="" />
+          <picture>
+            <source media="(max-width: 680px)" srcSet={mobileSrc} />
+            <source media="(max-width: 980px)" srcSet={tabletSrc} />
+            <img
+              className="managedPageHeroResponsive"
+              src={desktopSrc}
+              alt=""
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+            />
+          </picture>
         </div>
       )}
       {hasMedia && <div className={`managedPageHeroOverlay ${design.overlay_style}`} aria-hidden="true" />}

@@ -9,7 +9,7 @@ export default function PlayerCard({ player, locale = "ru" }: { player: Player; 
   return (
     <Link href={`/team/${player.slug}`} className="playerCard playerCardLink">
       {player.photo_url ? (
-        <div className="playerPhoto playerPhotoReal"><img src={player.photo_url} alt={fullName} /></div>
+        <div className="playerPhoto playerPhotoReal"><img src={player.photo_url} alt={fullName} loading="lazy" decoding="async" /></div>
       ) : (
         <div className="playerPhoto">{text.photo}</div>
       )}

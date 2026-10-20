@@ -73,7 +73,7 @@ function HeroSection({ pageKey, locale, layout, design, section }: { pageKey: Pr
   return <div className={proSectionClass(section)} style={style}>
     <div className="proSectionMotion">
       <section className={`proManagedHero proHero-${section.variant} align-${design.text_alignment}`}>
-        {desktop && <div className="proManagedHeroMedia" aria-hidden="true"><img className="proHeroImage proHeroImageDesktop" src={desktop} alt=""/>{tablet && <img className="proHeroImage proHeroImageTablet" src={tablet} alt=""/>}{mobile && <img className="proHeroImage proHeroImageMobile" src={mobile} alt=""/>}</div>}
+        {desktop && <div className="proManagedHeroMedia" aria-hidden="true"><picture>{mobile && <source media="(max-width: 560px)" srcSet={mobile}/>} {tablet && <source media="(max-width: 1000px)" srcSet={tablet}/>}<img className="proHeroImage proHeroImageResponsive" src={desktop} alt="" loading="eager" decoding="async" fetchPriority="high"/></picture></div>}
         <div className={`proManagedHeroOverlay ${design.overlay_style}`} aria-hidden="true"/>
         <div className="proManagedHeroInner heroBuilderContent">
           {design.show_eyebrow && heroLayerVisible(design.layer_config, "eyebrow") && <p className="eyebrow" style={heroLayerStyle(design.layer_config, "eyebrow")}>{hero.eyebrow}</p>}
@@ -91,7 +91,7 @@ function MediaAlbums({ section, albums, locale }: { section: ProPageLayoutConfig
     <SectionHeading eyebrow={text.photo} title={text.albums} align={section.align}/>
     {albums.length ? <div className={`proCardGrid proMediaAlbums proAlbums-${section.variant}`}>
       {albums.map((album, index) => <Link href={`/media/${album.slug}`} className={`proMediaAlbumCard${index === 0 ? " isLeadAlbum" : ""}${section.variant === "featured" && index === 0 ? " isFeatured" : ""}`} key={album.id}>
-        <div className="proMediaAlbumImage">{album.cover_image_url ? <img src={album.cover_image_url} alt={album.title}/> : <span>FC EDINEȚ</span>}<div className="proMediaShade"/></div>
+        <div className="proMediaAlbumImage">{album.cover_image_url ? <img src={album.cover_image_url} alt={album.title} loading="lazy" decoding="async"/> : <span>FC EDINEȚ</span>}<div className="proMediaShade"/></div>
         <div className="proMediaAlbumIndex" aria-hidden="true">{String(index + 1).padStart(2, "0")}</div>
         <div className="proMediaAlbumCopy">
           <div className="proMediaAlbumMeta"><span>{formatDate(album.event_date, locale)}</span>{album.location && <span>{album.location}</span>}</div>
@@ -112,7 +112,7 @@ function MediaVideos({ section, videos, locale }: { section: ProPageLayoutConfig
     {videos.length ? <div className={`proCardGrid proMediaVideos proVideos-${section.variant}`}>
       {videos.map((video, index) => <a className={`proMediaVideoCard${index === 0 ? " isLeadVideo" : ""}`} href={video.youtube_url} target="_blank" rel="noopener noreferrer" key={video.id}>
         <div className="proMediaVideoPreview">
-          <img src={`https://i.ytimg.com/vi/${video.youtube_id}/hqdefault.jpg`} alt="" loading="lazy"/>
+          <img src={`https://i.ytimg.com/vi/${video.youtube_id}/hqdefault.jpg`} alt="" loading="lazy" decoding="async"/>
           <span className="proMediaVideoPlay" aria-hidden="true"><i>▶</i></span>
           <span className="proMediaVideoPlatform">FC EDINEȚ TV</span>
         </div>
@@ -141,7 +141,7 @@ function PartnersGrid({ section, partners, locale }: { section: ProPageLayoutCon
 }
 
 function PartnerCard({ partner, locale, variant }: { partner: Partner; locale: Locale; variant: string }) {
-  const body = <><div className="proPartnerLogo"><img src={partner.logo_url} alt={partner.name}/></div><div className="proPartnerCopy"><strong>{partner.name}</strong>{variant !== "logos" && localized(partner.description, partner.description_ro, locale) && <p>{localized(partner.description, partner.description_ro, locale)}</p>}{partner.website_url && variant !== "logos" && <span>{publicText[locale].partners.openSite} ↗</span>}</div></>;
+  const body = <><div className="proPartnerLogo"><img src={partner.logo_url} alt={partner.name} loading="lazy" decoding="async"/></div><div className="proPartnerCopy"><strong>{partner.name}</strong>{variant !== "logos" && localized(partner.description, partner.description_ro, locale) && <p>{localized(partner.description, partner.description_ro, locale)}</p>}{partner.website_url && variant !== "logos" && <span>{publicText[locale].partners.openSite} ↗</span>}</div></>;
   const className = `proPartnerCard proPartnerCard-${partner.partner_level}`;
   return partner.website_url ? <a className={className} href={partner.website_url} target="_blank" rel="noopener noreferrer">{body}</a> : <article className={className}>{body}</article>;
 }
