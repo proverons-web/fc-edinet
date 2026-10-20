@@ -1,0 +1,22 @@
+FC EDINEȚ v2.8.5 — Diagnostics + System
+
+Changes:
+- new /admin/diagnostics system dashboard (admin only)
+- runtime app/version/environment/commit information
+- Supabase connectivity checks and safe table counts
+- required/optional environment-variable status without exposing secret values
+- Supabase admin-secret readiness for full user management
+- Builder and content schema-version overview
+- last design publish, autosave and audit activity timestamps
+- official crest, sitemap, robots and social-preview file checks
+- public-route file integrity overview
+- Diagnostics added to the admin sidebar and dashboard System section
+
+Security:
+- no tokens, keys or secret values are rendered
+- diagnostics route is restricted to administrators
+
+No SQL migration required.
+
+Next planned phase:
+- Match Center UX overhaul: match selection, lineup, events, score workflow, protocol and report in one clear working interface.

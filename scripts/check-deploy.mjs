@@ -60,6 +60,20 @@ try {
   errors.push(`Release metadata check failed: ${error instanceof Error ? error.message : String(error)}`);
 }
 
+// Admin diagnostics must ship with the release and report the same app version.
+try {
+  const packageJson = JSON.parse(fs.readFileSync(path.join(cwd, "package.json"), "utf8"));
+  const diagnosticsSource = fs.readFileSync(path.join(cwd, "app", "admin", "diagnostics", "page.tsx"), "utf8");
+  const diagnosticsVersion = diagnosticsSource.match(/const APP_VERSION = ["']([^"']+)["']/)?.[1] || "";
+  if (!diagnosticsVersion) {
+    errors.push("/admin/diagnostics does not expose APP_VERSION.");
+  } else if (diagnosticsVersion !== packageJson.version) {
+    errors.push(`Diagnostics version mismatch: package.json=${packageJson.version}, diagnostics=${diagnosticsVersion}.`);
+  }
+} catch (error) {
+  errors.push(`Admin diagnostics check failed: ${error instanceof Error ? error.message : String(error)}`);
+}
+
 const officialCrestPath = path.join(cwd, "public", "brand", "fc-edinet-crest.png");
 if (!fs.existsSync(officialCrestPath)) {
   errors.push("Official crest is missing: public/brand/fc-edinet-crest.png");

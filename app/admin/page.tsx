@@ -110,6 +110,7 @@ export default async function AdminPage() {
           modules={[
             { title: "Пользователи", text: "Аккаунты, роли сотрудников и права доступа.", href: "/admin/users", icon: "U", kicker: "Только admin" },
             { title: "Журнал действий", text: "История изменений, удалений и смены ролей.", href: "/admin/audit", icon: "A", kicker: "Только admin" },
+            { title: "Диагностика", text: "Версия, окружение, Supabase, Builder, SEO и системные проверки.", href: "/admin/diagnostics", icon: "D", kicker: "Только admin" },
           ]}
         />
       )}

@@ -40,6 +40,7 @@ const groups = [
     items: [
       { href: "/admin/users", label: "Пользователи", icon: "U", minRole: "admin" as UserRole },
       { href: "/admin/audit", label: "Журнал действий", icon: "A", minRole: "admin" as UserRole },
+      { href: "/admin/diagnostics", label: "Диагностика", icon: "D", minRole: "admin" as UserRole },
     ],
   },
 ];
@@ -63,6 +64,7 @@ const adminRouteLabels: Record<string, string> = {
   translations: "Переводы RU → RO",
   users: "Пользователи",
   audit: "Журнал действий",
+  diagnostics: "Диагностика",
   "page-builder": "Расширенный редактор",
   new: "Новая запись",
   teams: "Команды",
