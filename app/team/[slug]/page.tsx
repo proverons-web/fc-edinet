@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import Link from "next/link";
 import PageHeroShell from "@/app/components/PageHeroShell";
 import PublicBreadcrumbs from "@/app/components/PublicBreadcrumbs";
@@ -42,7 +43,7 @@ type PlayerSeasonHistory = PlayerSeasonTotal & {
   season: Season | null;
 };
 
-async function getPlayer(slug: string): Promise<Player | null> {
+const getPlayer = cache(async (slug: string): Promise<Player | null> => {
   const supabase = await createClient();
   const { data } = await supabase
     .from("players")
@@ -51,7 +52,7 @@ async function getPlayer(slug: string): Promise<Player | null> {
     .eq("is_active", true)
     .maybeSingle();
   return data as Player | null;
-}
+});
 
 function one(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;

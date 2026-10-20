@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import NewsCard, { formatNewsDate } from "@/app/components/NewsCard";
@@ -20,7 +21,7 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-async function getArticle(slug: string): Promise<NewsArticle | null> {
+const getArticle = cache(async (slug: string): Promise<NewsArticle | null> => {
   const supabase = await createClient();
   const { data, error } = await supabase.from("news").select(`
       id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,cover_image_url,cover_position_x,cover_position_y,cover_zoom,author_name,status,
@@ -28,7 +29,7 @@ async function getArticle(slug: string): Promise<NewsArticle | null> {
     `).eq("slug", slug).eq("status", "published").lte("published_at", new Date().toISOString()).maybeSingle();
   if (error) return null;
   return data as unknown as NewsArticle | null;
-}
+});
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const locale = await getLocale();

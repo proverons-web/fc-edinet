@@ -42,6 +42,29 @@ function readValue(name) {
 const errors = [];
 const warnings = [];
 
+// Static release integrity checks. These run before Next.js starts so a
+// broken package is rejected early with a useful message.
+try {
+  const packageJson = JSON.parse(fs.readFileSync(path.join(cwd, "package.json"), "utf8"));
+  const versionRoute = fs.readFileSync(path.join(cwd, "app", "api", "version", "route.ts"), "utf8");
+  const routeVersion = versionRoute.match(/version:\s*["']([^"']+)["']/)?.[1] || "";
+
+  if (!packageJson.version) {
+    errors.push("package.json version is missing.");
+  } else if (!routeVersion) {
+    errors.push("/api/version does not expose a static version string.");
+  } else if (packageJson.version !== routeVersion) {
+    errors.push(`Version mismatch: package.json=${packageJson.version}, /api/version=${routeVersion}.`);
+  }
+} catch (error) {
+  errors.push(`Release metadata check failed: ${error instanceof Error ? error.message : String(error)}`);
+}
+
+const officialCrestPath = path.join(cwd, "public", "brand", "fc-edinet-crest.png");
+if (!fs.existsSync(officialCrestPath)) {
+  errors.push("Official crest is missing: public/brand/fc-edinet-crest.png");
+}
+
 const supabaseUrl = readValue("NEXT_PUBLIC_SUPABASE_URL");
 const publishableKey = readValue(
   "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
@@ -124,6 +147,7 @@ for (const name of forbiddenPublicNames) {
 
 console.log("");
 console.log("FC Edineț — deploy check");
+try { console.log(`Release version: ${JSON.parse(fs.readFileSync(path.join(cwd, "package.json"), "utf8")).version || "unknown"}`); } catch {}
 console.log("------------------------");
 console.log(
   `Supabase URL: ${supabaseUrl ? "configured" : "missing"}`

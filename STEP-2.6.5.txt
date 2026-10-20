@@ -1,0 +1,16 @@
+FC Edineț v2.6.5 — Phase 13.2: Deep technical cleanup.
+
+- Added request-scoped caching for locale resolution so repeated Layout/Header/Footer/page locale reads are deduplicated during the same server render.
+- Added request-scoped cached entity loaders for news articles, player profiles, media albums and media photos so generateMetadata() and the page body do not repeat the same database read.
+- Media album metadata and page rendering now share the same album loader.
+- Site Header profile lookup now requests only the fields actually needed by public navigation (id, role, display_name, full_name) instead of SELECT *.
+- Deploy check now validates release metadata consistency between package.json and /api/version before build.
+- Deploy check now fails early if the official crest asset is missing.
+- Existing visual design and Supabase schema are unchanged.
+- No SQL migration required.
+
+Validation performed:
+- package.json JSON parse OK.
+- CSS brace/parenthesis balance OK.
+- Changed TS/TSX files passed syntax-class TypeScript parsing; full project type/build was not run because node_modules are not included in the FULL source package.
+- deploy check static integrity path tested with temporary non-secret environment placeholders.

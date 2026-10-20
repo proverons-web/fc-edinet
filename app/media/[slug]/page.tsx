@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import MediaGallery from "@/app/components/MediaGallery";
 import PageHeroShell from "@/app/components/PageHeroShell";
@@ -14,11 +15,21 @@ import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
 export const dynamic = "force-dynamic";
 type PageProps = { params: Promise<{ slug: string }> };
 
+const getAlbum = cache(async (slug: string): Promise<MediaAlbum | null> => {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("media_albums")
+    .select("*")
+    .eq("slug", slug)
+    .eq("is_published", true)
+    .maybeSingle();
+  return data as MediaAlbum | null;
+});
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const locale = await getLocale();
   const { slug } = await params;
-  const supabase = await createClient();
-  const { data } = await supabase.from("media_albums").select("title,description,cover_image_url").eq("slug", slug).eq("is_published", true).maybeSingle();
+  const data = await getAlbum(slug);
   if (!data) return { title: publicText[locale].media.defaultAlbum };
   return { title: data.title, description: data.description || `${data.title} — FC Edineț`, openGraph: { title: data.title, description: data.description || `${data.title} — FC Edineț`, type: "website", images: data.cover_image_url ? [{ url: data.cover_image_url }] : undefined } };
 }
@@ -28,13 +39,12 @@ export default async function MediaAlbumPage({ params }: PageProps) {
   const text = publicText[locale].media;
   const { slug } = await params;
   const supabase = await createClient();
-  const [{ data: albumData }, design] = await Promise.all([
-    supabase.from("media_albums").select("*").eq("slug", slug).eq("is_published", true).maybeSingle(),
+  const [album, design] = await Promise.all([
+    getAlbum(slug),
     getPublishedSitePageDesign(supabase, "template_album"),
   ]);
-  if (!albumData) notFound();
-  const { data: photosData } = await supabase.from("media_photos").select("*").eq("album_id", albumData.id).eq("is_published", true).order("display_order").order("id");
-  const album = albumData as MediaAlbum;
+  if (!album) notFound();
+  const { data: photosData } = await supabase.from("media_photos").select("*").eq("album_id", album.id).eq("is_published", true).order("display_order").order("id");
   const photos = (photosData ?? []) as MediaPhoto[];
 
   return <main>

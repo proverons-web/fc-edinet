@@ -22,7 +22,7 @@ export default async function SiteHeader() {
 
   let profile: Profile | null = null;
   if (userId) {
-    const { data } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+    const { data } = await supabase.from("profiles").select("id,role,display_name,full_name").eq("id", userId).maybeSingle();
     profile = data as Profile | null;
   }
 
