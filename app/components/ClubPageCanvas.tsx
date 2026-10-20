@@ -265,6 +265,20 @@ export default function ClubPageCanvas({
 
   useEffect(() => {
     if (builderMode) return;
+    const syncHash = () => {
+      const key = window.location.hash.replace("#club-", "");
+      if (!key || !navItems.some((item) => item.key === key)) return;
+      const section = document.getElementById(`club-${key}`);
+      if (!section) return;
+      window.requestAnimationFrame(() => section.scrollIntoView({ behavior: "auto", block: "start" }));
+    };
+    syncHash();
+    window.addEventListener("hashchange", syncHash);
+    return () => window.removeEventListener("hashchange", syncHash);
+  }, [builderMode, navItems.map((item) => item.key).join("|")]);
+
+  useEffect(() => {
+    if (builderMode) return;
     const strip = navRef.current?.querySelector<HTMLElement>(".clubSectionNavLinks");
     const active = strip?.querySelector<HTMLElement>(`a[data-section-key="${activeSection}"]`);
     if (!strip || !active) return;
