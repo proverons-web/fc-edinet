@@ -299,8 +299,8 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
   const firstHalfEvents = events.filter((event) => Number(event.minute) <= 45);
   const secondHalfEvents = events.filter((event) => Number(event.minute) > 45);
   const halfTimeScore = scoreAtEnd(firstHalfEvents, match);
-  const homeGoalMinutes = goalMinutes(events, match, String(match.home_team_id));
-  const awayGoalMinutes = goalMinutes(events, match, String(match.away_team_id));
+  const homeGoalSummary = goalSummary(events, match, String(match.home_team_id), locale);
+  const awayGoalSummary = goalSummary(events, match, String(match.away_team_id), locale);
   const homeYellow = events.filter((event) => event.event_type === "yellow_card" && String(event.team_id) === String(match.home_team_id)).length;
   const awayYellow = events.filter((event) => event.event_type === "yellow_card" && String(event.team_id) === String(match.away_team_id)).length;
   const homeRed = events.filter((event) => (event.event_type === "red_card" || secondYellowIds.has(String(event.id))) && String(event.team_id) === String(match.home_team_id)).length;
@@ -334,9 +334,9 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
             </div>
             {published && events.length > 0 ? (
               <div className="premiumGoalStrip">
-                <div><strong>{match.home?.short_name || match.home?.name || "—"}</strong><span>{homeGoalMinutes || "—"}</span></div>
-                <i>•</i>
-                <div><strong>{match.away?.short_name || match.away?.name || "—"}</strong><span>{awayGoalMinutes || "—"}</span></div>
+                <div className="goalStripSide is-home"><strong>{match.home?.short_name || match.home?.name || "—"}</strong><span>{homeGoalSummary || "—"}</span></div>
+                <i aria-hidden="true" />
+                <div className="goalStripSide is-away"><strong>{match.away?.short_name || match.away?.name || "—"}</strong><span>{awayGoalSummary || "—"}</span></div>
               </div>
             ) : null}
           </div>
@@ -439,8 +439,23 @@ function scoreAtEnd(events: MatchEvent[], match: ClubMatch) {
   return { home, away };
 }
 
-function goalMinutes(events: MatchEvent[], match: ClubMatch, teamId: string) {
-  return events.filter(eventCountsAsGoal).filter((event) => eventScoringTeamId(event, match) === teamId).map(eventMinute).join(", ");
+function personShortLabel(value: string | null | undefined) {
+  const text = String(value || "").trim();
+  if (!text) return "—";
+  const parts = text.split(/\s+/).filter(Boolean);
+  if (parts.length === 1) return parts[0];
+  return parts[parts.length - 1];
+}
+
+function goalSummary(events: MatchEvent[], match: ClubMatch, teamId: string, locale: Locale) {
+  return events
+    .filter(eventCountsAsGoal)
+    .filter((event) => eventScoringTeamId(event, match) === teamId)
+    .map((event) => {
+      const suffix = event.event_type === "own_goal" ? (locale === "ro" ? " (AG)" : " (АГ)") : "";
+      return `${eventMinute(event)} ${personShortLabel(event.player_name || event.description)}${suffix}`;
+    })
+    .join(", ");
 }
 
 function horizontalEventPosition(event: MatchEvent, half: "first" | "second") {
@@ -472,7 +487,7 @@ function eventGlyphClass(event: MatchEvent, secondYellow: boolean) {
 
 function EventGlyph({ event, secondYellow }: { event: MatchEvent; secondYellow: boolean }) {
   const kind = eventGlyphClass(event, secondYellow);
-  const content = kind === "goal" ? "⚽" : kind === "substitution" ? "⇄" : kind === "penalty-miss" ? "×" : kind === "var" ? "VAR" : kind === "injury" ? "+" : kind === "other" ? "•" : "";
+  const content = kind === "substitution" ? "⇄" : kind === "penalty-miss" ? "×" : kind === "var" ? "VAR" : kind === "injury" ? "+" : kind === "other" ? "•" : "";
   return <span className={`horizontalEventGlyph is-${kind}`} aria-hidden="true">{content}</span>;
 }
 
@@ -554,12 +569,13 @@ function TimelineSegment({ half, items, match, locale, scoreAfterEvent, secondYe
         const originalTeam = String(event.team_id) === String(match.home_team_id) ? match.home : match.away;
         const tooltipTeam = originalTeam?.name || "—";
         const substitutionText = event.event_type === "substitution" ? `${event.player_name || "—"} → ${event.related_player_name || "—"}` : null;
+        const tooltipAlign = position < 14 ? " tooltip-start" : position > 86 ? " tooltip-end" : "";
         const style = { left: `${position}%`, "--event-shift": `${shift}px` } as CSSProperties;
         return (
           <button
             type="button"
             key={String(event.id)}
-            className={`horizontalTimelineEvent is-${side} event-${event.event_type}${isSecondYellow ? " second-yellow" : ""}`}
+            className={`horizontalTimelineEvent is-${side} event-${event.event_type}${isSecondYellow ? " second-yellow" : ""}${tooltipAlign}`}
             style={style}
             aria-label={`${eventMinute(event)} ${label}: ${eventPerson(event)}`}
           >
@@ -637,13 +653,13 @@ function LineupRow({ row, t, locale, events, secondYellowIds, photo, profileSlug
     <div className="publicLineupRow premiumLineupRow">
       {isClub && profileSlug ? (
         <Link className="premiumLineupPlayerLink" href={`/team/${profileSlug}`} aria-label={`${row.player_name || "—"} — ${locale === "ro" ? "profil" : "профиль"}`}>
-          <div className="premiumLineupAvatar">{photo ? <img src={photo} alt="" /> : <span>{row.shirt_number ?? "—"}</span>}</div>
+          <div className={`premiumLineupAvatar${photo ? " has-photo" : ""}`}>{photo ? <img src={photo} alt="" /> : <span>{row.shirt_number ?? "—"}</span>}</div>
           <b>{row.shirt_number ?? "—"}</b>
           {playerName}
         </Link>
       ) : (
         <>
-          <div className="premiumLineupAvatar">{photo ? <img src={photo} alt="" /> : <span>{row.shirt_number ?? "—"}</span>}</div>
+          <div className={`premiumLineupAvatar${photo ? " has-photo" : ""}`}>{photo ? <img src={photo} alt="" /> : <span>{row.shirt_number ?? "—"}</span>}</div>
           <b>{row.shirt_number ?? "—"}</b>
           {playerName}
         </>
