@@ -18,6 +18,11 @@ function visitorId() {
   }
 }
 
+function currentLocale() {
+  const lang = document.documentElement.lang || navigator.language || "";
+  return lang.toLowerCase().startsWith("ro") ? "ro" : lang.toLowerCase().startsWith("ru") ? "ru" : "other";
+}
+
 export default function VisitorTracker() {
   const pathname = usePathname();
   const lastTracked = useRef<string>("");
@@ -31,7 +36,14 @@ export default function VisitorTracker() {
       void fetch("/api/analytics/visit", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ visitorId: visitorId(), path: pathname, referrer: document.referrer || null }),
+        body: JSON.stringify({
+          visitorId: visitorId(),
+          path: pathname,
+          referrer: document.referrer || null,
+          viewportWidth: window.innerWidth,
+          viewportHeight: window.innerHeight,
+          locale: currentLocale(),
+        }),
         keepalive: true,
         credentials: "same-origin",
       }).catch(() => undefined);
