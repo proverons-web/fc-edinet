@@ -24,6 +24,7 @@ import LineupEditor from "./LineupEditor";
 import ClubSquadStatsEditor from "./ClubSquadStatsEditor";
 import EventFields, { type EventParticipantOption } from "./EventFields";
 import SelectOnFocus from "./SelectOnFocus";
+import MatchCenterFeedback from "./MatchCenterFeedback";
 
 export const metadata = { title: "Матч-центр — Админ" };
 export const dynamic = "force-dynamic";
@@ -122,6 +123,21 @@ export default async function MatchCenterMatchPage({
   const query = await searchParams;
   const saved = one(query.saved);
   const errorMessage = one(query.error);
+  const savedMessages: Record<string, string> = {
+    report: "Основа матч-центра сохранена.",
+    event: "Событие добавлено в таймлайн.",
+    "event-updated": "Событие изменено.",
+    "event-deleted": "Событие удалено.",
+    "lineup-home": "Состав хозяев сохранён.",
+    "lineup-away": "Состав гостей сохранён.",
+    "lineup-imported": "Состав FC Edineț импортирован из статистики игроков.",
+    "squad-draft": "Состав и статистика FC Edineț сохранены как черновик.",
+    "squad-complete": "Состав и статистика FC Edineț сохранены. Сезонные итоги обновлены автоматически.",
+    published: "Публичный протокол матча опубликован.",
+    unpublished: "Публичный протокол снят с публикации.",
+  };
+  const feedbackMessage = errorMessage || (saved ? savedMessages[saved] : null) || null;
+  const feedbackTone = errorMessage ? "error" as const : saved === "unpublished" ? "info" as const : "success" as const;
 
   if (!/^\d+$/.test(matchId)) notFound();
 
@@ -206,13 +222,26 @@ export default async function MatchCenterMatchPage({
   const opponentSide: "home" | "away" = clubSide === "home" ? "away" : "home";
   const clubLineupEntries = clubSide ? lineupEntries.filter((row) => row.side === clubSide) : [];
   const clubLineupSetting = clubSide ? lineupSettings.find((row) => row.side === clubSide) ?? null : null;
-  const eventParticipants: EventParticipantOption[] = lineupEntries
+  const playerParticipants: EventParticipantOption[] = lineupEntries
     .filter((entry) => Boolean(entry.player_name))
     .map((entry) => ({
       teamId: String(entry.team_id),
       ref: entry.player_id ? `db:${entry.player_id}` : `manual:${entry.player_name}`,
       label: `${entry.shirt_number != null ? `#${entry.shirt_number} · ` : ""}${entry.player_name}${entry.lineup_role === "substitute" ? " · запас" : ""}`,
-    }))
+      kind: "player" as const,
+    }));
+  const coachParticipants: EventParticipantOption[] = lineupSettings
+    .filter((setting) => Boolean(setting.coach_name?.trim()))
+    .map((setting) => {
+      const coachLabel = `Тренер · ${setting.coach_name!.trim()}`;
+      return {
+        teamId: String(setting.team_id),
+        ref: `manual:${coachLabel}`,
+        label: `${setting.coach_name!.trim()} · ТРЕНЕР`,
+        kind: "coach" as const,
+      };
+    });
+  const eventParticipants: EventParticipantOption[] = [...playerParticipants, ...coachParticipants]
     .filter((item, index, all) => all.findIndex((candidate) => candidate.teamId === item.teamId && candidate.ref === item.ref) === index);
   const reportHasMetadata = Boolean(progress?.report_has_metadata);
 
@@ -233,6 +262,7 @@ export default async function MatchCenterMatchPage({
 
   return (
     <SelectOnFocus>
+    <MatchCenterFeedback matchId={String(match.id)} message={feedbackMessage} tone={feedbackTone} />
     <main className="adminPage matchCenterPage">
       <section className="adminHero compactAdminHero matchCenterHero">
         <div className="container adminHeroInner">
@@ -262,18 +292,6 @@ export default async function MatchCenterMatchPage({
 
       <section className="section adminSurface">
         <div className="container matchCenterContainer">
-          {errorMessage && <div className="formError matchCenterNotice">{errorMessage}</div>}
-          {saved === "report" && <div className="statisticsSuccess matchCenterNotice">Основа матч-центра сохранена.</div>}
-          {saved === "event" && <div className="statisticsSuccess matchCenterNotice">Событие добавлено в таймлайн.</div>}
-          {saved === "event-updated" && <div className="statisticsSuccess matchCenterNotice">Событие изменено.</div>}
-          {saved === "event-deleted" && <div className="statisticsSuccess matchCenterNotice">Событие удалено.</div>}
-          {saved === "lineup-home" && <div className="statisticsSuccess matchCenterNotice">Состав хозяев сохранён.</div>}
-          {saved === "lineup-away" && <div className="statisticsSuccess matchCenterNotice">Состав гостей сохранён.</div>}
-          {saved === "lineup-imported" && <div className="statisticsSuccess matchCenterNotice">Состав FC Edineț импортирован из статистики игроков.</div>}
-          {saved === "squad-draft" && <div className="statisticsSuccess matchCenterNotice">Состав и статистика FC Edineț сохранены как черновик.</div>}
-          {saved === "squad-complete" && <div className="statisticsSuccess matchCenterNotice">Состав и статистика FC Edineț завершены. Сезонные итоги обновлены автоматически.</div>}
-          {saved === "published" && <div className="statisticsSuccess matchCenterNotice">Публичный протокол матча опубликован.</div>}
-          {saved === "unpublished" && <div className="matchCenterNotice practicalMutedNotice">Публичный протокол снят с публикации.</div>}
 
           {!timelineMatchesScore && (
             <div className="matchCenterTimelineWarning">

@@ -7,6 +7,7 @@ export type EventParticipantOption = {
   teamId: string;
   ref: string;
   label: string;
+  kind?: "player" | "coach";
 };
 
 const EVENT_LABELS: Record<MatchEventType, string> = {
@@ -57,11 +58,17 @@ export default function EventFields({
   const [playerRef, setPlayerRef] = useState(initialPlayerRef);
   const [relatedRef, setRelatedRef] = useState(initialRelatedRef);
 
-  const available = useMemo(() => participants.filter((item) => item.teamId === teamId), [participants, teamId]);
+  const teamParticipants = useMemo(() => participants.filter((item) => item.teamId === teamId), [participants, teamId]);
+  const cardEvent = eventType === "yellow_card" || eventType === "red_card";
+  const available = useMemo(
+    () => teamParticipants.filter((item) => item.kind !== "coach" || cardEvent),
+    [teamParticipants, cardEvent],
+  );
+  const relatedAvailable = useMemo(() => teamParticipants.filter((item) => item.kind !== "coach"), [teamParticipants]);
   const hasCurrentPlayer = playerRef && available.some((item) => item.ref === playerRef);
-  const hasCurrentRelated = relatedRef && available.some((item) => item.ref === relatedRef);
+  const hasCurrentRelated = relatedRef && relatedAvailable.some((item) => item.ref === relatedRef);
 
-  const primaryLabel = eventType === "substitution" ? "Кто ушёл с поля" : "Игрок";
+  const primaryLabel = eventType === "substitution" ? "Кто ушёл с поля" : cardEvent ? "Игрок / тренер" : "Игрок";
   const relatedLabel = eventType === "substitution"
     ? "Кто вышел на поле"
     : eventType === "goal" || eventType === "penalty_goal"
@@ -73,7 +80,18 @@ export default function EventFields({
     <div className={`matchEventFields ${compact ? "compact" : ""}`}>
       <label className="fieldGroup">
         <span>Тип события</span>
-        <select name="event_type" value={eventType} onChange={(event) => setEventType(event.target.value as MatchEventType)}>
+        <select
+          name="event_type"
+          value={eventType}
+          onChange={(event) => {
+            const nextType = event.target.value as MatchEventType;
+            setEventType(nextType);
+            const nextIsCard = nextType === "yellow_card" || nextType === "red_card";
+            if (!nextIsCard && participants.some((item) => item.ref === playerRef && item.kind === "coach")) {
+              setPlayerRef("");
+            }
+          }}
+        >
           {Object.entries(EVENT_LABELS).map(([value, label]) => <option value={value} key={value}>{label}</option>)}
         </select>
       </label>
@@ -114,7 +132,7 @@ export default function EventFields({
         <select name="related_player_ref" value={relatedRef} onChange={(event) => setRelatedRef(event.target.value)}>
           <option value="">— не выбран —</option>
           {!hasCurrentRelated && relatedRef && <option value={relatedRef}>Сохранённый игрок</option>}
-          {available.filter((item) => item.ref !== playerRef).map((item) => <option value={item.ref} key={`${item.teamId}-${item.ref}`}>{item.label}</option>)}
+          {relatedAvailable.filter((item) => item.ref !== playerRef).map((item) => <option value={item.ref} key={`${item.teamId}-${item.ref}`}>{item.label}</option>)}
         </select>
       </label>
       <label className="fieldGroup matchEventDescription">

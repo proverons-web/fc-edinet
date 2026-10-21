@@ -3450,3 +3450,22 @@ body:has(.adminEmbedded){background:#f3f6fa}
 @media(max-width:720px){
   .matchCenterSquadMeta.compact.afterLineups{grid-template-columns:1fr!important}
 }
+
+/* v2.10.2 — Match Center non-disruptive save feedback */
+.matchCenterToast{
+  position:fixed;right:24px;bottom:24px;z-index:2600;
+  width:min(420px,calc(100vw - 32px));min-height:72px;
+  display:grid;grid-template-columns:34px minmax(0,1fr);grid-template-rows:auto auto;
+  gap:3px 10px;align-items:center;padding:14px 16px;
+  border:1px solid rgba(7,53,103,.16);border-radius:12px;
+  background:#fff;color:#0b2545;text-align:left;
+  box-shadow:0 22px 58px rgba(2,22,50,.22);cursor:pointer;
+  animation:matchCenterToastIn .2s ease-out both;
+}
+.matchCenterToast.success{border-left:5px solid #18824b}.matchCenterToast.error{border-left:5px solid #c53f3f}.matchCenterToast.info{border-left:5px solid #2468b5}
+.matchCenterToastMark{grid-row:1/3;width:30px;height:30px;display:grid;place-items:center;border-radius:50%;font-weight:900;background:#e8f6ee;color:#127342}
+.matchCenterToast.error .matchCenterToastMark{background:#fdecec;color:#b52f2f}.matchCenterToast.info .matchCenterToastMark{background:#eaf2fc;color:#195a9f}
+.matchCenterToast>span:nth-child(2){font-size:14px;font-weight:800;line-height:1.35}.matchCenterToast small{font-size:10px;color:#71839a}
+@keyframes matchCenterToastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media(max-width:680px){.matchCenterToast{right:16px;bottom:16px;left:16px;width:auto}}
+@media(prefers-reduced-motion:reduce){.matchCenterToast{animation:none}}
