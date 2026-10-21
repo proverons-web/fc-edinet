@@ -33,6 +33,7 @@ const groups = [
     items: [
       { href: "/admin/comments", label: "Комментарии", icon: "#", minRole: "editor" as UserRole },
       { href: "/admin/translations", label: "Переводы RU → RO", icon: "RO", minRole: "editor" as UserRole },
+      { href: "/admin/site-analytics", label: "Статистика сайта", icon: "AN", minRole: "editor" as UserRole },
     ],
   },
   {
@@ -62,6 +63,7 @@ const adminRouteLabels: Record<string, string> = {
   partners: "Партнёры",
   comments: "Комментарии",
   translations: "Переводы RU → RO",
+  "site-analytics": "Статистика сайта",
   users: "Пользователи",
   audit: "Журнал действий",
   diagnostics: "Диагностика",

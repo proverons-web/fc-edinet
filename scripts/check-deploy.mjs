@@ -47,7 +47,9 @@ const warnings = [];
 try {
   const packageJson = JSON.parse(fs.readFileSync(path.join(cwd, "package.json"), "utf8"));
   const versionRoute = fs.readFileSync(path.join(cwd, "app", "api", "version", "route.ts"), "utf8");
+  const healthRoute = fs.readFileSync(path.join(cwd, "app", "api", "health", "route.ts"), "utf8");
   const routeVersion = versionRoute.match(/version:\s*["']([^"']+)["']/)?.[1] || "";
+  const healthVersion = healthRoute.match(/version:\s*["']([^"']+)["']/)?.[1] || "";
 
   if (!packageJson.version) {
     errors.push("package.json version is missing.");
@@ -55,6 +57,11 @@ try {
     errors.push("/api/version does not expose a static version string.");
   } else if (packageJson.version !== routeVersion) {
     errors.push(`Version mismatch: package.json=${packageJson.version}, /api/version=${routeVersion}.`);
+  }
+  if (!healthVersion) {
+    errors.push("/api/health does not expose a static version string.");
+  } else if (packageJson.version !== healthVersion) {
+    errors.push(`Health version mismatch: package.json=${packageJson.version}, /api/health=${healthVersion}.`);
   }
 } catch (error) {
   errors.push(`Release metadata check failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -89,6 +96,27 @@ for (const requiredSeoFile of ["app/sitemap.ts", "app/robots.ts", "app/opengraph
   if (!fs.existsSync(path.join(cwd, requiredSeoFile))) {
     errors.push(`SEO release file is missing: ${requiredSeoFile}`);
   }
+}
+
+// Visitor analytics release integrity. Database migration 048 must be applied in Supabase.
+for (const analyticsFile of [
+  "database/048_visitor_analytics.sql",
+  "app/api/analytics/visit/route.ts",
+  "app/components/VisitorTracker.tsx",
+  "app/admin/site-analytics/page.tsx",
+]) {
+  if (!fs.existsSync(path.join(cwd, analyticsFile))) {
+    errors.push(`Visitor analytics release file is missing: ${analyticsFile}`);
+  }
+}
+
+try {
+  const layoutSource = fs.readFileSync(path.join(cwd, "app", "layout.tsx"), "utf8");
+  const footerSource = fs.readFileSync(path.join(cwd, "app", "components", "SiteFooter.tsx"), "utf8");
+  if (!/VisitorTracker/.test(layoutSource)) errors.push("VisitorTracker is not mounted in app/layout.tsx.");
+  if (!/get_public_visit_counts/.test(footerSource)) errors.push("Footer visitor counter is not connected to get_public_visit_counts RPC.");
+} catch (error) {
+  errors.push(`Visitor analytics wiring check failed: ${error instanceof Error ? error.message : String(error)}`);
 }
 
 // RU/RO release integrity: auth actions must receive the active locale so

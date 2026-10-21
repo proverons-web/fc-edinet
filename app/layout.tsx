@@ -10,6 +10,7 @@ import { getLocale } from "@/lib/locale";
 import { defaultDesignSystem, designSystemCssVariables, normalizeDesignSystem } from "@/lib/design-system";
 import { getGlobalDesignConfigs } from "@/lib/site-global-designs";
 import { sportsTeamJsonLd } from "@/lib/seo";
+import VisitorTracker from "./components/VisitorTracker";
 
 const fceBodyFont = Inter({
   subsets: ["latin", "latin-ext", "cyrillic"],
@@ -60,6 +61,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <html lang={locale}>
       <body className={`${fceBodyFont.variable} ${fceDisplayFont.variable}`} style={designSystemCssVariables(designSystem)}>
         <JsonLd data={teamJsonLd} />
+        <VisitorTracker />
         <SiteHeader />
         {children}
         <SiteFooter />

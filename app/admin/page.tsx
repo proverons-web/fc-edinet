@@ -33,6 +33,7 @@ export default async function AdminPage() {
       { title: "Статистика", text: "Статистика игроков, сезонов и матчей.", href: "/admin/statistics", icon: "S", kicker: "Данные" },
       { title: "Медиа", text: "Фотоальбомы, фотографии и YouTube-видео.", href: "/admin/media", icon: "◎", kicker: "Медиа" },
       { title: "Партнёры", text: "Спонсоры, логотипы, уровни и ссылки.", href: "/admin/partners", icon: "◇", kicker: "Партнёры" },
+      { title: "Статистика сайта", text: "Уникальные посетители, просмотры, популярные страницы и источники переходов.", href: "/admin/site-analytics", icon: "AN", kicker: "Аналитика" },
     ] : []),
   ];
 
