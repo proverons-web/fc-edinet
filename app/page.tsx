@@ -87,7 +87,7 @@ export default async function Home() {
       .select(matchSelect())
       .eq("status", "finished")
       .order("kickoff", { ascending: false })
-      .limit(4),
+      .limit(80),
     supabase
       .from("competitions")
       .select("*")
@@ -123,8 +123,12 @@ export default async function Home() {
   const pinnedNews = pinnedNewsResult.data as unknown as NewsArticle | null;
   const nextMatch = nextMatchResult.data as unknown as ClubMatch | null;
   const lastMatch = lastMatchResult.data as unknown as ClubMatch | null;
-  const recentMatches = (recentMatchesResult.data ?? []) as unknown as ClubMatch[];
   const competition = (nextMatch?.competition || lastMatch?.competition || competitionResult.data) as Competition | null;
+  const allFinishedMatches = (recentMatchesResult.data ?? []) as unknown as ClubMatch[];
+  const activeSeasonName = String(competition?.season ?? "").trim();
+  const recentMatches = activeSeasonName
+    ? allFinishedMatches.filter((match) => String(match.competition?.season ?? "").trim() === activeSeasonName)
+    : allFinishedMatches;
   const partners = (partnersResult.data ?? []) as Partner[];
 
   const leadNews = pinnedNews || allNews[0] || null;
@@ -248,7 +252,7 @@ export default async function Home() {
                 <div className="fcRefMatchFacts">
                   <span><small>{locale === "ro" ? "DATA" : "ДАТА"}</small><strong>{formatMatchDay(nextMatch.kickoff, locale)}</strong></span>
                   <span><small>{locale === "ro" ? "ORA" : "ЧАС"}</small><strong>{formatMatchTime(nextMatch.kickoff, locale)}</strong></span>
-                  <span><small>{locale === "ro" ? "STADION" : "СТАДИОН"}</small><strong>{nextMatch.stadium || text.stadiumUnknown}</strong></span>
+                  <span><small>{locale === "ro" ? "STADION" : "СТАДИОН"}</small><strong>{nextMatch.home?.home_stadium || nextMatch.stadium || text.stadiumUnknown}</strong></span>
                 </div>
               </div>
               <Link href="/matches" className="fcYellowButton fcRefMatchButton">{locale === "ro" ? "DETALII MECI" : "ПОДРОБНЕЕ О МАТЧЕ"} <span>→</span></Link>
@@ -276,13 +280,12 @@ export default async function Home() {
             </div>
             <div className="fcRefRecentMatchesGrid">
               {recentMatches.map((match) => {
-                const clubIsHome = match.home?.is_club || String(match.home_team_id ?? "") === "1";
+                const clubIsHome = Boolean(match.home?.is_club);
                 const clubGoals = clubIsHome ? match.home_score : match.away_score;
                 const rivalGoals = clubIsHome ? match.away_score : match.home_score;
-                const rivalTeam = clubIsHome ? match.away : match.home;
-                const rivalLogo = rivalTeam?.logo_url || (rivalTeam?.is_club ? CLUB_LOGO : null);
                 const clubWin = Number(clubGoals ?? -1) > Number(rivalGoals ?? -1);
                 const draw = Number(clubGoals ?? -1) === Number(rivalGoals ?? -1);
+                const stadiumName = match.home?.home_stadium || match.stadium || (locale === "ro" ? "Stadion" : "Стадион");
                 return (
                   <Link key={match.id} href={`/matches/${match.id}`} className={`fcRefRecentMatchCard${clubWin ? " is-win" : draw ? " is-draw" : " is-loss"}`}>
                     <div className="fcRefRecentMatchMeta">
@@ -290,22 +293,16 @@ export default async function Home() {
                       {match.round ? <b>{match.round}</b> : null}
                     </div>
                     <div className="fcRefRecentMatchBody">
-                      <div className="fcRefRecentMatchTeam is-club">
-                        <img src={CLUB_LOGO} alt="FC Edineț" />
-                        <strong>FC Edineț</strong>
-                      </div>
+                      <RecentMatchTeam team={match.home} locale={locale} side={locale === "ro" ? "GAZDE" : "ДОМА"} />
                       <div className="fcRefRecentMatchScore">
                         <em>{formatMatchShortDate(match.kickoff, locale)}</em>
-                        <strong>{clubGoals}:{rivalGoals}</strong>
+                        <strong>{match.home_score}:{match.away_score}</strong>
                         <span>{draw ? (locale === "ro" ? "Egal" : "Ничья") : clubWin ? (locale === "ro" ? "Victorie" : "Победа") : (locale === "ro" ? "Înfrângere" : "Поражение")}</span>
                       </div>
-                      <div className="fcRefRecentMatchTeam is-rival">
-                        {rivalLogo ? <img src={rivalLogo} alt="" /> : <span>{(rivalTeam?.short_name || rivalTeam?.name || "FC").slice(0,3).toUpperCase()}</span>}
-                        <strong>{rivalTeam?.short_name || rivalTeam?.name || (locale === "ro" ? "Adversar" : "Соперник")}</strong>
-                      </div>
+                      <RecentMatchTeam team={match.away} locale={locale} side={locale === "ro" ? "OASPEȚI" : "ГОСТИ"} />
                     </div>
                     <div className="fcRefRecentMatchFooter">
-                      <span>{match.stadium || (locale === "ro" ? "Stadion" : "Стадион")}</span>
+                      <span>{stadiumName}</span>
                       <b>{locale === "ro" ? "PROTOCOL" : "ПРОТОКОЛ"} →</b>
                     </div>
                   </Link>
@@ -349,6 +346,17 @@ export default async function Home() {
 
       {sectionEnabled("partners") && <section className="fcRefPartnersStrip"><div className="container fcRefPartnersInner"><strong>{locale === "ro" ? "PARTENERII NOȘTRI" : "НАШИ ПАРТНЁРЫ"}</strong><div className="fcRefPartnerLogos">{partners.map((partner) => partner.website_url ? <a key={partner.id} href={partner.website_url} target="_blank" rel="noreferrer"><img src={partner.logo_url} alt={partner.name} loading="lazy" decoding="async"/></a> : <span key={partner.id}><img src={partner.logo_url} alt={partner.name} loading="lazy" decoding="async"/></span>)}</div><Link href="/partners">{locale === "ro" ? "ÎMPREUNĂ CONSTRUIM MAI MULT" : "ВМЕСТЕ СТРОИМ БОЛЬШЕ"}</Link></div></section>}
     </main>
+  );
+}
+
+function RecentMatchTeam({ team, locale, side }: { team: ClubMatch["home"]; locale: Locale; side: string }) {
+  const logo = team?.logo_url || (team?.is_club ? CLUB_LOGO : null);
+  return (
+    <div className={`fcRefRecentMatchTeam${team?.is_club ? " is-club" : " is-rival"}`}>
+      <small>{side}</small>
+      {logo ? <img src={logo} alt="" /> : <span>{(team?.short_name || team?.name || "FC").slice(0,3).toUpperCase()}</span>}
+      <strong>{team?.short_name || team?.name || (locale === "ro" ? "Echipă" : "Команда")}</strong>
+    </div>
   );
 }
 

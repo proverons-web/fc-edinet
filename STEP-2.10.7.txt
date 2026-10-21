@@ -1,0 +1,12 @@
+FC EDINEȚ v2.10.7 — Player Profile + Statistics UX + Recent Matches
+
+- Statistics table sorting now preserves the current scroll position.
+- Player profile hero redesigned; shirt number is visible on the photo.
+- Player season match list shows 5 recent appearances and can expand to every completed match of the selected season in which the player participated.
+- Home recent-results section now loads the full current-season history and uses a horizontal scroll rail with five cards visible on desktop.
+- Recent result cards preserve real home/away order and clearly label home/away teams.
+- Win/draw/loss cards receive green/yellow/red visual states.
+- Stadium name is derived from the home team profile first, then falls back to the match venue.
+- Reduced excess space between recent results and the following homepage dashboard.
+
+No SQL migration required.

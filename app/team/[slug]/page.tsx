@@ -177,8 +177,7 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
         .select("*")
         .eq("player_id", player.id)
         .eq("season_id", selectedSeason.id)
-        .order("match_id", { ascending: false })
-        .limit(30),
+        .order("match_id", { ascending: false }),
     ]);
 
     statisticsError =
@@ -265,8 +264,7 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
               .sort(
                 (a, b) =>
                   new Date(b.match.kickoff).getTime() - new Date(a.match.kickoff).getTime()
-              )
-              .slice(0, 5);
+              );
           }
         }
       }
@@ -669,6 +667,10 @@ function PlayerStatisticsSection({
     total.key_passes, total.tackles_won, total.interceptions, total.clearances,
     total.blocks, total.fouls_committed, total.fouls_won,
   ].some((value) => numberValue(value) > 0));
+  const initialRecentMatches = recentMatches.slice(0, 5);
+  const additionalRecentMatches = recentMatches.slice(5);
+  const showAllLabel = locale === "ro" ? `Arată toate meciurile sezonului (${recentMatches.length})` : `Показать все матчи сезона (${recentMatches.length})`;
+  const hideAllLabel = locale === "ro" ? "Restrânge lista" : "Свернуть список";
 
   return (
     <section className="section playerStatsSection">
@@ -781,66 +783,66 @@ function PlayerStatisticsSection({
             )}
 
             {recentMatches.length > 0 && (
-              <section className="playerStatsBlock">
+              <section className="playerStatsBlock playerSeasonMatchesBlock">
                 <div className="playerStatsBlockHead">
                   <h3>{text.statsRecent}</h3>
                   <span>{recentMatches.length}</span>
                 </div>
                 <div className="playerRecentMatches">
-                  {recentMatches.map(({ stat, match }) => {
-                    const opponent = getOpponent(match);
-                    const result = getClubResult(match);
-                    return (
-                      <article className="playerRecentMatch" key={String(match.id)}>
-                        <div className="playerRecentDate">
-                          <strong>{formatShortDate(match.kickoff, locale)}</strong>
-                          <span>{match.competition?.name ?? text.statsTournamentEmpty}</span>
-                        </div>
-                        <div className="playerRecentOpponent">
-                          <span className={`playerMatchResult ${result.code.toLowerCase()}`}>
-                            {result.code}
-                          </span>
-                          {opponent?.logo_url ? (
-                            <img src={opponent.logo_url} alt="" />
-                          ) : (
-                            <span className="playerRecentOpponentLogo">FC</span>
-                          )}
-                          <div>
-                            <strong>{opponent?.name ?? "—"}</strong>
-                            <span>{formatScore(match)}</span>
-                          </div>
-                        </div>
-                        <div className="playerRecentRole">
-                          <strong>
-                            {stat.appearance === "starter"
-                              ? text.statsStarter
-                              : text.statsSubstitute}
-                          </strong>
-                          <span>
-                            {stat.minutes_played} {text.statsMinutesShort}
-                            {stat.is_captain ? ` • ${text.statsCaptain}` : ""}
-                          </span>
-                        </div>
-                        <div className="playerRecentNumbers">
-                          <span>
-                            <b>{stat.goals}</b>
-                            {text.statsGoals}
-                          </span>
-                          <span>
-                            <b>{stat.assists}</b>
-                            {text.statsAssists}
-                          </span>
-                        </div>
-                      </article>
-                    );
-                  })}
+                  {initialRecentMatches.map((item) => (
+                    <PlayerRecentMatchRow key={String(item.match.id)} item={item} locale={locale} text={text} />
+                  ))}
                 </div>
+                {additionalRecentMatches.length > 0 && (
+                  <details className="playerSeasonMatchesMore">
+                    <summary>
+                      <span className="playerSeasonMatchesOpen">{showAllLabel}</span>
+                      <span className="playerSeasonMatchesClose">{hideAllLabel}</span>
+                    </summary>
+                    <div className="playerRecentMatches playerRecentMatchesExpanded">
+                      {additionalRecentMatches.map((item) => (
+                        <PlayerRecentMatchRow key={String(item.match.id)} item={item} locale={locale} text={text} />
+                      ))}
+                    </div>
+                  </details>
+                )}
               </section>
             )}
           </>
         )}
       </div>
     </section>
+  );
+}
+
+function PlayerRecentMatchRow({ item, locale, text }: { item: RecentPlayerMatch; locale: "ru" | "ro"; text: (typeof publicText)["ru"]["team"] | (typeof publicText)["ro"]["team"] }) {
+  const { stat, match } = item;
+  const opponent = getOpponent(match);
+  const result = getClubResult(match);
+  const clubIsHome = Boolean(match.home?.is_club);
+  return (
+    <Link className="playerRecentMatch" href={`/matches/${match.id}`}>
+      <div className="playerRecentDate">
+        <strong>{formatShortDate(match.kickoff, locale)}</strong>
+        <span>{match.competition?.name ?? text.statsTournamentEmpty}</span>
+      </div>
+      <div className="playerRecentOpponent">
+        <span className={`playerMatchResult ${result.code.toLowerCase()}`}>{result.code}</span>
+        {opponent?.logo_url ? <img src={opponent.logo_url} alt="" /> : <span className="playerRecentOpponentLogo">FC</span>}
+        <div>
+          <strong>{opponent?.name ?? "—"}</strong>
+          <span>{formatScore(match)} · {clubIsHome ? (locale === "ro" ? "acasă" : "дома") : (locale === "ro" ? "deplasare" : "в гостях")}</span>
+        </div>
+      </div>
+      <div className="playerRecentRole">
+        <strong>{stat.appearance === "starter" ? text.statsStarter : text.statsSubstitute}</strong>
+        <span>{stat.minutes_played} {text.statsMinutesShort}{stat.is_captain ? ` • ${text.statsCaptain}` : ""}</span>
+      </div>
+      <div className="playerRecentNumbers">
+        <span><b>{stat.goals}</b>{text.statsGoals}</span>
+        <span><b>{stat.assists}</b>{text.statsAssists}</span>
+      </div>
+    </Link>
   );
 }
 

@@ -864,7 +864,7 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
 function SortableHead({ label, href, active }: { label: string; href: string; active?: boolean }) {
   return (
     <th>
-      <Link className={`teamStatisticsThLink${active ? " active" : ""}`} href={href}>
+      <Link className={`teamStatisticsThLink${active ? " active" : ""}`} href={href} scroll={false}>
         <span>{label}</span>
         <i aria-hidden="true">↕</i>
       </Link>
