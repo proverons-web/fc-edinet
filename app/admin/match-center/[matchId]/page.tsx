@@ -427,7 +427,7 @@ export default async function MatchCenterMatchPage({
 
               <div className="matchCenterFormFooter">
                 <p>Основу можно сохранять постепенно. Для публикации достаточно завершённого матча и корректного таймлайна голов.</p>
-                <button className="primaryButton" type="submit">Сохранить основу</button>
+                <MatchCenterSubmitButton className="primaryButton" pendingText="Сохранение…">Сохранить основу</MatchCenterSubmitButton>
               </div>
             </form>
 
@@ -443,13 +443,13 @@ export default async function MatchCenterMatchPage({
                     <Link className="rowAction" href={`/matches/${match.id}`} target="_blank">Открыть страницу ↗</Link>
                     <form action={unpublishMatchProtocol}>
                       <input type="hidden" name="match_id" value={String(match.id)} />
-                      <button className="rowAction muted" type="submit">Снять с публикации</button>
+                      <MatchCenterSubmitButton className="rowAction muted" pendingText="Снятие…">Снять с публикации</MatchCenterSubmitButton>
                     </form>
                   </>
                 ) : (
                   <form action={publishMatchProtocol}>
                     <input type="hidden" name="match_id" value={String(match.id)} />
-                    <button className="primaryButton" type="submit" disabled={match.status !== "finished" || !timelineMatchesScore}>Опубликовать протокол</button>
+                    <MatchCenterSubmitButton className="primaryButton" pendingText="Публикация…" disabled={match.status !== "finished" || !timelineMatchesScore}>Опубликовать протокол</MatchCenterSubmitButton>
                   </form>
                 )}
               </section>

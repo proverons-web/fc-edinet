@@ -10,9 +10,10 @@ export default function SelectOnFocus({ children }: { children: ReactNode }) {
     // (Tab / Shift+Tab) must keep the browser's native focus behaviour.
     if (target instanceof HTMLInputElement) {
       const type = (target.type || "text").toLowerCase();
-      // Number fields are intentionally excluded: users often append a digit
-      // (e.g. shirt number 2 -> 21), which select-all would otherwise replace.
-      if (["text", "search", "email", "tel", "url"].includes(type)) {
+      // Number fields stay untouched by default because shirt numbers and similar
+      // values are often extended digit-by-digit. Specific number fields can opt in.
+      const explicitSelect = target.dataset.selectOnClick === "true";
+      if (["text", "search", "email", "tel", "url"].includes(type) || explicitSelect) {
         target.select();
       }
       return;

@@ -7,10 +7,16 @@ export default function MatchCenterSubmitButton({
   children,
   pendingText,
   className = "primaryButton",
+  name,
+  value,
+  disabled = false,
 }: {
   children: ReactNode;
   pendingText: string;
   className?: string;
+  name?: string;
+  value?: string;
+  disabled?: boolean;
 }) {
   const { pending } = useFormStatus();
 
@@ -18,7 +24,9 @@ export default function MatchCenterSubmitButton({
     <button
       className={`${className}${pending ? " is-loading" : ""}`}
       type="submit"
-      disabled={pending}
+      name={name}
+      value={value}
+      disabled={disabled || pending}
       aria-busy={pending}
     >
       {pending ? <span className="matchCenterButtonSpinner" aria-hidden="true" /> : null}

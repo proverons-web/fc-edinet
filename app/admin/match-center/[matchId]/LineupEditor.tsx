@@ -6,6 +6,7 @@ import type {
   Player,
 } from "@/lib/types";
 import { importClubLineupFromPlayerStats, saveMatchLineup } from "./actions";
+import MatchCenterSubmitButton from "./MatchCenterSubmitButton";
 
 const POSITION_OPTIONS = [
   ["goalkeeper", "ВР"],
@@ -141,7 +142,7 @@ function TeamLineup({
       {isClub && (
         <form action={importClubLineupFromPlayerStats} className="matchLineupImportAction">
           <input type="hidden" name="match_id" value={matchId} />
-          <button className="rowAction muted" type="submit">↻ Из статистики игроков</button>
+          <MatchCenterSubmitButton className="rowAction muted" pendingText="Загрузка…">↻ Из статистики игроков</MatchCenterSubmitButton>
         </form>
       )}
 
@@ -195,9 +196,9 @@ function TeamLineup({
         <footer className="matchCenterUnifiedSaveBar compact matchCenterOpponentSaveBar">
           <div>
             <strong>Состав соперника</strong>
-            <span>Пустые строки не сохраняются. После сохранения игроки доступны в событиях.</span>
+            <span>Капитан обязателен. Пустые строки не сохраняются. После сохранения игроки доступны в событиях.</span>
           </div>
-          <button className="primaryButton" type="submit">Сохранить</button>
+          <MatchCenterSubmitButton className="primaryButton" pendingText="Сохранение…">Сохранить</MatchCenterSubmitButton>
         </footer>
       </form>
     </article>

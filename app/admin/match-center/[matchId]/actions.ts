@@ -574,7 +574,7 @@ export async function saveMatchLineup(formData: FormData) {
     }
   }
 
-  if (captains > 1) go(matchId, { error: "В одной команде можно отметить только одного капитана." });
+  if (payload.length > 0 && captains !== 1) go(matchId, { error: "Перед сохранением состава выбери одного капитана." });
 
   const { error: settingsError } = await supabase
     .from("match_lineup_settings")
@@ -1057,7 +1057,7 @@ export async function saveClubSquadAndStats(formData: FormData) {
     }
   }
 
-  if (captainCount > 1) go(matchId, { error: "У FC Edineț можно отметить только одного капитана." });
+  if (captainCount !== 1) go(matchId, { error: "Перед сохранением состава FC Edineț выбери одного капитана." });
 
   let hasSeasonCompetition = false;
   if (match.competition_id) {
@@ -1069,7 +1069,7 @@ export async function saveClubSquadAndStats(formData: FormData) {
     hasSeasonCompetition = !competitionError && Boolean(competition?.season_id);
   }
 
-  // v2.10.3: there is only one Save button. A valid lineup of a finished match
+  // v2.10.4: there is only one Save button. A valid lineup of a finished match
   // becomes COMPLETE automatically so season/tournament aggregation includes it.
   const completed =
     match.status === "finished" &&

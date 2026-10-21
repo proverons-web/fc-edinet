@@ -112,11 +112,11 @@ export default function EventFields({
       </label>
       <label className="fieldGroup compactMinuteField">
         <span>Минута</span>
-        <input name="minute" type="number" min={0} max={130} step={1} defaultValue={defaults.minute ?? 0} />
+        <input name="minute" type="number" min={0} max={130} step={1} defaultValue={defaults.minute ?? 0} data-select-on-click="true" />
       </label>
       <label className="fieldGroup compactMinuteField">
         <span>+ время</span>
-        <input name="stoppage_minute" type="number" min={0} max={30} step={1} defaultValue={defaults.stoppage_minute ?? 0} placeholder="0" />
+        <input name="stoppage_minute" type="number" min={0} max={30} step={1} defaultValue={defaults.stoppage_minute ?? 0} placeholder="0" data-select-on-click="true" />
       </label>
       <label className="fieldGroup matchEventParticipantField">
         <span>{primaryLabel}</span>

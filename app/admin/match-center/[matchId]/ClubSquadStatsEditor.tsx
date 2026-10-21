@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { MatchLineupEntry, Player } from "@/lib/types";
 import { saveClubSquadAndStats } from "./actions";
+import MatchCenterSubmitButton from "./MatchCenterSubmitButton";
 
 type ExistingStat = {
   player_id: string | number;
@@ -93,6 +94,7 @@ export default function ClubSquadStatsEditor({
   const selectedIds = new Set(Object.values(state).map((row) => row.playerId).filter(Boolean));
   const startersCount = Object.entries(state).filter(([key, row]) => key.startsWith("starter-") && row.playerId).length;
   const benchCount = Object.entries(state).filter(([key, row]) => key.startsWith("substitute-") && row.playerId).length;
+  const hasCaptain = Object.values(state).some((row) => Boolean(row.playerId && row.captain));
 
   function patch(key: string, changes: Partial<RowState>) {
     setState((current) => {
@@ -172,10 +174,10 @@ export default function ClubSquadStatsEditor({
         <div className="matchCenterUnifiedSaveBar compact">
           <div>
             <strong>Статистика считается из событий</strong>
-            <span>Замена задаёт минуты, гол/ассист и карточки попадают в сезон автоматически.</span>
+            <span>{hasCaptain ? "Замена задаёт минуты, гол/ассист и карточки попадают в сезон автоматически." : "Выбери капитана — без него состав сохранить нельзя."}</span>
           </div>
           <div>
-            <button className="primaryButton" type="submit" name="intent" value="draft">Сохранить</button>
+            <MatchCenterSubmitButton className="primaryButton" pendingText="Сохранение…" name="intent" value="draft" disabled={!hasCaptain}>Сохранить</MatchCenterSubmitButton>
           </div>
         </div>
       </form>
