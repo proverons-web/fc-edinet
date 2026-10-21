@@ -1973,9 +1973,6 @@ button:disabled:hover,[aria-disabled="true"]:hover{transform:none!important}
 }
 .premiumLineupBadges i.goal:before{display:none!important;content:none!important}
 .lineupBallIcon{display:block;width:28px;height:28px;color:#0b3b6c;filter:drop-shadow(0 2px 5px rgba(5,38,75,.12))}
-.premiumLineupBadges i.goal b{
-  position:absolute;right:-5px;top:-5px;display:grid;place-items:center;min-width:15px;height:15px;padding:0 3px;border-radius:999px;background:#0755a5;color:#fff;font-size:8px;line-height:1;font-style:normal;
-}
 .premiumLineupBadges i.yellow-card,
 .premiumLineupBadges i.red-card{
   width:12px!important;
@@ -2017,7 +2014,7 @@ button:disabled:hover,[aria-disabled="true"]:hover{transform:none!important}
 }
 
 
-/* v2.11.8 — classic ball + true full-size player photo preview */
+/* v2.11.9 — classic ball + true full-size player photo preview */
 .matchBallIcon{display:block!important;width:24px!important;height:24px!important;filter:drop-shadow(0 1px 2px rgba(3,22,47,.12))!important}
 .lineupBallIcon{display:block!important;width:24px!important;height:24px!important;filter:drop-shadow(0 1px 2px rgba(3,22,47,.10))!important}
 .premiumLineupAvatar.has-photo{position:relative!important;overflow:visible!important;z-index:20!important;cursor:zoom-in!important}
@@ -2040,7 +2037,7 @@ button:disabled:hover,[aria-disabled="true"]:hover{transform:none!important}
   .premiumLineupAvatarPreview{left:40px!important;width:190px!important;height:260px!important;padding:6px!important}
 }
 
-/* v2.11.8 — restore original goal icons */
+/* v2.11.9 — restore original goal icons */
 .matchBallIcon{
   display:inline-grid!important;
   place-items:center!important;

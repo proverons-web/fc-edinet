@@ -15,7 +15,7 @@ type DiagnosticCheck = {
   detail?: string;
 };
 
-const APP_VERSION = "2.11.8";
+const APP_VERSION = "2.11.9";
 const BUILDER_VERSION = "2.1";
 const HERO_BUILDER_VERSION = "2.1";
 const CONTENT_SCHEMA_VERSION = "3";

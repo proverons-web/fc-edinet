@@ -701,7 +701,7 @@ function LineupRow({ row, t, locale, events, secondYellowIds, photo, profileSlug
       )}
       <div className="premiumLineupBadges">
         {row.is_captain ? <i className="captain" data-tooltip={t.captain}>C</i> : null}
-        {goalEvents.length ? <i className="goal" data-tooltip={goalTooltip}><FootballIcon className="lineupBallIcon" />{goalEvents.length > 1 ? <b>{goalEvents.length}</b> : null}</i> : null}
+        {goalEvents.length ? <i className="goal" data-tooltip={goalTooltip}><FootballIcon className="lineupBallIcon" /></i> : null}
         {ownGoalEvents.length ? <i className="own-goal" data-tooltip={ownGoalTooltip}>{locale === "ro" ? "AG" : "АГ"}</i> : null}
         {yellowEvents.length ? <i className="yellow-card" data-tooltip={yellowTooltip}>{yellowEvents.length > 1 ? yellowEvents.length : ""}</i> : null}
         {redEvents.length ? <i className="red-card" data-tooltip={redTooltip}>{redEvents.length > 1 ? redEvents.length : ""}</i> : null}
