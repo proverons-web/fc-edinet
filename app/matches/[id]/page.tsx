@@ -4,6 +4,7 @@ import type { CSSProperties } from "react";
 import { cache } from "react";
 import PublicBreadcrumbs from "@/app/components/PublicBreadcrumbs";
 import PublicBackLink from "@/app/components/PublicBackLink";
+import LineupSubstitutionBadge from "./LineupSubstitutionBadge";
 import JsonLd from "@/app/components/JsonLd";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -460,13 +461,15 @@ function goalSummary(events: MatchEvent[], match: ClubMatch, teamId: string, loc
 
 function horizontalEventPosition(event: MatchEvent, half: "first" | "second") {
   const minute = Number(event.minute) || 0;
-  const stoppage = Math.max(0, Number(event.stoppage_minute) || 0);
+  const safeStart = 4;
+  const safeEnd = 96;
+  const span = safeEnd - safeStart;
   if (half === "first") {
-    if (minute >= 45) return Math.min(98.5, 96 + stoppage * 0.35);
-    return Math.max(2, Math.min(96, (minute / 45) * 100));
+    const normalized = Math.max(0, Math.min(45, minute)) / 45;
+    return safeStart + normalized * span;
   }
-  if (minute >= 90) return Math.min(98.5, 96 + stoppage * 0.35);
-  return Math.max(2, Math.min(96, ((minute - 45) / 45) * 100));
+  const normalized = Math.max(0, Math.min(45, minute - 45)) / 45;
+  return safeStart + normalized * span;
 }
 
 function eventDisplayTeamId(event: MatchEvent, match: ClubMatch) {
@@ -485,22 +488,37 @@ function eventGlyphClass(event: MatchEvent, secondYellow: boolean) {
   return "other";
 }
 
+function FootballIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+      <circle cx="32" cy="32" r="27.5" fill="none" stroke="currentColor" strokeWidth="3" />
+      <path d="M32 15.5 40.5 22 37.2 32H26.8L23.5 22 32 15.5Z" fill="currentColor" />
+      <path d="m23.5 22-9.4 2.5-4 9.4 8.2 6.4 8.5-8.3M40.5 22l9.4 2.5 4 9.4-8.2 6.4-8.5-8.3M18.3 40.3l3.8 10.2 9.9 5.1 9.9-5.1 3.8-10.2M22.1 50.5l3.6-9.8h12.6l3.6 9.8" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function EventGlyph({ event, secondYellow }: { event: MatchEvent; secondYellow: boolean }) {
   const kind = eventGlyphClass(event, secondYellow);
+  if (kind === "goal") return <span className="horizontalEventGlyph is-goal" aria-hidden="true"><FootballIcon className="matchBallIcon" /></span>;
   const content = kind === "substitution" ? "⇄" : kind === "penalty-miss" ? "×" : kind === "var" ? "VAR" : kind === "injury" ? "+" : kind === "other" ? "•" : "";
   return <span className={`horizontalEventGlyph is-${kind}`} aria-hidden="true">{content}</span>;
 }
 
 function buildTimelineLanes(events: MatchEvent[], match: ClubMatch, half: "first" | "second") {
-  const counters = new Map<string, number>();
+  const state: Record<"home" | "away", { lastPosition: number; lane: number }> = {
+    home: { lastPosition: -100, lane: 0 },
+    away: { lastPosition: -100, lane: 0 },
+  };
   return events.map((event) => {
     const displayTeam = eventDisplayTeamId(event, match);
-    const side = displayTeam === String(match.home_team_id) ? "home" : "away";
-    const key = `${side}-${event.minute}-${event.stoppage_minute || 0}`;
-    const lane = counters.get(key) ?? 0;
-    counters.set(key, lane + 1);
-    const shift = lane === 0 ? 0 : Math.ceil(lane / 2) * 18 * (lane % 2 === 1 ? 1 : -1);
-    return { event, side, shift, position: horizontalEventPosition(event, half) };
+    const side: "home" | "away" = displayTeam === String(match.home_team_id) ? "home" : "away";
+    const position = horizontalEventPosition(event, half);
+    const current = state[side];
+    const closeToPrevious = position - current.lastPosition < 4.3;
+    const lane = closeToPrevious ? Math.min(current.lane + 1, 3) : 0;
+    state[side] = { lastPosition: position, lane };
+    return { event, side, laneOffset: lane * 24, position };
   });
 }
 
@@ -550,7 +568,7 @@ function HorizontalMatchTimeline({ events, match, locale, scoreAfterEvent, secon
 
 function TimelineSegment({ half, items, match, locale, scoreAfterEvent, secondYellowIds }: {
   half: "first" | "second";
-  items: Array<{ event: MatchEvent; side: string; shift: number; position: number }>;
+  items: Array<{ event: MatchEvent; side: string; laneOffset: number; position: number }>;
   match: ClubMatch;
   locale: Locale;
   scoreAfterEvent: Map<string, { home: number; away: number }>;
@@ -561,8 +579,8 @@ function TimelineSegment({ half, items, match, locale, scoreAfterEvent, secondYe
     <section className={`horizontalTimelineSegment is-${half}`}>
       <div className="horizontalTimelineHalfLabel">{half === "first" ? (locale === "ro" ? "PRIMA REPRIZĂ" : "1 ТАЙМ") : (locale === "ro" ? "REPRIZA A DOUA" : "2 ТАЙМ")}</div>
       <div className="horizontalTimelineAxis" />
-      {ticks.map((tick, index) => <div key={tick} className="horizontalTimelineTick" style={{ left: `${((index + 1) / 3) * 100}%` }}><i/><span>{tick}′</span></div>)}
-      {items.map(({ event, side, shift, position }) => {
+      {ticks.map((tick, index) => <div key={tick} className="horizontalTimelineTick" style={{ left: `${4 + ((index + 1) / 3) * 92}%` }}><i/><span>{tick}′</span></div>)}
+      {items.map(({ event, side, laneOffset, position }) => {
         const isSecondYellow = event.event_type === "yellow_card" && secondYellowIds.has(String(event.id));
         const label = isSecondYellow ? (locale === "ro" ? "Al doilea galben / roșu" : "Вторая жёлтая / красная") : (eventLabels[locale][event.event_type] ?? event.event_type);
         const goalScore = scoreAfterEvent.get(String(event.id));
@@ -570,7 +588,7 @@ function TimelineSegment({ half, items, match, locale, scoreAfterEvent, secondYe
         const tooltipTeam = originalTeam?.name || "—";
         const substitutionText = event.event_type === "substitution" ? `${event.player_name || "—"} → ${event.related_player_name || "—"}` : null;
         const tooltipAlign = position < 14 ? " tooltip-start" : position > 86 ? " tooltip-end" : "";
-        const style = { left: `${position}%`, "--event-shift": `${shift}px` } as CSSProperties;
+        const style = { left: `${position}%`, "--event-lane-offset": `${laneOffset}px` } as CSSProperties;
         return (
           <button
             type="button"
@@ -650,7 +668,7 @@ function LineupRow({ row, t, locale, events, secondYellowIds, photo, profileSlug
   const localizedPosition = positionLabels[locale][String(row.position || "").toLowerCase()] || row.position || "";
   const playerName = <span className="premiumLineupName">{row.player_name || "—"}<small>{localizedPosition}</small></span>;
   return (
-    <div className="publicLineupRow premiumLineupRow">
+    <div className="publicLineupRow premiumLineupRow" data-player-name={name}>
       {isClub && profileSlug ? (
         <Link className="premiumLineupPlayerLink" href={`/team/${profileSlug}`} aria-label={`${row.player_name || "—"} — ${locale === "ro" ? "profil" : "профиль"}`}>
           <div className={`premiumLineupAvatar${photo ? " has-photo" : ""}`}>{photo ? <img src={photo} alt="" /> : <span>{row.shirt_number ?? "—"}</span>}</div>
@@ -666,11 +684,11 @@ function LineupRow({ row, t, locale, events, secondYellowIds, photo, profileSlug
       )}
       <div className="premiumLineupBadges">
         {row.is_captain ? <i className="captain" data-tooltip={t.captain}>C</i> : null}
-        {goals ? <i className="goal" data-tooltip={locale === "ro" ? `${goals} gol(uri)` : `${goals} гол(а)`}>⚽{goals > 1 ? goals : ""}</i> : null}
+        {goals ? <i className="goal" data-tooltip={locale === "ro" ? `${goals} gol(uri)` : `${goals} гол(а)`}><FootballIcon className="lineupBallIcon" />{goals > 1 ? <b>{goals}</b> : null}</i> : null}
         {ownGoals ? <i className="own-goal" data-tooltip={locale === "ro" ? "Autogol" : "Автогол"}>{locale === "ro" ? "AG" : "АГ"}</i> : null}
         {yellows ? <i className="yellow-card" data-tooltip={locale === "ro" ? `${yellows} cartonaș(e) galben(e)` : `${yellows} жёлтая карточка`}>{yellows > 1 ? yellows : ""}</i> : null}
         {reds ? <i className="red-card" data-tooltip={locale === "ro" ? "Cartonaș roșu" : "Красная карточка"}></i> : null}
-        {substitutions.map((event) => <i className="substitution" key={`sub-${String(event.id)}`} data-tooltip={`${eventMinute(event)} · ${event.player_name || "—"} → ${event.related_player_name || "—"}`}>⇄</i>)}
+        {substitutions.map((event) => <LineupSubstitutionBadge key={`sub-${String(event.id)}`} outgoing={event.player_name || ""} incoming={event.related_player_name || ""} tooltip={`${eventMinute(event)} · ${event.player_name || "—"} → ${event.related_player_name || "—"}`} />)}
       </div>
     </div>
   );

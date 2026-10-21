@@ -1,0 +1,9 @@
+FC Edineț v2.11.2 — Timeline Precision + Lineup Event UX
+
+- First-half line now visibly ends before the halftime score card; second-half line starts after it.
+- Nearby events use vertical lanes: home events stack upward, away events downward.
+- Replaced the ball icon with a unified vector football icon.
+- Yellow/red cards are vertical rectangular cards in timeline and lineups.
+- Player photo zoom triggers only when hovering the photo itself.
+- Hovering/focusing a substitution icon highlights outgoing player red and incoming player green.
+- Goal icons in lineups are larger and use the same vector ball as the timeline.
