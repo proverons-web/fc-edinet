@@ -1731,3 +1731,42 @@ button:disabled:hover,[aria-disabled="true"]:hover{transform:none!important}
   .fcRefRecentMatchesGrid{grid-auto-columns:86%!important;padding-bottom:14px!important}
   .fcRefRecentMatchesSection + .fcRefDashboardSection{padding-top:12px!important}
 }
+
+/* ============================================================
+   FC EDINEȚ v2.10.8 — RECENT MATCHES CAROUSEL
+   ============================================================ */
+.fcRefRecentMatchesSection{padding:20px 0 8px!important}
+.fcRefRecentMatchesSection + .fcRefDashboardSection{padding-top:10px!important}
+.fcRefRecentMatchesRail{position:relative;padding:0 46px}
+.fcRefRecentMatchesGrid{display:grid!important;grid-auto-flow:column!important;grid-template-columns:none!important;grid-auto-columns:calc((100% - 36px)/4)!important;gap:12px!important;overflow-x:auto!important;overflow-y:visible!important;padding:2px 0 8px!important;scroll-snap-type:x mandatory!important;scroll-behavior:smooth!important;scrollbar-width:none!important;-ms-overflow-style:none!important}
+.fcRefRecentMatchesGrid::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+.fcRefRecentMatchesArrow{position:absolute;top:50%;z-index:6;width:38px;height:38px;display:grid;place-items:center;transform:translateY(-50%);border:1px solid #ccdae8;border-radius:50%;background:#fff;color:#0a4d98;font-size:19px;font-weight:900;box-shadow:0 8px 22px rgba(5,36,70,.12);cursor:pointer;transition:background .16s ease,color .16s ease,transform .16s ease,opacity .16s ease}
+.fcRefRecentMatchesArrow:hover:not(:disabled){background:#0a55a5;color:#fff;transform:translateY(-50%) scale(1.05)}
+.fcRefRecentMatchesArrow:disabled{opacity:.26;cursor:default;box-shadow:none}
+.fcRefRecentMatchesArrow.is-prev{left:0}.fcRefRecentMatchesArrow.is-next{right:0}
+.fcRefRecentMatchCard{position:relative;scroll-snap-align:start;overflow:hidden;min-width:0!important;border-width:1px!important;box-shadow:0 10px 26px rgba(10,31,58,.07)!important}
+.fcRefRecentMatchCard:before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:#7d91a8}
+.fcRefRecentMatchCard.is-win{background:linear-gradient(145deg,#f2fff6 0%,#e5f8ec 100%)!important;border-color:#a8dfbc!important;box-shadow:0 10px 28px rgba(15,129,77,.13)!important}
+.fcRefRecentMatchCard.is-win:before{background:#1d9a5e}
+.fcRefRecentMatchCard.is-draw{background:linear-gradient(145deg,#fffdf3 0%,#fff5cb 100%)!important;border-color:#e8cf73!important;box-shadow:0 10px 28px rgba(180,139,16,.12)!important}
+.fcRefRecentMatchCard.is-draw:before{background:#d7a80d}
+.fcRefRecentMatchCard.is-loss{background:linear-gradient(145deg,#fff3f5 0%,#ffe3e8 100%)!important;border-color:#e7aab5!important;box-shadow:0 10px 28px rgba(179,64,86,.14)!important}
+.fcRefRecentMatchCard.is-loss:before{background:#c8455d}
+.fcRefRecentMatchCard.is-win .fcRefRecentMatchScore span{background:#d9f3e3!important;color:#117444!important}
+.fcRefRecentMatchCard.is-draw .fcRefRecentMatchScore span{background:#ffefad!important;color:#8b6900!important}
+.fcRefRecentMatchCard.is-loss .fcRefRecentMatchScore span{background:#ffd9df!important;color:#a62f47!important}
+.fcRefRecentMatchFooter{justify-content:flex-end!important;padding-top:8px!important}
+.fcRefRecentMatchFooter b{font-size:10px!important}
+
+@media(max-width:1200px){
+  .fcRefRecentMatchesGrid{grid-auto-columns:calc((100% - 24px)/3)!important}
+}
+@media(max-width:820px){
+  .fcRefRecentMatchesRail{padding:0 42px}
+  .fcRefRecentMatchesGrid{grid-auto-columns:calc((100% - 12px)/2)!important}
+}
+@media(max-width:560px){
+  .fcRefRecentMatchesRail{padding:0 38px}
+  .fcRefRecentMatchesGrid{grid-auto-columns:100%!important;padding-bottom:4px!important}
+  .fcRefRecentMatchesArrow{width:32px;height:32px;font-size:16px}
+}

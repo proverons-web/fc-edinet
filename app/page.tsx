@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import StandingsTable from "@/app/components/StandingsTable";
+import RecentMatchesCarousel from "@/app/components/RecentMatchesCarousel";
 import { createClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/locale";
 import { publicSectionMetadata } from "@/lib/seo";
@@ -278,14 +279,16 @@ export default async function Home() {
               </div>
               <Link href="/matches">{locale === "ro" ? "TOATE MECIURILE" : "ВСЕ МАТЧИ"} →</Link>
             </div>
-            <div className="fcRefRecentMatchesGrid">
+            <RecentMatchesCarousel
+              previousLabel={locale === "ro" ? "Meciul precedent" : "Предыдущий матч"}
+              nextLabel={locale === "ro" ? "Meciul următor" : "Следующий матч"}
+            >
               {recentMatches.map((match) => {
                 const clubIsHome = Boolean(match.home?.is_club);
                 const clubGoals = clubIsHome ? match.home_score : match.away_score;
                 const rivalGoals = clubIsHome ? match.away_score : match.home_score;
                 const clubWin = Number(clubGoals ?? -1) > Number(rivalGoals ?? -1);
                 const draw = Number(clubGoals ?? -1) === Number(rivalGoals ?? -1);
-                const stadiumName = match.home?.home_stadium || match.stadium || (locale === "ro" ? "Stadion" : "Стадион");
                 return (
                   <Link key={match.id} href={`/matches/${match.id}`} className={`fcRefRecentMatchCard${clubWin ? " is-win" : draw ? " is-draw" : " is-loss"}`}>
                     <div className="fcRefRecentMatchMeta">
@@ -302,13 +305,12 @@ export default async function Home() {
                       <RecentMatchTeam team={match.away} locale={locale} side={locale === "ro" ? "OASPEȚI" : "ГОСТИ"} />
                     </div>
                     <div className="fcRefRecentMatchFooter">
-                      <span>{stadiumName}</span>
                       <b>{locale === "ro" ? "PROTOCOL" : "ПРОТОКОЛ"} →</b>
                     </div>
                   </Link>
                 );
               })}
-            </div>
+            </RecentMatchesCarousel>
           </div>
         </section>
       )}
