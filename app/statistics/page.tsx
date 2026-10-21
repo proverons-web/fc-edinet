@@ -70,7 +70,7 @@ type PlayerSummary = SummaryNumbers & {
   >;
 };
 
-type SortKey = "goals" | "assists" | "appearances" | "minutes" | "contributions" | "clean_sheets";
+type SortKey = "position" | "goals" | "assists" | "appearances" | "starts" | "minutes" | "contributions" | "yellow_cards" | "red_cards" | "clean_sheets";
 
 type ResultSummary = {
   played: number;
@@ -200,11 +200,15 @@ const textByLocale = {
 } as const;
 
 const sortLabels = {
+  position: { ru: "Позиция", ro: "Poziție" },
   goals: { ru: "Голы", ro: "Goluri" },
-  assists: { ru: "Ассисты", ro: "Pase decisive" },
-  contributions: { ru: "Гол + пас", ro: "Gol + pasă" },
+  assists: { ru: "Ассистенты", ro: "Pase decisive" },
+  contributions: { ru: "Г+А", ro: "Gol + pasă" },
   appearances: { ru: "Матчи", ro: "Meciuri" },
+  starts: { ru: "Старт", ro: "Titular" },
   minutes: { ru: "Минуты", ro: "Minute" },
+  yellow_cards: { ru: "ЖК", ro: "CG" },
+  red_cards: { ru: "КК", ro: "CR" },
   clean_sheets: { ru: "Сухие матчи", ro: "Meciuri fără gol" },
 } satisfies Record<SortKey, Record<"ru" | "ro", string>>;
 
@@ -290,11 +294,23 @@ function passAccuracy(row: Pick<SummaryNumbers, "passes_attempted" | "passes_com
   return Math.round((row.passes_completed / row.passes_attempted) * 100);
 }
 
+function positionOrder(position: string) {
+  if (position === "goalkeeper") return 0;
+  if (position === "defender") return 1;
+  if (position === "midfielder") return 2;
+  if (position === "forward") return 3;
+  return 4;
+}
+
 function sortRows(rows: PlayerSummary[], sort: SortKey) {
   return [...rows].sort((a, b) => {
     let diff = 0;
-    if (sort === "contributions") diff = contribution(b) - contribution(a);
+    if (sort === "position") diff = positionOrder(a.player.position) - positionOrder(b.player.position);
+    else if (sort === "contributions") diff = contribution(b) - contribution(a);
     else if (sort === "minutes") diff = b.minutes_played - a.minutes_played;
+    else if (sort === "starts") diff = b.starts - a.starts;
+    else if (sort === "yellow_cards") diff = b.yellow_cards - a.yellow_cards;
+    else if (sort === "red_cards") diff = b.red_cards - a.red_cards;
     else diff = numberValue(b[sort]) - numberValue(a[sort]);
     if (diff !== 0) return diff;
     if (b.goals !== a.goals) return b.goals - a.goals;
@@ -638,7 +654,6 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
             <TeamMetric label={text.goals} value={`${results.goalsFor}:${results.goalsAgainst}`} />
             <TeamMetric label={text.goalDifference} value={results.goalDifference > 0 ? `+${results.goalDifference}` : results.goalDifference} />
             <TeamMetric label={text.winRate} value={`${results.winRate}%`} accent="blue" />
-            <TeamMetric label={text.dataCoverage} value={`${results.statisticsComplete}/${results.played}`} accent="blue" />
           </div>
 
           {featuredLeader && !statisticsError && (
@@ -687,24 +702,10 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
               </section>
 
               <section className="teamStatisticsTableSection">
-                <div className="teamStatisticsHeading teamStatisticsTableHeading">
+                <div className="teamStatisticsHeading teamStatisticsTableHeading compact">
                   <div>
                     <p className="eyebrow blue">{text.tableEyebrow}</p>
                     <h2>{text.tableTitle}</h2>
-                  </div>
-                  <div className="teamStatisticsSort">
-                    <span>{text.sort}</span>
-                    <div>
-                      {(Object.keys(sortLabels) as SortKey[]).map((key) => (
-                        <Link
-                          key={key}
-                          className={sort === key ? "active" : ""}
-                          href={statHref(selectedSeasonId, selectedCompetitionId, key)}
-                        >
-                          {sortLabels[key][locale]}
-                        </Link>
-                      ))}
-                    </div>
                   </div>
                 </div>
 
@@ -714,15 +715,15 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
                       <tr>
                         <th>#</th>
                         <th>{text.player}</th>
-                        <th>{text.position}</th>
-                        <th>{text.matches}</th>
-                        <th>{text.starts}</th>
-                        <th>{text.minutes}</th>
-                        <th>{text.goals}</th>
-                        <th>{text.assistants}</th>
-                        <th>{text.contribution}</th>
-                        <th>{text.yellow}</th>
-                        <th>{text.red}</th>
+                        <SortableHead label={text.position} href={statHref(selectedSeasonId, selectedCompetitionId, "position")} active={sort === "position"} />
+                        <SortableHead label={text.matches} href={statHref(selectedSeasonId, selectedCompetitionId, "appearances")} active={sort === "appearances"} />
+                        <SortableHead label={text.starts} href={statHref(selectedSeasonId, selectedCompetitionId, "starts")} active={sort === "starts"} />
+                        <SortableHead label={text.minutes} href={statHref(selectedSeasonId, selectedCompetitionId, "minutes")} active={sort === "minutes"} />
+                        <SortableHead label={text.goals} href={statHref(selectedSeasonId, selectedCompetitionId, "goals")} active={sort === "goals"} />
+                        <SortableHead label={text.assistants} href={statHref(selectedSeasonId, selectedCompetitionId, "assists")} active={sort === "assists"} />
+                        <SortableHead label={text.contribution} href={statHref(selectedSeasonId, selectedCompetitionId, "contributions")} active={sort === "contributions"} />
+                        <SortableHead label={text.yellow} href={statHref(selectedSeasonId, selectedCompetitionId, "yellow_cards")} active={sort === "yellow_cards"} />
+                        <SortableHead label={text.red} href={statHref(selectedSeasonId, selectedCompetitionId, "red_cards")} active={sort === "red_cards"} />
                       </tr>
                     </thead>
                     <tbody>
@@ -786,7 +787,6 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
                   <TeamMetric label={text.losses} value={historyTotals.losses} accent="bad" />
                   <TeamMetric label={text.goals} value={`${historyTotals.goalsFor}:${historyTotals.goalsAgainst}`} />
                   <TeamMetric label={text.winRate} value={`${historyWinRate}%`} accent="blue" />
-                  <TeamMetric label={text.careerDataCoverage} value={`${historyTotals.statisticsComplete}/${historyTotals.played}`} accent="blue" />
                 </div>
 
                 {careerSummaries.length > 0 && (
@@ -826,7 +826,6 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
                           <th>{text.goals}</th>
                           <th>{text.goalDifference}</th>
                           <th>{text.winRate}</th>
-                          <th>{text.dataCoverage}</th>
                           <th>{text.seasonPlayers}</th>
                         </tr>
                       </thead>
@@ -846,7 +845,6 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
                             <td>{row.goals_for}:{row.goals_against}</td>
                             <td>{numberValue(row.goal_difference) > 0 ? `+${row.goal_difference}` : row.goal_difference}</td>
                             <td>{numberValue(row.win_rate)}%</td>
-                            <td>{row.statistics_complete}/{row.played}</td>
                             <td>{row.players_with_stats}</td>
                           </tr>
                         ))}
@@ -860,6 +858,17 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
         </div>
       </section>
     </main>
+  );
+}
+
+function SortableHead({ label, href, active }: { label: string; href: string; active?: boolean }) {
+  return (
+    <th>
+      <Link className={`teamStatisticsThLink${active ? " active" : ""}`} href={href}>
+        <span>{label}</span>
+        <i aria-hidden="true">↕</i>
+      </Link>
+    </th>
   );
 }
 

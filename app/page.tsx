@@ -48,7 +48,7 @@ export default async function Home() {
   const sectionRows = (sectionsResult.data ?? []) as HomepageSection[];
   const sectionEnabled = (key: string) => sectionRows.find((row) => row.section_key === key)?.is_enabled !== false;
 
-  const [playersResult, newsResult, nextMatchResult, lastMatchResult, competitionResult, partnersResult, pinnedNewsResult] = await Promise.all([
+  const [playersResult, newsResult, nextMatchResult, lastMatchResult, recentMatchesResult, competitionResult, partnersResult, pinnedNewsResult] = await Promise.all([
     supabase
       .from("players")
       .select("*")
@@ -82,6 +82,12 @@ export default async function Home() {
       .order("kickoff", { ascending: false })
       .limit(1)
       .maybeSingle(),
+    supabase
+      .from("matches")
+      .select(matchSelect())
+      .eq("status", "finished")
+      .order("kickoff", { ascending: false })
+      .limit(4),
     supabase
       .from("competitions")
       .select("*")
@@ -117,6 +123,7 @@ export default async function Home() {
   const pinnedNews = pinnedNewsResult.data as unknown as NewsArticle | null;
   const nextMatch = nextMatchResult.data as unknown as ClubMatch | null;
   const lastMatch = lastMatchResult.data as unknown as ClubMatch | null;
+  const recentMatches = (recentMatchesResult.data ?? []) as unknown as ClubMatch[];
   const competition = (nextMatch?.competition || lastMatch?.competition || competitionResult.data) as Competition | null;
   const partners = (partnersResult.data ?? []) as Partner[];
 
@@ -257,6 +264,58 @@ export default async function Home() {
 
       {settings?.banner_enabled && <section className="fcRefAnnouncement"><div className="container fcRefAnnouncementInner"><div><small>{localized(settings.banner_eyebrow, settings.banner_eyebrow_ro, locale)}</small><strong>{localized(settings.banner_title, settings.banner_title_ro, locale)}</strong></div><Link href={settings.banner_button_href || "/club"}>{localized(settings.banner_button_text, settings.banner_button_text_ro, locale) || text.more} →</Link></div></section>}
 
+      {sectionEnabled("matches") && recentMatches.length > 0 && (
+        <section className="fcRefRecentMatchesSection">
+          <div className="container">
+            <div className="fcRefRecentMatchesHead">
+              <div>
+                <small>{locale === "ro" ? "REZULTATE RECENTE" : "ПОСЛЕДНИЕ МАТЧИ"}</small>
+                <h2>{locale === "ro" ? "Ultimele rezultate" : "Последние результаты"}</h2>
+              </div>
+              <Link href="/matches">{locale === "ro" ? "TOATE MECIURILE" : "ВСЕ МАТЧИ"} →</Link>
+            </div>
+            <div className="fcRefRecentMatchesGrid">
+              {recentMatches.map((match) => {
+                const clubIsHome = match.home?.is_club || String(match.home_team_id ?? "") === "1";
+                const clubGoals = clubIsHome ? match.home_score : match.away_score;
+                const rivalGoals = clubIsHome ? match.away_score : match.home_score;
+                const rivalTeam = clubIsHome ? match.away : match.home;
+                const rivalLogo = rivalTeam?.logo_url || (rivalTeam?.is_club ? CLUB_LOGO : null);
+                const clubWin = Number(clubGoals ?? -1) > Number(rivalGoals ?? -1);
+                const draw = Number(clubGoals ?? -1) === Number(rivalGoals ?? -1);
+                return (
+                  <Link key={match.id} href={`/matches/${match.id}`} className={`fcRefRecentMatchCard${clubWin ? " is-win" : draw ? " is-draw" : " is-loss"}`}>
+                    <div className="fcRefRecentMatchMeta">
+                      <span>{match.competition?.name || competition?.name || "Liga 2"}</span>
+                      {match.round ? <b>{match.round}</b> : null}
+                    </div>
+                    <div className="fcRefRecentMatchBody">
+                      <div className="fcRefRecentMatchTeam is-club">
+                        <img src={CLUB_LOGO} alt="FC Edineț" />
+                        <strong>FC Edineț</strong>
+                      </div>
+                      <div className="fcRefRecentMatchScore">
+                        <em>{formatMatchShortDate(match.kickoff, locale)}</em>
+                        <strong>{clubGoals}:{rivalGoals}</strong>
+                        <span>{draw ? (locale === "ro" ? "Egal" : "Ничья") : clubWin ? (locale === "ro" ? "Victorie" : "Победа") : (locale === "ro" ? "Înfrângere" : "Поражение")}</span>
+                      </div>
+                      <div className="fcRefRecentMatchTeam is-rival">
+                        {rivalLogo ? <img src={rivalLogo} alt="" /> : <span>{(rivalTeam?.short_name || rivalTeam?.name || "FC").slice(0,3).toUpperCase()}</span>}
+                        <strong>{rivalTeam?.short_name || rivalTeam?.name || (locale === "ro" ? "Adversar" : "Соперник")}</strong>
+                      </div>
+                    </div>
+                    <div className="fcRefRecentMatchFooter">
+                      <span>{match.stadium || (locale === "ro" ? "Stadion" : "Стадион")}</span>
+                      <b>{locale === "ro" ? "PROTOCOL" : "ПРОТОКОЛ"} →</b>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
       {(sectionEnabled("news") || sectionEnabled("standings")) && <section className="fcRefDashboardSection">
         <div className="container fcRefDashboard">
           {sectionEnabled("news") && <>
@@ -322,6 +381,10 @@ function formatMatchDay(value: string, locale: Locale) {
 
 function formatMatchTime(value: string, locale: Locale) {
   return new Intl.DateTimeFormat(dateLocale(locale), { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Chisinau" }).format(new Date(value));
+}
+
+function formatMatchShortDate(value: string, locale: Locale) {
+  return new Intl.DateTimeFormat(dateLocale(locale), { day: "2-digit", month: "short", timeZone: "Europe/Chisinau" }).format(new Date(value));
 }
 
 function legacyHeroCoordinates(position?: HomepageHero["background_position"] | null) {

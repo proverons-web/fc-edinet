@@ -1,0 +1,8 @@
+FC Edineț v2.10.6 — Version Sync Hotfix
+
+Fix:
+- synchronized package.json, /api/version, Diagnostics and RU/RO visible version labels to 2.10.6;
+- no database or feature changes;
+- keeps all v2.10.5 statistics sorting and recent-match homepage changes.
+
+No SQL migration required.
