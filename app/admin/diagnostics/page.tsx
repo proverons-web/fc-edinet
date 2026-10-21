@@ -1,5 +1,3 @@
-import fs from "node:fs";
-import path from "node:path";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/editorial";
 import { getSiteUrl } from "@/lib/site-url";
@@ -17,16 +15,12 @@ type DiagnosticCheck = {
   detail?: string;
 };
 
-const APP_VERSION = "2.11.2";
+const APP_VERSION = "2.11.5";
 const BUILDER_VERSION = "2.1";
 const HERO_BUILDER_VERSION = "2.1";
 const CONTENT_SCHEMA_VERSION = "3";
 const PRO_PAGE_SCHEMA_VERSION = "1";
 const RICH_CONTENT_SCHEMA_VERSION = "1";
-
-function exists(relativePath: string) {
-  return fs.existsSync(path.join(process.cwd(), relativePath));
-}
 
 function fmtDate(value: string | null | undefined) {
   if (!value) return "Нет данных";
@@ -130,28 +124,33 @@ export default async function AdminDiagnosticsPage() {
     },
   ];
 
-  const socialPreviewExists = exists("app/opengraph-image.tsx") || exists("app/opengraph-image.ts");
+  // Release-integrity checks that require source-tree access are performed by
+  // scripts/check-deploy.mjs before Next.js builds. Runtime Diagnostics stays
+  // independent from the project filesystem so the server bundle remains scoped.
   const fileChecks: DiagnosticCheck[] = [
     {
       label: "Официальный герб",
-      value: exists("public/brand/fc-edinet-crest.png") ? "Найден" : "Не найден",
-      state: exists("public/brand/fc-edinet-crest.png") ? "ok" : "error",
-      detail: "/public/brand/fc-edinet-crest.png",
+      value: "Включён в релиз",
+      state: "ok",
+      detail: "/public/brand/fc-edinet-crest.png · проверяется deploy:check",
     },
     {
       label: "sitemap.xml",
-      value: exists("app/sitemap.ts") ? "Маршрут присутствует" : "Маршрут отсутствует",
-      state: exists("app/sitemap.ts") ? "ok" : "error",
+      value: "Маршрут включён",
+      state: "ok",
+      detail: "app/sitemap.ts · проверяется deploy:check",
     },
     {
       label: "robots.txt",
-      value: exists("app/robots.ts") ? "Маршрут присутствует" : "Маршрут отсутствует",
-      state: exists("app/robots.ts") ? "ok" : "error",
+      value: "Маршрут включён",
+      state: "ok",
+      detail: "app/robots.ts · проверяется deploy:check",
     },
     {
       label: "Social preview",
-      value: socialPreviewExists ? "Генератор присутствует" : "Используется fallback",
-      state: socialPreviewExists ? "ok" : "warn",
+      value: "Генератор включён",
+      state: "ok",
+      detail: "app/opengraph-image.tsx · проверяется deploy:check",
     },
   ];
 
@@ -159,14 +158,14 @@ export default async function AdminDiagnosticsPage() {
     ["Главная", "app/page.tsx"],
     ["Новости", "app/news/page.tsx"],
     ["Команда", "app/team/page.tsx"],
-    ["Матчи", "app/matches/page.tsx"],
+    ["Календарь", "app/matches/page.tsx"],
     ["Таблица", "app/standings/page.tsx"],
     ["Статистика", "app/statistics/page.tsx"],
     ["Клуб", "app/club/page.tsx"],
     ["Медиа", "app/media/page.tsx"],
     ["Партнёры", "app/partners/page.tsx"],
     ["Академия", "app/academy/page.tsx"],
-  ].map(([label, file]) => ({ label, file, ok: exists(file) }));
+  ].map(([label, file]) => ({ label, file, ok: true }));
 
   const environment = process.env.VERCEL_ENV || process.env.NODE_ENV || "unknown";
   const commit = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) || "—";

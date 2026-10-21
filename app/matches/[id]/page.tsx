@@ -399,8 +399,8 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
                 <section className="publicMatchPanel publicMatchLineupsPanel premiumLineupsPanel" id="lineups">
                   <div className="publicMatchSectionHead premiumSectionHead"><p className="eyebrow blue">{t.lineupEyebrow}</p><h2>{t.lineups}</h2></div>
                   <div className="publicMatchLineupGrid premiumLineupGrid">
-                    <PublicLineup side="home" team={match.home} settings={lineupSettings} entries={lineupEntries} events={events} secondYellowIds={secondYellowIds} playerPhotos={playerPhotos} playerSlugs={playerSlugs} t={t} locale={locale} />
-                    <PublicLineup side="away" team={match.away} settings={lineupSettings} entries={lineupEntries} events={events} secondYellowIds={secondYellowIds} playerPhotos={playerPhotos} playerSlugs={playerSlugs} t={t} locale={locale} />
+                    <PublicLineup side="home" team={match.home} settings={lineupSettings} entries={lineupEntries} events={events} secondYellowIds={secondYellowIds} playerPhotos={playerPhotos} playerSlugs={playerSlugs} t={t} locale={locale} match={match} scoreAfterEvent={scoreAfterEvent} />
+                    <PublicLineup side="away" team={match.away} settings={lineupSettings} entries={lineupEntries} events={events} secondYellowIds={secondYellowIds} playerPhotos={playerPhotos} playerSlugs={playerSlugs} t={t} locale={locale} match={match} scoreAfterEvent={scoreAfterEvent} />
                   </div>
                 </section>
 
@@ -440,12 +440,14 @@ function scoreAtEnd(events: MatchEvent[], match: ClubMatch) {
   return { home, away };
 }
 
-function personShortLabel(value: string | null | undefined) {
+function playerSurnameForDisplay(value: string | null | undefined, isClubPlayer: boolean) {
   const text = String(value || "").trim();
   if (!text) return "—";
   const parts = text.split(/\s+/).filter(Boolean);
   if (parts.length === 1) return parts[0];
-  return parts[parts.length - 1];
+  // FC Edineț players are stored as First name + Surname.
+  // Opponent players entered manually in Match Center are Surname + First name.
+  return isClubPlayer ? parts[parts.length - 1] : parts[0];
 }
 
 function goalSummary(events: MatchEvent[], match: ClubMatch, teamId: string, locale: Locale) {
@@ -453,8 +455,10 @@ function goalSummary(events: MatchEvent[], match: ClubMatch, teamId: string, loc
     .filter(eventCountsAsGoal)
     .filter((event) => eventScoringTeamId(event, match) === teamId)
     .map((event) => {
+      const actorTeam = String(event.team_id) === String(match.home_team_id) ? match.home : match.away;
       const suffix = event.event_type === "own_goal" ? (locale === "ro" ? " (AG)" : " (АГ)") : "";
-      return `${eventMinute(event)} ${personShortLabel(event.player_name || event.description)}${suffix}`;
+      const surname = playerSurnameForDisplay(event.player_name || event.description, Boolean(actorTeam?.is_club));
+      return `${eventMinute(event)} ${surname}${suffix}`;
     })
     .join(", ");
 }
@@ -491,9 +495,13 @@ function eventGlyphClass(event: MatchEvent, secondYellow: boolean) {
 function FootballIcon({ className = "" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-      <circle cx="32" cy="32" r="27.5" fill="none" stroke="currentColor" strokeWidth="3" />
-      <path d="M32 15.5 40.5 22 37.2 32H26.8L23.5 22 32 15.5Z" fill="currentColor" />
-      <path d="m23.5 22-9.4 2.5-4 9.4 8.2 6.4 8.5-8.3M40.5 22l9.4 2.5 4 9.4-8.2 6.4-8.5-8.3M18.3 40.3l3.8 10.2 9.9 5.1 9.9-5.1 3.8-10.2M22.1 50.5l3.6-9.8h12.6l3.6 9.8" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx="32" cy="32" r="29" fill="#fff" stroke="#07121f" strokeWidth="3.2" />
+      <path d="M32 11.7 42.7 19.5 38.6 32H25.4l-4.1-12.5L32 11.7Z" fill="#07121f" />
+      <path d="M8.8 22.4 20.8 19l4.6 13-10.3 7.6L5.6 33Z" fill="#07121f" />
+      <path d="M55.2 22.4 43.2 19l-4.6 13 10.3 7.6 9.5-6.6Z" fill="#07121f" />
+      <path d="m15.1 39.6 10.3-7.6h13.2l10.3 7.6-4.2 12.6L32 59.2 19.3 52.2 15.1 39.6Z" fill="#fff" stroke="#07121f" strokeWidth="2.8" strokeLinejoin="round" />
+      <path d="m25.4 32 6.6 4.8 6.6-4.8-2.5 7.8h-8.2L25.4 32Z" fill="#07121f" />
+      <path d="M19.3 52.2 24 41.5h16l4.7 10.7" fill="none" stroke="#07121f" strokeWidth="2.8" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -626,7 +634,7 @@ function PublicTeam({ team }: { team: ClubMatch["home"] }) {
   );
 }
 
-function PublicLineup({ side, team, settings, entries, events, secondYellowIds, playerPhotos, playerSlugs, t, locale }: { side: "home" | "away"; team: ClubMatch["home"]; settings: MatchLineupSetting[]; entries: MatchLineupEntry[]; events: MatchEvent[]; secondYellowIds: Set<string>; playerPhotos: Map<string, string>; playerSlugs: Map<string, string>; t: Copy; locale: Locale }) {
+function PublicLineup({ side, team, settings, entries, events, secondYellowIds, playerPhotos, playerSlugs, t, locale, match, scoreAfterEvent }: { side: "home" | "away"; team: ClubMatch["home"]; settings: MatchLineupSetting[]; entries: MatchLineupEntry[]; events: MatchEvent[]; secondYellowIds: Set<string>; playerPhotos: Map<string, string>; playerSlugs: Map<string, string>; t: Copy; locale: Locale; match: ClubMatch; scoreAfterEvent: Map<string, { home: number; away: number }> }) {
   const setting = settings.find((row) => row.side === side);
   const starters = entries.filter((row) => row.side === side && row.lineup_role === "starter");
   const substitutes = entries.filter((row) => row.side === side && row.lineup_role === "substitute");
@@ -640,15 +648,15 @@ function PublicLineup({ side, team, settings, entries, events, secondYellowIds, 
       {starters.length === 0 && substitutes.length === 0 ? <div className="adminEmpty">{t.noLineup}</div> : (
         <>
           <h4>{t.starters}</h4>
-          <div className="publicLineupRows">{starters.map((row) => <LineupRow row={row} t={t} locale={locale} events={events} secondYellowIds={secondYellowIds} photo={row.player_id ? playerPhotos.get(String(row.player_id)) : undefined} profileSlug={row.player_id ? playerSlugs.get(String(row.player_id)) : undefined} isClub={Boolean(team?.is_club)} key={String(row.id)} />)}</div>
-          {substitutes.length > 0 ? <><h4>{t.substitutes}</h4><div className="publicLineupRows substitutes">{substitutes.map((row) => <LineupRow row={row} t={t} locale={locale} events={events} secondYellowIds={secondYellowIds} photo={row.player_id ? playerPhotos.get(String(row.player_id)) : undefined} profileSlug={row.player_id ? playerSlugs.get(String(row.player_id)) : undefined} isClub={Boolean(team?.is_club)} key={String(row.id)} />)}</div></> : null}
+          <div className="publicLineupRows">{starters.map((row) => <LineupRow row={row} t={t} locale={locale} events={events} secondYellowIds={secondYellowIds} photo={row.player_id ? playerPhotos.get(String(row.player_id)) : undefined} profileSlug={row.player_id ? playerSlugs.get(String(row.player_id)) : undefined} isClub={Boolean(team?.is_club)} teamName={teamName} scoreAfterEvent={scoreAfterEvent} key={String(row.id)} />)}</div>
+          {substitutes.length > 0 ? <><h4>{t.substitutes}</h4><div className="publicLineupRows substitutes">{substitutes.map((row) => <LineupRow row={row} t={t} locale={locale} events={events} secondYellowIds={secondYellowIds} photo={row.player_id ? playerPhotos.get(String(row.player_id)) : undefined} profileSlug={row.player_id ? playerSlugs.get(String(row.player_id)) : undefined} isClub={Boolean(team?.is_club)} teamName={teamName} scoreAfterEvent={scoreAfterEvent} key={String(row.id)} />)}</div></> : null}
         </>
       )}
     </article>
   );
 }
 
-function LineupRow({ row, t, locale, events, secondYellowIds, photo, profileSlug, isClub }: {
+function LineupRow({ row, t, locale, events, secondYellowIds, photo, profileSlug, isClub, teamName, scoreAfterEvent }: {
   row: MatchLineupEntry;
   t: Copy;
   locale: Locale;
@@ -657,38 +665,57 @@ function LineupRow({ row, t, locale, events, secondYellowIds, photo, profileSlug
   photo?: string;
   profileSlug?: string;
   isClub: boolean;
+  teamName: string;
+  scoreAfterEvent: Map<string, { home: number; away: number }>;
 }) {
   const name = (row.player_name || "").trim().toLocaleLowerCase();
   const playerEvents = events.filter((event) => (event.player_name || "").trim().toLocaleLowerCase() === name || (event.related_player_name || "").trim().toLocaleLowerCase() === name);
-  const goals = playerEvents.filter((event) => (event.event_type === "goal" || event.event_type === "penalty_goal") && (event.player_name || "").trim().toLocaleLowerCase() === name).length;
-  const ownGoals = playerEvents.filter((event) => event.event_type === "own_goal" && (event.player_name || "").trim().toLocaleLowerCase() === name).length;
-  const yellows = playerEvents.filter((event) => event.event_type === "yellow_card" && (event.player_name || "").trim().toLocaleLowerCase() === name).length;
-  const reds = playerEvents.filter((event) => (event.event_type === "red_card" || secondYellowIds.has(String(event.id))) && (event.player_name || "").trim().toLocaleLowerCase() === name).length;
+  const goalEvents = playerEvents.filter((event) => (event.event_type === "goal" || event.event_type === "penalty_goal") && (event.player_name || "").trim().toLocaleLowerCase() === name);
+  const ownGoalEvents = playerEvents.filter((event) => event.event_type === "own_goal" && (event.player_name || "").trim().toLocaleLowerCase() === name);
+  const yellowEvents = playerEvents.filter((event) => event.event_type === "yellow_card" && (event.player_name || "").trim().toLocaleLowerCase() === name);
+  const redEvents = playerEvents.filter((event) => (event.event_type === "red_card" || secondYellowIds.has(String(event.id))) && (event.player_name || "").trim().toLocaleLowerCase() === name);
   const substitutions = playerEvents.filter((event) => event.event_type === "substitution" && ((event.player_name || "").trim().toLocaleLowerCase() === name || (event.related_player_name || "").trim().toLocaleLowerCase() === name));
   const localizedPosition = positionLabels[locale][String(row.position || "").toLowerCase()] || row.position || "";
   const playerName = <span className="premiumLineupName">{row.player_name || "—"}<small>{localizedPosition}</small></span>;
+
+  const goalTooltip = goalEvents.map((event) => {
+    const score = scoreAfterEvent.get(String(event.id));
+    const eventName = event.event_type === "penalty_goal" ? (locale === "ro" ? "Gol din penalty" : "Гол с пенальти") : (locale === "ro" ? "Gol" : "Гол");
+    return `${eventMinute(event)} · ${eventName} · ${event.player_name || "—"} · ${teamName}${score ? ` · ${score.home}:${score.away}` : ""}`;
+  }).join("\n");
+  const ownGoalTooltip = ownGoalEvents.map((event) => {
+    const score = scoreAfterEvent.get(String(event.id));
+    return `${eventMinute(event)} · ${locale === "ro" ? "Autogol" : "Автогол"} · ${event.player_name || "—"} · ${teamName}${score ? ` · ${score.home}:${score.away}` : ""}`;
+  }).join("\n");
+  const yellowTooltip = yellowEvents.map((event) => `${eventMinute(event)} · ${secondYellowIds.has(String(event.id)) ? (locale === "ro" ? "Al doilea galben / roșu" : "Вторая жёлтая / красная") : (locale === "ro" ? "Cartonaș galben" : "Жёлтая карточка")} · ${event.player_name || "—"} · ${teamName}`).join("\n");
+  const redTooltip = redEvents.map((event) => `${eventMinute(event)} · ${secondYellowIds.has(String(event.id)) ? (locale === "ro" ? "Al doilea galben / roșu" : "Вторая жёлтая / красная") : (locale === "ro" ? "Cartonaș roșu" : "Красная карточка")} · ${event.player_name || "—"} · ${teamName}`).join("\n");
+
   return (
     <div className="publicLineupRow premiumLineupRow" data-player-name={name}>
       {isClub && profileSlug ? (
         <Link className="premiumLineupPlayerLink" href={`/team/${profileSlug}`} aria-label={`${row.player_name || "—"} — ${locale === "ro" ? "profil" : "профиль"}`}>
-          <div className={`premiumLineupAvatar${photo ? " has-photo" : ""}`}>{photo ? <img src={photo} alt="" /> : <span>{row.shirt_number ?? "—"}</span>}</div>
+          <div className={`premiumLineupAvatar${photo ? " has-photo" : ""}`}>
+            {photo ? <><img className="premiumLineupAvatarThumb" src={photo} alt="" /><img className="premiumLineupAvatarPreview" src={photo} alt="" /></> : <span>{row.shirt_number ?? "—"}</span>}
+          </div>
           <b>{row.shirt_number ?? "—"}</b>
           {playerName}
         </Link>
       ) : (
         <>
-          <div className={`premiumLineupAvatar${photo ? " has-photo" : ""}`}>{photo ? <img src={photo} alt="" /> : <span>{row.shirt_number ?? "—"}</span>}</div>
+          <div className={`premiumLineupAvatar${photo ? " has-photo" : ""}`}>
+            {photo ? <><img className="premiumLineupAvatarThumb" src={photo} alt="" /><img className="premiumLineupAvatarPreview" src={photo} alt="" /></> : <span>{row.shirt_number ?? "—"}</span>}
+          </div>
           <b>{row.shirt_number ?? "—"}</b>
           {playerName}
         </>
       )}
       <div className="premiumLineupBadges">
         {row.is_captain ? <i className="captain" data-tooltip={t.captain}>C</i> : null}
-        {goals ? <i className="goal" data-tooltip={locale === "ro" ? `${goals} gol(uri)` : `${goals} гол(а)`}><FootballIcon className="lineupBallIcon" />{goals > 1 ? <b>{goals}</b> : null}</i> : null}
-        {ownGoals ? <i className="own-goal" data-tooltip={locale === "ro" ? "Autogol" : "Автогол"}>{locale === "ro" ? "AG" : "АГ"}</i> : null}
-        {yellows ? <i className="yellow-card" data-tooltip={locale === "ro" ? `${yellows} cartonaș(e) galben(e)` : `${yellows} жёлтая карточка`}>{yellows > 1 ? yellows : ""}</i> : null}
-        {reds ? <i className="red-card" data-tooltip={locale === "ro" ? "Cartonaș roșu" : "Красная карточка"}></i> : null}
-        {substitutions.map((event) => <LineupSubstitutionBadge key={`sub-${String(event.id)}`} outgoing={event.player_name || ""} incoming={event.related_player_name || ""} tooltip={`${eventMinute(event)} · ${event.player_name || "—"} → ${event.related_player_name || "—"}`} />)}
+        {goalEvents.length ? <i className="goal" data-tooltip={goalTooltip}><FootballIcon className="lineupBallIcon" />{goalEvents.length > 1 ? <b>{goalEvents.length}</b> : null}</i> : null}
+        {ownGoalEvents.length ? <i className="own-goal" data-tooltip={ownGoalTooltip}>{locale === "ro" ? "AG" : "АГ"}</i> : null}
+        {yellowEvents.length ? <i className="yellow-card" data-tooltip={yellowTooltip}>{yellowEvents.length > 1 ? yellowEvents.length : ""}</i> : null}
+        {redEvents.length ? <i className="red-card" data-tooltip={redTooltip}>{redEvents.length > 1 ? redEvents.length : ""}</i> : null}
+        {substitutions.map((event) => <LineupSubstitutionBadge key={`sub-${String(event.id)}`} outgoing={event.player_name || ""} incoming={event.related_player_name || ""} tooltip={`${eventMinute(event)} · ${locale === "ro" ? "Schimbare" : "Замена"} · ${event.player_name || "—"} → ${event.related_player_name || "—"} · ${teamName}`} />)}
       </div>
     </div>
   );

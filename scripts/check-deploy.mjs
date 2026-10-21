@@ -70,6 +70,12 @@ try {
   } else if (diagnosticsVersion !== packageJson.version) {
     errors.push(`Diagnostics version mismatch: package.json=${packageJson.version}, diagnostics=${diagnosticsVersion}.`);
   }
+  // Runtime diagnostics must never inspect the repository filesystem. With
+  // Next.js/Turbopack a dynamic process.cwd() + fs access can trace the entire
+  // project into the server bundle and fail deployment size/static analysis.
+  if (/from\s+["']node:fs["']|from\s+["']node:path["']|\bfs\.(?:existsSync|readFileSync|readdirSync)\b|\bprocess\.cwd\s*\(/.test(diagnosticsSource)) {
+    errors.push("/admin/diagnostics contains runtime filesystem access. Move release-file checks to scripts/check-deploy.mjs.");
+  }
 } catch (error) {
   errors.push(`Admin diagnostics check failed: ${error instanceof Error ? error.message : String(error)}`);
 }

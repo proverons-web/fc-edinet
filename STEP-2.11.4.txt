@@ -1,0 +1,9 @@
+FC Edineț v2.11.4 — Diagnostics/Turbopack deploy hotfix
+
+Fix:
+- removed node:fs/node:path/process.cwd() runtime filesystem inspection from /admin/diagnostics;
+- release-file integrity remains checked before build by scripts/check-deploy.mjs;
+- added deploy guard that rejects runtime filesystem access if it is reintroduced into Diagnostics;
+- no feature/database changes.
+
+No SQL migration required.

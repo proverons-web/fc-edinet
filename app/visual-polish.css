@@ -1836,7 +1836,7 @@ button:disabled:hover,[aria-disabled="true"]:hover{transform:none!important}
 .premiumLineupIdentity{display:flex;align-items:center;gap:13px;min-width:0}.premiumLineupIdentity img,.premiumLineupIdentity>span{width:54px;height:54px;object-fit:contain;padding:5px;border-radius:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.13)}.premiumLineupIdentity>span{display:grid;place-items:center;font-weight:900;color:#fff}.premiumLineupIdentity h3{margin:0!important;font-size:23px!important}.premiumLineupIdentity small{color:#90aed0!important;font-size:8px!important;font-weight:900;letter-spacing:.1em}.premiumLineupMeta{display:grid;justify-items:end;gap:5px;color:#9db8d5;font-size:10px}.premiumLineupMeta b{color:#fff}
 .premiumLineupTeam h4{margin:15px 0 7px!important}.premiumLineupTeam .publicLineupRows{gap:5px!important;background:transparent!important}
 .premiumLineupRow{display:grid!important;grid-template-columns:34px 32px minmax(0,1fr) auto!important;gap:9px!important;align-items:center!important;min-height:49px!important;border:1px solid #e1e8f0;border-radius:7px!important;background:#fff!important;padding:6px 8px!important}.premiumLineupAvatar{width:34px;height:34px;border-radius:5px;overflow:hidden;background:#eaf1f8}.premiumLineupAvatar img{width:100%;height:100%;object-fit:cover;object-position:center top}.premiumLineupAvatar span{display:grid;place-items:center;width:100%;height:100%;font-size:9px;font-weight:900;color:#52708d}.premiumLineupRow>b{font-size:16px!important;text-align:center}.premiumLineupName{display:grid!important;gap:1px;font-size:12px!important;font-weight:800!important;min-width:0}.premiumLineupName>small{font-size:9px!important;font-weight:600;color:#8797a8}.premiumLineupBadges{display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-wrap:wrap}.premiumLineupBadges i{display:inline-flex;align-items:center;justify-content:center;min-width:23px;height:23px;padding:0 5px;border-radius:5px;background:#edf4fb;color:#135796;font-size:9px;font-style:normal;font-weight:900}.premiumLineupBadges i.yellow{background:#fff5c8;color:#8c6900}.premiumLineupBadges i.red{background:#ffe6ea;color:#b52e43}.publicLineupRows.substitutes .premiumLineupRow{opacity:1!important;background:#fbfcfe!important}
-.premiumLineupAvatar{position:relative;overflow:visible;z-index:1}.premiumLineupAvatar.has-photo img{border-radius:5px;transition:transform .16s ease,box-shadow .16s ease}.premiumLineupPlayerLink:hover .premiumLineupAvatar.has-photo img,.premiumLineupPlayerLink:focus-visible .premiumLineupAvatar.has-photo img,.premiumLineupRow:hover .premiumLineupAvatar.has-photo img{transform:scale(2.45);box-shadow:0 16px 28px rgba(7,29,60,.28);background:#fff;position:relative;z-index:8}
+.premiumLineupAvatar{position:relative;overflow:visible;z-index:1}.premiumLineupAvatar.has-photo img{border-radius:5px;transition:transform .16s ease,box-shadow .16s ease}
 
 .premiumInfoPanel{padding-bottom:24px!important}.premiumMatchFacts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:0}.premiumMatchFacts>div{display:grid;gap:5px;min-height:76px;padding:13px 14px;border:1px solid #e0e8f0;border-radius:8px;background:#f9fbfd}.premiumMatchFacts dt{font-size:8px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#8495a8}.premiumMatchFacts dd{margin:0;font-size:13px;font-weight:800;color:#1f3e5f;overflow-wrap:anywhere}.premiumMatchFacts .is-mvp{background:#fff9df;border-color:#efe0a3}.premiumMatchFacts .is-mvp dd{color:#0755a5}
 
@@ -1960,22 +1960,8 @@ button:disabled:hover,[aria-disabled="true"]:hover{transform:none!important}
   box-shadow:inset 4px 0 0 #20945a,0 5px 14px rgba(24,119,70,.08)!important;
 }
 
-/* Player photo zoom only when the pointer is directly over the photo. */
-.premiumLineupPlayerLink:hover .premiumLineupAvatar.has-photo img,
-.premiumLineupPlayerLink:focus-visible .premiumLineupAvatar.has-photo img,
-.premiumLineupRow:hover .premiumLineupAvatar.has-photo img{
-  transform:none!important;
-  box-shadow:none!important;
-}
-.premiumLineupAvatar.has-photo:hover{z-index:30}
-.premiumLineupAvatar.has-photo:hover img{
-  transform:scale(2.55)!important;
-  transform-origin:center center!important;
-  box-shadow:0 16px 30px rgba(7,29,60,.30)!important;
-  background:#fff!important;
-  position:relative!important;
-  z-index:30!important;
-}
+/* Player photo preview behavior is defined in v2.11.3 below. */
+.premiumLineupAvatar.has-photo{z-index:30}
 
 /* One unified large goal icon in lineups. */
 .premiumLineupBadges i.goal{
@@ -2006,4 +1992,26 @@ button:disabled:hover,[aria-disabled="true"]:hover{transform:none!important}
   .horizontalTimelineGrid{grid-template-columns:minmax(0,1fr) 112px minmax(0,1fr)!important;min-height:254px!important}
   .horizontalTimelineSegment{height:236px!important}
   .horizontalHalfTime{min-width:92px!important;margin-inline:10px!important}
+}
+
+/* v2.11.3 — classic ball icon, reliable photo preview, detailed lineup tooltips */
+.matchBallIcon{width:25px!important;height:25px!important;filter:drop-shadow(0 3px 7px rgba(3,20,39,.16))!important}
+.lineupBallIcon{width:29px!important;height:29px!important;filter:drop-shadow(0 2px 5px rgba(3,20,39,.14))!important}
+
+/* The enlarged portrait is a dedicated preview, so hover works only over the thumbnail. */
+.premiumLineupAvatar.has-photo{position:relative!important;overflow:visible!important;z-index:10!important;cursor:zoom-in}
+.premiumLineupAvatarThumb{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center top!important;border-radius:5px!important;transform:none!important;box-shadow:none!important}
+.premiumLineupAvatarPreview{position:absolute!important;left:calc(100% + 10px)!important;top:50%!important;z-index:120!important;width:118px!important;height:148px!important;object-fit:cover!important;object-position:center top!important;border:3px solid #fff!important;border-radius:10px!important;background:#fff!important;box-shadow:0 18px 42px rgba(4,25,52,.32)!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important;transform:translateY(-50%) scale(.92)!important;transform-origin:left center!important;transition:opacity .14s ease,transform .14s ease,visibility .14s ease!important}
+.premiumLineupAvatar.has-photo:hover .premiumLineupAvatarPreview,
+.premiumLineupAvatar.has-photo:focus-within .premiumLineupAvatarPreview{opacity:1!important;visibility:visible!important;transform:translateY(-50%) scale(1)!important}
+.premiumLineupAvatar.has-photo:hover .premiumLineupAvatarThumb{transform:none!important;box-shadow:none!important}
+
+/* Preserve all event details supplied by data-tooltip, including line breaks. */
+.premiumLineupBadges i[data-tooltip]:after{white-space:pre-line!important;min-width:210px!important;max-width:300px!important;text-align:left!important}
+.premiumLineupBadges i.goal{cursor:help!important}
+.premiumLineupBadges i.yellow-card,.premiumLineupBadges i.red-card,.premiumLineupBadges i.own-goal{cursor:help!important}
+
+@media(max-width:760px){
+  .premiumLineupAvatarPreview{left:42px!important;width:98px!important;height:126px!important}
+  .premiumLineupBadges i[data-tooltip]:after{min-width:180px!important;max-width:230px!important}
 }
