@@ -2059,3 +2059,27 @@ button:disabled:hover,[aria-disabled="true"]:hover{transform:none!important}
   font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif!important;
 }
 .premiumLineupBadges i.goal{min-width:30px!important;height:30px!important}
+
+
+/* v2.11.10 — restore readable multi-goal count badge */
+.premiumLineupBadges i.goal{position:relative!important;overflow:visible!important}
+.premiumLineupBadges .goalCountBadge{
+  position:absolute!important;
+  top:-6px!important;
+  right:-7px!important;
+  display:grid!important;
+  place-items:center!important;
+  min-width:17px!important;
+  height:17px!important;
+  padding:0 4px!important;
+  border:2px solid #fff!important;
+  border-radius:999px!important;
+  background:#0755a5!important;
+  color:#fff!important;
+  font-family:var(--font-fce-display),Arial,sans-serif!important;
+  font-size:9px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  font-style:normal!important;
+  box-shadow:0 2px 7px rgba(4,35,72,.20)!important;
+}
