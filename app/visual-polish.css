@@ -1965,8 +1965,8 @@ button:disabled:hover,[aria-disabled="true"]:hover{transform:none!important}
 
 /* One unified large goal icon in lineups. */
 .premiumLineupBadges i.goal{
-  min-width:34px!important;
-  height:34px!important;
+  min-width:28px!important;
+  height:28px!important;
   padding:0!important;
   gap:2px!important;
   overflow:visible!important;
@@ -1974,7 +1974,7 @@ button:disabled:hover,[aria-disabled="true"]:hover{transform:none!important}
 .premiumLineupBadges i.goal:before{display:none!important;content:none!important}
 .lineupBallIcon{display:block;width:28px;height:28px;color:#0b3b6c;filter:drop-shadow(0 2px 5px rgba(5,38,75,.12))}
 .premiumLineupBadges i.goal b{
-  position:absolute;right:-4px;top:-4px;display:grid;place-items:center;min-width:15px;height:15px;padding:0 3px;border-radius:999px;background:#0755a5;color:#fff;font-size:8px;line-height:1;font-style:normal;
+  position:absolute;right:-5px;top:-5px;display:grid;place-items:center;min-width:15px;height:15px;padding:0 3px;border-radius:999px;background:#0755a5;color:#fff;font-size:8px;line-height:1;font-style:normal;
 }
 .premiumLineupBadges i.yellow-card,
 .premiumLineupBadges i.red-card{
@@ -2017,9 +2017,9 @@ button:disabled:hover,[aria-disabled="true"]:hover{transform:none!important}
 }
 
 
-/* v2.11.6 — classic ball + true full-size player photo preview */
-.matchBallIcon{width:26px!important;height:26px!important;filter:drop-shadow(0 2px 5px rgba(0,0,0,.16))!important}
-.lineupBallIcon{width:31px!important;height:31px!important;filter:drop-shadow(0 2px 4px rgba(0,0,0,.14))!important}
+/* v2.11.7 — classic ball + true full-size player photo preview */
+.matchBallIcon{display:block!important;width:24px!important;height:24px!important;filter:drop-shadow(0 1px 2px rgba(3,22,47,.12))!important}
+.lineupBallIcon{display:block!important;width:24px!important;height:24px!important;filter:drop-shadow(0 1px 2px rgba(3,22,47,.10))!important}
 .premiumLineupAvatar.has-photo{position:relative!important;overflow:visible!important;z-index:20!important;cursor:zoom-in!important}
 .premiumLineupAvatarThumb{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center top!important;border-radius:5px!important;transform:none!important;box-shadow:none!important}
 .premiumLineupAvatarPreview{

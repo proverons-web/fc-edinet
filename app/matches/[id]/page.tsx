@@ -495,14 +495,13 @@ function eventGlyphClass(event: MatchEvent, secondYellow: boolean) {
 function FootballIcon({ className = "" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-      <circle cx="32" cy="32" r="29" fill="#fff" stroke="#050505" strokeWidth="4" />
-      <path d="M32 18.5 42.2 25.9 38.3 38H25.7l-3.9-12.1L32 18.5Z" fill="#050505" />
-      <path d="M18.2 7.8 29.6 3.6h8.8l7.4 4.2-5.5 10.1-8.3-3.3-8.3 3.3-5.5-10.1Z" fill="#050505" />
-      <path d="M4.9 23.5 10.8 13l9.9 6.1-3.4 10.6-10.6 4.4-1.8-10.6Z" fill="#050505" />
-      <path d="m59.1 23.5-5.9-10.5-9.9 6.1 3.4 10.6 10.6 4.4 1.8-10.6Z" fill="#050505" />
-      <path d="m12.2 46.5 6.2-9.2 10.7 3.5 1.2 11.2-10 6.2-8.1-11.7Z" fill="#050505" />
-      <path d="m51.8 46.5-6.2-9.2-10.7 3.5-1.2 11.2 10 6.2 8.1-11.7Z" fill="#050505" />
-      <path d="M22.7 25.3 17.3 29.7M41.3 25.3l5.4 4.4M25.7 38l-7.3 7.8M38.3 38l7.3 7.8M32 18.5v-4" fill="none" stroke="#050505" strokeWidth="3" strokeLinecap="round" />
+      <circle cx="32" cy="32" r="29" fill="#fff" stroke="#111827" strokeWidth="3.25" />
+      <path d="M32 16.5 40.9 23l-3.4 10.6H26.5L23.1 23 32 16.5Z" fill="#111827" />
+      <path d="M18 11.8 26 7.6h12l8 4.2-4.6 8.5L32 16.8l-9.4 3.5-4.6-8.5Z" fill="#111827" />
+      <path d="M9.4 22.5 18.2 17l4.1 3L25.8 33l-7.4 6L9.9 34l-.5-11.5Z" fill="#111827" />
+      <path d="M54.6 22.5 45.8 17l-4.1 3L38.2 33l7.4 6 8.5-5 .5-11.5Z" fill="#111827" />
+      <path d="M18.7 40.7 26.1 35h11.8l7.4 5.7-3.6 11L32 57.3l-9.7-5.6-3.6-11Z" fill="#111827" />
+      <path d="M22.3 20.1 17.9 31M41.7 20.1 46.1 31M26.1 35l-7.4 5.7M37.9 35l7.4 5.7M32 16.5V9.4M22.3 51.7l3.8-16.7M41.7 51.7 37.9 35" fill="none" stroke="#111827" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
