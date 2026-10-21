@@ -447,8 +447,8 @@ const careerTextByLocale = {
     starts: "Titular",
     minutes: "Minute",
     goals: "Goluri",
-    assists: "Assisturi",
-    contribution: "Gol + assist",
+    assists: "Pase decisive",
+    contribution: "Gol + pasă",
     cleanSheets: "Meciuri fără gol",
     saves: "Intervenții",
     yellow: "Galbene",
@@ -819,6 +819,7 @@ function PlayerRecentMatchRow({ item, locale, text }: { item: RecentPlayerMatch;
   const { stat, match } = item;
   const opponent = getOpponent(match);
   const result = getClubResult(match);
+  const resultLabel = locale === "ro" ? (result.className === "w" ? "V" : result.className === "d" ? "E" : "Î") : (result.className === "w" ? "В" : result.className === "d" ? "Н" : "П");
   const clubIsHome = Boolean(match.home?.is_club);
   return (
     <Link className="playerRecentMatch" href={`/matches/${match.id}`}>
@@ -827,7 +828,7 @@ function PlayerRecentMatchRow({ item, locale, text }: { item: RecentPlayerMatch;
         <span>{match.competition?.name ?? text.statsTournamentEmpty}</span>
       </div>
       <div className="playerRecentOpponent">
-        <span className={`playerMatchResult ${result.code.toLowerCase()}`}>{result.code}</span>
+        <span className={`playerMatchResult ${result.className}`} title={locale === "ro" ? (result.className === "w" ? "Victorie" : result.className === "d" ? "Egal" : "Înfrângere") : (result.className === "w" ? "Победа" : result.className === "d" ? "Ничья" : "Поражение")}>{resultLabel}</span>
         {opponent?.logo_url ? <img src={opponent.logo_url} alt="" /> : <span className="playerRecentOpponentLogo">FC</span>}
         <div>
           <strong>{opponent?.name ?? "—"}</strong>
@@ -867,9 +868,9 @@ function getClubResult(match: ClubMatch) {
   const clubHome = Boolean(match.home?.is_club);
   const clubScore = clubHome ? homeScore : awayScore;
   const opponentScore = clubHome ? awayScore : homeScore;
-  if (clubScore > opponentScore) return { code: "W" };
-  if (clubScore < opponentScore) return { code: "L" };
-  return { code: "D" };
+  if (clubScore > opponentScore) return { className: "w" as const };
+  if (clubScore < opponentScore) return { className: "l" as const };
+  return { className: "d" as const };
 }
 
 function formatScore(match: ClubMatch) {

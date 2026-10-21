@@ -2083,3 +2083,45 @@ button:disabled:hover,[aria-disabled="true"]:hover{transform:none!important}
   font-style:normal!important;
   box-shadow:0 2px 7px rgba(4,35,72,.20)!important;
 }
+
+/* v2.12.0 — site-wide QA & final polish */
+main:not(.adminPage){overflow-x:clip}
+main:not(.adminPage) :where(.container,.managedPageHeroInner,.proSectionInner,.newsEditorialLeadGrid,.newsEditorialSecondary,.players,.publicMatchList,.standingsClubFocus,.standingsTopThree,.teamStatisticsTableWrap,.playerStatsContainer,.playerCareerContainer,.premiumMatchContent,.premiumLineupGrid,.proCardGrid)>*{min-width:0}
+.pageHero h1,.managedPageHero h1,.proManagedHero h1,.sectionHeading h2,.proSectionHeading h2,.newsEditorialHeading h2,.teamGroupHeading h2,.playerStatsHeader h2,.playerCareerHeader h2{overflow-wrap:anywhere;text-wrap:balance}
+.pageHero p,.managedPageHeroInner>p,.proManagedHeroInner>p{max-width:min(760px,100%);overflow-wrap:anywhere}
+.globalHeader a:focus-visible,.globalHeader button:focus-visible,.globalFooter a:focus-visible,main:not(.adminPage) a:focus-visible,main:not(.adminPage) button:focus-visible,main:not(.adminPage) input:focus-visible,main:not(.adminPage) select:focus-visible,main:not(.adminPage) summary:focus-visible{outline:3px solid rgba(255,211,40,.92);outline-offset:3px}
+.globalHeader .searchButton{display:grid;place-items:center;text-decoration:none}
+.mobileMenu .searchMobileLink{display:block}
+.publicMatchCard :where(.publicMatchMeta,.publicTeams,.matchFavoriteAction),.playerRecentMatch>*,.newsLeadBody,.newsSecondaryBody,.proMediaAlbumCopy,.proMediaVideoCopy{min-width:0}
+.publicTeams strong,.playerRecentOpponent strong,.proMediaAlbumCopy h3,.proMediaVideoCopy h3{overflow-wrap:anywhere}
+.publicMatchDetailsButton,.favoriteButton,.favoriteActiveButton{min-height:42px;display:inline-flex;align-items:center;justify-content:center}
+.matchPublicSection .adminEmpty,.managedProPage .adminEmpty{border:1px solid rgba(9,42,79,.12);border-radius:8px;background:#fff;color:#60758c;box-shadow:0 10px 28px rgba(4,28,61,.045)}
+.playerCompetitionStatsWrap,.teamStatisticsTableWrap,.teamStatisticsHistoryTableWrap,.statisticsSeasonTableWrap,.standingsPageContainer{max-width:100%}
+.playerCompetitionStatsWrap,.teamStatisticsTableWrap,.teamStatisticsHistoryTableWrap,.statisticsSeasonTableWrap{scrollbar-width:thin;scrollbar-color:#a9bbcc transparent}
+
+/* Search is a real route now, not a dead header icon. */
+.siteSearchHero{position:relative;padding:72px 0 58px;background:radial-gradient(circle at 82% 18%,rgba(15,99,255,.24),transparent 30%),linear-gradient(135deg,#020e21,#073b73);color:#fff;border-bottom:3px solid #ffd328}
+.siteSearchHero .eyebrow{color:#ffd328}.siteSearchHero h1{margin:8px 0 12px;font-family:var(--font-fce-display),Arial,sans-serif;font-size:clamp(48px,7vw,92px);line-height:.9;text-transform:uppercase;letter-spacing:-.04em}.siteSearchHero>div>p:last-of-type{max-width:720px;color:#cfdef0;font-size:16px;line-height:1.55}
+.siteSearchForm{max-width:820px;margin-top:30px}.siteSearchForm>label{display:block;margin-bottom:8px;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#9bb7d6}.siteSearchForm>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}.siteSearchForm input{width:100%;min-height:54px;border:1px solid rgba(255,255,255,.2);border-radius:6px;background:rgba(255,255,255,.08);padding:0 16px;color:#fff;font:inherit}.siteSearchForm input::placeholder{color:#9fb3ca}.siteSearchForm button{min-width:128px;border:0;border-radius:5px;background:#ffd328;color:#061a37;font-weight:950;text-transform:uppercase;letter-spacing:.04em;cursor:pointer}
+.siteSearchResults{padding:44px 0 84px;background:#f3f6fa;min-height:42vh}.siteSearchSummary{display:flex;align-items:center;gap:9px;margin-bottom:34px;padding-bottom:14px;border-bottom:1px solid #d9e3ed;color:#73869b}.siteSearchSummary strong{color:#0a315d;font-size:18px}.siteSearchSummary b{margin-left:auto;display:grid;place-items:center;min-width:34px;height:34px;border-radius:999px;background:#0755a5;color:#fff}
+.siteSearchGroup{margin-top:38px}.siteSearchGroup>header{margin-bottom:14px}.siteSearchGroup h2{margin:4px 0 0;font-family:var(--font-fce-display),Arial,sans-serif;font-size:34px;text-transform:uppercase;color:#082b55}.siteSearchPlayerGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.siteSearchPlayer{display:grid;grid-template-columns:54px minmax(0,1fr) auto;align-items:center;gap:12px;min-height:70px;padding:8px 12px;border:1px solid #dce6ef;border-radius:8px;background:#fff;color:#0b3159;text-decoration:none;transition:.16s ease}.siteSearchPlayer:hover{transform:translateY(-1px);box-shadow:0 10px 26px rgba(7,38,75,.08);border-color:#c5d7e8}.siteSearchPlayer>img{width:54px;height:54px;object-fit:cover;object-position:center top;border-radius:6px;background:#eaf1f8}.siteSearchPlayer>img.fallback{object-fit:contain;padding:9px;opacity:.35}.siteSearchPlayer>div{display:grid;gap:2px}.siteSearchPlayer span{font-size:10px;font-weight:900;color:#0f63c7}.siteSearchPlayer strong{font-size:14px;overflow-wrap:anywhere}.siteSearchPlayer>b{font-size:20px;color:#0755a5}
+.siteSearchNewsList{display:grid;border:1px solid #dce6ef;border-radius:8px;background:#fff;overflow:hidden}.siteSearchNewsList>a{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:16px 18px;border-bottom:1px solid #e7edf4;color:#153958;text-decoration:none}.siteSearchNewsList>a:last-child{border-bottom:0}.siteSearchNewsList strong{font-family:var(--font-fce-display),Arial,sans-serif;font-size:19px}.siteSearchNewsList p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;margin:5px 0 0;color:#728398;line-height:1.45}.siteSearchNewsList>a>span{align-self:center;color:#0755a5;font-size:19px}
+.siteSearchAlbumGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.siteSearchAlbumGrid>a{display:grid;gap:9px;padding:8px;border:1px solid #dce6ef;border-radius:8px;background:#fff;color:#12395f;text-decoration:none}.siteSearchAlbumGrid>a>img,.siteSearchAlbumFallback{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:5px;background:#dfe8f1}.siteSearchAlbumFallback{display:grid;place-items:center}.siteSearchAlbumFallback img{width:58px;opacity:.25}.siteSearchAlbumGrid strong{padding:0 4px 4px;overflow-wrap:anywhere}.siteSearchHint,.siteSearchMessage{display:flex;align-items:center;gap:18px;max-width:760px;padding:24px;border:1px solid #dce6ef;border-radius:10px;background:#fff}.siteSearchHint img,.siteSearchMessage img{width:58px;height:68px;object-fit:contain;opacity:.34}.siteSearchHint strong,.siteSearchMessage strong{display:block;color:#0a315d;font-family:var(--font-fce-display),Arial,sans-serif;font-size:24px;text-transform:uppercase}.siteSearchHint p,.siteSearchMessage p{margin:5px 0 0;color:#718398;line-height:1.55}
+
+/* Long localized labels and narrow screens. */
+@media(max-width:980px){
+  .siteSearchAlbumGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .siteSearchPlayerGrid{grid-template-columns:1fr}
+  .pageHero h1,.managedPageHero h1,.proManagedHero h1{max-width:100%!important}
+}
+@media(max-width:680px){
+  main:not(.adminPage) .container{width:min(100% - 28px,1200px)}
+  .siteSearchHero{padding:48px 0 38px}.siteSearchHero h1{font-size:48px}.siteSearchForm>div{grid-template-columns:1fr}.siteSearchForm button{min-height:50px;width:100%}
+  .siteSearchResults{padding:30px 0 58px}.siteSearchAlbumGrid{grid-template-columns:1fr}.siteSearchSummary{align-items:flex-start;flex-wrap:wrap}.siteSearchSummary b{margin-left:0}.siteSearchHint,.siteSearchMessage{align-items:flex-start;padding:18px}.siteSearchHint img,.siteSearchMessage img{width:42px;height:50px}
+  .sectionHeading h2,.proSectionHeading h2,.newsEditorialHeading h2,.teamGroupHeading h2,.playerStatsHeader h2,.playerCareerHeader h2{font-size:clamp(30px,10vw,44px)!important}
+  .publicMatchCard{max-width:100%}.publicTeams{min-width:0}.publicTeams>div{min-width:0}.publicTeams strong{font-size:12px!important}
+  .premiumLineupAvatarPreview{max-width:calc(100vw - 76px)!important}
+}
+@media(hover:none){
+  .playerCard:hover,.newsLeadStory:hover,.newsSecondaryStory:hover,.siteSearchPlayer:hover,.fcRefRecentMatchCard:hover{transform:none!important}
+}

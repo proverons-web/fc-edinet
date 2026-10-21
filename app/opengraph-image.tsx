@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 export const runtime = "nodejs";
-export const alt = "FC Edineț — official football club";
+export const alt = "FC Edineț — Edineț, Moldova";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -23,7 +23,7 @@ export default async function Image() {
           <div style={{ display: "flex", flexDirection: "column", maxWidth: 650 }}>
             <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: 5, color: "#ffd328" }}>FC EDINEȚ • MOLDOVA</div>
             <div style={{ fontSize: 92, fontWeight: 900, letterSpacing: -4, lineHeight: .92, marginTop: 24 }}>FC EDINEȚ</div>
-            <div style={{ fontSize: 29, lineHeight: 1.25, color: "rgba(255,255,255,.80)", marginTop: 30 }}>Football • Edineț • Moldova</div>
+            <div style={{ fontSize: 29, lineHeight: 1.25, color: "rgba(255,255,255,.80)", marginTop: 30 }}>EDINEȚ • MOLDOVA</div>
           </div>
         </div>
       </div>

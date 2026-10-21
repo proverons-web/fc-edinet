@@ -1,0 +1,18 @@
+FC Edineț v2.12.0 — Site-wide QA & Polish
+
+Public site QA:
+- fixed Russian/Romanian localization leaks on Home, Team and Player pages;
+- corrected Romanian assists terminology to “Pase decisive” / “Gol + pasă”;
+- localized player result badges (RU/RO instead of W/D/L);
+- made match stadium display consistent with the home team stadium;
+- removed public English fallback copy from social preview images;
+- converted the header search icon from a dead control into a real site search route;
+- added search for published news, active players and media albums;
+- added site-wide responsive/overflow/focus polish for desktop, tablet and mobile;
+- improved public empty states, long labels and narrow-screen layouts.
+
+Admin polish:
+- removed several mixed English preview labels in Site Builder / Club Builder;
+- fixed stale preview version copy.
+
+No SQL migration required.

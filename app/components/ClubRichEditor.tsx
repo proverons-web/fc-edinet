@@ -164,7 +164,7 @@ export default function ClubRichEditor({
           <div className="clubRichInsertAfter"><button type="button" onClick={() => insert("paragraph", block.id)}>+ текст ниже</button><button type="button" onClick={() => insert("image", block.id)}>+ фото ниже</button></div>
         </article>)}
       </div>
-      <aside className="clubRichLivePreview"><div className="clubRichLivePreviewHead"><span>LIVE PREVIEW</span><b>{content.blocks.length} блоков</b></div><ClubRichContentView content={content}/></aside>
+      <aside className="clubRichLivePreview"><div className="clubRichLivePreviewHead"><span>ПРЕДПРОСМОТР</span><b>{content.blocks.length} блоков</b></div><ClubRichContentView content={content}/></aside>
     </div>
   </section>;
 }

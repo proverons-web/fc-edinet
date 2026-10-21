@@ -241,7 +241,7 @@ export default function SitePageVisualEditor({
           <div className="formSectionTitle"><p className="eyebrow blue">АКТИВНЫЙ ОБЪЕКТ</p><h2>{layerDefinitions.find((layer) => layer.key === selectedLayer)?.label ?? selectedLayer}</h2><p>{layerDefinitions.find((layer) => layer.key === selectedLayer)?.description}</p></div>
           <div className={`heroLayerStatus ${heroLayerState(layerConfig, selectedLayer).visible ? "visible" : "hidden"}`}><strong>{heroLayerState(layerConfig, selectedLayer).visible ? "Слой видим" : "Слой скрыт"}</strong><span>{heroLayerState(layerConfig, selectedLayer).locked ? "🔒 Заблокирован — сначала разблокируй его в списке слоёв." : "Можно менять видимость и порядок слоя."}</span></div>
           {selectedLayer === "background" && <div className="adminNotice">Для фона ниже доступны Image Editor 2.0, crop, focus, zoom и отдельные кадры Desktop / Tablet / Mobile.</div>}
-          {selectedLayer !== "background" && <div className="adminNotice">В v2.1.5 объектный редактор управляет слоями, видимостью, блокировкой и порядком. Точное drag & drop позиционирование отдельных элементов всех Hero будет развиваться поверх этой общей системы.</div>}
+          {selectedLayer !== "background" && <div className="adminNotice">Объектный редактор управляет слоями, видимостью, блокировкой и порядком. Точное позиционирование элементов Hero работает поверх этой общей системы.</div>}
         </section>
       </div>
 

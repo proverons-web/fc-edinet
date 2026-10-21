@@ -13,7 +13,7 @@ import PageHeroShell from "@/app/components/PageHeroShell";
 import type { HomepageDesignSnapshot, HomepageHero, HomepageSection, HomepageSectionKey, HomepagePublishedBlock, SitePageDesignKey } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Preview Visual Editor — FC Edineț" };
+export const metadata = { title: "Предпросмотр визуального редактора — FC Edineț" };
 
 type Props = { searchParams?: Promise<Record<string, string | string[] | undefined>> };
 type PreviewDevice = "desktop" | "tablet" | "mobile";
@@ -42,7 +42,7 @@ export default async function DesignPreviewPage({ searchParams }: Props) {
     <div className={`publishingPreviewViewport ${device}`}>
       <div className="publishingPreviewSite">
         <PreviewHeader config={header} device={device} />
-        {rawPage === "home" ? <HomeDraftPreview supabase={supabase} /> : rawPage === "global_header" ? <GlobalShowcase title="Global Header" text="Preview показывает текущий черновик Header вместе с черновиками Footer и Design System." /> : rawPage === "global_footer" ? <GlobalShowcase title="Global Footer" text="Прокрути страницу вниз — Footer ниже отображается из текущего черновика." /> : rawPage === "global_design_system" ? <DesignSystemShowcase config={designSystem} /> : <SiteHeroDraftPreview pageKey={rawPage as SitePageDesignKey} supabase={supabase} />}
+        {rawPage === "home" ? <HomeDraftPreview supabase={supabase} /> : rawPage === "global_header" ? <GlobalShowcase title="Global Header" text="Предпросмотр показывает текущий черновик шапки вместе с черновиками подвала и дизайн-системы." /> : rawPage === "global_footer" ? <GlobalShowcase title="Global Footer" text="Прокрути страницу вниз — подвал отображается из текущего черновика." /> : rawPage === "global_design_system" ? <DesignSystemShowcase config={designSystem} /> : <SiteHeroDraftPreview pageKey={rawPage as SitePageDesignKey} supabase={supabase} />}
         <PreviewFooter config={footer} />
       </div>
     </div>
@@ -132,7 +132,7 @@ async function SiteHeroDraftPreview({ pageKey, supabase }: { pageKey: SitePageDe
 }
 
 function PreviewToolbar({ page, device }: { page: string; device: PreviewDevice }) {
-  return <div className="publishingPreviewToolbar"><div><strong>FC EDINEȚ • DRAFT PREVIEW</strong><span>Только для editor/admin. Публичный сайт не изменён.</span></div><div className="publishingPreviewDevices">{(["desktop","tablet","mobile"] as PreviewDevice[]).map((item) => <Link key={item} className={device === item ? "active" : ""} href={`/admin/design/preview?page=${encodeURIComponent(page)}&device=${item}`}>{item}</Link>)}<Link className="back" href={`/admin/design?page=${encodeURIComponent(page)}`}>← Редактор</Link></div></div>;
+  return <div className="publishingPreviewToolbar"><div><strong>FC EDINEȚ • ПРЕДПРОСМОТР ЧЕРНОВИКА</strong><span>Только для editor/admin. Публичный сайт не изменён.</span></div><div className="publishingPreviewDevices">{(["desktop","tablet","mobile"] as PreviewDevice[]).map((item) => <Link key={item} className={device === item ? "active" : ""} href={`/admin/design/preview?page=${encodeURIComponent(page)}&device=${item}`}>{item}</Link>)}<Link className="back" href={`/admin/design?page=${encodeURIComponent(page)}`}>← Редактор</Link></div></div>;
 }
 
 function PreviewHeader({ config, device }: { config: HeaderDesignConfig; device: PreviewDevice }) {
@@ -140,10 +140,10 @@ function PreviewHeader({ config, device }: { config: HeaderDesignConfig; device:
   return <>{config.topbar_enabled && <div className="draftPreviewTopbar"><span>{config.topbar_text_ru}</span>{config.show_language && <b>RU / RO</b>}</div>}<header className={`draftPreviewHeader ${config.background}`} style={{ minHeight: device === "mobile" ? config.height_mobile : config.height_desktop }}><div className="draftPreviewBrand">{config.logo_mode === "image" && config.logo_url ? <img src={config.logo_url} alt="" style={{ width: config.logo_width }} /> : <span style={{ width: config.logo_width, height: Math.round(config.logo_width * 1.17) }}>FCE</span>}{config.show_brand_text && <b>{config.brand_name}<small>{config.brand_subtitle}</small></b>}</div>{device === "mobile" ? <button>☰</button> : <nav>{visible.map((key) => <span key={key}>{headerLabels[key]}</span>)}</nav>}<div>{config.show_search && <span>⌕</span>}{config.show_account && <span>●</span>}</div></header></>;
 }
 function PreviewFooter({ config }: { config: FooterDesignConfig }) {
-  return <footer className={`draftPreviewFooter ${config.background}`} style={{ paddingTop: config.padding_top, paddingBottom: config.padding_bottom }}><div className="draftPreviewFooterGrid"><div><strong>{config.brand_name}</strong>{config.show_about && <p>{config.about_ru}</p>}</div>{config.columns.filter((c) => c.visible).map((column) => <div key={column.id}><b>{column.title_ru}</b>{column.links.map((link) => <span key={link.id}>{link.label_ru}</span>)}</div>)}</div><div className="draftPreviewFooterBottom">{config.show_copyright && <span>{config.copyright_text}</span>}{config.show_version && <span>Версия 2.2.0</span>}</div></footer>;
+  return <footer className={`draftPreviewFooter ${config.background}`} style={{ paddingTop: config.padding_top, paddingBottom: config.padding_bottom }}><div className="draftPreviewFooterGrid"><div><strong>{config.brand_name}</strong>{config.show_about && <p>{config.about_ru}</p>}</div>{config.columns.filter((c) => c.visible).map((column) => <div key={column.id}><b>{column.title_ru}</b>{column.links.map((link) => <span key={link.id}>{link.label_ru}</span>)}</div>)}</div><div className="draftPreviewFooterBottom">{config.show_copyright && <span>{config.copyright_text}</span>}{config.show_version && <span>Версия 2.12.0</span>}</div></footer>;
 }
 function GlobalShowcase({ title, text }: { title: string; text: string }) { return <div className="globalDraftShowcase"><p className="eyebrow blue">PUBLISHING 2.0</p><h1>{title}</h1><p>{text}</p><div className="draftSkeletonGrid"><span/><span/><span/></div><div className="draftSkeletonGrid"><span/><span/><span/></div></div>; }
-function DesignSystemShowcase({ config }: { config: DesignSystemConfig }) { return <div className="globalDraftShowcase"><p className="eyebrow blue">DESIGN SYSTEM PREVIEW</p><h1 style={{ color: config.primary }}>FC EDINEȚ</h1><p>Primary: {config.primary} • Navy: {config.navy} • Accent: {config.accent}</p><div className="designPreviewSwatches"><span style={{ background: config.primary }}/><span style={{ background: config.navy }}/><span style={{ background: config.accent }}/><span style={{ background: config.surface }}/></div><div className="draftSkeletonGrid"><span/><span/><span/></div></div>; }
+function DesignSystemShowcase({ config }: { config: DesignSystemConfig }) { return <div className="globalDraftShowcase"><p className="eyebrow blue">ПРЕДПРОСМОТР ДИЗАЙН-СИСТЕМЫ</p><h1 style={{ color: config.primary }}>FC EDINEȚ</h1><p>Основной: {config.primary} • Тёмный: {config.navy} • Акцент: {config.accent}</p><div className="designPreviewSwatches"><span style={{ background: config.primary }}/><span style={{ background: config.navy }}/><span style={{ background: config.accent }}/><span style={{ background: config.surface }}/></div><div className="draftSkeletonGrid"><span/><span/><span/></div></div>; }
 function PreviewSection({ title, detail }: { title: string; detail: string }) { return <section className="draftSectionCard"><p className="eyebrow blue">FC EDINEȚ</p><h2>{title}</h2><small>{detail}</small><div className="draftSkeletonGrid"><span/><span/><span/><span/></div></section>; }
 
 const sectionLabels: Record<HomepageSectionKey, string> = { matches: "Матчи", standings: "Турнирная таблица", news: "Новости", players: "Команда", media: "Фото и видео", partners: "Партнёры" };

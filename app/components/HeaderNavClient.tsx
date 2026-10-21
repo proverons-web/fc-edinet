@@ -108,7 +108,7 @@ export default function HeaderNavClient({
 
       <div className="navActions">
         {showLanguageMobile && <div className="headerMobileLanguage"><LanguageSwitcher locale={locale}/></div>}
-        {showSearch && <button type="button" className="searchButton" aria-label={labels.search}><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg></button>}
+        {showSearch && <Link href="/search" className="searchButton" aria-label={labels.search} title={labels.search}><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg></Link>}
         {showAccount && (isAuthenticated ? (
           <div className="accountMenuWrap" ref={accountWrapRef}>
             <button className="accountMenuButton" type="button" onClick={() => setAccountOpen(!accountOpen)} aria-expanded={accountOpen} aria-haspopup="menu" aria-controls="account-menu-dropdown">
@@ -132,6 +132,7 @@ export default function HeaderNavClient({
         <Link href="/" className={isActive("/") ? "isActive" : undefined} aria-current={isActive("/") ? "page" : undefined} onClick={() => setMenuOpen(false)}>{labels.home}</Link>
         {links.map((link) => <Link key={link.href} href={link.href} className={isActive(link.href) ? "isActive" : undefined} aria-current={isActive(link.href) ? "page" : undefined} onClick={() => setMenuOpen(false)}>{link.label}</Link>)}
         {showAdminLink && isStaff && <Link href="/admin" onClick={() => setMenuOpen(false)}>{labels.admin}</Link>}
+        {showSearch && <Link href="/search" onClick={() => setMenuOpen(false)}>{labels.search}</Link>}
         {showAccount && (isAuthenticated ? <>
           <Link href="/account" onClick={() => setMenuOpen(false)}>{labels.dashboard}</Link>
           <Link href="/account/profile" onClick={() => setMenuOpen(false)}>{labels.profile}</Link>

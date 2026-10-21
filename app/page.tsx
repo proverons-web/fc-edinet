@@ -262,7 +262,7 @@ export default async function Home() {
         </div>
 
         <div className="container fcRefHeroBottom">
-          <span>TRADIȚIE</span><i>•</i><span>UNITATE</span><i>•</i><span>VICTORIE</span>
+          <span>{locale === "ro" ? "TRADIȚIE" : "ТРАДИЦИЯ"}</span><i>•</i><span>{locale === "ro" ? "UNITATE" : "ЕДИНСТВО"}</span><i>•</i><span>{locale === "ro" ? "VICTORIE" : "ПОБЕДА"}</span>
           <strong>EDINEȚ<br/>{locale === "ro" ? "DOAR ÎNAINTE" : "ТОЛЬКО ВПЕРЁД"}</strong>
         </div>
       </section>

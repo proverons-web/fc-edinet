@@ -180,12 +180,12 @@ function AcademyPathway({ section, locale }: { section: ProPageLayoutConfig["sec
     ["U7–U9", "Selecție", "Coordonare, tehnică de bază și bucuria jocului."],
     ["U11–U13", "Fundamente", "Citirea jocului, disciplină și responsabilitate."],
     ["U15–U17", "Competiție", "Ritm, intensitate și pregătire pentru seniori."],
-    ["SENIOR", "Echipa mare", "Integrare în structura primei echipe FC Edineț."],
+    ["SENIORI", "Echipa mare", "Integrare în structura primei echipe FC Edineț."],
   ] : [
     ["U7–U9", "Набор", "Координация, базовая техника и удовольствие от игры."],
     ["U11–U13", "Фундамент", "Чтение игры, дисциплина и ответственность."],
     ["U15–U17", "Соревнования", "Темп, интенсивность и подготовка к взрослому футболу."],
-    ["SENIOR", "Основная команда", "Переход в структуру первой команды FC Edineț."],
+    ["ОСНОВА", "Основная команда", "Переход в структуру первой команды FC Edineț."],
   ];
   return <section className={`${proSectionClass(section)} academyPathwaySection`} style={proSectionStyle(section)}><div className="proSectionMotion"><div className="proSectionInner"><SectionHeading eyebrow={locale === "ro" ? "DRUMUL JUCĂTORULUI" : "ПУТЬ ИГРОКА"} title={locale === "ro" ? "De la academie la prima echipă" : "От академии до первой команды"} align={section.align}/><div className={`proCardGrid proAcademyPathway proAcademyPathway-${section.variant}`}>{steps.map(([age,title,body], index) => <article key={title}><div className="proAcademyPathIndex"><span>{String(index + 1).padStart(2, "0")}</span><b>{age}</b></div><h3>{title}</h3><p>{body}</p></article>)}</div></div></div></section>;
 }
