@@ -12,6 +12,8 @@ type Summary = {
 };
 type Comparison = { current_unique: number; previous_unique: number; current_pageviews: number; previous_pageviews: number; current_new: number; previous_new: number };
 type DailyRow = { date: string; unique: number; pageviews: number };
+type TrafficRow = { start: string; end: string; unique: number; pageviews: number };
+type TrafficPayload = { granularity: "day" | "week" | "month"; rows: TrafficRow[] };
 type PageRow = { path: string; pageviews: number; unique_visitors: number };
 type ReferrerRow = { source: string; pageviews: number; unique_visitors: number };
 type CountryRow = { country_code: string; pageviews: number; unique_visitors: number };
@@ -65,20 +67,39 @@ function fmtDate(value: string, withTime = false) {
     : { day: "2-digit", month: "short", timeZone: "Europe/Chisinau" }).format(date);
 }
 function delta(current: number, previous: number) {
-  if (!previous) return current ? 100 : 0;
+  if (!previous) return null;
   return Math.round(((current - previous) / previous) * 100);
 }
 function deltaText(current: number, previous: number) {
   const d = delta(current, previous);
-  return `${d > 0 ? "+" : ""}${d}% к прошлому периоду`;
+  if (d === null) return current ? "Новые данные · в прошлом периоде 0" : "Без изменений · в прошлом периоде 0";
+  if (d === 0) return `Без изменений · было ${fmt(previous)}`;
+  return `${d > 0 ? "+" : ""}${d}% · было ${fmt(previous)}`;
 }
+function normalizeTraffic(value: unknown, fallback: DailyRow[]): TrafficPayload {
+  if (value && typeof value === "object") {
+    const raw = value as Record<string, unknown>;
+    const granularity = raw.granularity === "week" || raw.granularity === "month" ? raw.granularity : "day";
+    const rows = Array.isArray(raw.rows) ? raw.rows as TrafficRow[] : [];
+    if (rows.length) return { granularity, rows };
+  }
+  return { granularity: "day", rows: fallback.map((row) => ({ start: row.date, end: row.date, unique: row.unique, pageviews: row.pageviews })) };
+}
+function chartLabel(row: TrafficRow, granularity: TrafficPayload["granularity"]) {
+  const start = new Date(`${row.start}T12:00:00`);
+  const end = new Date(`${row.end}T12:00:00`);
+  if (granularity === "month") return new Intl.DateTimeFormat("ru-RU", { month: "short", year: "2-digit" }).format(start);
+  if (granularity === "week") {
+    const a = new Intl.DateTimeFormat("ru-RU", { day: "2-digit", month: "short" }).format(start);
+    const b = new Intl.DateTimeFormat("ru-RU", { day: "2-digit", month: "short" }).format(end);
+    return `${a}–${b}`;
+  }
+  return new Intl.DateTimeFormat("ru-RU", { day: "2-digit", month: "short" }).format(start);
+}
+function share(value: number, total: number) { return total > 0 ? Math.round((value / total) * 100) : 0; }
 function countryName(code: string | null | undefined) {
   if (!code || code === "XX") return "Не определено";
   try { return regionNames.of(code) || code; } catch { return code; }
-}
-function flag(code: string | null | undefined) {
-  if (!code || !/^[A-Z]{2}$/.test(code)) return "🌐";
-  return String.fromCodePoint(...[...code].map((char) => 127397 + char.charCodeAt(0)));
 }
 function deviceLabel(value: string | null | undefined) {
   if (value === "mobile") return "Телефон";
@@ -98,7 +119,10 @@ export default async function SiteAnalyticsPage({ searchParams }: PageProps) {
   const requested = Number(single(params.period));
   const days = allowedPeriods.includes(requested) ? requested : 30;
   const { supabase } = await requireEditor();
-  const { data, error } = await supabase.rpc("admin_site_analytics", { p_days: days });
+  const [{ data, error }, { data: trafficData }] = await Promise.all([
+    supabase.rpc("admin_site_analytics", { p_days: days }),
+    supabase.rpc("admin_site_traffic_chart", { p_days: days }),
+  ]);
   const analytics = normalizePayload(data, days);
 
   if (error || !analytics) {
@@ -110,13 +134,16 @@ export default async function SiteAnalyticsPage({ searchParams }: PageProps) {
 
   const summary = analytics.summary;
   const comparison = analytics.comparison;
-  const maxDaily = Math.max(1, ...analytics.daily.map((row) => Math.max(number(row.pageviews), number(row.unique))));
+  const traffic = normalizeTraffic(trafficData, analytics.daily);
+  const maxDaily = Math.max(1, ...traffic.rows.map((row) => Math.max(number(row.pageviews), number(row.unique))));
   const avgPages = summary.period_unique ? summary.period_pageviews / summary.period_unique : 0;
   const returnRate = summary.period_unique ? Math.round((summary.period_returning / summary.period_unique) * 100) : 0;
+  const unknownDetails = analytics.countries.some((row) => row.country_code === "XX") || analytics.devices.some((row) => row.device === "unknown") || analytics.locales.some((row) => row.locale === "unknown");
+  const chartTitle = traffic.granularity === "month" ? "Посещения по месяцам" : traffic.granularity === "week" ? "Посещения по неделям" : "Посещения по дням";
 
   return <main className="adminPage siteAnalyticsPage">
     <section className="adminDashboardIntro siteAnalyticsIntro">
-      <div><p className="eyebrow blue">АНАЛИТИКА САЙТА · 2.0</p><h1>Статистика посещений</h1><p>Анонимные посетители, страницы, страны, устройства и язык интерфейса. IP-адреса и координаты не сохраняются.</p></div>
+      <div><p className="eyebrow blue">АНАЛИТИКА САЙТА · 2.1</p><h1>Статистика посещений</h1><p>Анонимные посетители, страницы, страны, устройства и язык интерфейса. IP-адреса и координаты не сохраняются.</p></div>
       <div className="analyticsPeriodTabs" aria-label="Период статистики">{allowedPeriods.map((period) => <Link key={period} className={days === period ? "active" : ""} href={`/admin/site-analytics?period=${period}`}>{period === 365 ? "1 год" : `${period} дней`}</Link>)}</div>
     </section>
 
@@ -134,26 +161,28 @@ export default async function SiteAnalyticsPage({ searchParams }: PageProps) {
     <section className="analyticsPanel">
       <header><div><p className="eyebrow blue">СРАВНЕНИЕ</p><h2>Текущий период против предыдущего</h2></div><span className="analyticsPrivacy">по {days} дней</span></header>
       <div className="analyticsKpiGrid">
-        <AnalyticsKpi label="Уникальные" value={comparison.current_unique} hint={`${deltaText(comparison.current_unique, comparison.previous_unique)} · было ${fmt(comparison.previous_unique)}`} accent="blue" />
-        <AnalyticsKpi label="Просмотры" value={comparison.current_pageviews} hint={`${deltaText(comparison.current_pageviews, comparison.previous_pageviews)} · было ${fmt(comparison.previous_pageviews)}`} />
-        <AnalyticsKpi label="Новые посетители" value={comparison.current_new} hint={`${deltaText(comparison.current_new, comparison.previous_new)} · было ${fmt(comparison.previous_new)}`} />
+        <AnalyticsKpi label="Уникальные" value={comparison.current_unique} hint={deltaText(comparison.current_unique, comparison.previous_unique)} accent="blue" />
+        <AnalyticsKpi label="Просмотры" value={comparison.current_pageviews} hint={deltaText(comparison.current_pageviews, comparison.previous_pageviews)} />
+        <AnalyticsKpi label="Новые посетители" value={comparison.current_new} hint={deltaText(comparison.current_new, comparison.previous_new)} />
       </div>
     </section>
 
     <section className="analyticsPanel analyticsTrafficPanel">
-      <header><div><p className="eyebrow blue">ДИНАМИКА</p><h2>Посещения по дням</h2></div><div className="analyticsLegend"><span><i className="unique" />Уникальные</span><span><i className="views" />Просмотры</span></div></header>
-      <div className="analyticsChartScroller"><div className="analyticsChart" style={{ "--chart-days": String(Math.max(analytics.daily.length, 7)) } as React.CSSProperties}>{analytics.daily.map((row) => <div className="analyticsChartDay" key={row.date} title={`${fmtDate(row.date)} · уникальные ${fmt(number(row.unique))} · просмотры ${fmt(number(row.pageviews))}`}><div className="analyticsBars"><i className="views" style={{ height: number(row.pageviews) ? `${Math.max(2, (number(row.pageviews) / maxDaily) * 100)}%` : "0%" }} /><i className="unique" style={{ height: number(row.unique) ? `${Math.max(2, (number(row.unique) / maxDaily) * 100)}%` : "0%" }} /></div><span>{fmtDate(row.date)}</span></div>)}</div></div>
+      <header><div><p className="eyebrow blue">ДИНАМИКА</p><h2>{chartTitle}</h2><small className="analyticsSubtle">Автоматическая детализация: 7/30 дней — день, 90 дней — неделя, 1 год — месяц.</small></div><div className="analyticsLegend"><span><i className="unique" />Уникальные</span><span><i className="views" />Просмотры</span></div></header>
+      <div className={`analyticsChart analyticsChart-${traffic.granularity}`} style={{ "--chart-days": String(Math.max(traffic.rows.length, 7)) } as React.CSSProperties}>{traffic.rows.map((row) => <div className="analyticsChartDay" key={`${row.start}-${row.end}`} title={`${chartLabel(row, traffic.granularity)} · уникальные ${fmt(number(row.unique))} · просмотры ${fmt(number(row.pageviews))}`}><div className="analyticsBars"><i className="views" style={{ height: number(row.pageviews) ? `${Math.max(4, (number(row.pageviews) / maxDaily) * 100)}%` : "0%" }} /><i className="unique" style={{ height: number(row.unique) ? `${Math.max(4, (number(row.unique) / maxDaily) * 100)}%` : "0%" }} /></div><span>{chartLabel(row, traffic.granularity)}</span></div>)}</div>
     </section>
 
     <section className="analyticsTwoColumns">
-      <AnalyticsRank title="Страны посетителей" eyebrow="ГЕОГРАФИЯ" rows={analytics.countries.map((row) => ({ key: row.country_code, label: `${flag(row.country_code)} ${countryName(row.country_code)}`, hint: `${fmt(number(row.pageviews))} просмотров`, value: fmt(number(row.unique_visitors)) }))} valueTitle="уникальных" />
-      <AnalyticsRank title="Устройства" eyebrow="УСТРОЙСТВА" rows={analytics.devices.map((row) => ({ key: row.device, label: deviceLabel(row.device), hint: `${fmt(number(row.unique_visitors))} уникальных`, value: fmt(number(row.pageviews)) }))} valueTitle="просмотров" />
+      <AnalyticsRank title="Страны посетителей" eyebrow="ГЕОГРАФИЯ" rows={analytics.countries.map((row) => ({ key: row.country_code, label: countryName(row.country_code), badge: row.country_code === "XX" ? "—" : row.country_code, hint: `${fmt(number(row.unique_visitors))} уникальных · ${fmt(number(row.pageviews))} просмотров`, value: `${share(number(row.pageviews), summary.period_pageviews)}%`, share: share(number(row.pageviews), summary.period_pageviews), muted: row.country_code === "XX" }))} valueTitle="доля просмотров" />
+      <AnalyticsRank title="Устройства" eyebrow="УСТРОЙСТВА" rows={analytics.devices.map((row) => ({ key: row.device, label: deviceLabel(row.device), hint: `${fmt(number(row.unique_visitors))} уникальных · ${fmt(number(row.pageviews))} просмотров`, value: `${share(number(row.pageviews), summary.period_pageviews)}%`, share: share(number(row.pageviews), summary.period_pageviews), muted: row.device === "unknown" }))} valueTitle="доля просмотров" />
     </section>
 
     <section className="analyticsTwoColumns">
-      <AnalyticsRank title="Язык сайта" eyebrow="RU / RO" rows={analytics.locales.map((row) => ({ key: row.locale, label: localeLabel(row.locale), hint: `${fmt(number(row.unique_visitors))} уникальных`, value: fmt(number(row.pageviews)) }))} valueTitle="просмотров" />
-      <AnalyticsRank title="Ширина экрана" eyebrow="VIEWPORT" rows={analytics.viewports.map((row) => ({ key: row.bucket, label: row.bucket, hint: `${fmt(number(row.unique_visitors))} уникальных`, value: fmt(number(row.pageviews)) }))} valueTitle="просмотров" />
+      <AnalyticsRank title="Язык сайта" eyebrow="RU / RO" rows={analytics.locales.map((row) => ({ key: row.locale, label: localeLabel(row.locale), hint: `${fmt(number(row.unique_visitors))} уникальных · ${fmt(number(row.pageviews))} просмотров`, value: `${share(number(row.pageviews), summary.period_pageviews)}%`, share: share(number(row.pageviews), summary.period_pageviews), muted: row.locale === "unknown" }))} valueTitle="доля просмотров" />
+      <AnalyticsRank title="Ширина экрана" eyebrow="VIEWPORT" rows={analytics.viewports.map((row) => ({ key: row.bucket, label: row.bucket, hint: `${fmt(number(row.unique_visitors))} уникальных · ${fmt(number(row.pageviews))} просмотров`, value: `${share(number(row.pageviews), summary.period_pageviews)}%`, share: share(number(row.pageviews), summary.period_pageviews), muted: row.bucket === "Не определено" }))} valueTitle="доля просмотров" />
     </section>
+
+    {unknownDetails ? <div className="analyticsLegacyNote"><strong>Почему есть «Не определено»?</strong><span>Это посещения, записанные до включения Analytics 2.0. Новые визиты уже получают страну, устройство, viewport и язык.</span></div> : null}
 
     <section className="analyticsTwoColumns">
       <AnalyticsRank title="Популярные страницы" eyebrow="КОНТЕНТ" rows={analytics.top_pages.map((row) => ({ key: row.path, label: row.path, hint: `${fmt(number(row.unique_visitors))} уникальных`, value: fmt(number(row.pageviews)) }))} valueTitle="просмотров" />
@@ -162,7 +191,7 @@ export default async function SiteAnalyticsPage({ searchParams }: PageProps) {
 
     <section className="analyticsPanel">
       <header><div><p className="eyebrow blue">ПОСЛЕДНЯЯ АКТИВНОСТЬ</p><h2>Недавние посетители</h2></div><span className="analyticsPrivacy">Анонимные ID · без IP</span></header>
-      <div className="analyticsTableWrap"><table className="analyticsTable"><thead><tr><th>Посетитель</th><th>Страна</th><th>Устройство</th><th>Viewport</th><th>Язык</th><th>Последний визит</th><th>Просмотры</th><th>Страница</th><th>Источник</th></tr></thead><tbody>{analytics.recent.map((row) => <tr key={`${row.visitor}-${row.last_seen}`}><td><code>{row.visitor}</code></td><td>{flag(row.country_code)} {countryName(row.country_code)}</td><td>{deviceLabel(row.device)}</td><td>{row.viewport_width && row.viewport_height ? `${row.viewport_width}×${row.viewport_height}` : "—"}</td><td>{localeLabel(row.locale)}</td><td>{fmtDate(row.last_seen, true)}</td><td><strong>{fmt(number(row.pageviews))}</strong></td><td>{row.last_path || "—"}</td><td>{row.referrer || "Прямой заход"}</td></tr>)}</tbody></table></div>
+      <div className="analyticsTableWrap"><table className="analyticsTable"><thead><tr><th>Посетитель</th><th>Страна</th><th>Устройство / экран</th><th>Язык</th><th>Последний визит</th><th>Просмотры</th><th>Страница</th><th>Источник</th></tr></thead><tbody>{analytics.recent.map((row) => <tr key={`${row.visitor}-${row.last_seen}`}><td><code>{row.visitor}</code></td><td><span className="analyticsCountryInline"><i className="analyticsCountryBadge">{row.country_code && row.country_code !== "XX" ? row.country_code : "—"}</i>{countryName(row.country_code)}</span></td><td><span className="analyticsCellStack"><strong>{deviceLabel(row.device)}</strong><small>{row.viewport_width && row.viewport_height ? `${row.viewport_width}×${row.viewport_height}` : "Экран не определён"}</small></span></td><td>{localeLabel(row.locale)}</td><td>{fmtDate(row.last_seen, true)}</td><td><strong>{fmt(number(row.pageviews))}</strong></td><td>{row.last_path || "—"}</td><td>{row.referrer || "Прямой заход"}</td></tr>)}</tbody></table></div>
     </section>
   </main>;
 }
@@ -171,6 +200,6 @@ function AnalyticsKpi({ label, value, hint, accent }: { label: string; value: nu
   return <article className={`analyticsKpi${accent ? ` is-${accent}` : ""}`}><span>{label}</span><strong>{fmt(value)}</strong><small>{hint}</small></article>;
 }
 
-function AnalyticsRank({ title, eyebrow, rows, valueTitle }: { title: string; eyebrow: string; rows: { key: string; label: string; hint: string; value: string }[]; valueTitle: string }) {
-  return <div className="analyticsPanel"><header><div><p className="eyebrow blue">{eyebrow}</p><h2>{title}</h2></div><span className="analyticsPrivacy">{valueTitle}</span></header><div className="analyticsRankList">{rows.length ? rows.map((row, index) => <div key={row.key}><b>{index + 1}</b><span><strong>{row.label}</strong><small>{row.hint}</small></span><em>{row.value}</em></div>) : <p className="analyticsEmpty">Данных пока нет.</p>}</div></div>;
+function AnalyticsRank({ title, eyebrow, rows, valueTitle }: { title: string; eyebrow: string; rows: { key: string; label: string; hint: string; value: string; share?: number; badge?: string; muted?: boolean }[]; valueTitle: string }) {
+  return <div className="analyticsPanel"><header><div><p className="eyebrow blue">{eyebrow}</p><h2>{title}</h2></div><span className="analyticsPrivacy">{valueTitle}</span></header><div className="analyticsRankList">{rows.length ? rows.map((row, index) => <div key={row.key} className={row.muted ? "is-muted" : ""}><b>{index + 1}</b><span><strong>{row.badge ? <i className="analyticsCountryBadge">{row.badge}</i> : null}{row.label}</strong><small>{row.hint}</small>{typeof row.share === "number" ? <i className="analyticsShareBar"><u style={{ width: `${Math.max(2, Math.min(100, row.share))}%` }} /></i> : null}</span><em>{row.value}</em></div>) : <p className="analyticsEmpty">Данных пока нет.</p>}</div></div>;
 }
