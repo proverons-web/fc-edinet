@@ -123,19 +123,9 @@ export default function ClubSquadStatsEditor({
 
       <form action={saveClubSquadAndStats}>
         <input type="hidden" name="match_id" value={matchId} />
-        <div className="matchCenterSquadMeta compact">
-          <label className="fieldGroup">
-            <span>Схема</span>
-            <input name="formation" defaultValue={formation ?? ""} placeholder="4-3-3" maxLength={40} />
-          </label>
-          <label className="fieldGroup">
-            <span>Тренер</span>
-            <input name="coach_name" defaultValue={coachName ?? ""} placeholder="Имя тренера" maxLength={160} />
-          </label>
-          <div className="matchCenterSquadSummary">
-            <span><b>{startersCount}</b>/11 старт</span>
-            <span><b>{benchCount}</b> запасных</span>
-          </div>
+        <div className="matchCenterSquadSummary standalone">
+          <span><b>{startersCount}</b>/11 старт</span>
+          <span><b>{benchCount}</b> запасных</span>
         </div>
 
         <SquadList
@@ -167,6 +157,17 @@ export default function ClubSquadStatsEditor({
             patch={patch}
           />
         </details>
+
+        <div className="matchCenterSquadMeta compact afterLineups">
+          <label className="fieldGroup">
+            <span>Схема</span>
+            <input name="formation" defaultValue={formation ?? ""} placeholder="4-3-3" maxLength={40} />
+          </label>
+          <label className="fieldGroup">
+            <span>Тренер</span>
+            <input name="coach_name" defaultValue={coachName ?? ""} placeholder="Имя тренера" maxLength={160} />
+          </label>
+        </div>
 
         <div className="matchCenterUnifiedSaveBar compact">
           <div>

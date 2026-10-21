@@ -6,6 +6,7 @@ import JsonLd from "@/app/components/JsonLd";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/locale";
+import { secondYellowEventIds } from "@/lib/match-discipline";
 import { publicText } from "@/lib/i18n";
 import { publicMetadata, sportsEventJsonLd } from "@/lib/seo";
 import type { ClubMatch, MatchEvent, MatchLineupEntry, MatchLineupSetting, MatchReport } from "@/lib/types";
@@ -275,6 +276,7 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
 
   const statusHasScore = match.status === "finished" || match.status === "live";
   const scoreAfterEvent = publicRunningScoreByEvent(events, match);
+  const secondYellowIds = secondYellowEventIds(events);
   const eventJsonLd = sportsEventJsonLd(match, locale);
 
   return (
@@ -320,13 +322,18 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
                         const scoringTeam = eventCountsAsGoal(event) ? eventScoringTeamId(event, match) : String(event.team_id);
                         const displayIsHome = scoringTeam === String(match.home_team_id);
                         const goalScore = scoreAfterEvent.get(String(event.id));
+                        const isSecondYellow = event.event_type === "yellow_card" && secondYellowIds.has(String(event.id));
+                        const disciplineLabel = isSecondYellow
+                          ? (locale === "ro" ? "Al doilea galben / roșu" : "Вторая жёлтая / красная")
+                          : (eventLabels[locale][event.event_type] ?? event.event_type);
+                        const disciplineIcon = isSecondYellow ? "▰■" : (eventIcons[event.event_type] ?? "•");
                         return (
-                          <article className={`publicMatchEvent ${displayIsHome ? "home" : "away"} event-${event.event_type}`} key={String(event.id)}>
+                          <article className={`publicMatchEvent ${displayIsHome ? "home" : "away"} event-${event.event_type} ${isSecondYellow ? "second-yellow" : ""}`} key={String(event.id)}>
                             <div className="publicMatchEventMinute">{eventMinute(event)}</div>
-                            <div className="publicMatchEventIcon">{eventIcons[event.event_type] ?? "•"}</div>
+                            <div className="publicMatchEventIcon">{disciplineIcon}</div>
                             <div className="publicMatchEventBody">
                               <small>{displayIsHome ? match.home?.name : match.away?.name}</small>
-                              <strong>{eventLabels[locale][event.event_type] ?? event.event_type}</strong>
+                              <strong>{disciplineLabel}</strong>
                               <span>{eventPerson(event)}</span>
                               {goalScore ? <b className="publicMatchRunningScore">{goalScore.home}:{goalScore.away}</b> : null}
                               {event.description && event.description !== event.player_name ? <p>{event.description}</p> : null}

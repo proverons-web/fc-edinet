@@ -1,0 +1,7 @@
+FC EDINEȚ v2.10.1 — Discipline Logic + Lineup UX
+
+- Second yellow card now automatically produces a red-card consequence in player match/season statistics.
+- Timeline and public match page label the second yellow as “Вторая жёлтая / красная” / “Al doilea galben / roșu”.
+- Formation and coach fields moved below starters/substitutes for both teams.
+- Match Center text/number inputs select their current value on focus for faster editing.
+- No SQL migration required.

@@ -149,19 +149,9 @@ function TeamLineup({
         <input type="hidden" name="match_id" value={matchId} />
         <input type="hidden" name="side" value={side} />
 
-        <div className="matchCenterSquadMeta compact">
-          <label className="fieldGroup">
-            <span>Схема</span>
-            <input name="formation" defaultValue={setting?.formation ?? ""} placeholder="4-3-3" maxLength={40} />
-          </label>
-          <label className="fieldGroup">
-            <span>Тренер</span>
-            <input name="coach_name" defaultValue={setting?.coach_name ?? ""} placeholder="Имя тренера" maxLength={160} />
-          </label>
-          <div className="matchCenterSquadSummary">
-            <span><b>{starterCount}</b>/11 старт</span>
-            <span><b>{subCount}</b> запасных</span>
-          </div>
+        <div className="matchCenterSquadSummary standalone">
+          <span><b>{starterCount}</b>/11 старт</span>
+          <span><b>{subCount}</b> запасных</span>
         </div>
 
         <LineupGroup
@@ -190,6 +180,17 @@ function TeamLineup({
             bare
           />
         </details>
+
+        <div className="matchCenterSquadMeta compact afterLineups">
+          <label className="fieldGroup">
+            <span>Схема</span>
+            <input name="formation" defaultValue={setting?.formation ?? ""} placeholder="4-3-3" maxLength={40} />
+          </label>
+          <label className="fieldGroup">
+            <span>Тренер</span>
+            <input name="coach_name" defaultValue={setting?.coach_name ?? ""} placeholder="Имя тренера" maxLength={160} />
+          </label>
+        </div>
 
         <footer className="matchCenterUnifiedSaveBar compact matchCenterOpponentSaveBar">
           <div>

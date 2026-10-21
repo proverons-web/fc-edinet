@@ -3421,3 +3421,32 @@ body:has(.adminEmbedded){background:#f3f6fa}
   box-shadow:0 5px 14px rgba(15,99,255,.18);
 }
 .matchTimelineEvent.opponent-event .matchTimelineRunningScore{background:#c98a12;box-shadow:0 5px 14px rgba(201,138,18,.16)}
+
+/* v2.10.1 — Match Center discipline + lineup UX */
+.matchCenterSquadSummary.standalone{
+  justify-content:flex-start;
+  margin:0 0 12px;
+}
+.matchCenterSquadMeta.compact.afterLineups{
+  margin:12px 0 0;
+  padding-top:12px;
+  border-top:1px solid #dfe7f0;
+}
+.matchTimelineEvent.second-yellow .matchTimelineRail span{
+  background:linear-gradient(135deg,#ffd328 0 48%,#d83545 52% 100%)!important;
+  color:#071d3b!important;
+  box-shadow:0 0 0 1px #d9b53d!important;
+  letter-spacing:-2px;
+}
+.matchTimelineEvent.second-yellow .matchTimelineCard{
+  border-left-color:#d83545!important;
+}
+.publicMatchEvent.second-yellow .publicMatchEventIcon{
+  background:linear-gradient(135deg,#ffd328 0 48%,#d83545 52% 100%)!important;
+  border-color:#d2ad20!important;
+  color:#071d3b!important;
+  letter-spacing:-2px;
+}
+@media(max-width:720px){
+  .matchCenterSquadMeta.compact.afterLineups{grid-template-columns:1fr!important}
+}

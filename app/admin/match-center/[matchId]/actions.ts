@@ -873,7 +873,12 @@ async function syncClubPlayerStatsFromEvents(
         }
         if (event.event_type === "own_goal") player.ownGoals += 1;
         if (event.event_type === "penalty_miss") player.penaltiesMissed += 1;
-        if (event.event_type === "yellow_card") player.yellow += 1;
+        if (event.event_type === "yellow_card") {
+          player.yellow += 1;
+          // The second yellow automatically means a sending-off. We keep both
+          // yellow-card events in the timeline, but derive the red card here.
+          if (player.yellow === 2) player.red += 1;
+        }
         if (event.event_type === "red_card") player.red += 1;
       }
     }
@@ -1064,7 +1069,7 @@ export async function saveClubSquadAndStats(formData: FormData) {
     hasSeasonCompetition = !competitionError && Boolean(competition?.season_id);
   }
 
-  // v2.10.0: there is only one Save button. A valid lineup of a finished match
+  // v2.10.1: there is only one Save button. A valid lineup of a finished match
   // becomes COMPLETE automatically so season/tournament aggregation includes it.
   const completed =
     match.status === "finished" &&

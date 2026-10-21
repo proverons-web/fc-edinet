@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireEditor } from "@/lib/editorial";
+import { secondYellowEventIds } from "@/lib/match-discipline";
 import type {
   ClubMatch,
   MatchCenterProgress,
@@ -22,6 +23,7 @@ import {
 import LineupEditor from "./LineupEditor";
 import ClubSquadStatsEditor from "./ClubSquadStatsEditor";
 import EventFields, { type EventParticipantOption } from "./EventFields";
+import SelectOnFocus from "./SelectOnFocus";
 
 export const metadata = { title: "Матч-центр — Админ" };
 export const dynamic = "force-dynamic";
@@ -221,6 +223,7 @@ export default async function MatchCenterMatchPage({
     (event) => countsAsGoal(event) && scoringTeamId(event, match) === String(match.away_team_id),
   ).length;
   const scoreAfterEvent = runningScoreByEvent(events, match);
+  const secondYellowIds = secondYellowEventIds(events);
   const scoreCanBeChecked = match.status === "finished" || match.status === "live";
   const timelineMatchesScore =
     !scoreCanBeChecked ||
@@ -229,6 +232,7 @@ export default async function MatchCenterMatchPage({
   const secondHalfEvents = events.filter((event) => Number(event.minute ?? 0) > 45);
 
   return (
+    <SelectOnFocus>
     <main className="adminPage matchCenterPage">
       <section className="adminHero compactAdminHero matchCenterHero">
         <div className="container adminHeroInner">
@@ -498,6 +502,7 @@ export default async function MatchCenterMatchPage({
                   clubSide={clubSide}
                   participants={eventParticipants}
                   scoreAfterEvent={scoreAfterEvent}
+                  secondYellowIds={secondYellowIds}
                 />
                 <TimelineHalf
                   title="2 тайм"
@@ -507,6 +512,7 @@ export default async function MatchCenterMatchPage({
                   clubSide={clubSide}
                   participants={eventParticipants}
                   scoreAfterEvent={scoreAfterEvent}
+                  secondYellowIds={secondYellowIds}
                 />
               </div>
             )}
@@ -514,6 +520,7 @@ export default async function MatchCenterMatchPage({
         </div>
       </section>
     </main>
+    </SelectOnFocus>
   );
 }
 
@@ -525,6 +532,7 @@ function TimelineHalf({
   clubSide,
   participants,
   scoreAfterEvent,
+  secondYellowIds,
 }: {
   title: string;
   range: string;
@@ -533,6 +541,7 @@ function TimelineHalf({
   clubSide: "home" | "away" | null;
   participants: EventParticipantOption[];
   scoreAfterEvent: Map<string, { home: number; away: number }>;
+  secondYellowIds: Set<string>;
 }) {
   const grouped: Array<{ key: string; events: MatchEvent[] }> = [];
   for (const event of events) {
@@ -562,16 +571,19 @@ function TimelineHalf({
             const isClubEvent = clubSide === "home" ? displayIsHome : clubSide === "away" ? !displayIsHome : false;
             const teamName = displayIsHome ? match.home?.name : match.away?.name;
             const isSubGroup = first.event_type === "substitution";
+            const isSecondYellow = first.event_type === "yellow_card" && secondYellowIds.has(String(first.id));
+            const eventLabel = isSecondYellow ? "Вторая жёлтая / красная" : EVENT_LABELS[first.event_type];
+            const eventIcon = isSecondYellow ? "▰■" : EVENT_ICONS[first.event_type];
             const goalScore = scoreAfterEvent.get(String(first.id));
             return (
-              <article className={`matchTimelineEvent ${displayIsHome ? "home" : "away"} ${isClubEvent ? "club-event" : "opponent-event"} ${isSubGroup && group.events.length > 1 ? "grouped-substitutions" : ""}`} key={group.key}>
+              <article className={`matchTimelineEvent ${displayIsHome ? "home" : "away"} ${isClubEvent ? "club-event" : "opponent-event"} ${isSubGroup && group.events.length > 1 ? "grouped-substitutions" : ""} ${isSecondYellow ? "second-yellow" : ""}`} key={group.key}>
                 <div className="matchTimelineMinute">{eventMinute(first)}</div>
-                <div className="matchTimelineRail"><span>{EVENT_ICONS[first.event_type]}</span></div>
+                <div className="matchTimelineRail"><span>{eventIcon}</span></div>
                 <div className="matchTimelineCard">
                   <div className="matchTimelineEventHead">
                     <div>
                       <small>{teamName ?? "Команда"}</small>
-                      <strong>{isSubGroup && group.events.length > 1 ? `Замены · ${group.events.length}` : EVENT_LABELS[first.event_type]}</strong>
+                      <strong>{isSubGroup && group.events.length > 1 ? `Замены · ${group.events.length}` : eventLabel}</strong>
                     </div>
                     {!isSubGroup && <span>{eventParticipant(first)}</span>}
                     {goalScore && (
