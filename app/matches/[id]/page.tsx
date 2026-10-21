@@ -287,7 +287,7 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
           <PublicBreadcrumbs locale={locale} items={[{ label: publicText[locale].matches.title, href: "/matches" }, { label: `${match.home?.name ?? "—"} — ${match.away?.name ?? "—"}` }]} className="breadcrumbsOnDark publicMatchBreadcrumbs" />
           <div className="publicMatchDetailMeta">
             <span>{match.competition?.name ?? t.match}</span>
-            <span className={`publicMatchStatusChip status-${match.status}`}>{match.status === "finished" ? (locale === "ro" ? "Final" : "Завершён") : match.status === "live" ? "LIVE" : match.status === "postponed" ? (locale === "ro" ? "Amânat" : "Перенесён") : (locale === "ro" ? "Programat" : "Запланирован")}</span>
+            <span className={`publicMatchStatusChip status-${match.status}`}>{match.status === "finished" ? (locale === "ro" ? "Final" : "Завершён") : match.status === "live" ? (locale === "ro" ? "ÎN JOC" : "В ИГРЕ") : match.status === "postponed" ? (locale === "ro" ? "Amânat" : "Перенесён") : (locale === "ro" ? "Programat" : "Запланирован")}</span>
             <strong>{formatDate(match.kickoff, locale)}</strong>
             <small>{[match.round, match.stadium].filter(Boolean).join(" • ")}</small>
           </div>
@@ -362,8 +362,8 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
               <section className="publicMatchPanel publicMatchLineupsPanel">
                 <div className="publicMatchSectionHead"><p className="eyebrow blue">{t.lineupEyebrow}</p><h2>{t.lineups}</h2></div>
                 <div className="publicMatchLineupGrid">
-                  <PublicLineup side="home" teamName={match.home?.name ?? "HOME"} settings={lineupSettings} entries={lineupEntries} t={t} />
-                  <PublicLineup side="away" teamName={match.away?.name ?? "AWAY"} settings={lineupSettings} entries={lineupEntries} t={t} />
+                  <PublicLineup side="home" teamName={match.home?.name ?? (locale === "ro" ? "GAZDE" : "ХОЗЯЕВА")} settings={lineupSettings} entries={lineupEntries} t={t} />
+                  <PublicLineup side="away" teamName={match.away?.name ?? (locale === "ro" ? "OASPEȚI" : "ГОСТИ")} settings={lineupSettings} entries={lineupEntries} t={t} />
                 </div>
               </section>
             </div>

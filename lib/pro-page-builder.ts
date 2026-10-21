@@ -113,8 +113,8 @@ function section(
 }
 
 const academyDefaults: AcademyContent = {
-  hero_eyebrow_ru: "FC EDINEȚ • ACADEMY",
-  hero_eyebrow_ro: "FC EDINEȚ • ACADEMY",
+  hero_eyebrow_ru: "АКАДЕМИЯ FC EDINEȚ",
+  hero_eyebrow_ro: "ACADEMIA FC EDINEȚ",
   hero_title_ru: "Академия FC Edineț",
   hero_title_ro: "Academia FC Edineț",
   hero_text_ru: "Развиваем молодых футболистов и создаём путь от первых тренировок до основной команды.",

@@ -36,7 +36,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   const away = Array.isArray(match?.away) ? match.away[0] : match?.away;
   const competition = Array.isArray(match?.competition) ? match.competition[0] : match?.competition;
   const homeName = home?.name || "FC Edineț";
-  const awayName = away?.name || "MATCHDAY";
+  const awayName = away?.name || "MECI";
   const hasScore = match?.status === "finished" || match?.status === "live";
   const score = hasScore ? `${match?.home_score ?? 0} : ${match?.away_score ?? 0}` : "VS";
   const date = match?.kickoff
@@ -54,7 +54,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
             <img src={crest} width="72" height="88" style={{ objectFit: "contain" }} />
             <div style={{ display: "flex", flexDirection: "column" }}>
               <div style={{ fontSize: 23, fontWeight: 800, letterSpacing: 2 }}>FC EDINEȚ</div>
-              <div style={{ fontSize: 16, color: "#ffd328", marginTop: 4 }}>{competition?.name || "MATCHDAY"}</div>
+              <div style={{ fontSize: 16, color: "#ffd328", marginTop: 4 }}>{competition?.name || "MECI"}</div>
             </div>
           </div>
           <div style={{ fontSize: 19, color: "rgba(255,255,255,.78)" }}>{date}</div>
@@ -71,7 +71,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 2, fontSize: 18, color: "rgba(255,255,255,.74)" }}>
           <span>{[match?.round, match?.stadium].filter(Boolean).join(" • ") || "fc-edinet.vercel.app"}</span>
-          <span style={{ color: "#ffd328", fontWeight: 800 }}>OFFICIAL MATCH</span>
+          <span style={{ color: "#ffd328", fontWeight: 800 }}>FC EDINEȚ • MECI</span>
         </div>
       </div>
     ),

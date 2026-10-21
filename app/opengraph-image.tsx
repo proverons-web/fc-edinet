@@ -21,7 +21,7 @@ export default async function Image() {
             <img src={crest} width="230" height="280" style={{ objectFit: "contain" }} />
           </div>
           <div style={{ display: "flex", flexDirection: "column", maxWidth: 650 }}>
-            <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: 5, color: "#ffd328" }}>OFFICIAL CLUB WEBSITE</div>
+            <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: 5, color: "#ffd328" }}>FC EDINEȚ • MOLDOVA</div>
             <div style={{ fontSize: 92, fontWeight: 900, letterSpacing: -4, lineHeight: .92, marginTop: 24 }}>FC EDINEȚ</div>
             <div style={{ fontSize: 29, lineHeight: 1.25, color: "rgba(255,255,255,.80)", marginTop: 30 }}>Football • Edineț • Moldova</div>
           </div>

@@ -157,7 +157,7 @@ function AcademyIntro({ section, layout, locale }: { section: ProPageLayoutConfi
     ["03", "Прогресс", "Понятные цели на каждом этапе развития игрока."],
   ];
   return <section className={`${proSectionClass(section)} academyIntroSection`} style={proSectionStyle(section)}><div className="proSectionMotion"><div className="proSectionInner proAcademyIntro">
-    <div className="proAcademyIntroCopy"><p className="eyebrow blue">FC EDINEȚ ACADEMY</p><h2>{localizedAcademy(layout, "intro_title", locale)}</h2><p>{localizedAcademy(layout, "intro_text", locale)}</p><div className="proAcademyBenefits">{benefits.map(([num,title,body]) => <article key={num}><span>{num}</span><div><h3>{title}</h3><p>{body}</p></div></article>)}</div></div>
+    <div className="proAcademyIntroCopy"><p className="eyebrow blue">{locale === "ro" ? "ACADEMIA FC EDINEȚ" : "АКАДЕМИЯ FC EDINEȚ"}</p><h2>{localizedAcademy(layout, "intro_title", locale)}</h2><p>{localizedAcademy(layout, "intro_text", locale)}</p><div className="proAcademyBenefits">{benefits.map(([num,title,body]) => <article key={num}><span>{num}</span><div><h3>{title}</h3><p>{body}</p></div></article>)}</div></div>
     <div className="proAcademyFact"><div className="proAcademyFactMark">FCE</div><strong>FC EDINEȚ</strong><span>{locale === "ro" ? "De la primii pași până la echipa mare" : "От первых шагов до основной команды"}</span><small>{locale === "ro" ? "Academie • Edineț • Moldova" : "Академия • Единец • Молдова"}</small></div>
   </div></div></section>;
 }
@@ -212,7 +212,7 @@ function pageLabels(pageKey: ProPageKey, locale: Locale, layout: ProPageLayoutCo
     ctaButton: publicText[locale].partners.clubContacts,
   };
   if (pageKey === "academy") return {
-    ctaEyebrow: "FC EDINEȚ ACADEMY", ctaTitle: localizedAcademy(layout, "contact_title", locale), ctaBody: localizedAcademy(layout, "contact_text", locale), ctaButton: locale === "ro" ? "Contacte" : "Контакты",
+    ctaEyebrow: locale === "ro" ? "ACADEMIA FC EDINEȚ" : "АКАДЕМИЯ FC EDINEȚ", ctaTitle: localizedAcademy(layout, "contact_title", locale), ctaBody: localizedAcademy(layout, "contact_text", locale), ctaButton: locale === "ro" ? "Contacte" : "Контакты",
   };
   return { ctaEyebrow: "", ctaTitle: "", ctaBody: "", ctaButton: "" };
 }

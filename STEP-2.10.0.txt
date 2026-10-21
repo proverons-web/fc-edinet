@@ -1,0 +1,8 @@
+FC EDINEȚ v2.10.0 — Public Mobile QA + Localization Cleanup
+
+- Centered the watermark crest in the next-match card.
+- Removed remaining English decorative/public labels or replaced them with RU/RO/neutral club branding.
+- Rebuilt home hero mobile flow to prevent overlap between hero copy and match card.
+- Kept the next-match teams side-by-side on phones and made time column narrower than date/stadium.
+- Added mobile overflow hardening for standings, statistics, matches, media, partners, academy and footer.
+- No SQL migration required.

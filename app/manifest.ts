@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "FC Edineț",
     short_name: "FC Edineț",
-    description: "Official website of FC Edineț football club.",
+    description: "Site-ul oficial al clubului de fotbal FC Edineț.",
     start_url: "/",
     display: "standalone",
     background_color: "#020E21",
