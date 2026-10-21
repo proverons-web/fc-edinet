@@ -15,6 +15,8 @@ export const dynamic = "force-dynamic";
 
 type Locale = "ru" | "ro";
 
+const CLUB_CREST = "/brand/fc-edinet-crest.png";
+
 type Copy = {
   back: string;
   protocol: string;
@@ -42,6 +44,7 @@ type Copy = {
   infoEyebrow: string;
   lineupEyebrow: string;
   status: string;
+  stadium: string;
 };
 
 const copy: Record<Locale, Copy> = {
@@ -72,6 +75,7 @@ const copy: Record<Locale, Copy> = {
     infoEyebrow: "ИНФОРМАЦИЯ",
     lineupEyebrow: "СОСТАВЫ",
     status: "Статус",
+    stadium: "Стадион",
   },
   ro: {
     back: "← Toate meciurile",
@@ -100,6 +104,7 @@ const copy: Record<Locale, Copy> = {
     infoEyebrow: "INFORMAȚII",
     lineupEyebrow: "ECHIPE",
     status: "Statut",
+    stadium: "Stadion",
   },
 };
 
@@ -252,6 +257,7 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
   let events: MatchEvent[] = [];
   let lineupSettings: MatchLineupSetting[] = [];
   let lineupEntries: MatchLineupEntry[] = [];
+  let playerPhotos = new Map<string, string>();
   let mvpName: string | null = null;
 
   if (published) {
@@ -263,6 +269,12 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
     events = (eventsResult.data ?? []) as MatchEvent[];
     lineupSettings = (settingsResult.data ?? []) as MatchLineupSetting[];
     lineupEntries = (entriesResult.data ?? []) as MatchLineupEntry[];
+
+    const playerIds = [...new Set(lineupEntries.map((row) => row.player_id).filter(Boolean).map(String))];
+    if (playerIds.length > 0) {
+      const { data: lineupPlayers } = await supabase.from("players").select("id,photo_url").in("id", playerIds);
+      playerPhotos = new Map((lineupPlayers ?? []).filter((row) => row.photo_url).map((row) => [String(row.id), String(row.photo_url)]));
+    }
 
     if (report?.man_of_match_player_id) {
       const { data: player } = await supabase
@@ -278,159 +290,231 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
   const scoreAfterEvent = publicRunningScoreByEvent(events, match);
   const secondYellowIds = secondYellowEventIds(events);
   const eventJsonLd = sportsEventJsonLd(match, locale);
+  const firstHalfEvents = events.filter((event) => Number(event.minute) <= 45);
+  const secondHalfEvents = events.filter((event) => Number(event.minute) > 45);
+  const halfTimeScore = scoreAtEnd(firstHalfEvents, match);
+  const homeGoalMinutes = goalMinutes(events, match, String(match.home_team_id));
+  const awayGoalMinutes = goalMinutes(events, match, String(match.away_team_id));
+  const homeYellow = events.filter((event) => event.event_type === "yellow_card" && String(event.team_id) === String(match.home_team_id)).length;
+  const awayYellow = events.filter((event) => event.event_type === "yellow_card" && String(event.team_id) === String(match.away_team_id)).length;
+  const homeRed = events.filter((event) => (event.event_type === "red_card" || secondYellowIds.has(String(event.id))) && String(event.team_id) === String(match.home_team_id)).length;
+  const awayRed = events.filter((event) => (event.event_type === "red_card" || secondYellowIds.has(String(event.id))) && String(event.team_id) === String(match.away_team_id)).length;
+  const homeSubs = events.filter((event) => event.event_type === "substitution" && String(event.team_id) === String(match.home_team_id)).length;
+  const awaySubs = events.filter((event) => event.event_type === "substitution" && String(event.team_id) === String(match.away_team_id)).length;
+  const matchStadium = match.home?.home_stadium || match.stadium || null;
+  const hasInfo = Boolean(matchStadium || report?.referee || report?.attendance != null || report?.weather || report?.pitch_condition || mvpName);
 
   return (
     <>
       <JsonLd data={eventJsonLd} />
-      <main className="publicMatchDetailPage">
-      <section className="publicMatchDetailHero">
-        <div className="container">
-          <PublicBackLink fallbackHref="/matches" locale={locale} className="publicBackOnDark" />
-          <PublicBreadcrumbs locale={locale} items={[{ label: publicText[locale].matches.title, href: "/matches" }, { label: `${match.home?.name ?? "—"} — ${match.away?.name ?? "—"}` }]} className="breadcrumbsOnDark publicMatchBreadcrumbs" />
-          <div className="publicMatchDetailMeta">
-            <span>{match.competition?.name ?? t.match}</span>
-            <span className={`publicMatchStatusChip status-${match.status}`}>{match.status === "finished" ? (locale === "ro" ? "Final" : "Завершён") : match.status === "live" ? (locale === "ro" ? "ÎN JOC" : "В ИГРЕ") : match.status === "postponed" ? (locale === "ro" ? "Amânat" : "Перенесён") : (locale === "ro" ? "Programat" : "Запланирован")}</span>
-            <strong>{formatDate(match.kickoff, locale)}</strong>
-            <small>{[match.round, match.stadium].filter(Boolean).join(" • ")}</small>
-          </div>
-          <div className="publicMatchScoreBoard">
-            <PublicTeam team={match.home} />
-            <div className="publicMatchBigScore">
-              <b>{statusHasScore ? `${match.home_score ?? 0} : ${match.away_score ?? 0}` : "VS"}</b>
-              <span>{t.protocol}</span>
+      <main className="publicMatchDetailPage premiumMatchReport">
+        <section className="publicMatchDetailHero premiumMatchHero">
+          <div className="container premiumMatchHeroInner">
+            <PublicBackLink fallbackHref="/matches" locale={locale} className="publicBackOnDark" />
+            <PublicBreadcrumbs locale={locale} items={[{ label: publicText[locale].matches.title, href: "/matches" }, { label: `${match.home?.name ?? "—"} — ${match.away?.name ?? "—"}` }]} className="breadcrumbsOnDark publicMatchBreadcrumbs" />
+            <div className="premiumMatchMetaRow">
+              <span className="premiumMatchCompetition">{match.competition?.name ?? t.match}</span>
+              {match.round ? <span>{match.round}</span> : null}
+              <span className={`publicMatchStatusChip status-${match.status}`}>{match.status === "finished" ? (locale === "ro" ? "Final" : "Завершён") : match.status === "live" ? (locale === "ro" ? "ÎN JOC" : "В ИГРЕ") : match.status === "postponed" ? (locale === "ro" ? "Amânat" : "Перенесён") : (locale === "ro" ? "Programat" : "Запланирован")}</span>
+              <strong>{formatDate(match.kickoff, locale)}</strong>
             </div>
-            <PublicTeam team={match.away} />
+            <div className="publicMatchScoreBoard premiumScoreBoard">
+              <PublicTeam team={match.home} />
+              <div className="publicMatchBigScore premiumBigScore">
+                <b>{statusHasScore ? `${match.home_score ?? 0} : ${match.away_score ?? 0}` : "VS"}</b>
+                <span>{match.status === "finished" ? (locale === "ro" ? "MECI ÎNCHEIAT" : "МАТЧ ЗАВЕРШЁН") : t.protocol}</span>
+              </div>
+              <PublicTeam team={match.away} />
+            </div>
+            {published && events.length > 0 ? (
+              <div className="premiumGoalStrip">
+                <div><strong>{match.home?.short_name || match.home?.name || "—"}</strong><span>{homeGoalMinutes || "—"}</span></div>
+                <i>•</i>
+                <div><strong>{match.away?.short_name || match.away?.name || "—"}</strong><span>{awayGoalMinutes || "—"}</span></div>
+              </div>
+            ) : null}
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="section publicMatchProtocolSection">
-        <div className="container">
-          {!published ? (
-            <div className="publicMatchProtocolEmpty">
-              <strong>{t.notPublished}</strong>
-              <span>{t.notPublishedHint}</span>
+        {published ? (
+          <nav className="premiumMatchNav" aria-label={locale === "ro" ? "Navigarea raportului" : "Навигация по протоколу"}>
+            <div className="container">
+              <a href="#overview">{locale === "ro" ? "Rezumat" : "Обзор"}</a>
+              <a href="#timeline">{t.timeline}</a>
+              <a href="#lineups">{t.lineups}</a>
+              {hasInfo ? <a href="#info">{locale === "ro" ? "Informații" : "Информация"}</a> : null}
             </div>
-          ) : (
-            <div className="publicMatchProtocolGrid">
-              <div className="publicMatchProtocolMain">
-                <section className="publicMatchPanel publicMatchTimelinePublic">
-                  <div className="publicMatchSectionHead"><p className="eyebrow blue">{t.storyEyebrow}</p><h2>{t.timeline}</h2></div>
+          </nav>
+        ) : null}
+
+        <section className="section publicMatchProtocolSection premiumProtocolSection">
+          <div className="container premiumProtocolContainer">
+            {!published ? (
+              <div className="publicMatchProtocolEmpty">
+                <strong>{t.notPublished}</strong>
+                <span>{t.notPublishedHint}</span>
+              </div>
+            ) : (
+              <div className="premiumMatchContent">
+                <section className="premiumOverview" id="overview">
+                  <div className="premiumOverviewHead">
+                    <div><p className="eyebrow blue">{locale === "ro" ? "REZUMAT" : "ИТОГ МАТЧА"}</p><h2>{match.home?.name ?? "—"} <span>{match.home_score ?? 0}:{match.away_score ?? 0}</span> {match.away?.name ?? "—"}</h2></div>
+                  </div>
+                  <div className="premiumOverviewMetrics">
+                    <MatchMetric label={locale === "ro" ? "Goluri" : "Голы"} home={match.home_score ?? 0} away={match.away_score ?? 0} />
+                    <MatchMetric label={locale === "ro" ? "Cartonașe galbene" : "Жёлтые карточки"} home={homeYellow} away={awayYellow} />
+                    <MatchMetric label={locale === "ro" ? "Cartonașe roșii" : "Красные карточки"} home={homeRed} away={awayRed} />
+                    <MatchMetric label={locale === "ro" ? "Schimbări" : "Замены"} home={homeSubs} away={awaySubs} />
+                  </div>
+                </section>
+
+                <section className="publicMatchPanel premiumTimelinePanel" id="timeline">
+                  <div className="publicMatchSectionHead premiumSectionHead"><p className="eyebrow blue">{t.storyEyebrow}</p><h2>{t.timeline}</h2></div>
                   {events.length === 0 ? <div className="adminEmpty">{t.noEvents}</div> : (
-                    <div className="publicMatchEventList">
-                      {events.map((event) => {
-                        const scoringTeam = eventCountsAsGoal(event) ? eventScoringTeamId(event, match) : String(event.team_id);
-                        const displayIsHome = scoringTeam === String(match.home_team_id);
-                        const goalScore = scoreAfterEvent.get(String(event.id));
-                        const isSecondYellow = event.event_type === "yellow_card" && secondYellowIds.has(String(event.id));
-                        const disciplineLabel = isSecondYellow
-                          ? (locale === "ro" ? "Al doilea galben / roșu" : "Вторая жёлтая / красная")
-                          : (eventLabels[locale][event.event_type] ?? event.event_type);
-                        const disciplineIcon = isSecondYellow ? "▰■" : (eventIcons[event.event_type] ?? "•");
-                        return (
-                          <article className={`publicMatchEvent ${displayIsHome ? "home" : "away"} event-${event.event_type} ${isSecondYellow ? "second-yellow" : ""}`} key={String(event.id)}>
-                            <div className="publicMatchEventMinute">{eventMinute(event)}</div>
-                            <div className="publicMatchEventIcon">{disciplineIcon}</div>
-                            <div className="publicMatchEventBody">
-                              <small>{displayIsHome ? match.home?.name : match.away?.name}</small>
-                              <strong>{disciplineLabel}</strong>
-                              <span>{eventPerson(event)}</span>
-                              {goalScore ? <b className="publicMatchRunningScore">{goalScore.home}:{goalScore.away}</b> : null}
-                              {event.description && event.description !== event.player_name ? <p>{event.description}</p> : null}
-                            </div>
-                          </article>
-                        );
-                      })}
+                    <div className="premiumTimeline">
+                      <TimelineHalf label={locale === "ro" ? "PRIMA REPRIZĂ" : "1 ТАЙМ"} events={firstHalfEvents} match={match} locale={locale} scoreAfterEvent={scoreAfterEvent} secondYellowIds={secondYellowIds} />
+                      <div className="premiumHalfTime"><span>{locale === "ro" ? "PAUZĂ" : "ПЕРЕРЫВ"}</span><strong>{halfTimeScore.home}:{halfTimeScore.away}</strong></div>
+                      <TimelineHalf label={locale === "ro" ? "REPRIZA A DOUA" : "2 ТАЙМ"} events={secondHalfEvents} match={match} locale={locale} scoreAfterEvent={scoreAfterEvent} secondYellowIds={secondYellowIds} />
                     </div>
                   )}
                 </section>
 
                 {report?.summary ? (
-                  <section className="publicMatchPanel publicMatchReportText">
-                    <div className="publicMatchSectionHead"><p className="eyebrow blue">{t.reportEyebrow}</p><h2>{t.report}</h2></div>
+                  <section className="publicMatchPanel publicMatchReportText premiumReportText">
+                    <div className="publicMatchSectionHead premiumSectionHead"><p className="eyebrow blue">{t.reportEyebrow}</p><h2>{locale === "ro" ? "Cronica meciului" : "Отчёт о матче"}</h2></div>
                     <p>{report.summary}</p>
                   </section>
                 ) : null}
-              </div>
 
-              <aside className="publicMatchProtocolSide">
-                <section className="publicMatchPanel">
-                  <div className="publicMatchSectionHead compact"><p className="eyebrow blue">{t.infoEyebrow}</p><h3>{t.report}</h3></div>
-                  <dl className="publicMatchFacts">
-                    {report?.referee ? <><dt>{t.referee}</dt><dd>{report.referee}</dd></> : null}
-                    {report?.attendance != null ? <><dt>{t.attendance}</dt><dd>{report.attendance.toLocaleString(locale === "ro" ? "ro-RO" : "ru-RU")}</dd></> : null}
-                    {report?.weather ? <><dt>{t.weather}</dt><dd>{report.weather}</dd></> : null}
-                    {report?.pitch_condition ? <><dt>{t.pitch}</dt><dd>{report.pitch_condition}</dd></> : null}
-                    {mvpName ? <><dt className="mvpFactLabel">{t.mvp}</dt><dd className="mvpFactValue">★ {mvpName}</dd></> : null}
-                  </dl>
+                <section className="publicMatchPanel publicMatchLineupsPanel premiumLineupsPanel" id="lineups">
+                  <div className="publicMatchSectionHead premiumSectionHead"><p className="eyebrow blue">{t.lineupEyebrow}</p><h2>{t.lineups}</h2></div>
+                  <div className="publicMatchLineupGrid premiumLineupGrid">
+                    <PublicLineup side="home" team={match.home} settings={lineupSettings} entries={lineupEntries} events={events} secondYellowIds={secondYellowIds} playerPhotos={playerPhotos} t={t} locale={locale} />
+                    <PublicLineup side="away" team={match.away} settings={lineupSettings} entries={lineupEntries} events={events} secondYellowIds={secondYellowIds} playerPhotos={playerPhotos} t={t} locale={locale} />
+                  </div>
                 </section>
-              </aside>
 
-              <section className="publicMatchPanel publicMatchLineupsPanel">
-                <div className="publicMatchSectionHead"><p className="eyebrow blue">{t.lineupEyebrow}</p><h2>{t.lineups}</h2></div>
-                <div className="publicMatchLineupGrid">
-                  <PublicLineup side="home" teamName={match.home?.name ?? (locale === "ro" ? "GAZDE" : "ХОЗЯЕВА")} settings={lineupSettings} entries={lineupEntries} t={t} />
-                  <PublicLineup side="away" teamName={match.away?.name ?? (locale === "ro" ? "OASPEȚI" : "ГОСТИ")} settings={lineupSettings} entries={lineupEntries} t={t} />
-                </div>
-              </section>
-            </div>
-          )}
-        </div>
-      </section>
+                {hasInfo ? <section className="publicMatchPanel premiumInfoPanel" id="info">
+                  <div className="publicMatchSectionHead premiumSectionHead compact"><p className="eyebrow blue">{t.infoEyebrow}</p><h2>{t.report}</h2></div>
+                  <dl className="premiumMatchFacts">
+                    {matchStadium ? <div><dt>{t.stadium}</dt><dd>{matchStadium}</dd></div> : null}
+                    {report?.referee ? <div><dt>{t.referee}</dt><dd>{report.referee}</dd></div> : null}
+                    {report?.attendance != null ? <div><dt>{t.attendance}</dt><dd>{report.attendance.toLocaleString(locale === "ro" ? "ro-RO" : "ru-RU")}</dd></div> : null}
+                    {report?.weather ? <div><dt>{t.weather}</dt><dd>{report.weather}</dd></div> : null}
+                    {report?.pitch_condition ? <div><dt>{t.pitch}</dt><dd>{report.pitch_condition}</dd></div> : null}
+                    {mvpName ? <div className="is-mvp"><dt>{t.mvp}</dt><dd>★ {mvpName}</dd></div> : null}
+                  </dl>
+                </section> : null}
+              </div>
+            )}
+          </div>
+        </section>
       </main>
     </>
   );
 }
 
+function MatchMetric({ label, home, away }: { label: string; home: number; away: number }) {
+  return <article className="premiumMatchMetric"><span>{label}</span><div><strong>{home}</strong><i>—</i><strong>{away}</strong></div></article>;
+}
+
+function scoreAtEnd(events: MatchEvent[], match: ClubMatch) {
+  let home = 0;
+  let away = 0;
+  for (const event of events) {
+    if (!eventCountsAsGoal(event)) continue;
+    const team = eventScoringTeamId(event, match);
+    if (team === String(match.home_team_id)) home += 1;
+    if (team === String(match.away_team_id)) away += 1;
+  }
+  return { home, away };
+}
+
+function goalMinutes(events: MatchEvent[], match: ClubMatch, teamId: string) {
+  return events.filter(eventCountsAsGoal).filter((event) => eventScoringTeamId(event, match) === teamId).map(eventMinute).join(", ");
+}
+
+function TimelineHalf({ label, events, match, locale, scoreAfterEvent, secondYellowIds }: { label: string; events: MatchEvent[]; match: ClubMatch; locale: Locale; scoreAfterEvent: Map<string, { home: number; away: number }>; secondYellowIds: Set<string> }) {
+  return (
+    <section className="premiumTimelineHalf">
+      <header><span>{label}</span></header>
+      <div className="premiumTimelineRows">
+        {events.length === 0 ? <div className="premiumTimelineEmpty">—</div> : events.map((event) => {
+          const scoringTeam = eventCountsAsGoal(event) ? eventScoringTeamId(event, match) : String(event.team_id);
+          const isHome = scoringTeam === String(match.home_team_id);
+          const goalScore = scoreAfterEvent.get(String(event.id));
+          const isSecondYellow = event.event_type === "yellow_card" && secondYellowIds.has(String(event.id));
+          const labelText = isSecondYellow ? (locale === "ro" ? "Al doilea galben / roșu" : "Вторая жёлтая / красная") : (eventLabels[locale][event.event_type] ?? event.event_type);
+          const icon = isSecondYellow ? "▰■" : (eventIcons[event.event_type] ?? "•");
+          return (
+            <article className={`premiumTimelineRow ${isHome ? "is-home" : "is-away"} event-${event.event_type}${isSecondYellow ? " second-yellow" : ""}`} key={String(event.id)}>
+              <div className="premiumTimelineSide premiumTimelineLeft">{isHome ? <TimelineEventCard event={event} teamName={match.home?.name || "—"} label={labelText} icon={icon} goalScore={goalScore} /> : null}</div>
+              <div className="premiumTimelineCenter"><span>{eventMinute(event)}</span><i>{icon}</i></div>
+              <div className="premiumTimelineSide premiumTimelineRight">{!isHome ? <TimelineEventCard event={event} teamName={match.away?.name || "—"} label={labelText} icon={icon} goalScore={goalScore} /> : null}</div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function TimelineEventCard({ event, teamName, label, goalScore }: { event: MatchEvent; teamName: string; label: string; icon: string; goalScore?: { home: number; away: number } }) {
+  return <div className="premiumTimelineCard"><small>{teamName}</small><strong>{label}{goalScore ? <b>{goalScore.home}:{goalScore.away}</b> : null}</strong><span>{eventPerson(event)}</span>{event.description && event.description !== event.player_name ? <p>{event.description}</p> : null}</div>;
+}
+
+function teamLogo(team: ClubMatch["home"]) {
+  if (team?.is_club) return CLUB_CREST;
+  return team?.logo_url || null;
+}
+
 function PublicTeam({ team }: { team: ClubMatch["home"] }) {
+  const logo = teamLogo(team);
   return (
     <div className="publicMatchDetailTeam">
-      {team?.logo_url ? <img src={team.logo_url} alt="" /> : <span className={team?.is_club ? "club" : ""}>{(team?.short_name || team?.name || "FC").slice(0, 3).toUpperCase()}</span>}
+      {logo ? <img src={logo} alt="" /> : <span>{(team?.short_name || team?.name || "FC").slice(0, 3).toUpperCase()}</span>}
       <strong>{team?.name ?? "—"}</strong>
     </div>
   );
 }
 
-function PublicLineup({
-  side,
-  teamName,
-  settings,
-  entries,
-  t,
-}: {
-  side: "home" | "away";
-  teamName: string;
-  settings: MatchLineupSetting[];
-  entries: MatchLineupEntry[];
-  t: Copy;
-}) {
+function PublicLineup({ side, team, settings, entries, events, secondYellowIds, playerPhotos, t, locale }: { side: "home" | "away"; team: ClubMatch["home"]; settings: MatchLineupSetting[]; entries: MatchLineupEntry[]; events: MatchEvent[]; secondYellowIds: Set<string>; playerPhotos: Map<string, string>; t: Copy; locale: Locale }) {
   const setting = settings.find((row) => row.side === side);
   const starters = entries.filter((row) => row.side === side && row.lineup_role === "starter");
   const substitutes = entries.filter((row) => row.side === side && row.lineup_role === "substitute");
+  const teamName = team?.name ?? (side === "home" ? (locale === "ro" ? "GAZDE" : "ХОЗЯЕВА") : (locale === "ro" ? "OASPEȚI" : "ГОСТИ"));
   return (
-    <article className="publicMatchLineupTeam">
+    <article className={`publicMatchLineupTeam premiumLineupTeam${team?.is_club ? " is-club" : ""}`}>
       <header>
-        <h3>{teamName}</h3>
-        {setting?.formation ? <span>{t.formation}: {setting.formation}</span> : null}
-        {setting?.coach_name ? <small>{t.coach}: {setting.coach_name}</small> : null}
+        <div className="premiumLineupIdentity">{teamLogo(team) ? <img src={teamLogo(team) || ""} alt="" /> : <span>{(team?.short_name || teamName).slice(0,3).toUpperCase()}</span>}<div><h3>{teamName}</h3><small>{side === "home" ? (locale === "ro" ? "GAZDE" : "ХОЗЯЕВА") : (locale === "ro" ? "OASPEȚI" : "ГОСТИ")}</small></div></div>
+        <div className="premiumLineupMeta">{setting?.formation ? <span>{t.formation}: <b>{setting.formation}</b></span> : null}{setting?.coach_name ? <span>{t.coach}: <b>{setting.coach_name}</b></span> : null}</div>
       </header>
       {starters.length === 0 && substitutes.length === 0 ? <div className="adminEmpty">{t.noLineup}</div> : (
         <>
           <h4>{t.starters}</h4>
-          <div className="publicLineupRows">{starters.map((row) => <LineupRow row={row} t={t} key={String(row.id)} />)}</div>
-          {substitutes.length > 0 ? <><h4>{t.substitutes}</h4><div className="publicLineupRows substitutes">{substitutes.map((row) => <LineupRow row={row} t={t} key={String(row.id)} />)}</div></> : null}
+          <div className="publicLineupRows">{starters.map((row) => <LineupRow row={row} t={t} locale={locale} events={events} secondYellowIds={secondYellowIds} photo={row.player_id ? playerPhotos.get(String(row.player_id)) : undefined} key={String(row.id)} />)}</div>
+          {substitutes.length > 0 ? <><h4>{t.substitutes}</h4><div className="publicLineupRows substitutes">{substitutes.map((row) => <LineupRow row={row} t={t} locale={locale} events={events} secondYellowIds={secondYellowIds} photo={row.player_id ? playerPhotos.get(String(row.player_id)) : undefined} key={String(row.id)} />)}</div></> : null}
         </>
       )}
     </article>
   );
 }
 
-function LineupRow({ row, t }: { row: MatchLineupEntry; t: Copy }) {
+function LineupRow({ row, t, locale, events, secondYellowIds, photo }: { row: MatchLineupEntry; t: Copy; locale: Locale; events: MatchEvent[]; secondYellowIds: Set<string>; photo?: string }) {
+  const name = (row.player_name || "").trim().toLocaleLowerCase();
+  const playerEvents = events.filter((event) => (event.player_name || "").trim().toLocaleLowerCase() === name || (event.related_player_name || "").trim().toLocaleLowerCase() === name);
+  const goals = playerEvents.filter((event) => (event.event_type === "goal" || event.event_type === "penalty_goal") && (event.player_name || "").trim().toLocaleLowerCase() === name).length;
+  const ownGoals = playerEvents.filter((event) => event.event_type === "own_goal" && (event.player_name || "").trim().toLocaleLowerCase() === name).length;
+  const yellows = playerEvents.filter((event) => event.event_type === "yellow_card" && (event.player_name || "").trim().toLocaleLowerCase() === name).length;
+  const reds = playerEvents.filter((event) => (event.event_type === "red_card" || secondYellowIds.has(String(event.id))) && (event.player_name || "").trim().toLocaleLowerCase() === name).length;
+  const subOut = playerEvents.some((event) => event.event_type === "substitution" && (event.player_name || "").trim().toLocaleLowerCase() === name);
+  const subIn = playerEvents.some((event) => event.event_type === "substitution" && (event.related_player_name || "").trim().toLocaleLowerCase() === name);
   return (
-    <div className="publicLineupRow">
+    <div className="publicLineupRow premiumLineupRow">
+      <div className="premiumLineupAvatar">{photo ? <img src={photo} alt="" /> : <span>{row.shirt_number ?? "—"}</span>}</div>
       <b>{row.shirt_number ?? "—"}</b>
-      <span>{row.player_name || "—"}{row.is_captain ? ` · ${t.captain}` : ""}</span>
-      <small>{row.position ?? ""}</small>
+      <span className="premiumLineupName">{row.player_name || "—"}<small>{row.position ?? ""}</small></span>
+      <div className="premiumLineupBadges">{row.is_captain ? <i title={t.captain}>C</i> : null}{goals ? <i>⚽{goals > 1 ? goals : ""}</i> : null}{ownGoals ? <i>{locale === "ro" ? "AG" : "АГ"}</i> : null}{yellows ? <i className="yellow">{yellows > 1 ? `🟨${yellows}` : "🟨"}</i> : null}{reds ? <i className="red">🟥</i> : null}{subIn ? <i>↗</i> : null}{subOut ? <i>↘</i> : null}</div>
     </div>
   );
 }
