@@ -1,6 +1,6 @@
 {
   "name": "fc-edinet",
-  "version": "2.10.9",
+  "version": "2.11.0",
   "private": true,
   "scripts": {
     "dev": "next dev",

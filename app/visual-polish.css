@@ -1850,3 +1850,51 @@ button:disabled:hover,[aria-disabled="true"]:hover{transform:none!important}
   .premiumTimelineRows:before{left:33px}.premiumTimelineRow{grid-template-columns:66px minmax(0,1fr)!important;gap:8px;align-items:start}.premiumTimelineLeft,.premiumTimelineRight{grid-column:2;grid-row:1;justify-content:flex-start!important}.premiumTimelineCenter{grid-column:1;grid-row:1;display:grid!important;grid-template-columns:30px 32px!important;gap:4px!important}.premiumTimelineRow.is-away .premiumTimelineCenter{grid-template-columns:30px 32px!important}.premiumTimelineRow.is-away .premiumTimelineCenter span{grid-column:1!important;justify-self:end!important}.premiumTimelineRow.is-away .premiumTimelineCenter i{grid-column:2!important}.premiumTimelineCenter span{font-size:14px}.premiumTimelineCenter i{width:30px;height:30px}.premiumTimelineCard{width:100%;text-align:left!important;border-left:3px solid #d79f2b!important;border-right:1px solid #dce5ee!important}.premiumTimelineRow.is-home .premiumTimelineCard{border-left-color:#0b62c6!important}.premiumTimelineCard strong,.premiumTimelineRow.is-home .premiumTimelineCard strong{flex-direction:row!important}.premiumHalfTime{margin-left:0}
   .premiumLineupGrid{grid-template-columns:1fr!important}.premiumLineupTeam{padding:0 10px 12px!important}.premiumLineupTeam header{margin:0 -10px 14px!important;padding:14px!important}.premiumLineupRow{grid-template-columns:30px 28px minmax(0,1fr)!important}.premiumLineupAvatar{width:30px;height:30px}.premiumLineupBadges{grid-column:3;justify-content:flex-start}.premiumMatchFacts{grid-template-columns:repeat(2,1fr)}
 }
+
+/* v2.11.0 — horizontal match timeline + lineup interaction polish */
+.premiumTimelinePanel{overflow:visible!important}
+.horizontalTimelineViewport{position:relative;overflow-x:auto;overflow-y:visible;padding:8px 2px 18px;scrollbar-width:none;-ms-overflow-style:none;outline:none}
+.horizontalTimelineViewport::-webkit-scrollbar{display:none}
+.horizontalTimelineViewport:focus-visible{box-shadow:0 0 0 3px rgba(15,99,255,.18);border-radius:10px}
+.horizontalTimelineCanvas{min-width:980px;padding:4px 6px 10px}
+.horizontalTimelineTeamLegend{display:flex;justify-content:space-between;align-items:center;margin:0 4px 2px;color:#70849a;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.horizontalTimelineGrid{display:grid;grid-template-columns:minmax(0,1fr) 94px minmax(0,1fr);align-items:center;gap:0;min-height:248px}
+.horizontalTimelineSegment{position:relative;height:230px;min-width:0}
+.horizontalTimelineHalfLabel{position:absolute;left:50%;top:7px;transform:translateX(-50%);z-index:3;padding:5px 10px;border-radius:999px;background:#edf3f9;color:#315578;font-size:8px;font-weight:900;letter-spacing:.1em;white-space:nowrap;text-transform:uppercase}
+.horizontalTimelineAxis{position:absolute;left:0;right:0;top:50%;height:2px;transform:translateY(-50%);background:linear-gradient(90deg,#d2dce7,#9db4cb,#d2dce7)}
+.horizontalTimelineSegment.is-first .horizontalTimelineAxis{border-radius:999px 0 0 999px}.horizontalTimelineSegment.is-second .horizontalTimelineAxis{border-radius:0 999px 999px 0}
+.horizontalTimelineTick{position:absolute;top:50%;z-index:2;transform:translate(-50%,-50%);pointer-events:none}
+.horizontalTimelineTick i{display:block;width:1px;height:14px;margin:0 auto;background:#9fb2c6}
+.horizontalTimelineTick span{position:absolute;top:13px;left:50%;transform:translateX(-50%);font-family:var(--font-fce-display),Arial,sans-serif;font-size:11px;font-weight:900;color:#6f8296;white-space:nowrap}
+.horizontalHalfTime{position:relative;z-index:5;align-self:center;display:grid;justify-items:center;gap:3px;padding:11px 10px;border:1px solid #d7e2ec;border-radius:12px;background:#fff;box-shadow:0 9px 24px rgba(8,38,70,.08)}
+.horizontalHalfTime:before,.horizontalHalfTime:after{content:"";position:absolute;left:50%;width:1px;height:60px;background:#d6e0ea}.horizontalHalfTime:before{bottom:100%}.horizontalHalfTime:after{top:100%}
+.horizontalHalfTime span{font-size:8px;font-weight:900;letter-spacing:.09em;color:#71869a;text-transform:uppercase}.horizontalHalfTime strong{font-family:var(--font-fce-display),Arial,sans-serif;font-size:24px;line-height:1;color:#082f5c}
+.horizontalTimelineEvent{position:absolute;top:50%;z-index:8;width:30px;height:30px;padding:0;border:0;background:transparent;transform:translate(calc(-50% + var(--event-shift,0px)),-50%);cursor:pointer;overflow:visible}
+.horizontalTimelineEvent:after{content:"";position:absolute;left:50%;width:2px;height:13px;transform:translateX(-50%);border-radius:999px;background:#0f63c7;opacity:.8}.horizontalTimelineEvent.is-home:after{bottom:24px}.horizontalTimelineEvent.is-away:after{top:24px;background:#d18f1d}
+.horizontalEventGlyph{position:relative;z-index:2;display:grid;place-items:center;width:30px;height:30px;font-style:normal;font-weight:950;line-height:1;transition:transform .16s ease,filter .16s ease}
+.horizontalTimelineEvent:hover .horizontalEventGlyph,.horizontalTimelineEvent:focus-visible .horizontalEventGlyph{transform:scale(1.16);filter:drop-shadow(0 5px 8px rgba(6,35,67,.18))}
+.horizontalEventGlyph.is-goal{font-size:22px;background:transparent}
+.horizontalEventGlyph.is-yellow-card,.horizontalEventGlyph.is-red-card,.horizontalEventGlyph.is-second-yellow{width:17px;height:17px;margin:6px auto;border-radius:50%;box-shadow:0 0 0 3px #fff,0 3px 9px rgba(7,36,67,.14)}
+.horizontalEventGlyph.is-yellow-card{background:#ffc400}.horizontalEventGlyph.is-red-card{background:#e43a4e}.horizontalEventGlyph.is-second-yellow{background:linear-gradient(135deg,#ffc400 0 50%,#e43a4e 50% 100%)}
+.horizontalEventGlyph.is-substitution{width:24px;height:24px;margin:3px auto;border-radius:7px;background:#eaf4ff;color:#0c66ce;font-size:18px;box-shadow:0 0 0 2px #fff,0 3px 10px rgba(7,52,96,.12)}
+.horizontalEventGlyph.is-penalty-miss{width:22px;height:22px;margin:4px auto;border-radius:50%;background:#fff0f1;color:#c53849;font-size:18px;box-shadow:0 0 0 2px #fff}.horizontalEventGlyph.is-var{width:27px;height:20px;margin:5px auto;border-radius:4px;background:#102f50;color:#fff;font-size:8px;letter-spacing:.04em}.horizontalEventGlyph.is-injury{width:22px;height:22px;margin:4px auto;border-radius:50%;background:#f0f6fb;color:#244b73;font-size:16px}.horizontalEventGlyph.is-other{color:#6f8296;font-size:22px}
+.horizontalEventTooltip{position:absolute;left:50%;z-index:40;width:250px;padding:11px 12px;border:1px solid #d7e3ee;border-radius:9px;background:#071f3d;color:#fff;box-shadow:0 16px 38px rgba(1,18,39,.25);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .14s ease,transform .14s ease;text-align:left}
+.horizontalTimelineEvent.is-home .horizontalEventTooltip{bottom:38px;transform:translate(-50%,6px)}.horizontalTimelineEvent.is-away .horizontalEventTooltip{top:38px;transform:translate(-50%,-6px)}
+.horizontalTimelineEvent:hover .horizontalEventTooltip,.horizontalTimelineEvent:focus-visible .horizontalEventTooltip{opacity:1;visibility:visible;transform:translate(-50%,0)}
+.horizontalEventTooltip b{display:block;margin-bottom:5px;color:#ffd328;font-size:10px;font-weight:900;letter-spacing:.03em;text-transform:uppercase}.horizontalEventTooltip strong{display:block;font-size:13px;line-height:1.35}.horizontalEventTooltip small{display:block;margin-top:5px;color:#9eb8d1;font-size:10px;font-weight:800}.horizontalEventTooltip em{display:block;margin-top:6px;color:#d0dbe6;font-size:10px;line-height:1.4;font-style:normal}
+
+.premiumLineupPlayerLink{grid-column:1/4;display:grid;grid-template-columns:34px 32px minmax(0,1fr);gap:9px;align-items:center;min-width:0;color:inherit;text-decoration:none;border-radius:6px}
+.premiumLineupPlayerLink:hover .premiumLineupName>span,.premiumLineupPlayerLink:hover .premiumLineupName{color:#0755a5}.premiumLineupPlayerLink:focus-visible{outline:2px solid rgba(15,99,255,.35);outline-offset:2px}
+.premiumLineupBadges{position:relative;overflow:visible}.premiumLineupBadges i{position:relative;overflow:visible;min-width:27px!important;height:27px!important;border-radius:7px!important;font-size:11px!important;box-shadow:0 2px 7px rgba(10,48,87,.08)}
+.premiumLineupBadges i.goal{background:transparent!important;box-shadow:none!important;font-size:17px!important;padding:0!important}
+.premiumLineupBadges i.yellow-card,.premiumLineupBadges i.red-card{width:18px!important;min-width:18px!important;height:18px!important;padding:0!important;border-radius:50%!important;margin:4px 3px;box-shadow:0 0 0 2px #fff,0 2px 7px rgba(10,48,87,.12)}
+.premiumLineupBadges i.yellow-card{background:#ffc400!important;color:#6a5000!important}.premiumLineupBadges i.red-card{background:#e43a4e!important}.premiumLineupBadges i.substitution{background:#e9f4ff!important;color:#0b64c9!important;font-size:17px!important}.premiumLineupBadges i.captain{background:#082e5d!important;color:#fff!important}.premiumLineupBadges i.own-goal{background:#f4edf9!important;color:#72508a!important}
+.premiumLineupBadges i[data-tooltip]:after{content:attr(data-tooltip);position:absolute;left:50%;bottom:calc(100% + 8px);z-index:50;width:max-content;max-width:260px;padding:7px 9px;border-radius:7px;background:#071f3d;color:#fff;font-size:9px;font-weight:800;line-height:1.35;white-space:normal;box-shadow:0 9px 22px rgba(1,18,39,.22);opacity:0;visibility:hidden;transform:translate(-50%,5px);transition:.13s ease;pointer-events:none}
+.premiumLineupBadges i[data-tooltip]:hover:after{opacity:1;visibility:visible;transform:translate(-50%,0)}
+
+@media(max-width:760px){
+  .horizontalTimelineViewport{margin:0 -4px;padding-bottom:12px}.horizontalTimelineCanvas{min-width:900px;padding-inline:4px}.horizontalTimelineGrid{grid-template-columns:minmax(0,1fr) 86px minmax(0,1fr);min-height:224px}.horizontalTimelineSegment{height:210px}.horizontalTimelineHalfLabel{font-size:7px}.horizontalEventTooltip{width:220px}
+  .premiumLineupPlayerLink{grid-template-columns:30px 28px minmax(0,1fr);grid-column:1/4}.premiumLineupBadges{grid-column:3!important;justify-content:flex-start!important;margin-top:2px}
+}
+
+@media (prefers-reduced-motion: reduce){.horizontalEventGlyph,.horizontalEventTooltip{transition:none!important}}
