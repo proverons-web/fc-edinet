@@ -25,6 +25,7 @@ import ClubSquadStatsEditor from "./ClubSquadStatsEditor";
 import EventFields, { type EventParticipantOption } from "./EventFields";
 import SelectOnFocus from "./SelectOnFocus";
 import MatchCenterFeedback from "./MatchCenterFeedback";
+import MatchCenterSubmitButton from "./MatchCenterSubmitButton";
 
 export const metadata = { title: "Матч-центр — Админ" };
 export const dynamic = "force-dynamic";
@@ -489,7 +490,7 @@ export default async function MatchCenterMatchPage({
                 <p>
                   Для автогола выбирай <b>команду игрока, забившего в свои ворота</b>. Система сама засчитает мяч сопернику. Для обычного гола вторым игроком можно указать ассистента.
                 </p>
-                <button className="primaryButton" type="submit">+ Добавить событие</button>
+                <MatchCenterSubmitButton className="primaryButton" pendingText="Добавление…">+ Добавить событие</MatchCenterSubmitButton>
               </div>
             </form>
           </section>
@@ -631,13 +632,13 @@ function TimelineHalf({
                                   defaults={event}
                                   compact
                                 />
-                                <button className="rowAction" type="submit">Сохранить изменения</button>
+                                <MatchCenterSubmitButton className="rowAction" pendingText="Сохранение…">Сохранить изменения</MatchCenterSubmitButton>
                               </form>
                             </details>
                             <form action={deleteMatchEvent}>
                               <input type="hidden" name="match_id" value={String(match.id)} />
                               <input type="hidden" name="event_id" value={String(event.id)} />
-                              <button className="rowAction muted" type="submit">Удалить</button>
+                              <MatchCenterSubmitButton className="rowAction muted" pendingText="Удаление…">Удалить</MatchCenterSubmitButton>
                             </form>
                           </div>
                         </div>
@@ -661,13 +662,13 @@ function TimelineHalf({
                               defaults={first}
                               compact
                             />
-                            <button className="rowAction" type="submit">Сохранить изменения</button>
+                            <MatchCenterSubmitButton className="rowAction" pendingText="Сохранение…">Сохранить изменения</MatchCenterSubmitButton>
                           </form>
                         </details>
                         <form action={deleteMatchEvent}>
                           <input type="hidden" name="match_id" value={String(match.id)} />
                           <input type="hidden" name="event_id" value={String(first.id)} />
-                          <button className="rowAction muted" type="submit">Удалить</button>
+                          <MatchCenterSubmitButton className="rowAction muted" pendingText="Удаление…">Удалить</MatchCenterSubmitButton>
                         </form>
                       </div>
                     </>

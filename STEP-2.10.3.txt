@@ -1,0 +1,8 @@
+FC EDINEȚ v2.10.3 — Match Center Submit Lock + Input/Tab Fix
+
+- Added pending/loading state to match-event Add/Edit/Delete buttons.
+- Pending buttons are disabled while the server action is running to prevent duplicate event submissions.
+- Added a compact spinner and action-specific pending labels.
+- Changed select-on-focus behaviour to pointer-click only, preserving native Tab/Shift+Tab navigation.
+- Number inputs are no longer auto-selected, so shirt numbers can be appended normally (2 -> 21).
+- No SQL migration required.

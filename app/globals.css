@@ -3451,7 +3451,7 @@ body:has(.adminEmbedded){background:#f3f6fa}
   .matchCenterSquadMeta.compact.afterLineups{grid-template-columns:1fr!important}
 }
 
-/* v2.10.2 — Match Center non-disruptive save feedback */
+/* v2.10.3 — Match Center non-disruptive save feedback */
 .matchCenterToast{
   position:fixed;right:24px;bottom:24px;z-index:2600;
   width:min(420px,calc(100vw - 32px));min-height:72px;
@@ -3469,3 +3469,28 @@ body:has(.adminEmbedded){background:#f3f6fa}
 @keyframes matchCenterToastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @media(max-width:680px){.matchCenterToast{right:16px;bottom:16px;left:16px;width:auto}}
 @media(prefers-reduced-motion:reduce){.matchCenterToast{animation:none}}
+
+/* v2.10.3 — Match Center submit lock / loading feedback */
+.matchCenterPage button.is-loading,
+.matchCenterPage button[aria-busy="true"]{
+  cursor:wait!important;
+  opacity:.78!important;
+  pointer-events:none!important;
+}
+.matchCenterPage button.is-loading{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+}
+.matchCenterButtonSpinner{
+  width:15px;
+  height:15px;
+  flex:0 0 15px;
+  border:2px solid currentColor;
+  border-right-color:transparent;
+  border-radius:50%;
+  animation:matchCenterButtonSpin .7s linear infinite;
+}
+@keyframes matchCenterButtonSpin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.matchCenterButtonSpinner{animation-duration:1.4s}}
