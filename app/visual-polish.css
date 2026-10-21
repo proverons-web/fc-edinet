@@ -2017,7 +2017,7 @@ button:disabled:hover,[aria-disabled="true"]:hover{transform:none!important}
 }
 
 
-/* v2.11.7 — classic ball + true full-size player photo preview */
+/* v2.11.8 — classic ball + true full-size player photo preview */
 .matchBallIcon{display:block!important;width:24px!important;height:24px!important;filter:drop-shadow(0 1px 2px rgba(3,22,47,.12))!important}
 .lineupBallIcon{display:block!important;width:24px!important;height:24px!important;filter:drop-shadow(0 1px 2px rgba(3,22,47,.10))!important}
 .premiumLineupAvatar.has-photo{position:relative!important;overflow:visible!important;z-index:20!important;cursor:zoom-in!important}
@@ -2039,3 +2039,26 @@ button:disabled:hover,[aria-disabled="true"]:hover{transform:none!important}
 @media(max-width:760px){
   .premiumLineupAvatarPreview{left:40px!important;width:190px!important;height:260px!important;padding:6px!important}
 }
+
+/* v2.11.8 — restore original goal icons */
+.matchBallIcon{
+  display:inline-grid!important;
+  place-items:center!important;
+  width:auto!important;
+  height:auto!important;
+  font-size:22px!important;
+  line-height:1!important;
+  filter:none!important;
+  font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif!important;
+}
+.lineupBallIcon{
+  display:inline-grid!important;
+  place-items:center!important;
+  width:auto!important;
+  height:auto!important;
+  font-size:24px!important;
+  line-height:1!important;
+  filter:none!important;
+  font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif!important;
+}
+.premiumLineupBadges i.goal{min-width:30px!important;height:30px!important}

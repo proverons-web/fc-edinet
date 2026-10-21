@@ -493,17 +493,7 @@ function eventGlyphClass(event: MatchEvent, secondYellow: boolean) {
 }
 
 function FootballIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-      <circle cx="32" cy="32" r="29" fill="#fff" stroke="#111827" strokeWidth="3.25" />
-      <path d="M32 16.5 40.9 23l-3.4 10.6H26.5L23.1 23 32 16.5Z" fill="#111827" />
-      <path d="M18 11.8 26 7.6h12l8 4.2-4.6 8.5L32 16.8l-9.4 3.5-4.6-8.5Z" fill="#111827" />
-      <path d="M9.4 22.5 18.2 17l4.1 3L25.8 33l-7.4 6L9.9 34l-.5-11.5Z" fill="#111827" />
-      <path d="M54.6 22.5 45.8 17l-4.1 3L38.2 33l7.4 6 8.5-5 .5-11.5Z" fill="#111827" />
-      <path d="M18.7 40.7 26.1 35h11.8l7.4 5.7-3.6 11L32 57.3l-9.7-5.6-3.6-11Z" fill="#111827" />
-      <path d="M22.3 20.1 17.9 31M41.7 20.1 46.1 31M26.1 35l-7.4 5.7M37.9 35l7.4 5.7M32 16.5V9.4M22.3 51.7l3.8-16.7M41.7 51.7 37.9 35" fill="none" stroke="#111827" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  return <span className={className} aria-hidden="true">⚽</span>;
 }
 
 function EventGlyph({ event, secondYellow }: { event: MatchEvent; secondYellow: boolean }) {
