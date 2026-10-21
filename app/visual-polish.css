@@ -2015,3 +2015,27 @@ button:disabled:hover,[aria-disabled="true"]:hover{transform:none!important}
   .premiumLineupAvatarPreview{left:42px!important;width:98px!important;height:126px!important}
   .premiumLineupBadges i[data-tooltip]:after{min-width:180px!important;max-width:230px!important}
 }
+
+
+/* v2.11.6 — classic ball + true full-size player photo preview */
+.matchBallIcon{width:26px!important;height:26px!important;filter:drop-shadow(0 2px 5px rgba(0,0,0,.16))!important}
+.lineupBallIcon{width:31px!important;height:31px!important;filter:drop-shadow(0 2px 4px rgba(0,0,0,.14))!important}
+.premiumLineupAvatar.has-photo{position:relative!important;overflow:visible!important;z-index:20!important;cursor:zoom-in!important}
+.premiumLineupAvatarThumb{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center top!important;border-radius:5px!important;transform:none!important;box-shadow:none!important}
+.premiumLineupAvatarPreview{
+  position:absolute!important;left:calc(100% + 14px)!important;top:50%!important;z-index:250!important;
+  width:250px!important;height:330px!important;max-width:none!important;max-height:none!important;
+  object-fit:contain!important;object-position:center center!important;
+  padding:8px!important;border:3px solid #fff!important;border-radius:14px!important;
+  background:linear-gradient(180deg,#0a315d,#061a37)!important;
+  box-shadow:0 26px 58px rgba(3,22,47,.38)!important;
+  opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+  transform:translateY(-50%) scale(.96)!important;transform-origin:left center!important;
+  transition:opacity .14s ease,transform .14s ease,visibility .14s ease!important;
+}
+.premiumLineupAvatar.has-photo:hover .premiumLineupAvatarPreview,
+.premiumLineupAvatar.has-photo:focus-within .premiumLineupAvatarPreview{opacity:1!important;visibility:visible!important;transform:translateY(-50%) scale(1)!important}
+.premiumLineupAvatar.has-photo:hover .premiumLineupAvatarThumb{transform:none!important;box-shadow:none!important}
+@media(max-width:760px){
+  .premiumLineupAvatarPreview{left:40px!important;width:190px!important;height:260px!important;padding:6px!important}
+}

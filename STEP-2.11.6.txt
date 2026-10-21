@@ -1,0 +1,7 @@
+FC Edineț v2.11.6 — Ball Icon + Full Photo Preview
+
+- Replaced the previous football glyph with a cleaner classic black-and-white ball.
+- Uses one ball icon in the timeline and lineup event badges.
+- Replaced thumbnail scaling with a dedicated large full-photo preview.
+- Full preview uses object-fit: contain so the whole stored player photo is visible.
+- No database migration required.
