@@ -1,0 +1,7 @@
+FC Edinet v2.23.1 — Club Archive & Hall of Fame
+
+- Реальный фотоархив: альбомы, мультизагрузка, подписи, периоды, источники, порядок, публикация, lightbox.
+- Зал славы: игроки, тренеры, люди клуба и исторические составы.
+- Отдельные CRUD-экраны в /admin/club/archive и /admin/club/hall-of-fame.
+- Заглушки используют герб клуба и не выдают вымышленные данные за реальные.
+- Migration 057: club_archive_albums, club_archive_photos, club_hall_of_fame + RLS + audit.

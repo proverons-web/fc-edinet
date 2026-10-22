@@ -1116,3 +1116,55 @@ export type TeamStaffMember = {
   created_at?: string;
   updated_at?: string;
 };
+
+export type ClubArchiveAlbum = {
+  id: number;
+  title: string;
+  title_ro: string | null;
+  period_label: string | null;
+  period_label_ro: string | null;
+  description: string | null;
+  description_ro: string | null;
+  cover_url: string | null;
+  display_order: number;
+  is_active: boolean;
+  is_placeholder: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ClubArchivePhoto = {
+  id: number;
+  album_id: number;
+  image_url: string;
+  caption: string | null;
+  caption_ro: string | null;
+  year_label: string | null;
+  source_credit: string | null;
+  display_order: number;
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ClubHallOfFameEntry = {
+  id: number;
+  entry_type: "person" | "squad";
+  category: "player" | "coach" | "leader" | "squad";
+  first_name: string | null;
+  last_name: string | null;
+  title: string;
+  title_ro: string | null;
+  era_label: string | null;
+  era_label_ro: string | null;
+  description: string | null;
+  description_ro: string | null;
+  roster_text: string | null;
+  roster_text_ro: string | null;
+  photo_url: string | null;
+  display_order: number;
+  is_active: boolean;
+  is_placeholder: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
