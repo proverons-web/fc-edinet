@@ -121,10 +121,13 @@ ok("next match VS circle replaced", homeCss.includes('Modern VS separator') && h
 ok("results rail frame and rounding removed", homeCss.includes('.fcV215ResultsSection .fcV215MatchRailWide{') && homeCss.includes('.fcV215ResultsSection .fcRefRecentMatchCard,') && homeCss.includes('border:0!important;') && homeCss.includes('border-radius:0!important;'));
 ok("homepage news rounding removed", homeCss.includes('.fcRefLeadColumn,\n.fcRefLatestColumn{') && homeCss.includes('.fcRefNewsRow>div{\n  border-radius:0!important;'));
 const releaseSource = read("lib/release.ts");
-ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.28.6"'));
-ok("release version", JSON.parse(read("package.json")).version === "2.28.6");
+ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.28.7"'));
+ok("release version", JSON.parse(read("package.json")).version === "2.28.7");
 
 const failed = checks.filter((x) => !x.ok);
 for (const check of checks) console.log(`${check.ok ? "PASS" : "FAIL"}  ${check.name}${check.detail ? ` — ${check.detail}` : ""}`);
+
+ok("v2.28.7 next-match footprint restored", homeCss.includes("FC EDINEȚ v2.28.7 — LARGE CRESTS WITHOUT TALLER MATCH CARD") && homeCss.includes("min-height:168px!important") && homeCss.includes("height:168px!important"));
+ok("v2.28.7 crests enlarge without layout growth", homeCss.includes("transform:scale(1.58) translateY(-7px)!important"));
 console.log(`\n${checks.length - failed.length}/${checks.length} checks passed.`);
 if (failed.length) process.exit(1);

@@ -937,3 +937,82 @@
   }
   .fcV215NextMatchDashboard .fcRefVs{width:38px!important}
 }
+
+/* ============================================================
+   FC EDINEȚ v2.28.7 — LARGE CRESTS WITHOUT TALLER MATCH CARD
+   ============================================================ */
+/* Restore the v2.28.5 layout footprint. Crest enlargement is visual only,
+   so the Next Match card no longer forces the whole dashboard row taller. */
+.fcV215NextMatchDashboard .fcRefMatchTeams{
+  padding-bottom:20px!important;
+}
+.fcV215NextMatchDashboard .fcRefTeamBadge{
+  min-height:168px!important;
+  height:168px!important;
+  padding:4px 8px!important;
+  gap:10px!important;
+  overflow:visible!important;
+}
+.fcV215NextMatchDashboard .fcRefTeamBadge img{
+  width:106px!important;
+  height:116px!important;
+  max-width:none!important;
+  object-fit:contain!important;
+  transform:scale(1.58) translateY(-7px)!important;
+  transform-origin:center center!important;
+  position:relative!important;
+  z-index:1!important;
+}
+.fcV215NextMatchDashboard .fcRefTeamBadge>span{
+  width:88px!important;
+  height:88px!important;
+  max-width:none!important;
+  transform:scale(1.58) translateY(-7px)!important;
+  transform-origin:center center!important;
+  position:relative!important;
+  z-index:1!important;
+}
+.fcV215NextMatchDashboard .fcRefTeamBadge strong{
+  position:relative!important;
+  z-index:2!important;
+  margin-top:0!important;
+  font-size:16px!important;
+  line-height:1.08!important;
+}
+
+@media(max-width:760px){
+  .fcV215NextMatchDashboard .fcRefTeamBadge{
+    min-height:142px!important;
+    height:142px!important;
+    padding:2px 4px!important;
+  }
+  .fcV215NextMatchDashboard .fcRefTeamBadge img{
+    width:78px!important;
+    height:88px!important;
+    transform:scale(1.44) translateY(-5px)!important;
+  }
+  .fcV215NextMatchDashboard .fcRefTeamBadge>span{
+    width:70px!important;
+    height:70px!important;
+    transform:scale(1.44) translateY(-5px)!important;
+  }
+  .fcV215NextMatchDashboard .fcRefTeamBadge strong{font-size:12px!important}
+}
+
+@media(max-width:460px){
+  .fcV215NextMatchDashboard .fcRefTeamBadge{
+    min-height:126px!important;
+    height:126px!important;
+  }
+  .fcV215NextMatchDashboard .fcRefTeamBadge img{
+    width:66px!important;
+    height:74px!important;
+    transform:scale(1.46) translateY(-4px)!important;
+  }
+  .fcV215NextMatchDashboard .fcRefTeamBadge>span{
+    width:60px!important;
+    height:60px!important;
+    transform:scale(1.46) translateY(-4px)!important;
+  }
+  .fcV215NextMatchDashboard .fcRefTeamBadge strong{font-size:10px!important}
+}
