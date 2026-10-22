@@ -30,6 +30,7 @@ const entityLabels: Record<string, string> = {
   standings: "Турнирная таблица",
   club_profile: "Клуб",
   club_leadership: "Руководство",
+  team_staff: "Штаб команды",
   club_achievements: "Достижения",
   media_albums: "Фотоальбомы",
   media_photos: "Фотографии",

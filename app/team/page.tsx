@@ -2,7 +2,7 @@ import TeamRosterBrowser from "@/app/components/TeamRosterBrowser";
 import PageHeroShell from "@/app/components/PageHeroShell";
 import { PublicMessageState } from "@/app/components/PublicRouteState";
 import { createClient } from "@/lib/supabase/server";
-import type { Player, PlayerSeasonTotal, Season } from "@/lib/types";
+import type { Player, PlayerSeasonTotal, Season, TeamStaffMember } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { publicSectionMetadata } from "@/lib/seo";
 import { positionPluralLabelsI18n, publicText, type Locale } from "@/lib/i18n";
@@ -44,13 +44,15 @@ export default async function TeamPage() {
   const locale = await getLocale();
   const text = publicText[locale].team;
   const supabase = await createClient();
-  const [{ data, error }, design, seasonResult] = await Promise.all([
+  const [{ data, error }, design, seasonResult, staffResult] = await Promise.all([
     supabase.from("players").select("*").eq("is_active", true).order("display_order", { ascending: true }).order("shirt_number", { ascending: true }),
     getPublishedSitePageDesign(supabase, "team"),
     supabase.from("seasons").select("id,name,slug,starts_on,ends_on,is_current,is_active").eq("is_active", true).eq("is_current", true).maybeSingle(),
+    supabase.from("team_staff").select("*").eq("is_active", true).order("category").order("display_order").order("id"),
   ]);
   const players = (data ?? []) as Player[];
   const currentSeason = (seasonResult.data as Season | null) ?? null;
+  const staff = (staffResult.data ?? []) as TeamStaffMember[];
   let seasonStatsByPlayer = new Map<string, PlayerSeasonTotal>();
   if (currentSeason && players.length > 0) {
     const { data: seasonStats } = await supabase
@@ -97,6 +99,16 @@ export default async function TeamPage() {
       {error && <PublicMessageState title={text.loadError} text={locale === "ro" ? "Lotul nu este disponibil momentan. Încearcă din nou mai târziu." : "Состав временно недоступен. Попробуй снова позже."} actionLabel={locale === "ro" ? "Reîncarcă" : "Обновить"} actionHref="/team" />}
       {!error && players.length === 0 && <PublicMessageState title={text.empty} text={locale === "ro" ? "Jucătorii vor apărea aici după publicarea lor în administrare." : "Игроки появятся здесь после публикации в админке."} />}
       {!error && players.length > 0 && <TeamRosterBrowser players={players} seasonStats={Array.from(seasonStatsByPlayer.values())} locale={locale} />}
+
+      {staff.length > 0 && <section id="staff" className="teamStaffSection">
+        <div className="teamStaffHeading"><p className="eyebrow">{locale === "ro" ? "ECHIPA TEHNICĂ" : "ШТАБ КОМАНДЫ"}</p><h2>{locale === "ro" ? "Oamenii din spatele echipei" : "Люди, которые готовят команду"}</h2><p>{locale === "ro" ? "Staff tehnic, medical și administrativ FC Edineț." : "Тренерский, медицинский и организационный штаб FC Edineț."}</p></div>
+        {(["coaching","medical","operations"] as const).map((category) => {
+          const rows = staff.filter((member) => member.category === category);
+          if (!rows.length) return null;
+          const title = locale === "ro" ? (category === "coaching" ? "Staff tehnic" : category === "medical" ? "Staff medical" : "Organizare") : (category === "coaching" ? "Тренерский штаб" : category === "medical" ? "Медицинский штаб" : "Организация");
+          return <div className="teamStaffGroup" key={category}><div className="teamStaffGroupTitle"><span>{title}</span><b>{String(rows.length).padStart(2,"0")}</b></div><div className="teamStaffGrid">{rows.map((member) => <article className={`teamStaffCard${member.is_placeholder ? " isPlaceholder" : ""}`} key={member.id}><div className="teamStaffPortrait">{member.photo_url ? <img src={member.photo_url} alt={`${member.first_name} ${member.last_name}`} loading="lazy" /> : <img src="/brand/fc-edinet-crest.png" alt="FC Edineț" className="isCrest" />}{member.is_placeholder && <span>{locale === "ro" ? "MODEL" : "ЗАГЛУШКА"}</span>}</div><div className="teamStaffCopy"><small>{locale === "ro" ? (member.role_title_ro || member.role_title) : member.role_title}</small><h3>{member.first_name} {member.last_name}</h3>{(member.joined_year || member.left_year) && <b>{member.joined_year || "—"}{member.left_year ? ` — ${member.left_year}` : " — н.в."}</b>}{(locale === "ro" ? member.bio_ro : member.bio) && <p>{locale === "ro" ? (member.bio_ro || member.bio) : member.bio}</p>}</div></article>)}</div></div>;
+        })}
+      </section>}
     </div></section>
   </main>;
 }

@@ -27,6 +27,7 @@ export default async function AdminPage() {
     { title: "Новости", text: "Создание, редактура, черновики и публикация материалов.", href: "/admin/news", icon: "N", kicker: "Контент" },
     ...(canEdit ? [
       { title: "Команда", text: "Игроки, профили, фотографии и состав клуба.", href: "/admin/players", icon: "P", kicker: "Команда" },
+      { title: "Штаб команды", text: "Тренеры, медицина и организационный персонал.", href: "/admin/staff", icon: "ST", kicker: "Команда" },
       { title: "Календарь", text: "Календарь, результаты, соперники и команды.", href: "/admin/matches", icon: "M", kicker: "Календарь" },
       { title: "Протокол матча", text: "События, составы, протокол и подробности уже созданных матчей.", href: "/admin/match-center", icon: "MC", kicker: "Матч-центр" },
       { title: "Таблица", text: "Турниры, положение команд и очки.", href: "/admin/standings", icon: "T", kicker: "Турнир" },

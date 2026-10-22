@@ -1096,3 +1096,23 @@ export type ClubSeasonHistory = {
   statistics_complete: number;
   players_with_stats: number;
 };
+
+export type TeamStaffMember = {
+  id: string | number;
+  first_name: string;
+  last_name: string;
+  role_key: string;
+  role_title: string;
+  role_title_ro?: string | null;
+  category: "coaching" | "medical" | "operations";
+  bio?: string | null;
+  bio_ro?: string | null;
+  photo_url?: string | null;
+  joined_year?: number | null;
+  left_year?: number | null;
+  display_order: number;
+  is_active: boolean;
+  is_placeholder?: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
