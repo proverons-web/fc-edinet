@@ -12,7 +12,7 @@ import { getLocale } from "@/lib/locale";
 import { secondYellowEventIds } from "@/lib/match-discipline";
 import { publicText } from "@/lib/i18n";
 import { publicMetadata, sportsEventJsonLd } from "@/lib/seo";
-import type { ClubMatch, MatchEvent, MatchLineupEntry, MatchLineupSetting, MatchReport } from "@/lib/types";
+import type { ClubMatch, MatchEvent, MatchLineupEntry, MatchLineupSetting, MatchReport, MatchTeamStatistic } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +27,7 @@ type Copy = {
   notPublishedHint: string;
   timeline: string;
   lineups: string;
+  statistics: string;
   starters: string;
   substitutes: string;
   coach: string;
@@ -58,6 +59,7 @@ const copy: Record<Locale, Copy> = {
     notPublishedHint: "Счёт и основная информация уже доступны. Составы, события и отчёт появятся после публикации редактором клуба.",
     timeline: "Ход матча",
     lineups: "Составы",
+    statistics: "Статистика",
     starters: "Стартовый состав",
     substitutes: "Запасные",
     coach: "Тренер",
@@ -87,6 +89,7 @@ const copy: Record<Locale, Copy> = {
     notPublishedHint: "Scorul și informația de bază sunt disponibile. Echipele, evenimentele și raportul vor apărea după publicare.",
     timeline: "Desfășurarea meciului",
     lineups: "Loturi",
+    statistics: "Statistici",
     starters: "Primul 11",
     substitutes: "Rezerve",
     coach: "Antrenor",
@@ -262,19 +265,22 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
   let events: MatchEvent[] = [];
   let lineupSettings: MatchLineupSetting[] = [];
   let lineupEntries: MatchLineupEntry[] = [];
+  let teamStatistics: MatchTeamStatistic[] = [];
   let playerPhotos = new Map<string, string>();
   let playerSlugs = new Map<string, string>();
   let mvpName: string | null = null;
 
   if (published) {
-    const [eventsResult, settingsResult, entriesResult] = await Promise.all([
+    const [eventsResult, settingsResult, entriesResult, teamStatsResult] = await Promise.all([
       supabase.from("match_events").select("*").eq("match_id", id).order("minute").order("stoppage_minute").order("sort_order").order("id"),
       supabase.from("match_lineup_settings").select("*").eq("match_id", id).order("side"),
       supabase.from("match_lineup_entries").select("*").eq("match_id", id).order("side").order("lineup_role").order("slot_number"),
+      supabase.from("match_team_statistics").select("*").eq("match_id", id).order("side"),
     ]);
     events = (eventsResult.data ?? []) as MatchEvent[];
     lineupSettings = (settingsResult.data ?? []) as MatchLineupSetting[];
     lineupEntries = (entriesResult.data ?? []) as MatchLineupEntry[];
+    teamStatistics = (teamStatsResult.data ?? []) as MatchTeamStatistic[];
 
     const playerIds = [...new Set(lineupEntries.map((row) => row.player_id).filter(Boolean).map(String))];
     if (playerIds.length > 0) {
@@ -310,6 +316,9 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
   const awaySubs = events.filter((event) => event.event_type === "substitution" && String(event.team_id) === String(match.away_team_id)).length;
   const matchStadium = match.home?.home_stadium || match.stadium || null;
   const hasInfo = Boolean(matchStadium || report?.referee || report?.attendance != null || report?.weather || report?.pitch_condition || mvpName);
+  const homeTeamStats = teamStatistics.find((row) => row.side === "home") ?? null;
+  const awayTeamStats = teamStatistics.find((row) => row.side === "away") ?? null;
+  const hasTeamStatistics = hasAnyTeamStatistics(homeTeamStats) || hasAnyTeamStatistics(awayTeamStats);
 
   return (
     <>
@@ -347,6 +356,7 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
           <nav className="premiumMatchNav" aria-label={locale === "ro" ? "Navigarea raportului" : "Навигация по протоколу"}>
             <div className="container">
               <a href="#overview">{locale === "ro" ? "Rezumat" : "Обзор"}</a>
+              {hasTeamStatistics ? <a href="#statistics">{t.statistics}</a> : null}
               <a href="#timeline">{t.timeline}</a>
               <a href="#lineups">{t.lineups}</a>
               {hasInfo ? <a href="#info">{locale === "ro" ? "Informații" : "Информация"}</a> : null}
@@ -374,6 +384,22 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
                     <MatchMetric label={locale === "ro" ? "Schimbări" : "Замены"} home={homeSubs} away={awaySubs} />
                   </div>
                 </section>
+
+                {hasTeamStatistics ? (
+                  <section className="publicMatchPanel premiumStatisticsPanel" id="statistics">
+                    <div className="publicMatchSectionHead premiumSectionHead">
+                      <p className="eyebrow blue">{locale === "ro" ? "CIFRELE MECIULUI" : "ЦИФРЫ МАТЧА"}</p>
+                      <h2>{t.statistics}</h2>
+                    </div>
+                    <MatchStatisticsPanel
+                      home={homeTeamStats}
+                      away={awayTeamStats}
+                      homeName={match.home?.short_name || match.home?.name || "—"}
+                      awayName={match.away?.short_name || match.away?.name || "—"}
+                      locale={locale}
+                    />
+                  </section>
+                ) : null}
 
                 <section className="publicMatchPanel premiumTimelinePanel" id="timeline">
                   <div className="publicMatchSectionHead premiumSectionHead"><p className="eyebrow blue">{t.storyEyebrow}</p><h2>{t.timeline}</h2></div>
@@ -421,6 +447,116 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
         </section>
       </main>
     </>
+  );
+}
+
+function hasAnyTeamStatistics(row: MatchTeamStatistic | null) {
+  if (!row) return false;
+  return [
+    row.possession_percent,
+    row.shots,
+    row.shots_on_target,
+    row.corners,
+    row.fouls,
+    row.offsides,
+    row.yellow_cards,
+    row.red_cards,
+    row.passes_attempted,
+    row.passes_completed,
+    row.saves,
+    row.expected_goals,
+  ].some((value) => value !== null && value !== undefined);
+}
+
+type PublicStatRow = {
+  key: string;
+  label: string;
+  home: number | null;
+  away: number | null;
+  displayHome?: string;
+  displayAway?: string;
+};
+
+function passAccuracy(row: MatchTeamStatistic | null) {
+  if (!row || row.passes_attempted == null || row.passes_completed == null || row.passes_attempted <= 0) return null;
+  return Math.round((Number(row.passes_completed) / Number(row.passes_attempted)) * 100);
+}
+
+function MatchStatisticsPanel({
+  home,
+  away,
+  homeName,
+  awayName,
+  locale,
+}: {
+  home: MatchTeamStatistic | null;
+  away: MatchTeamStatistic | null;
+  homeName: string;
+  awayName: string;
+  locale: Locale;
+}) {
+  const homePassAccuracy = passAccuracy(home);
+  const awayPassAccuracy = passAccuracy(away);
+  const labels = locale === "ro" ? {
+    possession: "Posesie",
+    shots: "Șuturi",
+    shotsOnTarget: "Șuturi pe poartă",
+    xg: "xG",
+    corners: "Cornere",
+    fouls: "Faulturi",
+    offsides: "Ofsaiduri",
+    saves: "Intervenții portar",
+    passAccuracy: "Precizia paselor",
+  } : {
+    possession: "Владение",
+    shots: "Удары",
+    shotsOnTarget: "Удары в створ",
+    xg: "xG",
+    corners: "Угловые",
+    fouls: "Фолы",
+    offsides: "Офсайды",
+    saves: "Сейвы",
+    passAccuracy: "Точность передач",
+  };
+
+  const rows: PublicStatRow[] = [
+    { key: "possession", label: labels.possession, home: home?.possession_percent == null ? null : Number(home.possession_percent), away: away?.possession_percent == null ? null : Number(away.possession_percent), displayHome: home?.possession_percent == null ? undefined : `${Number(home.possession_percent)}%`, displayAway: away?.possession_percent == null ? undefined : `${Number(away.possession_percent)}%` },
+    { key: "shots", label: labels.shots, home: home?.shots ?? null, away: away?.shots ?? null },
+    { key: "shotsOnTarget", label: labels.shotsOnTarget, home: home?.shots_on_target ?? null, away: away?.shots_on_target ?? null },
+    { key: "xg", label: labels.xg, home: home?.expected_goals == null ? null : Number(home.expected_goals), away: away?.expected_goals == null ? null : Number(away.expected_goals) },
+    { key: "corners", label: labels.corners, home: home?.corners ?? null, away: away?.corners ?? null },
+    { key: "fouls", label: labels.fouls, home: home?.fouls ?? null, away: away?.fouls ?? null },
+    { key: "offsides", label: labels.offsides, home: home?.offsides ?? null, away: away?.offsides ?? null },
+    { key: "saves", label: labels.saves, home: home?.saves ?? null, away: away?.saves ?? null },
+    { key: "passAccuracy", label: labels.passAccuracy, home: homePassAccuracy, away: awayPassAccuracy, displayHome: homePassAccuracy == null ? undefined : `${homePassAccuracy}%`, displayAway: awayPassAccuracy == null ? undefined : `${awayPassAccuracy}%` },
+  ].filter((row) => row.home !== null || row.away !== null);
+
+  if (rows.length === 0) return null;
+
+  return (
+    <div className="matchStatsBoard">
+      <div className="matchStatsTeams" aria-hidden="true">
+        <strong>{homeName}</strong><span>{locale === "ro" ? "MECI" : "МАТЧ"}</span><strong>{awayName}</strong>
+      </div>
+      <div className="matchStatsRows">
+        {rows.map((row) => {
+          const homeValue = row.home ?? 0;
+          const awayValue = row.away ?? 0;
+          const total = Math.max(homeValue + awayValue, 1);
+          const homeShare = (homeValue / total) * 100;
+          const awayShare = (awayValue / total) * 100;
+          return (
+            <div className="matchStatRow" key={row.key}>
+              <div className="matchStatValues"><b>{row.displayHome ?? (row.home ?? "—")}</b><span>{row.label}</span><b>{row.displayAway ?? (row.away ?? "—")}</b></div>
+              <div className="matchStatBars" aria-hidden="true">
+                <i className="is-home"><span style={{ width: `${homeShare}%` }} /></i>
+                <i className="is-away"><span style={{ width: `${awayShare}%` }} /></i>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
