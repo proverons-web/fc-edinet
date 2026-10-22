@@ -8,6 +8,7 @@ import PageHeroShell from "@/app/components/PageHeroShell";
 import PublicBreadcrumbs from "@/app/components/PublicBreadcrumbs";
 import PublicBackLink from "@/app/components/PublicBackLink";
 import JsonLd from "@/app/components/JsonLd";
+import ArticleShareButton from "@/app/components/ArticleShareButton";
 import { createClient } from "@/lib/supabase/server";
 import type { CommentBlock, NewsArticle, NewsComment } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
@@ -116,6 +117,11 @@ export default async function NewsArticlePage({ params, searchParams }: PageProp
 
   const articleStoryLabel = locale === "ro" ? "POVESTEA CLUBULUI" : "ИСТОРИЯ КЛУБА";
   const articleInfoLabel = locale === "ro" ? "DETALII" : "ДЕТАЛИ";
+  const readingMinutes = Math.max(1, Math.ceil(content.split(/\s+/).filter(Boolean).length / 200));
+  const readingLabel = locale === "ro" ? "LECTURĂ" : "ЧТЕНИЕ";
+  const readingValue = locale === "ro" ? `${readingMinutes} min` : `${readingMinutes} мин`;
+  const updatedLabel = locale === "ro" ? "ACTUALIZAT" : "ОБНОВЛЕНО";
+  const showUpdated = Boolean(article.updated_at && article.published_at && Math.abs(new Date(article.updated_at).getTime() - new Date(article.published_at).getTime()) > 60000);
   const articleJsonLd = newsArticleJsonLd({
     slug: article.slug,
     title,
@@ -140,8 +146,8 @@ export default async function NewsArticlePage({ params, searchParams }: PageProp
       {article.cover_image_url ? <div className="articleCoverFrame"><img className="articleCover newsCoverManaged" src={article.cover_image_url} alt={title} style={newsCoverStyle(article)} /><span>{category}</span></div> : <div className="articleCoverFallback">FC EDINEȚ</div>}
       <div className="articleContent"><div className="articleStoryKicker"><span>{articleStoryLabel}</span><i></i></div>{paragraphs.length ? paragraphs.map((p, i) => <p key={i}>{p}</p>) : <p>{text.emptyText}</p>}</div>
     </div><aside className="articleAside"><div className="articleInfoBox articleEditorialInfo"><b>{articleInfoLabel}</b>
-      <small>{text.category}</small><strong>{category}</strong><small>{text.published}</small><strong>{formatNewsDate(article.published_at, locale)}</strong><small>{text.author.toUpperCase()}</small><strong>{article.author_name || "FC Edineț"}</strong>
-    </div></aside></div>
+      <small>{text.category}</small><strong>{category}</strong><small>{text.published}</small><strong>{formatNewsDate(article.published_at, locale)}</strong>{showUpdated && <><small>{updatedLabel}</small><strong>{formatNewsDate(article.updated_at || article.published_at, locale)}</strong></>}<small>{readingLabel}</small><strong>{readingValue}</strong><small>{text.author.toUpperCase()}</small><strong>{article.author_name || "FC Edineț"}</strong>
+    </div><ArticleShareButton slug={article.slug} title={title} locale={locale} /></aside></div>
   </article>
 
   <NewsComments

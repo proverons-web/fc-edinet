@@ -1,5 +1,6 @@
 import Link from "next/link";
 import NewsCard, { formatNewsDate } from "@/app/components/NewsCard";
+import NewsArchiveSearch from "@/app/components/NewsArchiveSearch";
 import PageHeroShell from "@/app/components/PageHeroShell";
 import { PublicMessageState } from "@/app/components/PublicRouteState";
 import { createClient } from "@/lib/supabase/server";
@@ -58,6 +59,7 @@ export default async function NewsPage({ searchParams }: PageProps) {
 
     <section className="newsEditorialSection"><div className="container">
       <CategoryFilters categories={categories} selectedSlug={selectedSlug} locale={locale} />
+      <NewsArchiveSearch articles={articles} locale={locale} />
       {error ? <PublicMessageState eyebrow="FC EDINEȚ" title={text.loadError} text={locale === "ro" ? "Reîncarcă pagina sau încearcă din nou peste câteva momente." : "Обнови страницу или попробуй снова через несколько минут."} actionLabel={locale === "ro" ? "Reîncarcă" : "Обновить"} actionHref={selectedSlug ? `/news?category=${encodeURIComponent(selectedSlug)}` : "/news"} />
       : articles.length === 0 ? <PublicMessageState eyebrow="FC EDINEȚ" title={text.empty} text={locale === "ro" ? "Alege o altă categorie sau revino la toate publicațiile." : "Выбери другую категорию или вернись ко всем публикациям."} actionLabel={locale === "ro" ? "Toate știrile" : "Все новости"} actionHref="/news" />
       : <>
