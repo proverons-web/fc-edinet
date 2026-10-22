@@ -252,3 +252,81 @@
   .fcV215NextMatchDashboard .fcRefMatchFacts strong{font-size:12px!important}
   .fcV215NextMatchDashboard .fcRefMatchButton{width:calc(100% - 44px)!important;margin:0 22px 14px!important;min-height:42px!important}
 }
+
+/* v2.15.7 — three-column command center, full form KPIs, team-colored results */
+@media(min-width:1251px){
+  .fcV215MatchDashboard{
+    grid-template-columns:minmax(0,1.08fr) minmax(315px,.82fr) minmax(285px,.74fr)!important;
+    gap:16px!important;
+    align-items:stretch!important;
+  }
+  .fcV215NextMatchDashboard{order:1!important}
+  .fcV215DashboardLeft{order:2!important}
+  .fcV215DashboardVideo{order:3!important}
+  .fcV215NextMatchDashboard .fcRefMatchHead{padding:15px 18px 10px!important}
+  .fcV215NextMatchDashboard .fcRefCompetition{padding:8px 18px 0!important}
+  .fcV215NextMatchDashboard .fcRefMatchBody{padding:8px 18px 7px!important}
+  .fcV215NextMatchDashboard .fcRefMatchTeams{grid-template-columns:minmax(0,1fr) 48px minmax(0,1fr)!important;gap:8px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge{min-height:138px!important;padding:9px 8px 8px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge img{width:70px!important;height:78px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge>span{width:70px!important;height:70px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge strong{font-size:11px!important}
+  .fcV215NextMatchDashboard .fcRefVs{width:44px!important;height:44px!important;font-size:13px!important}
+  .fcV215NextMatchDashboard .fcRefMatchButton{width:calc(100% - 36px)!important;margin:0 18px 13px!important;min-height:40px!important}
+}
+
+.fcV215DashboardKpisFull{grid-template-columns:repeat(7,minmax(0,1fr))!important}
+.fcV215DashboardKpisFull>span{min-width:0!important;padding:7px 3px 6px!important}
+.fcV215DashboardKpisFull small{font-size:5.5px!important;letter-spacing:.055em!important;white-space:nowrap!important}
+.fcV215DashboardKpisFull strong{font-size:18px!important;white-space:nowrap!important}
+
+.fcV215DashboardVideo{
+  min-width:0;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  border:1px solid #183d67;
+  border-radius:16px;
+  background:linear-gradient(145deg,#041a36 0%,#082f5f 100%);
+  color:#fff;
+  text-decoration:none;
+  box-shadow:0 12px 34px rgba(5,31,63,.15);
+}
+.fcV215DashboardVideoHead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 15px 10px;border-bottom:1px solid rgba(255,255,255,.09)}
+.fcV215DashboardVideoHead span,.fcV215DashboardVideoHead b{font-size:8px;font-weight:900;letter-spacing:.11em;text-transform:uppercase}.fcV215DashboardVideoHead b{color:#ffd22d}
+.fcV215DashboardVideoThumb{position:relative;min-height:155px;flex:1;overflow:hidden;background:#03152c}
+.fcV215DashboardVideoThumb img{width:100%;height:100%;min-height:155px;object-fit:cover;display:block;transition:transform .25s ease}
+.fcV215DashboardVideo:hover .fcV215DashboardVideoThumb img{transform:scale(1.035)}
+.fcV215DashboardVideoThumb:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,18,39,.06),rgba(2,18,39,.48))}
+.fcV215DashboardVideoThumb>span{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-fce-display),Arial,sans-serif;font-size:22px;font-weight:900;letter-spacing:.08em}
+.fcV215DashboardVideoThumb i{position:absolute;z-index:2;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;place-items:center;width:50px;height:50px;border-radius:50%;background:#ffd028;color:#06244a;font-style:normal;font-size:17px;box-shadow:0 10px 26px rgba(0,0,0,.28)}
+.fcV215DashboardVideoBody{display:grid;gap:6px;padding:14px 15px 15px}.fcV215DashboardVideoBody small{color:#94b2d1;font-size:7px;font-weight:900;letter-spacing:.1em}.fcV215DashboardVideoBody strong{font-family:var(--font-fce-display),Arial,sans-serif;font-size:18px;line-height:1.08;text-transform:uppercase;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.fcV215DashboardVideoBody span{margin-top:4px;color:#ffd028;font-size:8px;font-weight:900;letter-spacing:.08em}
+.fcV215DashboardVideoEmpty{justify-content:center;align-items:center;text-align:center;gap:8px;padding:20px}.fcV215DashboardVideoEmpty>span{color:#ffd028;font-size:10px;font-weight:900;letter-spacing:.14em}.fcV215DashboardVideoEmpty>strong{font-size:16px}
+
+.fcV215ResultsSection{
+  background:linear-gradient(118deg,#021631 0%,#062c59 62%,#031a3a 100%)!important;
+  border-bottom:0!important;
+  color:#fff;
+}
+.fcV215ResultsSection .fcV215CardLabel{color:#6eaaf0!important}
+.fcV215ResultsSection .fcV215MatchRailHead strong{color:#fff!important}
+.fcV215ResultsSection .fcV215MatchRailHead>a{color:#ffd22d!important}
+.fcV215ResultsSection .fcV215MatchRailWide{background:transparent!important;border-color:rgba(255,255,255,.08)!important;box-shadow:none!important}
+.fcV215ResultsSection .fcRefRecentMatchCard{background:rgba(255,255,255,.97)!important;border-color:rgba(255,255,255,.18)!important}
+
+@media(max-width:1250px) and (min-width:1051px){
+  .fcV215MatchDashboard{grid-template-columns:minmax(0,1.2fr) minmax(330px,.8fr)!important}
+  .fcV215DashboardVideo{grid-column:1/-1;min-height:260px;height:auto;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(260px,.8fr);grid-template-rows:auto 1fr}
+  .fcV215DashboardVideoHead{grid-column:1/-1}.fcV215DashboardVideoThumb{grid-row:2}.fcV215DashboardVideoBody{grid-column:2;grid-row:2;align-content:center}
+}
+@media(max-width:1050px){
+  .fcV215DashboardVideo{height:auto;min-height:300px;order:3}
+  .fcV215DashboardKpisFull{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .fcV215DashboardKpisFull>span:nth-child(n+5){border-top:1px solid #e5edf5}
+}
+@media(max-width:760px){
+  .fcV215DashboardKpisFull{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .fcV215DashboardKpisFull>span{border-top:1px solid #e5edf5}
+  .fcV215DashboardVideoThumb{min-height:190px}
+}

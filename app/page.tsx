@@ -186,6 +186,8 @@ export default async function Home() {
   }, { played: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0 });
   const clubStandingIndex = standings.findIndex((row) => Boolean(row.team?.is_club));
   const clubStandingPosition = clubStandingIndex >= 0 ? clubStandingIndex + 1 : null;
+  const clubStanding = clubStandingIndex >= 0 ? standings[clubStandingIndex] : null;
+  const clubPoints = clubStanding ? Number(clubStanding.points ?? 0) : null;
   const featuredAlbum = mediaAlbums[0] ?? null;
   const featuredVideo = mediaVideos[0] ?? null;
 
@@ -316,10 +318,14 @@ export default async function Home() {
                 <span>{locale === "ro" ? `${seasonPulse.wins} victorii · ${seasonPulse.draws} egaluri · ${seasonPulse.losses} înfrângeri` : `${seasonPulse.wins} побед · ${seasonPulse.draws} ничьи · ${seasonPulse.losses} поражение`}</span>
                 <span>{locale === "ro" ? `Goluri ${seasonPulse.goalsFor}:${seasonPulse.goalsAgainst}` : `Мячи ${seasonPulse.goalsFor}:${seasonPulse.goalsAgainst}`}</span>
               </div>
-              <div className="fcV215DashboardKpis">
+              <div className="fcV215DashboardKpis fcV215DashboardKpisFull">
+                <span><small>{locale === "ro" ? "POZIȚIE" : "МЕСТО"}</small><strong>{clubStandingPosition ? `#${clubStandingPosition}` : "—"}</strong></span>
                 <span><small>{locale === "ro" ? "MECIURI" : "МАТЧИ"}</small><strong>{seasonPulse.played}</strong></span>
-                <span><small>{locale === "ro" ? "GOLURI" : "ГОЛЫ"}</small><strong>{seasonPulse.goalsFor}</strong></span>
-                <span><small>{locale === "ro" ? "POZIȚIE" : "МЕСТО"}</small><strong>{clubStandingPosition ? `${clubStandingPosition}` : "—"}</strong></span>
+                <span><small>{locale === "ro" ? "VICTORII" : "ПОБЕДЫ"}</small><strong>{seasonPulse.wins}</strong></span>
+                <span><small>{locale === "ro" ? "EGALURI" : "НИЧЬИ"}</small><strong>{seasonPulse.draws}</strong></span>
+                <span><small>{locale === "ro" ? "ÎNFRÂNGERI" : "ПОРАЖЕНИЯ"}</small><strong>{seasonPulse.losses}</strong></span>
+                <span><small>{locale === "ro" ? "GOLURI" : "МЯЧИ"}</small><strong>{seasonPulse.goalsFor}-{seasonPulse.goalsAgainst}</strong></span>
+                <span><small>{locale === "ro" ? "PUNCTE" : "ОЧКИ"}</small><strong>{clubPoints ?? "—"}</strong></span>
               </div>
             </div>
           </div>
@@ -347,6 +353,19 @@ export default async function Home() {
               <Link href={`/matches/${nextMatch.id}`} className="fcYellowButton fcRefMatchButton">{locale === "ro" ? "DETALII MECI" : "ПОДРОБНЕЕ О МАТЧЕ"} <span>→</span></Link>
             </> : <div className="fcRefNoMatch">{locale === "ro" ? "Următorul meci nu a fost încă programat." : "Следующий матч пока не назначен."}</div>}
           </aside>
+
+          {featuredVideo ? <a href={featuredVideo.youtube_url} target="_blank" rel="noreferrer" className="fcV215DashboardVideo">
+            <div className="fcV215DashboardVideoHead"><span>{locale === "ro" ? "VIDEO" : "ВИДЕО"}</span><b>YOUTUBE ↗</b></div>
+            <div className="fcV215DashboardVideoThumb">
+              {featuredVideo.youtube_id ? <img src={`https://i.ytimg.com/vi/${featuredVideo.youtube_id}/hqdefault.jpg`} alt={featuredVideo.title} loading="lazy" decoding="async" /> : <span>FC EDINEȚ</span>}
+              <i>▶</i>
+            </div>
+            <div className="fcV215DashboardVideoBody">
+              <small>{featuredVideo.published_at ? formatMediaDate(featuredVideo.published_at, locale) : "YOUTUBE"}</small>
+              <strong>{featuredVideo.title}</strong>
+              <span>{locale === "ro" ? "VEZI PE YOUTUBE" : "СМОТРЕТЬ НА YOUTUBE"} →</span>
+            </div>
+          </a> : <div className="fcV215DashboardVideo fcV215DashboardVideoEmpty"><span>FC EDINEȚ</span><strong>{locale === "ro" ? "Video nou în curând" : "Новое видео скоро"}</strong></div>}
         </div>
       </section>}
 
