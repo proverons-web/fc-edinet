@@ -1016,3 +1016,59 @@
   }
   .fcV215NextMatchDashboard .fcRefTeamBadge strong{font-size:10px!important}
 }
+
+
+/* ============================================================
+   FC EDINEȚ v2.28.9 — RECENT MATCHES CRESTS UP, NO FRAMES
+   ============================================================ */
+/* Keep the result cards at the same height while making team crests much larger.
+   The home/away helper labels are removed from the public homepage cards. */
+.fcV215ResultsSection .fcRefRecentMatchTeam{
+  gap:4px!important;
+}
+.fcV215ResultsSection .fcRefRecentMatchTeam small{
+  display:none!important;
+}
+.fcV215ResultsSection .fcRefRecentMatchTeam img,
+.fcV215ResultsSection .fcRefRecentMatchTeam span{
+  width:78px!important;
+  height:88px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  padding:0!important;
+}
+.fcV215ResultsSection .fcRefRecentMatchTeam strong{
+  font-size:10px!important;
+  line-height:1.04!important;
+}
+.fcV215ResultsSection .fcRefRecentMatchBody{
+  padding:4px 12px 6px!important;
+  align-items:end!important;
+}
+.fcV215ResultsSection .fcRefRecentMatchMeta{
+  padding:9px 12px 4px!important;
+}
+
+@media(max-width:760px){
+  .fcV215ResultsSection .fcRefRecentMatchTeam img,
+  .fcV215ResultsSection .fcRefRecentMatchTeam span{
+    width:72px!important;
+    height:80px!important;
+  }
+  .fcV215ResultsSection .fcRefRecentMatchBody{
+    padding:4px 11px 6px!important;
+  }
+}
+
+@media(max-width:460px){
+  .fcV215ResultsSection .fcRefRecentMatchTeam img,
+  .fcV215ResultsSection .fcRefRecentMatchTeam span{
+    width:66px!important;
+    height:74px!important;
+  }
+  .fcV215ResultsSection .fcRefRecentMatchTeam strong{
+    font-size:9px!important;
+  }
+}
