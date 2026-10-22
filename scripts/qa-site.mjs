@@ -122,8 +122,8 @@ ok("next match VS circle replaced", homeCss.includes('Modern VS separator') && h
 ok("results rail frame and rounding removed", homeCss.includes('.fcV215ResultsSection .fcV215MatchRailWide{') && homeCss.includes('.fcV215ResultsSection .fcRefRecentMatchCard,') && homeCss.includes('border:0!important;') && homeCss.includes('border-radius:0!important;'));
 ok("homepage news rounding removed", homeCss.includes('.fcRefLeadColumn,\n.fcRefLatestColumn{') && homeCss.includes('.fcRefNewsRow>div{\n  border-radius:0!important;'));
 const releaseSource = read("lib/release.ts");
-ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.28.12"'));
-ok("release version", JSON.parse(read("package.json")).version === "2.28.12");
+ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.28.13"'));
+ok("release version", JSON.parse(read("package.json")).version === "2.28.13");
 
 const failed = checks.filter((x) => !x.ok);
 for (const check of checks) console.log(`${check.ok ? "PASS" : "FAIL"}  ${check.name}${check.detail ? ` — ${check.detail}` : ""}`);
@@ -133,10 +133,11 @@ ok("v2.28.8 crests enlarge without layout growth", homeCss.includes("transform:s
 ok("v2.28.9 recent match labels removed", !homepageSource.includes('side={locale === "ro" ? "GAZDE" : "ДОМА"}') && !homepageSource.includes('side={locale === "ro" ? "OASPEȚI" : "ГОСТИ"}') && !homepageSource.includes('<small>{side}</small>'));
 ok("v2.28.9 recent match crest frames removed and enlarged", homeCss.includes("FC EDINEȚ v2.28.9 — RECENT MATCHES CRESTS UP, NO FRAMES") && homeCss.includes("width:78px!important") && homeCss.includes("border:0!important") && homeCss.includes("background:transparent!important"));
 ok("v2.28.10 recent match crest alignment fixed", homeCss.includes("FC EDINEȚ v2.28.10 — RECENT MATCH CREST ALIGNMENT") && homeCss.includes('align-items:center!important'));
-ok("v2.28.12 recent match crest stage added", homepageSource.includes('className="fcRefRecentMatchCrest"') && homeCss.includes("FC EDINEȚ v2.28.12 — RECENT MATCHES HORIZONTAL CREST LINE") && homeCss.includes("grid-template-columns:98px minmax(76px,auto) 98px!important") && homeCss.includes("height:112px!important"));
-ok("v2.28.12 recent match crests aligned and larger", homeCss.includes("width:88px!important") && homeCss.includes("height:100px!important") && homeCss.includes("transform:scale(1.24)!important") && homeCss.includes("object-position:center center!important"));
+ok("v2.28.13 recent match crest stage added", homepageSource.includes('className="fcRefRecentMatchCrest"') && homeCss.includes("FC EDINEȚ v2.28.13 — RECENT MATCHES HORIZONTAL CREST LINE") && homeCss.includes("grid-template-columns:98px minmax(76px,auto) 98px!important") && homeCss.includes("height:112px!important"));
+ok("v2.28.13 recent match crests aligned and larger", homeCss.includes("width:88px!important") && homeCss.includes("height:100px!important") && homeCss.includes("transform:scale(1.24)!important") && homeCss.includes("object-position:center center!important"));
 const legacyTxt = fs.readdirSync(root).filter((name)=>/^(STEP-|DEPLOY-|FIX-).*\.txt$/.test(name));
-ok("v2.28.12 legacy step/deploy/fix txt pruned", legacyTxt.length === 1 && legacyTxt[0] === 'STEP-2.28.12.txt', legacyTxt.join(', '));
-ok("v2.28.12 recent match side padding restored", homeCss.includes("FC EDINEȚ v2.28.12 — RECENT MATCH SIDE PADDING FIX") && homeCss.includes("grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important") && homeCss.includes("padding:4px 16px 6px!important") && homeCss.includes("width:84px!important") && homeCss.includes("transform:scale(1.18)!important"));
+ok("v2.28.13 legacy step/deploy/fix txt pruned", legacyTxt.length === 1 && legacyTxt[0] === 'STEP-2.28.13.txt', legacyTxt.join(', '));
+ok("v2.28.13 recent match side padding restored", homeCss.includes("FC EDINEȚ v2.28.13 — RECENT MATCH SIDE PADDING FIX") && homeCss.includes("grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important") && homeCss.includes("padding:4px 16px 6px!important") && homeCss.includes("width:84px!important") && homeCss.includes("transform:scale(1.18)!important"));
+ok("v2.28.13 recent match logo boxes added", homepageSource.includes('className="fcRefRecentMatchLogoBox"') && homeCss.includes("FC EDINEȚ v2.28.13 — RECENT MATCH LOGO BOXES") && homeCss.includes("grid-template-columns:96px 76px 96px!important") && homeCss.includes("width:96px!important") && homeCss.includes("height:108px!important"));
 console.log(`\n${checks.length - failed.length}/${checks.length} checks passed.`);
 if (failed.length) process.exit(1);

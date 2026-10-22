@@ -456,8 +456,10 @@ function RecentMatchTeam({ team, locale }: { team: ClubMatch["home"]; locale: Lo
   const fallback = (team?.short_name || team?.name || "FC").slice(0,3).toUpperCase();
   return (
     <div className={`fcRefRecentMatchTeam${team?.is_club ? " is-club" : " is-rival"}`}>
-      <div className="fcRefRecentMatchCrest" aria-hidden="true">
-        {logo ? <img src={logo} alt="" /> : <span>{fallback}</span>}
+      <div className="fcRefRecentMatchLogoBox" aria-hidden="true">
+        <div className="fcRefRecentMatchCrest">
+          {logo ? <img src={logo} alt="" /> : <span>{fallback}</span>}
+        </div>
       </div>
       <strong>{team?.short_name || team?.name || (locale === "ro" ? "Echipă" : "Команда")}</strong>
     </div>
