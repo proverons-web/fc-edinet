@@ -207,19 +207,14 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, mode }: P
     if (!window.confirm("Есть несохранённые изменения. Покинуть страницу и потерять их?")) event.preventDefault();
   };
 
-  const changeZoom = (value: number) => {
-    setZoom(Math.min(100, Math.max(25, value)));
-    setFit(false);
-  };
-
   return (
     <main className="adminPage unifiedSiteBuilder">
       <section className="adminHero compactAdminHero">
         <div className="container adminHeroInner">
           <div>
-            <p className="eyebrow">FC EDINEȚ • UNIFIED SITE BUILDER 2.1</p>
-            <h1>Редактор всего сайта</h1>
-            <p>Редактор и предпросмотр используют существующие рендереры страниц. Переключай устройство, масштаб и полноэкранный режим без выхода из Site Builder.</p>
+            <p className="eyebrow">FC EDINEȚ • РЕДАКТОР САЙТА</p>
+            <h1>Редактор сайта</h1>
+            <p>Выбери страницу и работай в одном месте. Слева — редактор, справа — единый живой предпросмотр сайта.</p>
           </div>
           <div className="adminHeroActions">
             <Link href="/admin" className="adminBack">← Админка</Link>
@@ -254,7 +249,7 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, mode }: P
 
           <div className="unifiedBuilderSaveStrip" aria-live="polite">
             <span className={`builderSaveState ${editorState}`}><i />{editorMessage}</span>
-            <small>{editorState === "unsaved" ? "Изменения ещё не сохранены в черновик." : editorState === "saving" ? "Не закрывай редактор до завершения сохранения." : editorState === "error" ? "Сохранение не удалось. Проверь сообщение редактора и повтори попытку." : "История изменений и состояние черновика синхронизируются с текущим редактором."}</small>
+            <small>{editorState === "unsaved" ? "Изменения ещё не сохранены в черновик." : editorState === "saving" ? "Не закрывай редактор до завершения сохранения." : editorState === "error" ? "Сохранение не удалось. Проверь сообщение редактора и повтори попытку." : "Состояние черновика синхронизируется с открытым редактором."}</small>
           </div>
 
           <div className="unifiedBuilderToolbar" aria-label="Управление предпросмотром">
@@ -265,15 +260,8 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, mode }: P
                 </button>
               ))}
             </div>
-            <div className="unifiedBuilderZoomGroup">
-              <button type="button" onClick={() => changeZoom(zoom - 10)} aria-label="Уменьшить масштаб">−</button>
-              <button type="button" className={fit ? "active" : ""} onClick={() => setFit(true)}>По размеру</button>
-              <button type="button" className={!fit ? "active zoomValue" : "zoomValue"} onClick={() => setFit(false)}>{fit ? "АВТО" : `${zoom}%`}</button>
-              <button type="button" onClick={() => changeZoom(zoom + 10)} aria-label="Увеличить масштаб">+</button>
-            </div>
             <div className="unifiedBuilderToolbarActions">
-              <button type="button" onClick={() => setPreviewVersion((value) => value + 1)}>Обновить предпросмотр</button>
-              <button type="button" className="primary" onClick={() => { setFullscreen(true); setFit(true); }}>На весь экран</button>
+              <button type="button" className="primary" onClick={() => { setFullscreen(true); setFit(true); }}>Развернуть предпросмотр</button>
               <a href={selected.preview} target="_blank" rel="noreferrer">Открыть страницу ↗</a>
             </div>
           </div>
@@ -297,17 +285,11 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, mode }: P
       {fullscreen && (
         <div className="unifiedBuilderFullscreen" role="dialog" aria-modal="true" aria-label={`На весь экран — ${selected.label}`}>
           <div className="unifiedBuilderFullscreenBar">
-            <div><strong>{selected.label}</strong><span>{previewDevices[device].label} • {fit ? "По размеру" : `${zoom}%`}</span></div>
+            <div><strong>{selected.label}</strong><span>{previewDevices[device].label}</span></div>
             <div className="unifiedBuilderDeviceGroup">
               {(Object.keys(previewDevices) as PreviewDevice[]).map((key) => (
                 <button key={key} type="button" className={device === key ? "active" : ""} onClick={() => { setDevice(key); setFit(true); }}>{previewDevices[key].label}</button>
               ))}
-            </div>
-            <div className="unifiedBuilderZoomGroup">
-              <button type="button" onClick={() => changeZoom(zoom - 10)}>−</button>
-              <button type="button" className={fit ? "active" : ""} onClick={() => setFit(true)}>По размеру</button>
-              <button type="button" className={!fit ? "active zoomValue" : "zoomValue"} onClick={() => setFit(false)}>{fit ? "АВТО" : `${zoom}%`}</button>
-              <button type="button" onClick={() => changeZoom(zoom + 10)}>+</button>
             </div>
             <a href={selected.preview} target="_blank" rel="noreferrer">Открыть страницу ↗</a>
             <button type="button" className="close" onClick={() => setFullscreen(false)}>Закрыть ✕</button>

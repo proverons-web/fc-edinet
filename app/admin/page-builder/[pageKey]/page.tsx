@@ -9,11 +9,13 @@ import type { MediaAlbum, MediaVideo, Partner } from "@/lib/types";
 import { saveProPageLayout } from "./actions";
 
 export const dynamic = "force-dynamic";
-type PageProps = { params: Promise<{ pageKey: string }> };
+type PageProps = { params: Promise<{ pageKey: string }>; searchParams?: Promise<Record<string,string|string[]|undefined>> };
 const allowed = new Set<ProPageKey>(["media", "partners", "academy"]);
 
-export default async function ProPageBuilderPage({ params }: PageProps) {
+export default async function ProPageBuilderPage({ params, searchParams }: PageProps) {
   const { pageKey: rawKey } = await params;
+  const query = searchParams ? await searchParams : {};
+  const embedded = (Array.isArray(query.embedded) ? query.embedded[0] : query.embedded) === "1";
   const pageKey = rawKey as ProPageKey;
   if (!allowed.has(pageKey)) notFound();
   const { supabase } = await requireEditor();
@@ -36,11 +38,11 @@ export default async function ProPageBuilderPage({ params }: PageProps) {
     partners = (data ?? []) as Partner[];
   }
 
-  return <main className="adminPage proBuilderAdminPage">
-    <section className="adminHero compactAdminHero"><div className="container adminHeroInner">
-      <div><p className="eyebrow">FC EDINEȚ • PAGE BUILDER PRO</p><h1>{proPageLabels[pageKey]}</h1><p>Профессиональный редактор: простой режим для ежедневной работы и расширенный режим для точной настройки.</p></div>
-      <div className="adminHeroActions"><Link href="/admin/page-builder" className="adminBack">← Все страницы</Link><Link href={proPageRoutes[pageKey]} target="_blank" className="rowAction muted">Открыть страницу ↗</Link></div>
-    </div></section>
-    <section className="section adminSurface proBuilderSurface"><div className="proBuilderAdminContainer"><ProPageBuilder pageKey={pageKey} initial={layout} action={saveProPageLayout} locale={locale} heroDesign={heroDesign} albums={albums} videos={videos} partners={partners}/></div></section>
+  return <main className={`adminPage proBuilderAdminPage${embedded ? " isEmbedded" : ""}`}>
+    {!embedded && <section className="adminHero compactAdminHero"><div className="container adminHeroInner">
+      <div><p className="eyebrow">FC EDINEȚ • PAGE BUILDER PRO 2.0</p><h1>{proPageLabels[pageKey]}</h1><p>Простой редактор структуры страницы: секции слева, результат по центру, настройки справа.</p></div>
+      <div className="adminHeroActions"><Link href="/admin/site-builder" className="adminBack">← Редактор сайта</Link><Link href={proPageRoutes[pageKey]} target="_blank" className="rowAction muted">Открыть страницу ↗</Link></div>
+    </div></section>}
+    <section className={`section adminSurface proBuilderSurface${embedded ? " embeddedSurface" : ""}`}><div className="proBuilderAdminContainer"><ProPageBuilder pageKey={pageKey} initial={layout} action={saveProPageLayout} locale={locale} heroDesign={heroDesign} albums={albums} videos={videos} partners={partners} embedded={embedded}/></div></section>
   </main>;
 }
