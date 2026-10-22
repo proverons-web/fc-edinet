@@ -343,3 +343,81 @@
 .fcV215VideoCard .fcV215MediaImage.siteYouTubePlayer:after{display:none!important}
 .fcV215VideoCard .fcV215MediaImage .siteYouTubePlay{width:58px;height:58px}
 @media(max-width:1100px){.fcV215DashboardVideoThumb.siteYouTubePlayer{aspect-ratio:16/9;min-height:0}.fcV215DashboardVideoThumb .siteYouTubeFacade,.fcV215DashboardVideoThumb iframe{min-height:0}}
+
+
+/* v2.15.9 — symmetrical command center / perfectionist alignment */
+@media(min-width:1251px){
+  .fcV215MatchDashboard{
+    grid-template-columns:minmax(0,1fr) minmax(330px,.78fr) minmax(0,1fr)!important;
+    gap:16px!important;
+  }
+  .fcV215NextMatchDashboard,.fcV215DashboardVideo{width:100%!important;max-width:none!important}
+  .fcV215DashboardLeft{width:100%!important;max-width:none!important}
+}
+
+.fcV215DashboardLastMatch{
+  text-align:center!important;
+}
+.fcV215DashboardLastMatch .fcV215LastMatchHead{
+  position:relative!important;
+  display:flex!important;
+  justify-content:center!important;
+  align-items:center!important;
+  min-height:18px;
+  text-align:center!important;
+}
+.fcV215DashboardLastMatch .fcV215LastMatchHead .fcV215CardLabel{
+  position:absolute;left:0;top:0;
+}
+.fcV215DashboardLastMatch .fcV215LastMatchHead>span:last-child{
+  margin:0 auto!important;
+  text-align:center!important;
+}
+.fcV215DashboardLastMatch .fcV215LastMatchTeams{
+  justify-items:center!important;
+  align-items:center!important;
+}
+.fcV215DashboardLastMatch .fcRefTeamBadge{
+  justify-items:center!important;
+  text-align:center!important;
+}
+.fcV215DashboardLastMatch .fcRefTeamBadge strong{
+  text-align:center!important;
+  margin-inline:auto!important;
+}
+
+.fcV215DashboardForm{
+  text-align:center!important;
+  align-items:stretch!important;
+}
+.fcV215DashboardForm .fcV215FormHead{
+  position:relative!important;
+  display:flex!important;
+  justify-content:center!important;
+  align-items:flex-start!important;
+  text-align:center!important;
+  min-height:39px;
+}
+.fcV215DashboardForm .fcV215FormHead>div{
+  justify-items:center!important;
+  text-align:center!important;
+  margin:0 auto!important;
+}
+.fcV215DashboardForm .fcV215FormHead>a{
+  position:absolute!important;
+  top:0;right:0;
+}
+.fcV215DashboardForm .fcV215FormDots{
+  justify-content:center!important;
+  align-items:center!important;
+  margin:8px auto 12px!important;
+  width:100%!important;
+}
+.fcV215DashboardFormSummary{display:none!important}
+.fcV215DashboardKpisFull{margin-top:auto!important}
+
+@media(max-width:1250px){
+  .fcV215DashboardForm .fcV215FormHead>a{position:static!important;margin-left:auto!important}
+  .fcV215DashboardForm .fcV215FormHead{justify-content:space-between!important;text-align:left!important}
+  .fcV215DashboardForm .fcV215FormHead>div{justify-items:start!important;text-align:left!important;margin:0!important}
+}
