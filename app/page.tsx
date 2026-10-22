@@ -336,6 +336,10 @@ export default async function Home() {
                   return <Link key={match.id} href={`/matches/${match.id}`} className={`fcV215FormDot is-${result.toLowerCase()}`} title={`${match.home?.short_name || match.home?.name} ${match.home_score}:${match.away_score} ${match.away?.short_name || match.away?.name}`}>{label}</Link>;
                 }) : <span className="fcV215NoData">—</span>}
               </div>
+              <div className="fcV215FormSummary">
+                <span>{locale === "ro" ? `Victorii ${seasonPulse.wins} · Egaluri ${seasonPulse.draws} · Înfrângeri ${seasonPulse.losses}` : `Победы ${seasonPulse.wins} · Ничьи ${seasonPulse.draws} · Поражения ${seasonPulse.losses}`}</span>
+                <span>{locale === "ro" ? `Goluri ${seasonPulse.goalsFor}:${seasonPulse.goalsAgainst} · diferență ${seasonPulse.goalsFor - seasonPulse.goalsAgainst >= 0 ? "+" : ""}${seasonPulse.goalsFor - seasonPulse.goalsAgainst}` : `Мячи ${seasonPulse.goalsFor}:${seasonPulse.goalsAgainst} · разница ${seasonPulse.goalsFor - seasonPulse.goalsAgainst >= 0 ? "+" : ""}${seasonPulse.goalsFor - seasonPulse.goalsAgainst}`}</span>
+              </div>
               <div className="fcV215StatsWideRow">
                 <span><small>{locale === "ro" ? "MECIURI" : "МАТЧИ"}</small><strong>{seasonPulse.played}</strong></span>
                 <span><small>{locale === "ro" ? "VICTORII" : "ПОБЕДЫ"}</small><strong>{seasonPulse.wins}</strong></span>

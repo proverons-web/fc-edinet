@@ -40,3 +40,43 @@
 @media(max-width:1050px){.fcV215PulseTop{grid-template-columns:1fr}.fcV215LastMatchHero,.fcV215FormStatsWide{min-height:0}.fcV215MatchRailWide .fcRefRecentMatchesGrid{grid-auto-columns:calc((100% - 28px)/3)!important}}
 @media(max-width:760px){.fcV215PulseSection{padding:16px 0 22px!important}.fcV215PulseStack{gap:12px}.fcV215LastMatchHero{padding:15px 15px 0!important}.fcV215LastMatchHero .fcV215LastMatchTeams{grid-template-columns:1fr 82px 1fr;margin:16px 0 13px!important}.fcV215LastMatchHero .fcRefTeamBadge img{width:52px!important;height:58px!important}.fcV215LastMatchHero .fcRefTeamBadge strong{font-size:11px!important}.fcV215LastMatchHero .fcV215LastScore strong{font-size:37px!important}.fcV215LastMatchFooter{margin-left:-15px;margin-right:-15px;padding:11px 15px}.fcV215LastMatchFooter span{display:none}.fcV215FormStatsWide{padding:16px 15px 0!important}.fcV215FormHead{gap:12px}.fcV215FormHead strong{font-size:21px}.fcV215FormHead>a{font-size:8px}.fcV215StatsWideRow{grid-template-columns:repeat(3,1fr);margin-left:-15px;margin-right:-15px}.fcV215StatsWideRow>span:nth-child(3){border-right:0}.fcV215StatsWideRow>span:nth-child(-n+3){border-bottom:1px solid #e5edf5}.fcV215MatchRailWide{padding:14px 8px 13px!important}.fcV215MatchRailWide .fcRefRecentMatchesRail{padding:0 38px!important}.fcV215MatchRailWide .fcRefRecentMatchesGrid{grid-auto-columns:82%!important;gap:12px!important}}
 @media(max-width:460px){.fcV215LastMatchHead>span:last-child{display:none}.fcV215LastMatchHero .fcV215LastMatchTeams{grid-template-columns:1fr 72px 1fr}.fcV215LastMatchHero .fcRefTeamBadge strong{font-size:10px!important;max-width:96px}.fcV215LastMatchHero .fcV215LastScore strong{font-size:33px!important}.fcV215FormHead{display:grid}.fcV215FormHead>a{justify-self:start}.fcV215FormStatsWide .fcV215FormDots{margin:16px 0!important}.fcV215FormStatsWide .fcV215FormDot{width:35px!important;height:35px!important}.fcV215MatchRailHead>div>strong{font-size:22px}.fcV215MatchRailWide .fcRefRecentMatchesGrid{grid-auto-columns:88%!important}}
+
+
+/* v2.15.3 — compact first-screen match dashboard */
+.fcV215PulseSection{padding:12px 0 16px!important}
+.fcV215PulseStack{gap:10px!important}
+.fcV215PulseTop{gap:12px!important}
+.fcV215LastMatchHero{padding:12px 16px 0!important;min-height:168px!important}
+.fcV215LastMatchHero .fcV215LastMatchTeams{grid-template-columns:1fr 86px 1fr!important;gap:10px!important;margin:10px 0 7px!important}
+.fcV215LastMatchHero .fcRefTeamBadge{gap:3px!important}
+.fcV215LastMatchHero .fcRefTeamBadge img{width:50px!important;height:55px!important}
+.fcV215LastMatchHero .fcRefTeamBadge>span{width:50px!important;height:50px!important}
+.fcV215LastMatchHero .fcRefTeamBadge strong{font-size:10px!important}
+.fcV215LastMatchHero .fcV215LastScore strong{font-size:36px!important;margin:1px 0!important}
+.fcV215LastMatchHero .fcV215LastScore small,.fcV215LastMatchHero .fcV215LastScore em{font-size:7px!important}
+.fcV215LastMatchFooter{margin-left:-16px!important;margin-right:-16px!important;padding:8px 16px!important}
+.fcV215LastMatchFooter span,.fcV215LastMatchFooter b{font-size:8px!important}
+.fcV215FormStatsWide{padding:12px 16px 0!important;min-height:168px!important}
+.fcV215FormHead strong{font-size:20px!important}
+.fcV215FormHead>a{font-size:8px!important}
+.fcV215FormStatsWide .fcV215FormDots{margin:9px 0 6px!important;gap:8px!important}
+.fcV215FormStatsWide .fcV215FormDot{width:32px!important;height:32px!important;font-size:10px!important}
+.fcV215FormSummary{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:0 0 8px;color:#6d8094;font-size:9px;font-weight:750;line-height:1.25}
+.fcV215FormSummary span+span{position:relative;padding-left:16px}.fcV215FormSummary span+span:before{content:"";position:absolute;left:0;top:50%;width:3px;height:3px;border-radius:50%;background:#aab8c7;transform:translateY(-50%)}
+.fcV215StatsWideRow{margin:auto -16px 0!important}
+.fcV215StatsWideRow>span{padding:8px 6px 7px!important}
+.fcV215StatsWideRow strong{font-size:20px!important;margin-top:2px!important}
+.fcV215StatsWideRow small{font-size:6px!important}
+.fcV215MatchRailWide{padding:10px 14px 10px!important}
+.fcV215MatchRailWide .fcV215MatchRailHead{padding:0 4px 8px!important}
+.fcV215MatchRailHead>div{gap:2px!important}
+.fcV215MatchRailHead>div>strong{font-size:22px!important}
+.fcV215MatchRailWide .fcRefRecentMatchesGrid{gap:12px!important;grid-auto-columns:calc((100% - 36px)/4)!important}
+.fcV215MatchRailWide .fcRefRecentMatchCard{min-height:160px!important}
+.fcV215MatchRailWide .fcRefRecentMatchMeta{padding:9px 12px 5px!important}
+.fcV215MatchRailWide .fcRefRecentMatchBody{padding:5px 12px 6px!important}
+.fcV215MatchRailWide .fcRefRecentMatchFooter{padding:7px 12px 1px!important}
+.fcV215MatchRailWide .fcRefRecentMatchTeam img{width:39px!important;height:44px!important}
+.fcV215MatchRailWide .fcRefRecentMatchScore strong{font-size:28px!important}
+@media(max-width:1050px){.fcV215LastMatchHero,.fcV215FormStatsWide{min-height:0!important}}
+@media(max-width:760px){.fcV215PulseSection{padding:12px 0 18px!important}.fcV215FormSummary{gap:8px;font-size:8px}.fcV215FormSummary span+span{padding-left:0}.fcV215FormSummary span+span:before{display:none}.fcV215StatsWideRow{margin-left:-15px!important;margin-right:-15px!important}.fcV215MatchRailWide .fcRefRecentMatchCard{min-height:170px!important}}

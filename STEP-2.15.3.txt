@@ -1,0 +1,7 @@
+FC EDINEȚ v2.15.3 — Compact first-screen match dashboard
+
+- Reduced height of Last Match and Team Form cards.
+- Added compact season summary to use empty space in Team Form.
+- Reduced vertical padding and match rail card height.
+- Goal: show the complete Recent Matches row within a 1080p first screen after the hero.
+- No database migration required.
