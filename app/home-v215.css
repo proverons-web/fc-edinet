@@ -1488,3 +1488,43 @@
   .fcV215ResultsSection .fcRefRecentMatchTeam strong{width:72px!important;min-width:72px!important;max-width:72px!important;min-height:24px!important;max-height:24px!important;}
   .fcV215ResultsSection .fcRefRecentMatchScore{width:64px!important;min-width:64px!important;}
 }
+
+
+/* ============================================================
+   FC EDINEȚ v2.28.15 — RECENT MATCH EDGE BALANCE
+   ============================================================ */
+/* The left result-status rail visually adds 4px. Compensate by using a
+   slightly smaller left inner padding than right, so both sides read equal. */
+.fcV215ResultsSection .fcRefRecentMatchMeta{
+  padding:10px 12px 6px 8px!important;
+}
+.fcV215ResultsSection .fcRefRecentMatchBody{
+  padding:4px 10px 6px 6px!important;
+}
+.fcV215ResultsSection .fcRefRecentMatchFooter{
+  padding:8px 12px 8px 8px!important;
+}
+
+@media(max-width:760px){
+  .fcV215ResultsSection .fcRefRecentMatchMeta{
+    padding:10px 11px 6px 7px!important;
+  }
+  .fcV215ResultsSection .fcRefRecentMatchBody{
+    padding:4px 9px 6px 5px!important;
+  }
+  .fcV215ResultsSection .fcRefRecentMatchFooter{
+    padding:8px 11px 8px 7px!important;
+  }
+}
+
+@media(max-width:460px){
+  .fcV215ResultsSection .fcRefRecentMatchMeta{
+    padding:9px 10px 6px 6px!important;
+  }
+  .fcV215ResultsSection .fcRefRecentMatchBody{
+    padding:4px 8px 6px 4px!important;
+  }
+  .fcV215ResultsSection .fcRefRecentMatchFooter{
+    padding:8px 10px 8px 6px!important;
+  }
+}

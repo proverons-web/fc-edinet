@@ -1,8 +1,0 @@
-FC Edineț v2.28.11 — Recent Match Crest Line + Archive Cleanup
-
-What changed
-- Added a dedicated crest-stage wrapper for homepage recent match cards so logos align on one horizontal line.
-- Increased recent match crests again without increasing result-card height.
-- Preserved frame-free crests and removed home/away helper labels.
-- Removed legacy STEP / DEPLOY / FIX text files from the FULL archive; kept only the current step note.
-- Version synchronized to 2.28.11.
