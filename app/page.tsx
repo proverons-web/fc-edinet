@@ -306,20 +306,50 @@ export default async function Home() {
       {settings?.banner_enabled && <section className="fcRefAnnouncement"><div className="container fcRefAnnouncementInner"><div><small>{localized(settings.banner_eyebrow, settings.banner_eyebrow_ro, locale)}</small><strong>{localized(settings.banner_title, settings.banner_title_ro, locale)}</strong></div><Link href={settings.banner_button_href || "/club"}>{localized(settings.banner_button_text, settings.banner_button_text_ro, locale) || text.more} →</Link></div></section>}
 
       {sectionEnabled("matches") && (lastMatch || recentMatches.length > 0 || formMatches.length > 0) && <section className="fcV215PulseSection">
-        <div className="container fcV215PulseGrid">
-          {lastMatch && <Link href={`/matches/${lastMatch.id}`} className="fcV215LastMatch">
-            <span className="fcV215CardLabel">{locale === "ro" ? "ULTIMUL MECI" : "ПОСЛЕДНИЙ МАТЧ"}</span>
-            <div className="fcV215LastMatchTeams">
-              <ReferenceTeam team={lastMatch.home} locale={locale} />
-              <div className="fcV215LastScore"><small>{formatMatchShortDate(lastMatch.kickoff, locale)}</small><strong>{lastMatch.home_score}:{lastMatch.away_score}</strong><em>{lastMatch.competition?.name || competition?.name || "Liga 2"}</em></div>
-              <ReferenceTeam team={lastMatch.away} locale={locale} />
-            </div>
-            <b>{locale === "ro" ? "PROTOCOLUL MECIULUI" : "ПРОТОКОЛ МАТЧА"} →</b>
-          </Link>}
+        <div className="container fcV215PulseStack">
+          <div className="fcV215PulseTop">
+            {lastMatch && <Link href={`/matches/${lastMatch.id}`} className="fcV215LastMatch fcV215LastMatchHero">
+              <div className="fcV215LastMatchHead">
+                <span className="fcV215CardLabel">{locale === "ro" ? "ULTIMUL MECI" : "ПОСЛЕДНИЙ МАТЧ"}</span>
+                <span>{lastMatch.competition?.name || competition?.name || "Liga 2"}{lastMatch.round ? ` · ${lastMatch.round}` : ""}</span>
+              </div>
+              <div className="fcV215LastMatchTeams">
+                <ReferenceTeam team={lastMatch.home} locale={locale} />
+                <div className="fcV215LastScore"><small>{formatMatchShortDate(lastMatch.kickoff, locale)}</small><strong>{lastMatch.home_score}:{lastMatch.away_score}</strong><em>{locale === "ro" ? "SCOR FINAL" : "ФИНАЛЬНЫЙ СЧЁТ"}</em></div>
+                <ReferenceTeam team={lastMatch.away} locale={locale} />
+              </div>
+              <div className="fcV215LastMatchFooter"><span>{locale === "ro" ? "VEZI DETALIILE MECIULUI" : "СМОТРЕТЬ ДЕТАЛИ МАТЧА"}</span><b>{locale === "ro" ? "PROTOCOL" : "ПРОТОКОЛ"} →</b></div>
+            </Link>}
 
-          {recentMatches.length > 0 && <div className="fcV215MatchRail">
+            <div className="fcV215FormStats fcV215FormStatsWide">
+              <div className="fcV215FormHead">
+                <div><span className="fcV215CardLabel">{locale === "ro" ? "FORMA ECHIPEI" : "ФОРМА КОМАНДЫ"}</span><strong>{locale === "ro" ? "ULTIMELE 5 MECIURI" : "ПОСЛЕДНИЕ 5 МАТЧЕЙ"}</strong></div>
+                <Link href="/statistics">{locale === "ro" ? "STATISTICI COMPLETE" : "ПОЛНАЯ СТАТИСТИКА"} →</Link>
+              </div>
+              <div className="fcV215FormDots">
+                {formMatches.length ? formMatches.map((match) => {
+                  const clubIsHome = Boolean(match.home?.is_club);
+                  const gf = Number((clubIsHome ? match.home_score : match.away_score) ?? 0);
+                  const ga = Number((clubIsHome ? match.away_score : match.home_score) ?? 0);
+                  const result = gf > ga ? "W" : gf === ga ? "D" : "L";
+                  const label = result === "W" ? (locale === "ro" ? "V" : "В") : result === "D" ? (locale === "ro" ? "E" : "Н") : (locale === "ro" ? "Î" : "П");
+                  return <Link key={match.id} href={`/matches/${match.id}`} className={`fcV215FormDot is-${result.toLowerCase()}`} title={`${match.home?.short_name || match.home?.name} ${match.home_score}:${match.away_score} ${match.away?.short_name || match.away?.name}`}>{label}</Link>;
+                }) : <span className="fcV215NoData">—</span>}
+              </div>
+              <div className="fcV215StatsWideRow">
+                <span><small>{locale === "ro" ? "MECIURI" : "МАТЧИ"}</small><strong>{seasonPulse.played}</strong></span>
+                <span><small>{locale === "ro" ? "VICTORII" : "ПОБЕДЫ"}</small><strong>{seasonPulse.wins}</strong></span>
+                <span><small>{locale === "ro" ? "EGALURI" : "НИЧЬИ"}</small><strong>{seasonPulse.draws}</strong></span>
+                <span><small>{locale === "ro" ? "ÎNFRÂNGERI" : "ПОРАЖЕНИЯ"}</small><strong>{seasonPulse.losses}</strong></span>
+                <span><small>{locale === "ro" ? "GOLURI" : "ГОЛЫ"}</small><strong>{seasonPulse.goalsFor}</strong></span>
+                <span><small>{locale === "ro" ? "POZIȚIE" : "МЕСТО"}</small><strong>{clubStandingPosition ? `${clubStandingPosition}` : "—"}</strong></span>
+              </div>
+            </div>
+          </div>
+
+          {recentMatches.length > 0 && <div className="fcV215MatchRail fcV215MatchRailWide">
             <div className="fcV215MatchRailHead">
-              <span className="fcV215CardLabel">{locale === "ro" ? "MECIURILE SEZONULUI" : "МАТЧИ СЕЗОНА"}</span>
+              <div><span className="fcV215CardLabel">{locale === "ro" ? "REZULTATE" : "РЕЗУЛЬТАТЫ"}</span><strong>{locale === "ro" ? "ULTIMELE MECIURI" : "ПОСЛЕДНИЕ МАТЧИ"}</strong></div>
               <Link href="/matches">{locale === "ro" ? "TOATE MECIURILE" : "ВСЕ МАТЧИ"} →</Link>
             </div>
             <RecentMatchesCarousel
@@ -353,27 +383,6 @@ export default async function Home() {
               })}
             </RecentMatchesCarousel>
           </div>}
-
-          <div className="fcV215FormStats">
-            <span className="fcV215CardLabel">{locale === "ro" ? "ULTIMELE 5" : "ПОСЛЕДНИЕ 5"}</span>
-            <div className="fcV215FormDots">
-              {formMatches.length ? formMatches.map((match) => {
-                const clubIsHome = Boolean(match.home?.is_club);
-                const gf = Number((clubIsHome ? match.home_score : match.away_score) ?? 0);
-                const ga = Number((clubIsHome ? match.away_score : match.home_score) ?? 0);
-                const result = gf > ga ? "W" : gf === ga ? "D" : "L";
-                const label = result === "W" ? (locale === "ro" ? "V" : "В") : result === "D" ? (locale === "ro" ? "E" : "Н") : (locale === "ro" ? "Î" : "П");
-                return <Link key={match.id} href={`/matches/${match.id}`} className={`fcV215FormDot is-${result.toLowerCase()}`} title={`${match.home?.short_name || match.home?.name} ${match.home_score}:${match.away_score} ${match.away?.short_name || match.away?.name}`}>{label}</Link>;
-              }) : <span className="fcV215NoData">—</span>}
-            </div>
-            <p>{locale === "ro" ? `${seasonPulse.wins} victorii · ${seasonPulse.draws} egaluri · ${seasonPulse.losses} înfrângeri` : `${seasonPulse.wins} побед · ${seasonPulse.draws} ничьих · ${seasonPulse.losses} поражений`}</p>
-            <div className="fcV215StatsRow">
-              <span><small>{locale === "ro" ? "MECIURI" : "МАТЧИ"}</small><strong>{seasonPulse.played}</strong></span>
-              <span><small>{locale === "ro" ? "GOLURI" : "ГОЛЫ"}</small><strong>{seasonPulse.goalsFor}</strong></span>
-              <span><small>{locale === "ro" ? "POZIȚIE" : "МЕСТО"}</small><strong>{clubStandingPosition ? `${clubStandingPosition}` : "—"}</strong></span>
-            </div>
-            <Link className="fcV215StatsLink" href="/statistics">{locale === "ro" ? "STATISTICI" : "СТАТИСТИКА"} →</Link>
-          </div>
         </div>
       </section>}
 
