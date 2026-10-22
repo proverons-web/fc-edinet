@@ -1,0 +1,8 @@
+FC Edineț v2.22.1 — Club UX fixes
+
+- Stable CLUB dropdown hover with delayed close and hover bridge.
+- CLUB dropdown closes after cursor leaves the whole group.
+- Club subsection navigation centered on desktop.
+- Stadium page redesigned: full uncropped stadium image, compact facts bar, readable content block.
+- Mobile/tablet responsive adjustments.
+- No Supabase migration required.

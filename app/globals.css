@@ -3528,3 +3528,43 @@ body:has(.adminEmbedded){background:#f3f6fa}
 .managedMenuDropdown{min-width:260px!important}.managedMenuGroup>a:after{content:"⌄";margin-left:5px;font-size:9px;opacity:.65}.managedMenuDropdown a{font-size:11px!important}
 @media(max-width:980px){.clubSplitGrid,.clubStadiumFeature{grid-template-columns:1fr}.clubInfoPanel,.clubHistoryStamp{position:relative;top:auto}.clubNarrativeInner{grid-template-columns:1fr}.clubHistoryStamp{width:160px}.clubLeadershipStandalone{grid-template-columns:repeat(2,1fr)}.clubStadiumFeatureImage{min-height:420px}}
 @media(max-width:680px){.clubSectionHero{min-height:290px}.clubSectionHeroInner{padding-top:66px;padding-bottom:34px}.clubSectionHero h1{font-size:42px}.clubSectionHeroLead{font-size:15px}.clubSubnav{top:0}.clubSubnav a{min-height:50px;padding:0 12px;font-size:10px}.clubSplitGrid{gap:20px}.clubInfoPanel{padding:18px}.clubStadiumFeatureImage{min-height:300px}.clubStadiumFeatureCopy{padding:20px}.clubStadiumQuickFacts{grid-template-columns:1fr}.clubLeadershipStandalone{grid-template-columns:1fr}.clubFutureSection{padding:48px 22px}.clubFutureSection h2{font-size:30px}.clubNarrativeInner{gap:22px}}
+
+/* v2.22.1 — Club navigation stability + centered subnav + stadium redesign */
+.managedMenuGroup{padding-bottom:12px;margin-bottom:-12px}
+.managedMenuDropdown{top:calc(100% - 2px)!important;left:50%!important;transform:translateX(-50%);visibility:hidden!important;opacity:0!important;display:grid!important;pointer-events:none;transition:opacity .12s ease,visibility .12s ease;}
+.managedMenuGroup.isOpen .managedMenuDropdown,.managedMenuGroup:hover .managedMenuDropdown,.managedMenuGroup:focus-within .managedMenuDropdown{visibility:visible!important;opacity:1!important;pointer-events:auto}
+.managedMenuDropdown:before{content:"";position:absolute;left:0;right:0;top:-14px;height:14px}
+
+.clubSubnavInner{justify-content:center!important;margin-inline:auto!important}
+.clubSubnav a{flex:0 0 auto}
+
+.clubStadiumPage{padding-top:58px!important;padding-bottom:74px!important}
+.clubStadiumFeature{display:block!important;max-width:1120px;margin:0 auto;background:#fff!important;color:#102f54!important;border:1px solid #dbe5ef;border-radius:18px;overflow:hidden;box-shadow:0 24px 64px rgba(4,28,58,.12)!important}
+.clubStadiumFeatureImage{min-height:0!important;background:#e9f0f7;padding:0!important;display:flex;align-items:center;justify-content:center}
+.clubStadiumFeatureImage img{width:100%!important;height:auto!important;max-height:none!important;display:block;object-fit:contain!important;object-position:center!important}
+.clubStadiumFeatureCopy{padding:0!important;background:#fff!important;color:#183b61!important}
+.clubStadiumQuickFacts{display:grid!important;grid-template-columns:220px 1fr!important;gap:0!important;margin:0!important;background:#0b2d59!important;color:#fff!important}
+.clubStadiumQuickFacts>div{padding:20px 24px!important;background:transparent!important;border-right:1px solid rgba(255,255,255,.12)}
+.clubStadiumQuickFacts>div:last-child{border-right:0}
+.clubStadiumQuickFacts span{color:#9fb8d2!important}
+.clubStadiumQuickFacts strong{color:#fff!important;font-size:18px!important;line-height:1.25}
+.clubStadiumFeatureCopy>.clubRichComposer{padding:34px 38px 40px;max-width:900px}
+.clubStadiumFeatureCopy .clubRichParagraph{color:#35516e!important;font-size:15px;line-height:1.78}
+.clubStadiumFeatureCopy .clubRichHeading,.clubStadiumFeatureCopy .clubRichSubheading{color:#0b2d59!important}
+
+@media(max-width:980px){
+  .clubSubnavInner{justify-content:flex-start!important}
+  .clubStadiumFeature{border-radius:14px}
+  .clubStadiumQuickFacts{grid-template-columns:1fr 1fr!important}
+}
+@media(max-width:680px){
+  .managedMenuGroup{padding-bottom:0;margin-bottom:0}
+  .clubStadiumPage{padding-top:30px!important;padding-bottom:45px!important}
+  .clubStadiumQuickFacts{grid-template-columns:1fr!important}
+  .clubStadiumQuickFacts>div{border-right:0;border-bottom:1px solid rgba(255,255,255,.12)}
+  .clubStadiumQuickFacts>div:last-child{border-bottom:0}
+  .clubStadiumFeatureCopy>.clubRichComposer{padding:24px 20px 28px}
+}
+.globalHeader .menu .managedMenuDropdown a{min-height:0!important;display:block!important;padding:11px 12px!important;color:#11345b!important;background:transparent!important;opacity:1!important;border-radius:6px}
+.globalHeader .menu .managedMenuDropdown a:after{display:none!important}
+.globalHeader .menu .managedMenuDropdown a:hover{color:#0b4f9e!important;background:#f1f6fb!important}
