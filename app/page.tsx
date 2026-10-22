@@ -304,7 +304,6 @@ export default async function Home() {
             <div className="fcV215FormStats fcV215DashboardForm">
               <div className="fcV215FormHead">
                 <div><strong>{locale === "ro" ? "ULTIMELE 5 MECIURI" : "ПОСЛЕДНИЕ 5 МАТЧЕЙ"}</strong></div>
-                <Link href="/statistics">{locale === "ro" ? "STATISTICI" : "СТАТИСТИКА"} →</Link>
               </div>
               <div className="fcV215FormDots">
                 <FormMatchDots matches={formMatches} locale={locale} />

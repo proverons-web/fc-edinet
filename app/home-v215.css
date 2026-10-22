@@ -462,3 +462,64 @@
 .fcV215FormDotWrap:last-child:hover .fcV215FormPopover,.fcV215FormDotWrap:last-child:focus-within .fcV215FormPopover{transform:translate(0,0) scale(1)}
 .fcV215FormDotWrap:last-child .fcV215FormPopover:after{left:auto;right:16px;transform:rotate(45deg)}
 @media(max-width:760px){.fcV215FormPopover{display:none}.fcV215NextMatchDashboard .fcRefTeamBadge img{width:70px!important;height:78px!important}.fcV215NextMatchDashboard .fcRefTeamBadge strong{font-size:11px!important}}
+
+
+/* v2.15.11 — command center visual balance and true 16:9 video */
+@media(min-width:1251px){
+  .fcV215MatchDashboard{
+    grid-template-columns:minmax(0,1fr) minmax(360px,.88fr) minmax(0,1fr)!important;
+    gap:16px!important;
+  }
+  .fcV215NextMatchDashboard .fcRefCompetition{padding-top:14px!important}
+  .fcV215NextMatchDashboard .fcRefMatchBody{padding-top:9px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge{min-height:178px!important;padding:14px 12px 12px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge img{width:102px!important;height:112px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge>span{width:100px!important;height:100px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge strong{font-size:15px!important;line-height:1.08!important;max-width:170px!important}
+  .fcV215NextMatchDashboard .fcRefMatchFacts{margin-top:8px!important}
+}
+
+.fcV215DashboardForm .fcV215FormHead{
+  min-height:auto!important;
+  justify-content:center!important;
+  align-items:center!important;
+  padding:0!important;
+}
+.fcV215DashboardForm .fcV215FormHead>div{width:100%!important;margin:0!important}
+.fcV215DashboardForm .fcV215FormHead strong{font-size:18px!important;line-height:1.05!important}
+.fcV215DashboardForm .fcV215FormDots{margin:11px auto 12px!important}
+.fcV215DashboardKpisFull small{font-size:5.8px!important;letter-spacing:.035em!important}
+.fcV215DashboardKpisFull strong{font-size:18px!important}
+
+.fcV215DashboardVideo{height:100%!important}
+.fcV215DashboardVideoThumb.siteYouTubePlayer{
+  flex:0 0 auto!important;
+  width:100%!important;
+  min-height:0!important;
+  height:auto!important;
+  aspect-ratio:16/9!important;
+  background:#08264c!important;
+}
+.fcV215DashboardVideoThumb .siteYouTubeFacade,
+.fcV215DashboardVideoThumb iframe{
+  min-height:0!important;
+  width:100%!important;
+  height:100%!important;
+}
+.fcV215DashboardVideoThumb .siteYouTubeFacade img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center!important;
+}
+.fcV215DashboardVideoBody{
+  flex:1 1 auto!important;
+  align-content:center!important;
+  padding:13px 15px 14px!important;
+}
+.fcV215DashboardVideoBody strong{font-size:17px!important}
+
+@media(max-width:1250px){
+  .fcV215DashboardForm .fcV215FormHead{justify-content:center!important;text-align:center!important}
+  .fcV215DashboardForm .fcV215FormHead>div{justify-items:center!important;text-align:center!important;margin:0 auto!important}
+}
