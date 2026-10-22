@@ -2155,3 +2155,24 @@ main:not(.adminPage) :where(.container,.managedPageHeroInner,.proSectionInner,.n
 @media(max-width:900px){.analyticsTrafficPanel .analyticsChart{gap:5px}.analyticsTrafficPanel .analyticsChartDay>span{font-size:7px}.analyticsLegacyNote{align-items:flex-start;flex-direction:column;gap:4px}}
 @media(max-width:720px){.analyticsTrafficPanel .analyticsChart{height:190px;overflow-x:auto;grid-template-columns:repeat(var(--chart-days),minmax(30px,1fr));min-width:max(100%,calc(var(--chart-days) * 34px))}.analyticsLegacyNote{margin-top:12px}}
 .analyticsCountryInline{display:flex;align-items:center;gap:7px}
+
+/* v2.15.8 — embedded YouTube players */
+.siteYouTubePlayer{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:#071d3b}
+.siteYouTubePlayer iframe,.siteYouTubeFacade{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.siteYouTubeFacade{padding:0;margin:0;border:0;cursor:pointer;background:#071d3b;overflow:hidden}
+.siteYouTubeFacade img{width:100%;height:100%;display:block;object-fit:cover;object-position:center}
+.siteYouTubeFacade:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,20,45,.04),rgba(3,20,45,.24));pointer-events:none}
+.siteYouTubePlay{position:absolute;z-index:2;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;place-items:center;width:62px;height:62px;border-radius:50%;background:#ffd028;color:#06244a;font-size:20px;line-height:1;padding-left:3px;box-shadow:0 10px 28px rgba(0,0,0,.32);transition:transform .2s ease,background .2s ease}
+.siteYouTubeFacade:hover .siteYouTubePlay{transform:translate(-50%,-50%) scale(1.07);background:#ffe05d}
+.proMediaVideoPreview:after{display:none!important}
+.proMediaVideoPreview .siteYouTubePlayer{height:100%;min-height:inherit;aspect-ratio:16/9}
+.proVideos-list .proMediaVideoPreview .siteYouTubePlayer{aspect-ratio:auto;height:100%;min-height:240px}
+
+.mediaHomepageToggleForm{margin-top:8px}
+.mediaHomepageToggle{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.mediaHomepageToggle>input{position:absolute;opacity:0;pointer-events:none}
+.mediaHomepageToggleTrack{position:relative;width:36px;height:20px;border-radius:999px;background:#c8d4e1;box-shadow:inset 0 0 0 1px rgba(6,37,75,.08);transition:background .2s ease}
+.mediaHomepageToggleTrack i{position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.2);transition:transform .2s ease}
+.mediaHomepageToggle>input:checked + .mediaHomepageToggleTrack{background:#0a63c8}
+.mediaHomepageToggle>input:checked + .mediaHomepageToggleTrack i{transform:translateX(16px)}
+.mediaHomepageToggle b{font-size:11px;color:#34506e}

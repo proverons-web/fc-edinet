@@ -2,6 +2,7 @@ import Link from "next/link";
 import ConfirmSubmitButton from "@/app/components/ConfirmSubmitButton";
 import MediaAlbumCreateForm from "@/app/components/MediaAlbumCreateForm";
 import MediaVideoForm from "@/app/components/MediaVideoForm";
+import MediaHomepageToggle from "@/app/components/MediaHomepageToggle";
 import {
   deleteVideo,
 } from "@/app/admin/media/actions";
@@ -131,14 +132,16 @@ export default async function AdminMediaPage() {
                 {videos.map((video) => (
                   <article key={video.id}>
                     <img
-                      src={`https://i.ytimg.com/vi/${video.youtube_id}/hqdefault.jpg`}
+                      src={`https://i.ytimg.com/vi/${video.youtube_id}/mqdefault.jpg`}
                       alt=""
                     />
                     <div>
                       <strong>{video.title}</strong>
                       <span>
                         {video.is_published ? "На сайте" : "Скрыто"}
+                        {video.show_on_homepage ? " · На главной" : ""}
                       </span>
+                      <MediaHomepageToggle videoId={video.id} checked={Boolean(video.show_on_homepage)} />
                     </div>
 
                     {profile.role === "admin" && (

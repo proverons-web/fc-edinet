@@ -1,4 +1,5 @@
 import Link from "next/link";
+import YouTubePlayer from "@/app/components/YouTubePlayer";
 import type { MediaAlbum, MediaVideo, Partner, PartnerLevel, SitePageDesignSnapshot } from "@/lib/types";
 import type { CSSProperties } from "react";
 import { dateLocale, localized, partnerLevelLabelsI18n, publicText, type Locale } from "@/lib/i18n";
@@ -110,19 +111,18 @@ function MediaVideos({ section, videos, locale }: { section: ProPageLayoutConfig
   return <section className={proSectionClass(section)} style={proSectionStyle(section)}><div className="proSectionMotion"><div className="proSectionInner">
     <SectionHeading eyebrow="FC EDINEȚ TV" title={text.videos} align={section.align}/>
     {videos.length ? <div className={`proCardGrid proMediaVideos proVideos-${section.variant}`}>
-      {videos.map((video, index) => <a className={`proMediaVideoCard${index === 0 ? " isLeadVideo" : ""}`} href={video.youtube_url} target="_blank" rel="noopener noreferrer" key={video.id}>
+      {videos.map((video, index) => <article className={`proMediaVideoCard${index === 0 ? " isLeadVideo" : ""}`} key={video.id}>
         <div className="proMediaVideoPreview">
-          <img src={`https://i.ytimg.com/vi/${video.youtube_id}/hqdefault.jpg`} alt="" loading="lazy" decoding="async"/>
-          <span className="proMediaVideoPlay" aria-hidden="true"><i>▶</i></span>
+          <YouTubePlayer videoId={video.youtube_id} title={video.title} />
           <span className="proMediaVideoPlatform">FC EDINEȚ TV</span>
         </div>
         <div className="proMediaVideoCopy">
           <span>{formatDate(video.published_at, locale)}</span>
           <h3>{video.title}</h3>
           {video.description && section.variant !== "grid" && <p>{video.description}</p>}
-          <b className="proMediaVideoWatch">{watchLabel} ↗</b>
+          <b className="proMediaVideoWatch">{watchLabel}</b>
         </div>
-      </a>)}
+      </article>)}
     </div> : <div className="adminEmpty">{text.videosEmpty}</div>}
   </div></div></section>;
 }

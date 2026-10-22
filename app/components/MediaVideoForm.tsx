@@ -61,6 +61,14 @@ export default function MediaVideoForm() {
         </span>
       </label>
 
+      <label className="checkRow">
+        <input type="checkbox" name="show_on_homepage" />
+        <span>
+          <strong>Показывать на главной</strong>
+          <small>Если включить, это видео заменит прежнее главное видео.</small>
+        </span>
+      </label>
+
       {state.error && <div className="formError">{state.error}</div>}
       {state.success && <div className="formSuccess">{state.success}</div>}
 

@@ -1,0 +1,8 @@
+FC EDINEȚ v2.15.8 — Video Spotlight Upgrade
+
+- Admin Media: exclusive “Показывать на главной” switch for YouTube videos.
+- Homepage video spotlight uses only the explicitly selected published video.
+- YouTube facade uses 16:9 max-resolution thumbnails to avoid preview letterboxing.
+- Videos play inside the site through youtube-nocookie.com embeds with standard controls and fullscreen.
+- /media and homepage media video cards no longer navigate to YouTube for playback.
+- Database migration: 051_media_video_homepage.sql.

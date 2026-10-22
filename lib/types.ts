@@ -339,6 +339,7 @@ export type MediaVideo = {
   youtube_id: string;
   published_at: string | null;
   is_published: boolean;
+  show_on_homepage: boolean;
   display_order: number;
   created_at: string;
   updated_at: string;

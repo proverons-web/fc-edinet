@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import StandingsTable from "@/app/components/StandingsTable";
 import RecentMatchesCarousel from "@/app/components/RecentMatchesCarousel";
+import YouTubePlayer from "@/app/components/YouTubePlayer";
 import { createClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/locale";
 import { publicSectionMetadata } from "@/lib/seo";
@@ -130,6 +131,7 @@ export default async function Home() {
       .from("media_videos")
       .select("*")
       .eq("is_published", true)
+      .order("show_on_homepage", { ascending: false })
       .order("published_at", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false })
       .limit(3),
@@ -189,7 +191,7 @@ export default async function Home() {
   const clubStanding = clubStandingIndex >= 0 ? standings[clubStandingIndex] : null;
   const clubPoints = clubStanding ? Number(clubStanding.points ?? 0) : null;
   const featuredAlbum = mediaAlbums[0] ?? null;
-  const featuredVideo = mediaVideos[0] ?? null;
+  const featuredVideo = mediaVideos.find((video) => Boolean(video.show_on_homepage)) ?? null;
 
   const heroTitleMain = localized(hero?.title_main, hero?.title_main_ro, locale) || (locale === "ro" ? "UN ORAȘ. O ECHIPĂ." : "ОДИН ГОРОД. ОДНА КОМАНДА.");
   const heroTitleAccent = localized(hero?.title_accent, hero?.title_accent_ro, locale) || (locale === "ro" ? "ȚINTE MAI MARI" : "БОЛЬШИЕ ЦЕЛИ");
@@ -354,18 +356,15 @@ export default async function Home() {
             </> : <div className="fcRefNoMatch">{locale === "ro" ? "Următorul meci nu a fost încă programat." : "Следующий матч пока не назначен."}</div>}
           </aside>
 
-          {featuredVideo ? <a href={featuredVideo.youtube_url} target="_blank" rel="noreferrer" className="fcV215DashboardVideo">
-            <div className="fcV215DashboardVideoHead"><span>{locale === "ro" ? "VIDEO" : "ВИДЕО"}</span><b>YOUTUBE ↗</b></div>
-            <div className="fcV215DashboardVideoThumb">
-              {featuredVideo.youtube_id ? <img src={`https://i.ytimg.com/vi/${featuredVideo.youtube_id}/hqdefault.jpg`} alt={featuredVideo.title} loading="lazy" decoding="async" /> : <span>FC EDINEȚ</span>}
-              <i>▶</i>
-            </div>
+          {featuredVideo ? <article className="fcV215DashboardVideo">
+            <div className="fcV215DashboardVideoHead"><span>{locale === "ro" ? "VIDEO" : "ВИДЕО"}</span><b>FC EDINEȚ TV</b></div>
+            <YouTubePlayer videoId={featuredVideo.youtube_id} title={featuredVideo.title} className="fcV215DashboardVideoThumb" />
             <div className="fcV215DashboardVideoBody">
               <small>{featuredVideo.published_at ? formatMediaDate(featuredVideo.published_at, locale) : "YOUTUBE"}</small>
               <strong>{featuredVideo.title}</strong>
-              <span>{locale === "ro" ? "VEZI PE YOUTUBE" : "СМОТРЕТЬ НА YOUTUBE"} →</span>
+              <span>{locale === "ro" ? "REDĂ PE SITE • FULLSCREEN DISPONIBIL" : "СМОТРЕТЬ НА САЙТЕ • ДОСТУПЕН FULLSCREEN"}</span>
             </div>
-          </a> : <div className="fcV215DashboardVideo fcV215DashboardVideoEmpty"><span>FC EDINEȚ</span><strong>{locale === "ro" ? "Video nou în curând" : "Новое видео скоро"}</strong></div>}
+          </article> : <div className="fcV215DashboardVideo fcV215DashboardVideoEmpty"><span>FC EDINEȚ</span><strong>{locale === "ro" ? "Video nou în curând" : "Новое видео скоро"}</strong></div>}
         </div>
       </section>}
 
@@ -452,10 +451,10 @@ export default async function Home() {
               <div className="fcV215MediaImage">{featuredAlbum.cover_image_url ? <img src={featuredAlbum.cover_image_url} alt={featuredAlbum.title} loading="lazy" decoding="async" /> : <span>FC EDINEȚ</span>}<i>{locale === "ro" ? "FOTO" : "ФОТО"}</i></div>
               <div><small>{featuredAlbum.event_date ? formatMediaDate(featuredAlbum.event_date, locale) : (locale === "ro" ? "GALERIE" : "ГАЛЕРЕЯ")}</small><h3>{featuredAlbum.title}</h3>{featuredAlbum.location && <p>{featuredAlbum.location}</p>}<b>{locale === "ro" ? "DESCHIDE GALERIA" : "ОТКРЫТЬ АЛЬБОМ"} →</b></div>
             </Link>}
-            {featuredVideo && <a href={featuredVideo.youtube_url} target="_blank" rel="noreferrer" className="fcV215VideoCard">
-              <div className="fcV215MediaImage">{featuredVideo.youtube_id ? <img src={`https://i.ytimg.com/vi/${featuredVideo.youtube_id}/hqdefault.jpg`} alt={featuredVideo.title} loading="lazy" decoding="async" /> : <span>FC EDINEȚ</span>}<i>VIDEO</i><em className="fcV215Play">▶</em></div>
-              <div><small>{featuredVideo.published_at ? formatMediaDate(featuredVideo.published_at, locale) : "YOUTUBE"}</small><h3>{featuredVideo.title}</h3>{featuredVideo.description && <p>{featuredVideo.description}</p>}<b>{locale === "ro" ? "VEZI VIDEO" : "СМОТРЕТЬ ВИДЕО"} →</b></div>
-            </a>}
+            {featuredVideo && <article className="fcV215VideoCard">
+              <YouTubePlayer videoId={featuredVideo.youtube_id} title={featuredVideo.title} className="fcV215MediaImage" />
+              <div><small>{featuredVideo.published_at ? formatMediaDate(featuredVideo.published_at, locale) : "YOUTUBE"}</small><h3>{featuredVideo.title}</h3>{featuredVideo.description && <p>{featuredVideo.description}</p>}<b>{locale === "ro" ? "REDĂ VIDEO" : "СМОТРЕТЬ ВИДЕО"} →</b></div>
+            </article>}
           </div>
         </div>
       </section>}

@@ -331,29 +331,80 @@ export async function addVideo(
   const description = nullableText(formData.get("description"));
   const publishedAt = nullableText(formData.get("published_at"));
   const isPublished = formData.get("is_published") === "on";
+  const showOnHomepage = isPublished && formData.get("show_on_homepage") === "on";
   const youtubeId = extractYouTubeId(youtubeUrl);
 
   if (!title || !youtubeId) {
     return { error: "Укажи название и корректную YouTube-ссылку." };
   }
 
-  const { error } = await supabase.from("media_videos").insert({
+  const { data: insertedVideo, error } = await supabase.from("media_videos").insert({
     title,
     youtube_url: youtubeUrl,
     youtube_id: youtubeId,
     description,
     published_at: publishedAt,
     is_published: isPublished,
-  });
+    show_on_homepage: false,
+  }).select("id").single();
 
-  if (error) {
-    return { error: `Не удалось добавить видео: ${error.message}` };
+  if (error || !insertedVideo) {
+    return { error: `Не удалось добавить видео: ${error?.message ?? "unknown error"}` };
   }
 
+  if (showOnHomepage) {
+    const { error: clearError } = await supabase
+      .from("media_videos")
+      .update({ show_on_homepage: false })
+      .eq("show_on_homepage", true);
+    if (clearError) return { error: `Видео добавлено, но не удалось обновить главное видео: ${clearError.message}` };
+
+    const { error: featureError } = await supabase
+      .from("media_videos")
+      .update({ show_on_homepage: true })
+      .eq("id", insertedVideo.id);
+    if (featureError) return { error: `Видео добавлено, но не удалось показать его на главной: ${featureError.message}` };
+  }
+
+  revalidatePath("/");
   revalidatePath("/media");
   revalidatePath("/admin/media");
 
   return { success: "Видео добавлено." };
+}
+
+export async function setVideoHomepage(formData: FormData) {
+  const { supabase } = await requireEditor();
+  const id = text(formData.get("video_id"));
+  const enable = formData.getAll("show_on_homepage").includes("on");
+  if (!id) return;
+
+  if (enable) {
+    const { data: video } = await supabase
+      .from("media_videos")
+      .select("id,is_published")
+      .eq("id", id)
+      .maybeSingle();
+    if (!video?.is_published) return;
+
+    await supabase
+      .from("media_videos")
+      .update({ show_on_homepage: false })
+      .eq("show_on_homepage", true);
+    await supabase
+      .from("media_videos")
+      .update({ show_on_homepage: true })
+      .eq("id", id);
+  } else {
+    await supabase
+      .from("media_videos")
+      .update({ show_on_homepage: false })
+      .eq("id", id);
+  }
+
+  revalidatePath("/");
+  revalidatePath("/media");
+  revalidatePath("/admin/media");
 }
 
 export async function deleteVideo(formData: FormData) {
@@ -365,6 +416,7 @@ export async function deleteVideo(formData: FormData) {
 
   await supabase.from("media_videos").delete().eq("id", id);
 
+  revalidatePath("/");
   revalidatePath("/media");
   revalidatePath("/admin/media");
 }

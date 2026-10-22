@@ -119,6 +119,17 @@ try {
   errors.push(`Visitor analytics wiring check failed: ${error instanceof Error ? error.message : String(error)}`);
 }
 
+// Video spotlight release integrity. Migration 051 must be applied in Supabase.
+for (const videoSpotlightFile of [
+  "database/051_media_video_homepage.sql",
+  "app/components/YouTubePlayer.tsx",
+  "app/components/MediaHomepageToggle.tsx",
+]) {
+  if (!fs.existsSync(path.join(cwd, videoSpotlightFile))) {
+    errors.push(`Video spotlight release file is missing: ${videoSpotlightFile}`);
+  }
+}
+
 // RU/RO release integrity: auth actions must receive the active locale so
 // validation errors cannot silently fall back to Russian on the RO site.
 for (const authPair of [
