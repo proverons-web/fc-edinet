@@ -80,3 +80,126 @@
 .fcV215MatchRailWide .fcRefRecentMatchScore strong{font-size:28px!important}
 @media(max-width:1050px){.fcV215LastMatchHero,.fcV215FormStatsWide{min-height:0!important}}
 @media(max-width:760px){.fcV215PulseSection{padding:12px 0 18px!important}.fcV215FormSummary{gap:8px;font-size:8px}.fcV215FormSummary span+span{padding-left:0}.fcV215FormSummary span+span:before{display:none}.fcV215StatsWideRow{margin-left:-15px!important;margin-right:-15px!important}.fcV215MatchRailWide .fcRefRecentMatchCard{min-height:170px!important}}
+
+/* v2.15.4 — two-column match command center */
+.fcV215MatchDashboardSection{
+  padding:18px 0 22px!important;
+  background:#eef3f9!important;
+  border-bottom:1px solid #dce5ef;
+}
+.fcV215MatchDashboard{
+  display:grid;
+  grid-template-columns:minmax(350px,.82fr) minmax(0,1.38fr);
+  gap:16px;
+  min-height:clamp(410px,43vh,470px);
+  align-items:stretch;
+}
+.fcV215DashboardLeft{
+  display:grid;
+  grid-template-rows:minmax(0,1.04fr) minmax(0,.96fr);
+  gap:14px;
+  min-width:0;
+}
+.fcV215DashboardLastMatch,
+.fcV215DashboardForm{
+  min-height:0!important;
+  height:100%;
+  border-radius:16px!important;
+  box-shadow:0 10px 30px rgba(6,37,75,.055);
+}
+.fcV215DashboardLastMatch{
+  padding:14px 18px 0!important;
+}
+.fcV215DashboardLastMatch .fcV215LastMatchTeams{
+  grid-template-columns:1fr 88px 1fr!important;
+  margin:12px 0 8px!important;
+}
+.fcV215DashboardLastMatch .fcRefTeamBadge img{width:54px!important;height:60px!important}
+.fcV215DashboardLastMatch .fcRefTeamBadge>span{width:54px!important;height:54px!important}
+.fcV215DashboardLastMatch .fcV215LastScore strong{font-size:38px!important}
+.fcV215DashboardLastMatch .fcV215LastMatchFooter{margin-left:-18px!important;margin-right:-18px!important;padding:9px 18px!important}
+
+.fcV215DashboardForm{
+  display:flex!important;
+  flex-direction:column!important;
+  padding:14px 18px 0!important;
+  background:#fff;
+  border:1px solid #dbe4ee;
+  overflow:hidden;
+}
+.fcV215DashboardForm .fcV215FormHead strong{font-size:19px!important}
+.fcV215DashboardForm .fcV215FormDots{margin:10px 0 8px!important;gap:8px!important}
+.fcV215DashboardForm .fcV215FormDot{width:31px!important;height:31px!important;font-size:10px!important}
+.fcV215DashboardFormSummary{display:grid!important;grid-template-columns:1fr auto;gap:10px!important;margin:0 0 10px!important;font-size:8px!important}
+.fcV215DashboardFormSummary span+span{padding-left:0!important}.fcV215DashboardFormSummary span+span:before{display:none!important}
+.fcV215DashboardKpis{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  margin:auto -18px 0;
+  border-top:1px solid #e5edf5;
+}
+.fcV215DashboardKpis>span{padding:9px 7px 8px;text-align:center;border-right:1px solid #e5edf5}
+.fcV215DashboardKpis>span:last-child{border-right:0}
+.fcV215DashboardKpis small{display:block;color:#8a99aa;font-size:6px;font-weight:900;letter-spacing:.11em}
+.fcV215DashboardKpis strong{display:block;margin-top:2px;color:#082a55;font-family:var(--font-fce-display),Arial,sans-serif;font-size:21px;line-height:1}
+
+.fcV215NextMatchDashboard{
+  position:relative!important;
+  left:auto!important;
+  top:auto!important;
+  transform:none!important;
+  width:100%!important;
+  max-width:none!important;
+  height:100%;
+  min-height:0;
+  align-self:stretch!important;
+  display:flex!important;
+  flex-direction:column!important;
+  padding:0!important;
+  border-radius:16px!important;
+  overflow:hidden!important;
+}
+.fcV215NextMatchDashboard .fcRefMatchHead{padding:20px 24px 14px!important}
+.fcV215NextMatchDashboard .fcRefMatchHead strong{font-size:23px!important}
+.fcV215NextMatchDashboard .fcRefCompetition{padding:13px 24px 0!important}
+.fcV215NextMatchDashboard .fcRefMatchBody{padding:14px 24px 12px!important;display:flex!important;flex-direction:column!important;flex:1}
+.fcV215NextMatchDashboard .fcRefMatchTeams{grid-template-columns:minmax(0,1fr) 70px minmax(0,1fr)!important;gap:18px!important;flex:1;align-items:center}
+.fcV215NextMatchDashboard .fcRefTeamBadge{min-height:205px!important;padding:18px 14px 16px!important}
+.fcV215NextMatchDashboard .fcRefTeamBadge img{width:92px!important;height:104px!important}
+.fcV215NextMatchDashboard .fcRefTeamBadge>span{width:94px!important;height:94px!important}
+.fcV215NextMatchDashboard .fcRefTeamBadge strong{font-size:15px!important;margin-top:7px!important}
+.fcV215NextMatchDashboard .fcRefVs{width:58px!important;height:58px!important;font-size:17px!important}
+.fcV215NextMatchDashboard .fcRefMatchFacts{margin-top:12px!important}
+.fcV215NextMatchDashboard .fcRefMatchFacts span{min-height:64px!important;padding:10px 12px!important}
+.fcV215NextMatchDashboard .fcRefMatchFacts strong{font-size:13px!important}
+.fcV215NextMatchDashboard .fcRefMatchButton{width:calc(100% - 48px)!important;margin:0 24px 20px!important;min-height:48px!important}
+
+.fcV215ResultsSection{
+  padding:22px 0 32px;
+  background:#eef3f9;
+  border-bottom:1px solid #dce5ef;
+}
+.fcV215ResultsSection .fcV215MatchRailWide{margin:0}
+
+@media(max-width:1050px){
+  .fcV215MatchDashboard{grid-template-columns:1fr;min-height:0}
+  .fcV215DashboardLeft{grid-template-columns:1fr 1fr;grid-template-rows:none;order:2}
+  .fcV215NextMatchDashboard{order:1;min-height:430px!important}
+}
+@media(max-width:760px){
+  .fcV215MatchDashboardSection{padding:12px 0 16px!important}
+  .fcV215MatchDashboard{gap:12px}
+  .fcV215DashboardLeft{grid-template-columns:1fr;gap:12px}
+  .fcV215NextMatchDashboard{min-height:0!important}
+  .fcV215NextMatchDashboard .fcRefMatchHead{padding:16px 15px 11px!important}
+  .fcV215NextMatchDashboard .fcRefCompetition{padding:10px 15px 0!important}
+  .fcV215NextMatchDashboard .fcRefMatchBody{padding:10px 15px 9px!important}
+  .fcV215NextMatchDashboard .fcRefMatchTeams{grid-template-columns:minmax(0,1fr) 50px minmax(0,1fr)!important;gap:8px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge{min-height:150px!important;padding:12px 8px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge img{width:62px!important;height:70px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge>span{width:62px!important;height:62px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge strong{font-size:11px!important}
+  .fcV215NextMatchDashboard .fcRefMatchButton{width:calc(100% - 30px)!important;margin:0 15px 15px!important}
+  .fcV215DashboardFormSummary{grid-template-columns:1fr}
+  .fcV215ResultsSection{padding:16px 0 24px}
+}
