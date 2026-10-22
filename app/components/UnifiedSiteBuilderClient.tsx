@@ -27,10 +27,15 @@ export default function UnifiedSiteBuilderClient({pages,selectedKey,menuItems,no
  const embeddedEditorUrl=editorUrl?`${editorUrl}${editorUrl.includes("?")?"&":"?"}embedded=1`:"";
  const previewWidth=widths[device];
  const topLevel=useMemo(()=>menu.filter(i=>!i.parent_id),[menu]);
+ const orderedMenu=useMemo(()=>{
+   const children=new Map<number,SiteMenuItem[]>();
+   for(const item of menu){if(item.parent_id)children.set(item.parent_id,[...(children.get(item.parent_id)??[]),item]);}
+   return topLevel.flatMap(parent=>[parent,...(children.get(parent.id)??[])]);
+ },[menu,topLevel]);
 
  function moveDragged(targetId:number){
    if(!dragId||dragId===targetId)return;
-   const next=[...menu]; const from=next.findIndex(x=>x.id===dragId); const to=next.findIndex(x=>x.id===targetId);
+   const next=[...orderedMenu]; const from=next.findIndex(x=>x.id===dragId); const to=next.findIndex(x=>x.id===targetId);
    if(from<0||to<0)return; const [item]=next.splice(from,1); next.splice(to,0,item); setMenu(next); setDragId(null);
    startTransition(()=>reorderMenuItems(next.map(x=>x.id)));
  }
@@ -102,10 +107,10 @@ export default function UnifiedSiteBuilderClient({pages,selectedKey,menuItems,no
 
        {panel==="menu"&&<div className="siteBuilderDrawerBody">
          <p className="builderHint">Перетащи строки, чтобы изменить порядок. Системные пункты нельзя удалить, но можно переименовать или скрыть.</p>
-         <div className="menuManagerList">{menu.map(item=><article key={item.id} draggable onDragStart={()=>setDragId(item.id)} onDragOver={e=>e.preventDefault()} onDrop={()=>moveDragged(item.id)} className={`menuManagerRow${item.parent_id?" child":""}`}>
+         <div className="menuManagerList">{orderedMenu.map(item=><article key={item.id} draggable onDragStart={()=>setDragId(item.id)} onDragOver={e=>e.preventDefault()} onDrop={()=>moveDragged(item.id)} className={`menuManagerRow${item.parent_id?" child":""}`}>
            <span className="dragHandle">⋮⋮</span><form action={saveMenuItem} className="menuItemForm"><input type="hidden" name="id" value={item.id}/><input name="label_ru" defaultValue={item.label_ru}/><input name="label_ro" defaultValue={item.label_ro}/><input name="href" defaultValue={item.href}/><select name="parent_id" defaultValue={item.parent_id??""}><option value="">Верхний уровень</option>{topLevel.filter(x=>x.id!==item.id).map(x=><option key={x.id} value={x.id}>↳ {x.label_ru}</option>)}</select><label className="miniCheck"><input type="checkbox" name="visible" defaultChecked={item.visible}/> Видим</label><button type="submit">Сохранить</button></form>{!item.system_key&&<button className="danger iconButton" type="button" onClick={()=>startTransition(()=>deleteMenuItem(item.id))}>×</button>}
          </article>)}</div>
-         <form action={createMenuItem} className="newMenuItemForm"><h3>+ Новый пункт меню</h3><input name="label_ru" placeholder="Название RU"/><input name="label_ro" placeholder="Название RO"/><input name="href" placeholder="/страница или https://..."/><button type="submit" className="primary">Добавить</button></form>
+         <form action={createMenuItem} className="newMenuItemForm"><h3>+ Новый пункт меню</h3><input name="label_ru" placeholder="Название RU"/><input name="label_ro" placeholder="Название RO"/><input name="href" placeholder="/страница или https://..."/><select name="parent_id"><option value="">Верхний уровень</option>{topLevel.map(x=><option key={x.id} value={x.id}>↳ {x.label_ru}</option>)}</select><button type="submit" className="primary">Добавить</button></form>
          {pending&&<small>Сохраняю порядок…</small>}
        </div>}
 

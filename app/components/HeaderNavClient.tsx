@@ -58,9 +58,10 @@ export default function HeaderNavClient({
   const managedMenuCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const accountWrapRef = useRef<HTMLDivElement>(null);
   const managedMenuRootRef = useRef<HTMLElement | null>(null);
+
   const linkMap: Record<HeaderNavKey, { href: string; label: string }> = {
     news: { href: "/news", label: labels.nav.news },
-    team: { href: "/team", label: labels.nav.team },
+    team: { href: "/team/squad", label: labels.nav.team },
     statistics: { href: "/statistics", label: labels.nav.statistics },
     matches: { href: "/matches", label: labels.nav.matches },
     standings: { href: "/standings", label: labels.nav.standings },
@@ -69,6 +70,7 @@ export default function HeaderNavClient({
     media: { href: "/media", label: labels.nav.media },
     partners: { href: "/partners", label: labels.nav.partners },
   };
+
   const order = navOrder?.length ? navOrder : Object.keys(linkMap) as HeaderNavKey[];
   const legacyLinks = order.filter((key) => navVisibility?.[key] !== false).map((key) => linkMap[key]);
   const useManagedMenu = managedMenu.length > 0;
@@ -135,9 +137,10 @@ export default function HeaderNavClient({
     }
     setOpenManagedMenuId(id);
   };
+
   const scheduleManagedMenuClose = () => {
     if (managedMenuCloseTimer.current) clearTimeout(managedMenuCloseTimer.current);
-    managedMenuCloseTimer.current = setTimeout(() => setOpenManagedMenuId(null), 220);
+    managedMenuCloseTimer.current = setTimeout(() => setOpenManagedMenuId(null), 180);
   };
 
   return (
@@ -145,30 +148,40 @@ export default function HeaderNavClient({
       <nav className="menu" ref={managedMenuRootRef}>
         {useManagedMenu ? topManaged.map((item) => {
           const children = childMap.get(item.id) ?? [];
-          return children.length ? <div
-            className={`managedMenuGroup${openManagedMenuId === item.id ? " isOpen" : ""}`}
+          const groupActive = isActive(item.href) || children.some((child) => isActive(child.href));
+          if (!children.length) return <Link key={item.id} href={item.href} className={groupActive ? "isActive" : undefined} aria-current={groupActive ? "page" : undefined}>{localizedMenuLabel(item)}</Link>;
+          const isOpen = openManagedMenuId === item.id;
+          const dropdownId = `managed-menu-${item.id}`;
+          return <div
+            className={`managedMenuGroup${isOpen ? " isOpen" : ""}`}
             key={item.id}
-            onMouseEnter={() => openManagedMenu(item.id)}
-            onMouseLeave={scheduleManagedMenuClose}
+            onPointerEnter={() => openManagedMenu(item.id)}
+            onPointerLeave={scheduleManagedMenuClose}
             onBlur={(event) => {
               if (!event.currentTarget.contains(event.relatedTarget as Node | null)) scheduleManagedMenuClose();
             }}
           >
             <button
               type="button"
-              className={`managedMenuTrigger${isActive(item.href) ? " isActive" : ""}`}
-              aria-expanded={openManagedMenuId === item.id}
+              className={`managedMenuTrigger${groupActive ? " isActive" : ""}`}
+              aria-expanded={isOpen}
               aria-haspopup="menu"
+              aria-controls={dropdownId}
               onClick={() => setOpenManagedMenuId((current) => current === item.id ? null : item.id)}
               onFocus={() => openManagedMenu(item.id)}
               onKeyDown={(event) => {
-                if (event.key === "ArrowDown") { event.preventDefault(); const trigger = event.currentTarget; openManagedMenu(item.id); requestAnimationFrame(() => trigger.parentElement?.querySelector<HTMLAnchorElement>(".managedMenuDropdown a")?.focus()); }
+                if (event.key === "ArrowDown") {
+                  event.preventDefault();
+                  const trigger = event.currentTarget;
+                  openManagedMenu(item.id);
+                  requestAnimationFrame(() => trigger.parentElement?.querySelector<HTMLAnchorElement>(".managedMenuDropdown a")?.focus());
+                }
               }}
             >{localizedMenuLabel(item)}</button>
-            {openManagedMenuId === item.id ? <div className="managedMenuDropdown" role="menu" onMouseEnter={() => openManagedMenu(item.id)} onMouseLeave={scheduleManagedMenuClose}>
-              {children.map((child) => <Link role="menuitem" key={child.id} href={child.href} onClick={() => setOpenManagedMenuId(null)}>{localizedMenuLabel(child)}</Link>)}
-            </div> : null}
-          </div> : <Link key={item.id} href={item.href} className={isActive(item.href) ? "isActive" : undefined} aria-current={isActive(item.href) ? "page" : undefined}>{localizedMenuLabel(item)}</Link>;
+            <div className="managedMenuDropdown" id={dropdownId} role="menu" aria-hidden={!isOpen}>
+              {children.map((child) => <Link role="menuitem" key={child.id} href={child.href} className={isActive(child.href) ? "isActive" : undefined} onClick={() => setOpenManagedMenuId(null)}>{localizedMenuLabel(child)}</Link>)}
+            </div>
+          </div>;
         }) : <>
           <Link href="/" className={isActive("/") ? "isActive" : undefined} aria-current={isActive("/") ? "page" : undefined}>{labels.home}</Link>
           {legacyLinks.map((link) => <Link key={link.href} href={link.href} className={isActive(link.href) ? "isActive" : undefined} aria-current={isActive(link.href) ? "page" : undefined}>{link.label}</Link>)}
@@ -199,7 +212,14 @@ export default function HeaderNavClient({
       </div>
 
       {menuOpen && <div className="mobileMenu mobileMenuAbsolute" id="mobile-site-menu" role="dialog" aria-modal="true" aria-label={labels.openMenu}><div className="container mobileMenuInner">
-        {useManagedMenu ? topManaged.map((item) => <div className="mobileManagedGroup" key={item.id}><Link href={item.href} className={isActive(item.href) ? "isActive" : undefined} onClick={() => setMenuOpen(false)}>{localizedMenuLabel(item)}</Link>{(childMap.get(item.id) ?? []).map((child) => <Link className="mobileManagedChild" key={child.id} href={child.href} onClick={() => setMenuOpen(false)}>{localizedMenuLabel(child)}</Link>)}</div>) : <>
+        {useManagedMenu ? topManaged.map((item) => {
+          const children = childMap.get(item.id) ?? [];
+          const groupActive = isActive(item.href) || children.some((child) => isActive(child.href));
+          return <div className={`mobileManagedGroup${groupActive ? " isActive" : ""}`} key={item.id}>
+            {children.length ? <span className="mobileManagedLabel">{localizedMenuLabel(item)}</span> : <Link href={item.href} className={groupActive ? "isActive" : undefined} onClick={() => setMenuOpen(false)}>{localizedMenuLabel(item)}</Link>}
+            {children.map((child) => <Link className={`mobileManagedChild${isActive(child.href) ? " isActive" : ""}`} key={child.id} href={child.href} onClick={() => setMenuOpen(false)}>{localizedMenuLabel(child)}</Link>)}
+          </div>;
+        }) : <>
           <Link href="/" className={isActive("/") ? "isActive" : undefined} aria-current={isActive("/") ? "page" : undefined} onClick={() => setMenuOpen(false)}>{labels.home}</Link>
           {legacyLinks.map((link) => <Link key={link.href} href={link.href} className={isActive(link.href) ? "isActive" : undefined} aria-current={isActive(link.href) ? "page" : undefined} onClick={() => setMenuOpen(false)}>{link.label}</Link>)}
         </>}

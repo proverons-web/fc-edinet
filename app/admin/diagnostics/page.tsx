@@ -15,7 +15,7 @@ type DiagnosticCheck = {
   detail?: string;
 };
 
-const APP_VERSION = "2.27.0";
+const APP_VERSION = "2.28.0";
 const BUILDER_VERSION = "2.1";
 const HERO_BUILDER_VERSION = "2.1";
 const CONTENT_SCHEMA_VERSION = "3";
@@ -157,8 +157,8 @@ export default async function AdminDiagnosticsPage() {
   const publicRoutes = [
     ["Главная", "app/page.tsx"],
     ["Новости", "app/news/page.tsx"],
-    ["Команда", "app/team/page.tsx"],
-    ["Штаб команды", "app/admin/staff/page.tsx"],
+    ["Состав", "app/team/squad/page.tsx"],
+    ["Тренерский штаб", "app/team/staff/page.tsx"],
     ["Календарь", "app/matches/page.tsx"],
     ["Таблица", "app/standings/page.tsx"],
     ["Статистика", "app/statistics/page.tsx"],

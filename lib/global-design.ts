@@ -64,7 +64,7 @@ export type FooterDesignConfig = {
   padding_bottom: number;
 };
 
-export const headerNavKeys: HeaderNavKey[] = ["news", "team", "statistics", "matches", "standings", "club", "academy", "media", "partners"];
+export const headerNavKeys: HeaderNavKey[] = ["news", "team", "matches", "statistics", "standings", "club", "media", "academy", "partners"];
 
 export const defaultHeaderDesign: HeaderDesignConfig = {
   topbar_enabled: true,
@@ -85,7 +85,7 @@ export const defaultHeaderDesign: HeaderDesignConfig = {
   show_account: true,
   show_admin_link: true,
   nav_order: [...headerNavKeys],
-  nav_visibility: Object.fromEntries(headerNavKeys.map((key) => [key, true])) as Record<HeaderNavKey, boolean>,
+  nav_visibility: Object.fromEntries(headerNavKeys.map((key) => [key, !["academy","partners"].includes(key)])) as Record<HeaderNavKey, boolean>,
 };
 
 export const defaultFooterDesign: FooterDesignConfig = {
@@ -116,7 +116,8 @@ export const defaultFooterDesign: FooterDesignConfig = {
       title_ro: "Echipa",
       visible: true,
       links: [
-        { id: "players", label_ru: "Игроки", label_ro: "Jucători", href: "/team" },
+        { id: "players", label_ru: "Состав", label_ro: "Lot", href: "/team/squad" },
+        { id: "staff", label_ru: "Тренерский штаб", label_ro: "Staff tehnic", href: "/team/staff" },
         { id: "statistics", label_ru: "Статистика", label_ro: "Statistici", href: "/statistics" },
         { id: "matches", label_ru: "Календарь", label_ro: "Calendar", href: "/matches" },
       ],

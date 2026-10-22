@@ -485,14 +485,6 @@ body :where(h1,h2,h3,h4,h5,h6){text-wrap:balance}
 .teamHero:after{content:"FC EDINEȚ";position:absolute;right:max(24px,calc((100vw - 1200px)/2));bottom:-.08em;z-index:0;color:rgba(255,255,255,.035);font-family:var(--font-fce-display),Arial,sans-serif;font-size:clamp(90px,13vw,190px);font-weight:900;line-height:.75;letter-spacing:-.055em;white-space:nowrap;pointer-events:none}
 .teamHero .managedPageHeroInner{position:relative;z-index:1}
 .teamPage{padding-top:54px!important;background:linear-gradient(180deg,#04152e 0%,#06244a 46%,#03162f 100%)!important}
-.teamSquadOverview{display:grid;grid-template-columns:minmax(260px,.8fr) minmax(0,1.2fr);gap:1px;margin:0 0 72px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.10);box-shadow:0 20px 60px rgba(0,0,0,.18)}
-.teamSquadOverviewLead{display:flex;align-items:center;gap:22px;min-height:126px;padding:24px 30px;background:linear-gradient(135deg,#0a58ad,#073d80)}
-.teamSquadOverviewNumber{font-family:var(--font-fce-display),Arial,sans-serif;font-size:72px;font-weight:900;line-height:.8;letter-spacing:-.055em;color:#ffd328}
-.teamSquadOverviewLead div{display:grid;gap:6px}.teamSquadOverviewLead small{font-size:9px;font-weight:900;letter-spacing:.16em;color:#a9cbed}.teamSquadOverviewLead strong{font-family:var(--font-fce-display),Arial,sans-serif;font-size:26px;line-height:1;text-transform:uppercase}
-.teamSquadOverviewPositions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:#071d3a}
-.teamSquadOverviewPositions>div{display:grid;align-content:center;gap:6px;min-height:126px;padding:20px 22px;border-left:1px solid rgba(255,255,255,.09)}
-.teamSquadOverviewPositions strong{font-family:var(--font-fce-display),Arial,sans-serif;font-size:30px;line-height:1;color:#fff}
-.teamSquadOverviewPositions span{font-size:10px;font-weight:800;line-height:1.25;text-transform:uppercase;letter-spacing:.055em;color:#8eaac8}
 .teamGroup{position:relative;margin-bottom:82px!important}
 .teamGroupHeading{position:relative;display:flex;align-items:flex-end;gap:18px;margin-bottom:24px!important;padding-bottom:15px;border-bottom:1px solid rgba(255,255,255,.13)}
 .teamGroupHeading .eyebrow{position:absolute;left:0;top:-20px;margin:0!important;font-size:9px!important;letter-spacing:.14em!important;color:#ffd328!important}
@@ -559,17 +551,17 @@ body :where(h1,h2,h3,h4,h5,h6){text-wrap:balance}
 
 @media(max-width:1100px){
   .teamPage .players{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .teamSquadOverview{grid-template-columns:1fr}.teamSquadOverviewPositions>div:first-child{border-left:0}
+  
   .playerProfileHero .playerProfileGrid{grid-template-columns:minmax(300px,.78fr) minmax(0,1.22fr)!important;gap:38px!important}
   .profileIntro h1{font-size:clamp(58px,8vw,86px)!important}
 }
 @media(max-width:820px){
   .teamPage .players{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .teamSquadOverviewPositions{grid-template-columns:repeat(2,1fr)}.teamSquadOverviewPositions>div:nth-child(3){border-top:1px solid rgba(255,255,255,.09)}.teamSquadOverviewPositions>div:nth-child(4){border-top:1px solid rgba(255,255,255,.09)}
+  
   .playerProfileHero .playerProfileGrid{grid-template-columns:1fr!important;gap:0!important}.profileIntro{grid-row:1;padding:46px 0 34px!important}.profilePhotoWrap{grid-row:2;min-height:520px!important;max-width:520px}.profilePhoto{height:520px!important}.profileFacts{max-width:620px}.backLink{margin-bottom:28px!important}
 }
 @media(max-width:560px){
-  .teamHero:after{display:none}.teamPage{padding-top:34px!important}.teamSquadOverview{margin-bottom:54px}.teamSquadOverviewLead{min-height:104px;padding:20px}.teamSquadOverviewNumber{font-size:58px}.teamSquadOverviewLead strong{font-size:21px}.teamSquadOverviewPositions>div{min-height:88px;padding:15px}.teamSquadOverviewPositions strong{font-size:25px}.teamSquadOverviewPositions span{font-size:8px}
+  .teamHero:after{display:none}.teamPage{padding-top:34px!important}
   .teamGroup{margin-bottom:60px!important}.teamPage .players{grid-template-columns:1fr;gap:14px!important}.teamPage .playerCard{min-height:430px!important}.teamPage .playerPhoto{height:305px!important}.teamPage .number{top:254px!important}
   .playerProfileHero:before{display:none}.profileIntro h1{font-size:55px!important;line-height:.8!important}.profileFacts{grid-template-columns:repeat(2,1fr)!important;margin-top:28px!important}.profileFacts>div{min-height:74px;padding:14px!important}.profilePhotoWrap{min-height:440px!important}.profilePhoto{height:440px!important}.profileNumber{font-size:130px!important}
   .playerStatsSection{padding:56px 0!important}.playerStatsHeader h2{font-size:38px!important}.playerStatsKpi{min-height:108px!important;padding:14px!important}.profileSection{padding-top:56px!important;padding-bottom:62px!important}.bioCard{padding:24px!important}
@@ -1047,7 +1039,7 @@ iframe{max-width:100%}
 
   /* Media/cards and all common grids: no accidental intrinsic overflow. */
   .newsDbCard,.playerCard,.publicMatchCard,.proMediaAlbumCard,.proMediaVideoCard,.proPartnerCard,
-  .profileFacts,.teamSquadOverview,.statisticsHero,.statisticsLeaders,.proAcademyIntro,
+  .profileFacts,.statisticsHero,.statisticsLeaders,.proAcademyIntro,
   .mediaFeaturedGrid,.partnersTierGrid{min-width:0;max-width:100%}
 }
 
@@ -2218,20 +2210,6 @@ main:not(.adminPage) :where(.container,.managedPageHeroInner,.proSectionInner,.n
 /* ============================================================
    FC EDINEȚ v2.18.0 — TEAM PAGE 2.0
    ============================================================ */
-.teamSeasonLeaders{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:-38px 0 38px}
-.teamSeasonLeader{position:relative;display:grid;grid-template-columns:72px minmax(0,1fr);min-height:88px;overflow:hidden;border:1px solid rgba(255,255,255,.11);border-radius:6px;background:linear-gradient(145deg,rgba(14,56,105,.95),rgba(5,25,52,.98));color:#fff;text-decoration:none;transition:transform .2s ease,border-color .2s ease,background .2s ease}
-.teamSeasonLeader:hover{transform:translateY(-3px);border-color:rgba(255,211,40,.42);background:linear-gradient(145deg,#124b8d,#071c3a)}
-.teamSeasonLeader>div{position:relative;overflow:hidden;background:#09284e}.teamSeasonLeader>div:after{content:"";position:absolute;inset:auto 0 0;height:36%;background:linear-gradient(to top,#09284e,transparent)}
-.teamSeasonLeader img{width:100%;height:100%;object-fit:cover;object-position:center 18%}.teamSeasonLeader img.isCrest{object-fit:contain;padding:14px;opacity:.72}
-.teamSeasonLeader>span{position:relative;display:grid;align-content:center;gap:4px;padding:12px 38px 12px 14px}.teamSeasonLeader small{font-size:8px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#ffd328}.teamSeasonLeader strong{font-family:var(--font-fce-display),Arial,sans-serif;font-size:15px;line-height:1.05;text-transform:uppercase}.teamSeasonLeader b{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-family:var(--font-fce-display),Arial,sans-serif;font-size:30px;color:#fff}
-.teamRosterBrowser{position:relative}.teamRosterToolbar{position:sticky;top:70px;z-index:12;display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,360px);gap:14px;margin:0 0 28px;padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:rgba(3,22,47,.93);box-shadow:0 16px 34px rgba(0,0,0,.18);backdrop-filter:blur(14px)}
-.teamRosterFilters{display:flex;gap:7px;min-width:0;overflow-x:auto;scrollbar-width:none}.teamRosterFilters::-webkit-scrollbar{display:none}.teamRosterFilters button{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;min-height:42px;padding:0 13px;border:1px solid rgba(255,255,255,.12);border-radius:5px;background:#09254a;color:#b9cee4;font:800 9px/1 Arial,sans-serif;letter-spacing:.055em;text-transform:uppercase;cursor:pointer;transition:.18s ease}.teamRosterFilters button:hover{border-color:rgba(255,211,40,.35);color:#fff}.teamRosterFilters button.isActive{border-color:#ffd328;background:#ffd328;color:#071b36}.teamRosterFilters button span{display:grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:rgba(255,255,255,.10);font-size:9px}.teamRosterFilters button.isActive span{background:rgba(7,27,54,.12)}
-.teamRosterSearch{position:relative;display:flex;align-items:center}.teamRosterSearch input{width:100%;height:42px;padding:0 92px 0 14px;border:1px solid rgba(255,255,255,.13);border-radius:5px;outline:0;background:#061b38;color:#fff;font:700 11px/1.2 Arial,sans-serif}.teamRosterSearch input::placeholder{color:#6f89a6}.teamRosterSearch input:focus{border-color:#ffd328;box-shadow:0 0 0 2px rgba(255,211,40,.10)}.teamRosterSearch b{position:absolute;right:12px;font-size:8px;letter-spacing:.07em;text-transform:uppercase;color:#ffd328;pointer-events:none}
-.teamRosterGrid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:18px!important}.teamRosterEmpty{display:grid;place-items:center;min-height:180px;border:1px dashed rgba(255,255,255,.16);border-radius:8px;color:#8fa9c6;font-size:13px}
-@media(max-width:1120px){.teamSeasonLeaders{grid-template-columns:repeat(2,minmax(0,1fr))}.teamRosterGrid{grid-template-columns:repeat(3,minmax(0,1fr))!important}.teamRosterToolbar{grid-template-columns:1fr}.teamRosterSearch{max-width:100%}}
-@media(max-width:820px){.teamSeasonLeaders{margin-top:-30px}.teamRosterGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.teamRosterToolbar{top:58px}.teamSquadOverview{margin-bottom:52px!important}}
-@media(max-width:560px){.teamSeasonLeaders{grid-template-columns:1fr;gap:8px;margin:-28px 0 26px}.teamSeasonLeader{grid-template-columns:62px minmax(0,1fr);min-height:74px}.teamRosterToolbar{position:relative;top:auto;margin-bottom:20px;padding:8px}.teamRosterFilters{padding-bottom:2px}.teamRosterFilters button{min-height:38px;padding-inline:11px}.teamRosterSearch input{height:40px}.teamRosterGrid{grid-template-columns:1fr!important;gap:14px!important}.teamPage .playerCard{min-height:420px!important}.teamPage .playerPhoto{height:300px!important}.teamPage .number{top:252px!important}}
-.teamSeasonLeaders:empty{display:none}
 
 /* ============================================================
    FC EDINEȚ v2.19.0 — MEDIA HUB 2.0

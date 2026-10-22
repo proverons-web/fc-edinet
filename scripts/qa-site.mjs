@@ -29,7 +29,7 @@ ok("login noindex", exists("app/login/layout.tsx") && /index:\s*false/.test(read
 ok("register noindex", exists("app/register/layout.tsx") && /index:\s*false/.test(read("app/register/layout.tsx")));
 
 const sitemap = read("app/sitemap.ts");
-for (const route of ["/club/about","/club/history","/club/stadium","/club/leadership","/club/achievements","/club/archive","/club/hall-of-fame"]) {
+for (const route of ["/team/squad","/team/staff","/club/about","/club/history","/club/stadium","/club/leadership","/club/achievements","/club/archive","/club/hall-of-fame"]) {
   ok(`sitemap ${route}`, sitemap.includes(route));
 }
 ok("custom pages in sitemap", sitemap.includes("site_custom_pages"));
@@ -66,7 +66,14 @@ for (const cssFile of walk(path.join(root, "app"), [".css"])) {
   ok(`CSS braces ${path.relative(root, cssFile)}`, (css.match(/{/g) || []).length === (css.match(/}/g) || []).length);
 }
 
-ok("release version", JSON.parse(read("package.json")).version === "2.27.0");
+ok("team root redirects to squad", read("app/team/page.tsx").includes('redirect("/team/squad")'));
+ok("team squad page exists", exists("app/team/squad/page.tsx"));
+ok("team staff page exists", exists("app/team/staff/page.tsx"));
+ok("legacy roster filter removed", !exists("app/components/TeamRosterBrowser.tsx"));
+ok("managed navigation has one canonical CSS block", (read("app/globals.css").match(/^\.globalHeader \.menu \.managedMenuDropdown\{/gm) || []).length === 1);
+ok("managed navigation is dark", read("app/globals.css").includes('background:linear-gradient(180deg,#052b5d 0%,#031a3b 100%)'));
+ok("Site Builder exposes squad and staff", read("app/admin/site-builder/page.tsx").includes('key:"team_squad"') && read("app/admin/site-builder/page.tsx").includes('key:"team_staff"'));
+ok("release version", JSON.parse(read("package.json")).version === "2.28.0");
 
 const failed = checks.filter((x) => !x.ok);
 for (const check of checks) console.log(`${check.ok ? "PASS" : "FAIL"}  ${check.name}${check.detail ? ` — ${check.detail}` : ""}`);

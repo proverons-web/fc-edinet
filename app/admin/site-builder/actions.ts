@@ -114,11 +114,14 @@ export async function createMenuItem(fd: FormData) {
   const href = normalizeSiteMenuHref(text(fd, "href") || "/");
   if (!href) redirect(builderHref("error=invalid_href"));
   const { data: maxRow } = await supabase.from("site_menu_items").select("display_order").order("display_order", { ascending: false }).limit(1).maybeSingle();
+  const parentRaw = text(fd, "parent_id");
+  const parentId = parentRaw ? Number(parentRaw) : null;
   const { error } = await supabase.from("site_menu_items").insert({
     label_ru: text(fd, "label_ru") || "Новый пункт",
     label_ro: text(fd, "label_ro"),
     href,
     visible: true,
+    parent_id: parentId !== null && Number.isFinite(parentId) ? parentId : null,
     display_order: Number(maxRow?.display_order ?? 100) + 10,
   });
   if (error) redirect(builderHref("error=menu_create_failed"));
