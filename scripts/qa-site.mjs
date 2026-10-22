@@ -116,11 +116,13 @@ const homepageSource = read("app/page.tsx");
 ok("next match host guest labels removed", !homepageSource.includes('label={locale === "ro" ? "GAZDE" : "ХОЗЯЕВА"}') && !homepageSource.includes('label={locale === "ro" ? "OASPEȚI" : "ГОСТИ"}'));
 const homeCss = read("app/home-v215.css");
 ok("next match yellow rail removed", homeCss.includes('.fcV215NextMatchDashboard.fcRefNextMatch:before{display:none!important}'));
-ok("next match team frames removed and crests enlarged", homeCss.includes('.fcV215NextMatchDashboard .fcRefTeamBadge{') && homeCss.includes('background:transparent!important;') && homeCss.includes('width:106px!important;'));
+ok("next match team frames removed and crests enlarged", homeCss.includes('.fcV215NextMatchDashboard .fcRefTeamBadge{') && homeCss.includes('background:transparent!important;') && homeCss.includes('width:168px!important;'));
 ok("next match VS circle replaced", homeCss.includes('Modern VS separator') && homeCss.includes('border-radius:0!important;') && homeCss.includes('.fcV215NextMatchDashboard .fcRefVs:before'));
+ok("results rail frame and rounding removed", homeCss.includes('.fcV215ResultsSection .fcV215MatchRailWide{') && homeCss.includes('.fcV215ResultsSection .fcRefRecentMatchCard,') && homeCss.includes('border:0!important;') && homeCss.includes('border-radius:0!important;'));
+ok("homepage news rounding removed", homeCss.includes('.fcRefLeadColumn,\n.fcRefLatestColumn{') && homeCss.includes('.fcRefNewsRow>div{\n  border-radius:0!important;'));
 const releaseSource = read("lib/release.ts");
-ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.28.5"'));
-ok("release version", JSON.parse(read("package.json")).version === "2.28.5");
+ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.28.6"'));
+ok("release version", JSON.parse(read("package.json")).version === "2.28.6");
 
 const failed = checks.filter((x) => !x.ok);
 for (const check of checks) console.log(`${check.ok ? "PASS" : "FAIL"}  ${check.name}${check.detail ? ` — ${check.detail}` : ""}`);

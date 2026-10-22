@@ -1,0 +1,11 @@
+FC Edineț v2.28.6 — Sharp Homepage Geometry
+
+Changes:
+- Next Match crests enlarged from 106×116px to 168×184px on desktop.
+- Next Match remains frameless with square corners and the modern VS separator.
+- Previous Matches outer rail frame removed.
+- Previous match cards now use square corners and no border.
+- Homepage news columns and news media thumbnails now use square corners.
+- Standings block intentionally left unchanged.
+- Responsive crest sizes increased on tablet/mobile while preserving layout.
+- Version synchronized to 2.28.6.

@@ -819,3 +819,121 @@
   .fcV215NextMatchDashboard .fcRefMatchFacts{grid-template-columns:1fr!important;gap:2px!important}
   .fcV215NextMatchDashboard .fcRefMatchFacts span{min-height:42px!important}
 }
+
+
+/* ============================================================
+   FC EDINEȚ v2.28.6 — SHARP HOME CARDS + LARGE NEXT-MATCH CRESTS
+   ============================================================ */
+
+/* Next match — larger crests, sharp geometry, no card-within-card feel. */
+.fcV215NextMatchDashboard.fcRefNextMatch{
+  border-radius:0!important;
+}
+.fcV215NextMatchDashboard .fcRefMatchTeams{
+  grid-template-columns:minmax(0,1fr) 64px minmax(0,1fr)!important;
+  gap:4px!important;
+  padding-bottom:14px!important;
+}
+.fcV215NextMatchDashboard .fcRefTeamBadge{
+  min-height:226px!important;
+  padding:0!important;
+  gap:6px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+}
+.fcV215NextMatchDashboard .fcRefTeamBadge img{
+  width:168px!important;
+  height:184px!important;
+  max-width:92%!important;
+  object-fit:contain!important;
+  filter:drop-shadow(0 10px 20px rgba(0,0,0,.24))!important;
+}
+.fcV215NextMatchDashboard .fcRefTeamBadge>span{
+  width:150px!important;
+  height:150px!important;
+  max-width:88%!important;
+  border:0!important;
+  border-radius:0!important;
+}
+.fcV215NextMatchDashboard .fcRefTeamBadge strong{
+  margin-top:0!important;
+  font-size:17px!important;
+  line-height:1.04!important;
+}
+.fcV215NextMatchDashboard .fcRefVs{
+  width:64px!important;
+}
+
+/* Previous matches — no enclosing frame and no rounded result cards. */
+.fcV215ResultsSection .fcV215MatchRailWide{
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+.fcV215ResultsSection .fcRefRecentMatchCard,
+.fcV215ResultsSection .fcRefRecentMatchCard.is-win,
+.fcV215ResultsSection .fcRefRecentMatchCard.is-draw,
+.fcV215ResultsSection .fcRefRecentMatchCard.is-loss{
+  border:0!important;
+  border-radius:0!important;
+}
+
+/* News area — sharp editorial blocks. Standings is intentionally unchanged. */
+.fcRefLeadColumn,
+.fcRefLatestColumn{
+  border-radius:0!important;
+}
+.fcRefLeadNews{
+  border-radius:0!important;
+}
+.fcRefNewsRow>div{
+  border-radius:0!important;
+}
+.fcRefLeadNewsMedia>span{
+  border-radius:0!important;
+}
+
+@media(max-width:760px){
+  .fcV215NextMatchDashboard .fcRefMatchTeams{
+    grid-template-columns:minmax(0,1fr) 48px minmax(0,1fr)!important;
+    gap:2px!important;
+  }
+  .fcV215NextMatchDashboard .fcRefTeamBadge{
+    min-height:166px!important;
+  }
+  .fcV215NextMatchDashboard .fcRefTeamBadge img{
+    width:112px!important;
+    height:126px!important;
+    max-width:94%!important;
+  }
+  .fcV215NextMatchDashboard .fcRefTeamBadge>span{
+    width:102px!important;
+    height:102px!important;
+  }
+  .fcV215NextMatchDashboard .fcRefTeamBadge strong{
+    font-size:12px!important;
+  }
+  .fcV215NextMatchDashboard .fcRefVs{width:48px!important}
+}
+
+@media(max-width:460px){
+  .fcV215NextMatchDashboard .fcRefMatchTeams{
+    grid-template-columns:minmax(0,1fr) 38px minmax(0,1fr)!important;
+  }
+  .fcV215NextMatchDashboard .fcRefTeamBadge{
+    min-height:148px!important;
+  }
+  .fcV215NextMatchDashboard .fcRefTeamBadge img{
+    width:96px!important;
+    height:108px!important;
+  }
+  .fcV215NextMatchDashboard .fcRefTeamBadge>span{
+    width:88px!important;
+    height:88px!important;
+  }
+  .fcV215NextMatchDashboard .fcRefTeamBadge strong{
+    font-size:10px!important;
+  }
+  .fcV215NextMatchDashboard .fcRefVs{width:38px!important}
+}
