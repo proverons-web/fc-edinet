@@ -524,7 +524,7 @@
   .fcV215DashboardForm .fcV215FormHead>div{justify-items:center!important;text-align:center!important;margin:0 auto!important}
 }
 
-/* v2.15.12 — unclipped form popovers + mathematically centered VS */
+/* v2.15.13 — unclipped form popovers + mathematically centered VS */
 .fcV215DashboardLeft{overflow:visible!important}
 .fcV215DashboardLastMatch{position:relative!important;z-index:1!important}
 .fcV215DashboardForm{position:relative!important;z-index:20!important;overflow:visible!important}
@@ -546,4 +546,120 @@
   .fcV215NextMatchDashboard .fcRefMatchTeams>.fcRefVs{grid-column:2!important;justify-self:center!important;align-self:center!important;margin:0!important;position:relative!important;left:auto!important;right:auto!important;top:auto!important;transform:none!important;z-index:3!important}
   .fcV215NextMatchDashboard .fcRefMatchTeams>.fcRefTeamBadge:last-child{grid-column:3!important;justify-self:stretch!important}
   .fcV215NextMatchDashboard .fcRefTeamBadge{min-width:0!important;width:100%!important}
+}
+
+/* v2.15.13 — Homepage Final Polish */
+:root{
+  --home-section-gap-desktop:64px;
+  --home-card-radius:16px;
+  --home-card-shadow:0 12px 34px rgba(5,31,63,.075);
+}
+
+/* Match command center: final spacing + visual hierarchy */
+.fcV215MatchDashboardSection{padding:28px 0 30px!important}
+.fcV215MatchDashboard{gap:18px!important}
+.fcV215DashboardLastMatch,.fcV215DashboardForm,.fcV215NextMatchDashboard,.fcV215DashboardVideo{border-radius:var(--home-card-radius)!important}
+.fcV215DashboardLastMatch,.fcV215DashboardForm{box-shadow:var(--home-card-shadow)!important}
+.fcV215DashboardLastMatch .fcV215LastMatchFooter{min-height:38px!important;align-items:center!important}
+.fcV215DashboardForm .fcV215FormDots{justify-content:center!important}
+.fcV215DashboardKpisFull>span{display:flex!important;min-height:48px;flex-direction:column;justify-content:center;align-items:center}
+.fcV215DashboardKpisFull small{line-height:1.08!important;color:#8393a5!important}
+.fcV215DashboardKpisFull strong{line-height:1!important}
+.fcV215NextMatchDashboard,.fcV215DashboardVideo{box-shadow:0 16px 42px rgba(3,25,55,.14)!important}
+.fcV215NextMatchDashboard .fcRefCompetition{justify-content:center!important}
+.fcV215NextMatchDashboard .fcRefMatchFacts{gap:9px!important}
+.fcV215NextMatchDashboard .fcRefMatchButton{font-size:9px!important;letter-spacing:.07em!important}
+
+/* Results: stronger separation but less vertical bulk */
+.fcV215ResultsSection{padding:28px 0 34px!important}
+.fcV215ResultsSection .fcV215MatchRailWide{padding:12px 14px 13px!important}
+.fcV215ResultsSection .fcV215MatchRailHead{padding-bottom:12px!important}
+.fcV215ResultsSection .fcRefRecentMatchCard{min-height:164px!important;box-shadow:0 9px 26px rgba(0,0,0,.12)!important;transition:transform .18s ease,box-shadow .18s ease!important}
+.fcV215ResultsSection .fcRefRecentMatchCard:hover{transform:translateY(-2px)!important;box-shadow:0 14px 32px rgba(0,0,0,.18)!important}
+
+/* News / standings: consistent rhythm and equal-card feel */
+.fcRefDashboardSection{padding:60px 0 64px!important}
+.fcRefDashboard{gap:18px!important}
+.fcRefLeadColumn,.fcRefLatestColumn,.fcRefTableColumn{border-radius:12px!important;box-shadow:0 12px 34px rgba(5,31,62,.06)!important}
+.fcRefLeadNews{border-radius:8px!important;overflow:hidden!important}
+.fcRefPanelTitle{margin-bottom:2px!important}
+.fcRefNewsRow:last-child{border-bottom:0!important}
+
+/* Team: align spacing with the rest of the homepage */
+.fcRefTeamSection{padding:64px 0 68px!important}
+.fcRefTeamHead{margin-bottom:28px!important}
+.fcRefPlayers{gap:18px!important}
+.fcRefPlayerCard{border-radius:8px!important}
+
+/* Media: cleaner grid and same card language */
+.fcV215MediaSection{padding:60px 0 64px!important}
+.fcV215SectionHead{margin-bottom:24px!important}
+.fcV215MediaGrid{grid-template-columns:minmax(0,1.08fr) minmax(330px,.92fr)!important;gap:18px!important}
+.fcV215AlbumCard,.fcV215VideoCard{min-height:300px!important;border-radius:14px!important;box-shadow:var(--home-card-shadow)!important}
+.fcV215AlbumCard>div:last-child,.fcV215VideoCard>div:last-child{padding:22px!important}
+.fcV215AlbumCard h3,.fcV215VideoCard h3{font-size:23px!important;line-height:1.08!important}
+
+/* Partners: compact finish instead of another full section */
+.fcRefPartnersStrip{padding:26px 0!important}
+.fcRefPartnersInner{gap:26px!important}
+.fcRefPartnerLogos{justify-content:center!important}
+.fcRefPartnerLogos img{filter:grayscale(.08);transition:transform .18s ease,filter .18s ease,opacity .18s ease}
+.fcRefPartnerLogos a:hover img{transform:translateY(-2px);filter:none}
+
+/* Shared homepage interaction polish */
+.fcRefLeadNews,.fcRefNewsRow,.fcRefPlayerCard,.fcV215AlbumCard,.fcRefPartnerLogos a{outline-offset:4px}
+.fcRefLeadNews:focus-visible,.fcRefNewsRow:focus-visible,.fcRefPlayerCard:focus-visible,.fcV215AlbumCard:focus-visible,.fcRefPartnerLogos a:focus-visible{outline:2px solid #f4c928!important}
+
+@media(min-width:1251px){
+  .fcV215MatchDashboard{grid-template-columns:minmax(0,1fr) minmax(360px,.88fr) minmax(0,1fr)!important}
+  .fcV215DashboardLeft{gap:16px!important}
+  .fcV215DashboardLastMatch .fcV215LastMatchTeams{margin:9px 0 7px!important}
+  .fcV215DashboardForm{padding-top:13px!important}
+  .fcV215DashboardForm .fcV215FormDots{margin:12px auto 13px!important}
+}
+
+@media(max-width:1250px) and (min-width:1051px){
+  .fcV215MatchDashboardSection{padding:24px 0 26px!important}
+  .fcV215DashboardVideo{min-height:245px!important}
+  .fcV215DashboardVideoBody{padding:20px 22px!important}
+  .fcV215MediaGrid{grid-template-columns:1fr!important}
+}
+
+@media(max-width:1050px){
+  .fcV215MatchDashboardSection{padding:20px 0 24px!important}
+  .fcV215MatchDashboard{gap:14px!important}
+  .fcV215DashboardLeft{gap:14px!important}
+  .fcV215ResultsSection{padding:24px 0 28px!important}
+  .fcRefDashboardSection,.fcRefTeamSection,.fcV215MediaSection{padding-top:52px!important;padding-bottom:56px!important}
+  .fcV215MediaGrid{grid-template-columns:1fr!important}
+  .fcRefPartnersInner{gap:20px!important}
+}
+
+@media(max-width:760px){
+  .fcV215MatchDashboardSection{padding:14px 0 18px!important}
+  .fcV215MatchDashboard{gap:12px!important}
+  .fcV215DashboardLeft{gap:12px!important}
+  .fcV215DashboardLastMatch,.fcV215DashboardForm,.fcV215NextMatchDashboard,.fcV215DashboardVideo{border-radius:12px!important}
+  .fcV215DashboardLastMatch .fcV215LastMatchTeams{grid-template-columns:minmax(0,1fr) 72px minmax(0,1fr)!important}
+  .fcV215DashboardKpisFull{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .fcV215DashboardKpisFull>span{min-height:54px!important}
+  .fcV215ResultsSection{padding:20px 0 24px!important}
+  .fcV215ResultsSection .fcV215MatchRailWide{padding:10px 8px 12px!important}
+  .fcRefDashboardSection,.fcRefTeamSection,.fcV215MediaSection{padding-top:44px!important;padding-bottom:48px!important}
+  .fcRefLeadColumn,.fcRefLatestColumn,.fcRefTableColumn{border-radius:10px!important}
+  .fcRefTeamHead{margin-bottom:22px!important}
+  .fcRefPlayers{gap:10px!important}
+  .fcV215SectionHead{margin-bottom:18px!important}
+  .fcV215AlbumCard,.fcV215VideoCard{border-radius:12px!important}
+  .fcRefPartnersStrip{padding:22px 0!important}
+  .fcRefPartnerLogos{justify-content:flex-start!important;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:none}
+  .fcRefPartnerLogos::-webkit-scrollbar{display:none}
+  .fcRefPartnerLogos>*{flex:0 0 auto}
+}
+
+@media(max-width:460px){
+  .fcV215DashboardKpisFull small{font-size:6px!important}
+  .fcV215DashboardKpisFull strong{font-size:19px!important}
+  .fcRefDashboardSection,.fcRefTeamSection,.fcV215MediaSection{padding-top:38px!important;padding-bottom:42px!important}
+  .fcV215AlbumCard>div:last-child,.fcV215VideoCard>div:last-child{padding:18px!important}
 }
