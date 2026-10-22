@@ -1,11 +1,11 @@
-import PlayerCard from "@/app/components/PlayerCard";
+import TeamRosterBrowser from "@/app/components/TeamRosterBrowser";
 import PageHeroShell from "@/app/components/PageHeroShell";
 import { PublicMessageState } from "@/app/components/PublicRouteState";
 import { createClient } from "@/lib/supabase/server";
 import type { Player, PlayerSeasonTotal, Season } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { publicSectionMetadata } from "@/lib/seo";
-import { positionLabelsI18n, positionPluralLabelsI18n, publicText } from "@/lib/i18n";
+import { positionPluralLabelsI18n, publicText, type Locale } from "@/lib/i18n";
 import { getPublishedSitePageDesign, resolvePageHeroText } from "@/lib/page-design";
 import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
 
@@ -17,6 +17,28 @@ export async function generateMetadata() {
 }
 
 const order = ["goalkeeper", "defender", "midfielder", "forward"];
+
+type LeaderRow = { player: Player; stats: PlayerSeasonTotal | null };
+
+function playerLeaderDefinitions(rows: LeaderRow[], locale: Locale) {
+  const eligible = rows.filter((row) => row.stats && Number(row.stats.appearances ?? 0) > 0);
+  const maxBy = (getter: (row: LeaderRow) => number, filter?: (row: LeaderRow) => boolean) => {
+    const pool = filter ? eligible.filter(filter) : eligible;
+    if (!pool.length) return null;
+    return [...pool].sort((a,b) => getter(b) - getter(a) || Number(a.player.display_order ?? 999) - Number(b.player.display_order ?? 999))[0];
+  };
+  const appearance = maxBy((row) => Number(row.stats?.appearances ?? 0));
+  const goals = maxBy((row) => Number(row.stats?.goals ?? 0), (row) => row.player.position !== "goalkeeper");
+  const assists = maxBy((row) => Number(row.stats?.assists ?? 0), (row) => row.player.position !== "goalkeeper");
+  const goalkeeper = maxBy((row) => Number(row.stats?.clean_sheets ?? 0), (row) => row.player.position === "goalkeeper");
+  const labels = locale === "ro" ? { appearances:"Cele mai multe meciuri", goals:"Golgeter", assists:"Lider la pase", clean:"Meciuri fără gol" } : { appearances:"Больше всего матчей", goals:"Бомбардир", assists:"Лидер по ассистам", clean:"Сухие матчи" };
+  return [
+    appearance && { label: labels.appearances, player: appearance.player, value: String(appearance.stats?.appearances ?? 0) },
+    goals && { label: labels.goals, player: goals.player, value: String(goals.stats?.goals ?? 0) },
+    assists && { label: labels.assists, player: assists.player, value: String(assists.stats?.assists ?? 0) },
+    goalkeeper && { label: labels.clean, player: goalkeeper.player, value: String(goalkeeper.stats?.clean_sheets ?? 0) },
+  ].filter(Boolean) as Array<{ label:string; player:Player; value:string }>;
+}
 
 export default async function TeamPage() {
   const locale = await getLocale();
@@ -60,18 +82,21 @@ export default async function TeamPage() {
               })}
             </div>
           </div>
-          <nav className="teamPositionNav" aria-label={locale === "ro" ? "Poziții" : "Позиции"}>
-            {order.map((position) => {
-              const count = players.filter((player) => player.position === position).length;
-              if (!count) return null;
-              return <a key={position} href={`#team-${position}`}>{positionPluralLabelsI18n[locale][position] ?? position}<span>{count}</span></a>;
-            })}
-          </nav>
+          <div className="teamSeasonLeaders">
+            {(() => {
+              const rows = players.map((player) => ({ player, stats: seasonStatsByPlayer.get(String(player.id)) ?? null }));
+              const leaderDefs = playerLeaderDefinitions(rows, locale);
+              return leaderDefs.map((leader) => leader ? <a className="teamSeasonLeader" key={leader.label} href={`/team/${leader.player.slug}`}>
+                <div>{leader.player.photo_url ? <img src={leader.player.photo_url} alt="" loading="lazy" /> : <img src="/brand/fc-edinet-crest.png" alt="" className="isCrest" />}</div>
+                <span><small>{leader.label}</small><strong>{leader.player.first_name} {leader.player.last_name}</strong><b>{leader.value}</b></span>
+              </a> : null);
+            })()}
+          </div>
         </>
       )}
       {error && <PublicMessageState title={text.loadError} text={locale === "ro" ? "Lotul nu este disponibil momentan. Încearcă din nou mai târziu." : "Состав временно недоступен. Попробуй снова позже."} actionLabel={locale === "ro" ? "Reîncarcă" : "Обновить"} actionHref="/team" />}
       {!error && players.length === 0 && <PublicMessageState title={text.empty} text={locale === "ro" ? "Jucătorii vor apărea aici după publicarea lor în administrare." : "Игроки появятся здесь после публикации в админке."} />}
-      {order.map((position) => { const group = players.filter((player) => player.position === position); if (!group.length) return null; return <section className="teamGroup" id={`team-${position}`} key={position}><div className="groupHeading teamGroupHeading"><p className="eyebrow">{(positionLabelsI18n[locale][position] ?? position).toUpperCase()}</p><h2>{positionPluralLabelsI18n[locale][position] ?? position}</h2><span className="teamGroupCount">{String(group.length).padStart(2, "0")}</span></div><div className="players">{group.map((player) => <PlayerCard key={player.id} player={player} locale={locale} seasonStats={seasonStatsByPlayer.get(String(player.id)) ?? null} />)}</div></section>; })}
+      {!error && players.length > 0 && <TeamRosterBrowser players={players} seasonStats={Array.from(seasonStatsByPlayer.values())} locale={locale} />}
     </div></section>
   </main>;
 }
