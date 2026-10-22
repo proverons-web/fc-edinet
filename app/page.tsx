@@ -3,6 +3,7 @@ import Link from "next/link";
 import StandingsTable from "@/app/components/StandingsTable";
 import RecentMatchesCarousel from "@/app/components/RecentMatchesCarousel";
 import YouTubePlayer from "@/app/components/YouTubePlayer";
+import FormMatchDots from "@/app/components/FormMatchDots";
 import { createClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/locale";
 import { publicSectionMetadata } from "@/lib/seo";
@@ -290,7 +291,6 @@ export default async function Home() {
           <div className="fcV215DashboardLeft">
             {lastMatch && <Link href={`/matches/${lastMatch.id}`} className="fcV215LastMatch fcV215LastMatchHero fcV215DashboardLastMatch">
               <div className="fcV215LastMatchHead">
-                <span className="fcV215CardLabel">{locale === "ro" ? "ULTIMUL MECI" : "ПОСЛЕДНИЙ МАТЧ"}</span>
                 <span>{lastMatch.competition?.name || competition?.name || "Liga 2"}{lastMatch.round ? ` · ${lastMatch.round}` : ""}</span>
               </div>
               <div className="fcV215LastMatchTeams">
@@ -303,18 +303,11 @@ export default async function Home() {
 
             <div className="fcV215FormStats fcV215DashboardForm">
               <div className="fcV215FormHead">
-                <div><span className="fcV215CardLabel">{locale === "ro" ? "FORMA ECHIPEI" : "ФОРМА КОМАНДЫ"}</span><strong>{locale === "ro" ? "ULTIMELE 5 MECIURI" : "ПОСЛЕДНИЕ 5 МАТЧЕЙ"}</strong></div>
+                <div><strong>{locale === "ro" ? "ULTIMELE 5 MECIURI" : "ПОСЛЕДНИЕ 5 МАТЧЕЙ"}</strong></div>
                 <Link href="/statistics">{locale === "ro" ? "STATISTICI" : "СТАТИСТИКА"} →</Link>
               </div>
               <div className="fcV215FormDots">
-                {formMatches.length ? formMatches.map((match) => {
-                  const clubIsHome = Boolean(match.home?.is_club);
-                  const gf = Number((clubIsHome ? match.home_score : match.away_score) ?? 0);
-                  const ga = Number((clubIsHome ? match.away_score : match.home_score) ?? 0);
-                  const result = gf > ga ? "W" : gf === ga ? "D" : "L";
-                  const label = result === "W" ? (locale === "ro" ? "V" : "В") : result === "D" ? (locale === "ro" ? "E" : "Н") : (locale === "ro" ? "Î" : "П");
-                  return <Link key={match.id} href={`/matches/${match.id}`} className={`fcV215FormDot is-${result.toLowerCase()}`} title={`${match.home?.short_name || match.home?.name} ${match.home_score}:${match.away_score} ${match.away?.short_name || match.away?.name}`}>{label}</Link>;
-                }) : <span className="fcV215NoData">—</span>}
+                <FormMatchDots matches={formMatches} locale={locale} />
               </div>
               <div className="fcV215DashboardKpis fcV215DashboardKpisFull">
                 <span><small>{locale === "ro" ? "POZIȚIE" : "МЕСТО"}</small><strong>{clubStandingPosition ? `#${clubStandingPosition}` : "—"}</strong></span>
@@ -329,7 +322,6 @@ export default async function Home() {
           </div>
 
           <aside className="fcRefNextMatch fcV215NextMatchDashboard">
-            <div className="fcRefMatchHead"><strong>{locale === "ro" ? "URMĂTORUL MECI" : "СЛЕДУЮЩИЙ МАТЧ"}</strong><Link href="/matches">{locale === "ro" ? "TOATE MECIURILE" : "ВСЕ МАТЧИ"} →</Link></div>
             {nextMatch ? <>
               <div className="fcRefCompetition">
                 <span className="fcRefMatchChip">{nextMatch.competition?.name || competition?.name || "Liga 2"}</span>

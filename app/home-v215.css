@@ -421,3 +421,44 @@
   .fcV215DashboardForm .fcV215FormHead{justify-content:space-between!important;text-align:left!important}
   .fcV215DashboardForm .fcV215FormHead>div{justify-items:start!important;text-align:left!important;margin:0!important}
 }
+
+/* v2.15.10 — cleaner command center + interactive form popovers */
+@media(min-width:1251px){
+  .fcV215NextMatchDashboard .fcRefCompetition{padding-top:18px!important}
+  .fcV215NextMatchDashboard .fcRefMatchBody{padding-top:12px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge{min-height:188px!important;padding:18px 12px 14px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge img{width:104px!important;height:116px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge>span{width:102px!important;height:102px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge strong{font-size:16px!important;line-height:1.08!important;margin-top:8px!important}
+  .fcV215NextMatchDashboard .fcRefVs{width:60px!important;height:60px!important;font-size:17px!important}
+}
+
+.fcV215DashboardLastMatch .fcV215LastMatchHead{min-height:12px!important}
+.fcV215DashboardLastMatch .fcV215LastMatchHead>span:last-child{font-size:8px!important;letter-spacing:.09em!important;color:#8090a1!important}
+.fcV215DashboardForm .fcV215FormHead{min-height:32px!important}
+.fcV215DashboardForm .fcV215FormHead>div{display:grid;place-items:center;width:100%}
+.fcV215DashboardForm .fcV215FormHead strong{display:block;text-align:center!important}
+.fcV215DashboardForm .fcV215FormDots{position:relative;overflow:visible!important;z-index:5}
+
+.fcV215FormDotWrap{position:relative;display:inline-grid;place-items:center;z-index:1}
+.fcV215FormDotWrap:hover,.fcV215FormDotWrap:focus-within{z-index:50}
+.fcV215FormPopover{position:absolute;left:50%;bottom:calc(100% + 13px);width:286px;padding:11px 12px 12px;border:1px solid #d7e1ec;border-radius:14px;background:#fff;box-shadow:0 18px 44px rgba(3,29,61,.22);color:#09294f;opacity:0;visibility:hidden;pointer-events:none;transform:translate(-50%,7px) scale(.98);transform-origin:50% 100%;transition:opacity .15s ease,transform .15s ease,visibility .15s ease}
+.fcV215FormPopover:after{content:"";position:absolute;left:50%;bottom:-7px;width:13px;height:13px;background:#fff;border-right:1px solid #d7e1ec;border-bottom:1px solid #d7e1ec;transform:translateX(-50%) rotate(45deg)}
+.fcV215FormDotWrap:hover .fcV215FormPopover,.fcV215FormDotWrap:focus-within .fcV215FormPopover{opacity:1;visibility:visible;transform:translate(-50%,0) scale(1)}
+.fcV215FormPopoverMeta{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:8px;border-bottom:1px solid #e7edf4}
+.fcV215FormPopoverMeta b,.fcV215FormPopoverMeta em{font-size:8px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;font-style:normal}
+.fcV215FormPopoverMeta b{color:#0c5db9}.fcV215FormPopoverMeta em{color:#8393a6}
+.fcV215FormPopoverTeams{display:grid;grid-template-columns:minmax(0,1fr) 72px minmax(0,1fr);align-items:center;gap:7px;padding-top:10px}
+.fcV215FormPopoverTeam{display:grid;justify-items:center;gap:4px;min-width:0;text-align:center}
+.fcV215FormPopoverTeam img{width:54px;height:60px;object-fit:contain;filter:drop-shadow(0 6px 12px rgba(6,37,75,.14))}
+.fcV215FormPopoverTeam i{display:grid;place-items:center;width:50px;height:50px;border-radius:12px;background:#0b5cae;color:#fff;font-style:normal;font-size:10px;font-weight:900}
+.fcV215FormPopoverTeam strong{max-width:92px;font-size:10px;line-height:1.05;color:#09294f;text-wrap:balance}
+.fcV215FormPopoverTeam small{font-size:6px;font-weight:900;letter-spacing:.08em;color:#93a0af}
+.fcV215FormPopoverScore{text-align:center}.fcV215FormPopoverScore small{display:block;font-size:7px;font-weight:800;color:#8998a8;text-transform:uppercase}.fcV215FormPopoverScore strong{display:block;margin:3px 0 2px;font-family:var(--font-fce-display),Arial,sans-serif;font-size:31px;line-height:1;color:#062a55}.fcV215FormPopoverScore em{display:inline-flex;padding:3px 7px;border-radius:999px;background:#edf5ff;color:#0b61bd;font-size:7px;font-style:normal;font-weight:900;text-transform:uppercase}
+.fcV215FormDotWrap:first-child .fcV215FormPopover{left:0;transform:translate(0,7px) scale(.98)}
+.fcV215FormDotWrap:first-child:hover .fcV215FormPopover,.fcV215FormDotWrap:first-child:focus-within .fcV215FormPopover{transform:translate(0,0) scale(1)}
+.fcV215FormDotWrap:first-child .fcV215FormPopover:after{left:16px;transform:rotate(45deg)}
+.fcV215FormDotWrap:last-child .fcV215FormPopover{left:auto;right:0;transform:translate(0,7px) scale(.98)}
+.fcV215FormDotWrap:last-child:hover .fcV215FormPopover,.fcV215FormDotWrap:last-child:focus-within .fcV215FormPopover{transform:translate(0,0) scale(1)}
+.fcV215FormDotWrap:last-child .fcV215FormPopover:after{left:auto;right:16px;transform:rotate(45deg)}
+@media(max-width:760px){.fcV215FormPopover{display:none}.fcV215NextMatchDashboard .fcRefTeamBadge img{width:70px!important;height:78px!important}.fcV215NextMatchDashboard .fcRefTeamBadge strong{font-size:11px!important}}
