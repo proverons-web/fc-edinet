@@ -1,5 +1,5 @@
-import PlayerCard from "@/app/components/PlayerCard";
 import { redirect } from "next/navigation";
+import PlayerCard from "@/app/components/PlayerCard";
 import PageHeroShell from "@/app/components/PageHeroShell";
 import { PublicMessageState } from "@/app/components/PublicRouteState";
 import { createPublicClient } from "@/lib/supabase/public";
@@ -13,6 +13,8 @@ import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
 export const dynamic = "force-dynamic";
 
 const positionOrder = ["goalkeeper", "defender", "midfielder", "forward"] as const;
+type TeamSearchParams = Promise<{ view?: string | string[] }>;
+
 export async function generateMetadata() {
   const locale = await getLocale();
   return publicMetadata({
@@ -23,16 +25,14 @@ export async function generateMetadata() {
   });
 }
 
-type TeamSearchParams = Promise<{ view?: string | string[] }>;
-
 export default async function TeamPage({ searchParams }: { searchParams: TeamSearchParams }) {
   const params = await searchParams;
   const view = Array.isArray(params.view) ? params.view[0] : params.view;
   if (view === "staff") redirect("/staff");
+
   const locale = await getLocale();
   const supabase = createPublicClient();
   const design = await getPublishedSitePageDesign(supabase, "team");
-
   const text = publicText[locale].team;
   const [{ data, error }, seasonResult] = await Promise.all([
     supabase.from("players").select("*").eq("is_active", true).order("display_order", { ascending: true }).order("shirt_number", { ascending: true }),

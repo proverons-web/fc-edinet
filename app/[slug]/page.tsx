@@ -28,7 +28,7 @@ export default async function CustomSitePage({params}:Props){
   const body=ro?(page.body_ro||page.body_ru):page.body_ru;
   const paragraphs=body.split(/\n{2,}/).map(x=>x.trim()).filter(Boolean);
   return <main className="customSitePage">
-    <section className="customSiteHero imageFreeCustomHero">
+    <section className="customSiteHero" style={page.hero_image_url?{backgroundImage:`linear-gradient(90deg,rgba(4,30,61,.9),rgba(4,30,61,.58)),url(${page.hero_image_url})`}:undefined}>
       <div className="container"><span>FC EDINEȚ</span><h1>{title}</h1>{intro&&<p>{intro}</p>}</div>
     </section>
     <section className="section"><div className="container customSiteBody">{paragraphs.length?paragraphs.map((p,i)=><p key={i}>{p}</p>):<p>{ro?"Conținutul paginii va apărea aici.":"Содержимое страницы появится здесь."}</p>}</div></section>

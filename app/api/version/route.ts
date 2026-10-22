@@ -1,23 +1,16 @@
 import { NextResponse } from "next/server";
+import { RELEASE_API_VERSION, RELEASE_NAME, RELEASE_VERSION } from "@/lib/release";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-export const fetchCache = "force-no-store";
-
-const VERSION = "2.28.4";
 
 export async function GET() {
   return NextResponse.json(
     {
-      version: VERSION,
-      apiVersion: VERSION,
-      release: `FC Edineț v${VERSION}`,
-      staffRoute: "/staff",
-      navigationMigration: "063",
-      environment: process.env.VERCEL_ENV || process.env.NODE_ENV || "unknown",
-      deployment: process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL || null,
-      commit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) || null,
-      generatedAt: new Date().toISOString(),
+      ok: true,
+      version: RELEASE_VERSION,
+      apiVersion: RELEASE_API_VERSION,
+      release: RELEASE_NAME,
     },
     {
       headers: {
@@ -27,6 +20,6 @@ export async function GET() {
         Pragma: "no-cache",
         Expires: "0",
       },
-    },
+    }
   );
 }

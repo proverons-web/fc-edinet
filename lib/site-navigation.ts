@@ -23,6 +23,12 @@ export const canonicalPublicMenu: SiteMenuItem[] = [
   { id: -500, system_key: "media", label_ru: "Медиа", label_ro: "Media", href: "/media", visible: true, display_order: 50, parent_id: null, custom_page_id: null },
 ];
 
+export function normalizeCanonicalMenuRoutes(items: SiteMenuItem[]) {
+  return items.map((item) => item.system_key === "team_staff" && item.href !== "/staff"
+    ? { ...item, href: "/staff" }
+    : item);
+}
+
 export function hasCanonicalMenuHierarchy(items: SiteMenuItem[]) {
   const season = items.find((item) => item.system_key === "team" && item.parent_id == null);
   const club = items.find((item) => item.system_key === "club" && item.parent_id == null);

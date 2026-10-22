@@ -1,33 +1,38 @@
-FC Edineț v2.28.4 — Staff route + clean internal headers
+FC Edineț v2.28.4 — Staff Route, Version API & Internal Header Cleanup
 
-PUBLIC ROUTES
-- /team is the squad only.
-- /staff is a real first-class coaching/staff page backed by team_staff.
-- /team?view=staff redirects to /staff for compatibility.
-- /team/staff redirects to /staff for compatibility.
+CURRENT PRIORITY COMPLETED
 
-NAVIGATION
-- Season 26/27 -> Coaching Staff points to /staff.
-- Removed desktop menu separators.
-- Removed yellow active/hover underlines and dropdown yellow accents.
-- Active items use a subtle blue background only.
+STAFF
+- /staff is now the canonical public coaching staff page and reads team_staff directly.
+- Staff is grouped into coaching, medical and operations with names, roles, bios, photos and crest fallback.
+- /team remains squad-only.
+- Legacy /team?view=staff redirects to /staff.
+- Legacy /team/staff redirects to /staff.
+- Public managed navigation, fallback navigation, Site Builder preview and staff admin link now point to /staff.
+- Added migration 063_team_staff_public_route.sql; migration 062 remains untouched as applied history.
+- Runtime navigation normalization also forces team_staff to /staff, so the deployed code is correct even before migration 063 is applied.
 
-INTERNAL PAGE HEADERS
-- Removed background photos/images from internal page hero/header blocks.
-- Page titles/eyebrows/descriptions remain on a compact solid navy header.
-- Applies to standard PageHeroShell, Club pages, Managed Page Canvas and custom pages.
+VERSION
+- Added lib/release.ts as the canonical runtime release constant.
+- /api/version is now a minimal no-store JSON response with ok/version/apiVersion/release.
+- /api/health and Admin Diagnostics use the same release constant.
+- package.json is 2.28.4.
 
-API VERSION
-- /api/version is forced dynamic and no-store.
-- version/apiVersion/release are synchronized to 2.28.4.
-- staffRoute=/staff, navigationMigration=063.
+HEADER
+- Removed vertical separators between top menu items.
+- Removed yellow top-navigation underlines and parent trigger lines.
+- Removed yellow active rail from dropdown items.
+- Preserved centered equal-width desktop navigation, the ☰ marker and portal-based dropdown behavior.
+- Active states use blue background/tone.
 
-DATABASE
-- database/063_restore_staff_route.sql
-- Migration 063 has already been applied to production Supabase.
+INTERNAL PAGE HEADINGS
+- Generic landing-page hero images are disabled by default.
+- News, squad, staff, matches, statistics and standings use compact solid dark-blue heading blocks.
+- Club section pages use compact solid dark-blue headings without background photos.
+- Media, academy and partners landing heroes are image-free and compact.
+- Article, player-profile and media-album detail pages explicitly retain their content image heroes.
+- Removed yellow hero bottom borders.
 
-VALIDATION
-- qa:site: 68/68 passed.
-- TS/TSX syntax: 252 files, 0 errors.
-- CSS braces balanced.
-- Production Next build is still performed by DEPLOY_FC_EDINET.bat on the user's Windows machine before Git push.
+SEO / QA
+- /staff added to sitemap.
+- QA updated for canonical staff routing, v2.28.4 synchronization, menu cleanup and image-free landing heroes.

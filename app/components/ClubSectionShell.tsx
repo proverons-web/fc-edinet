@@ -9,6 +9,7 @@ export default function ClubSectionShell({
   title,
   eyebrow,
   description,
+  imageUrl,
   children,
 }: {
   locale: Locale;
@@ -21,7 +22,7 @@ export default function ClubSectionShell({
 }) {
   return (
     <main className="clubSectionPage">
-      <section className="clubSectionHero imageFreeClubHero">
+      <section className="clubSectionHero">
         <div className="container clubSectionHeroInner">
           <p className="eyebrow">{eyebrow || "FC EDINEȚ • CLUB"}</p>
           <h1>{title}</h1>

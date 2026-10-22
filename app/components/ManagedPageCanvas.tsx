@@ -62,19 +62,12 @@ function HeroSection({ pageKey, locale, layout, design, section }: { pageKey: Pr
   const hero = resolvePageHeroText(design, locale, fallback);
   const style = {
     ...proSectionStyle(section),
-    "--pro-hero-height-d": `${design.hero_height_desktop}px`,
-    "--pro-hero-height-t": `${design.hero_height_tablet}px`,
-    "--pro-hero-height-m": `${design.hero_height_mobile}px`,
-    "--pro-hero-overlay": design.overlay_opacity / 100,
     "--pro-hero-content": `${design.content_width}px`,
-    "--pro-hero-d-x": `${design.desktop_position_x}%`, "--pro-hero-d-y": `${design.desktop_position_y}%`, "--pro-hero-d-z": design.desktop_zoom_percent / 100,
-    "--pro-hero-t-x": `${design.tablet_position_x}%`, "--pro-hero-t-y": `${design.tablet_position_y}%`, "--pro-hero-t-z": design.tablet_zoom_percent / 100,
-    "--pro-hero-m-x": `${design.mobile_position_x}%`, "--pro-hero-m-y": `${design.mobile_position_y}%`, "--pro-hero-m-z": design.mobile_zoom_percent / 100,
   } as CSSProperties;
   return <div className={proSectionClass(section)} style={style}>
     <div className="proSectionMotion">
-      <section className={`proManagedHero imageFreeProHero proHero-${section.variant} align-${design.text_alignment}`}>
-        <div className="proManagedHeroInner pageHeroContent">
+      <section className={`proManagedHero proHero-${section.variant} align-${design.text_alignment}`}>
+        <div className="proManagedHeroInner">
           {design.show_eyebrow && heroLayerVisible(design.layer_config, "eyebrow") && <p className="eyebrow" style={heroLayerStyle(design.layer_config, "eyebrow")}>{hero.eyebrow}</p>}
           {heroLayerVisible(design.layer_config, "title") && <h1 style={heroLayerStyle(design.layer_config, "title")}>{hero.title}</h1>}
           {design.show_description && heroLayerVisible(design.layer_config, "description") && <p style={heroLayerStyle(design.layer_config, "description")}>{hero.description}</p>}

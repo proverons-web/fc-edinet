@@ -301,6 +301,7 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
         className="playerProfileHero"
         contentClassName="container playerProfileGrid"
         contentImageUrl={player.photo_url}
+        showBackgroundMedia
       >
         <>
           {heroLayerVisible(design.layer_config, "photo") && (

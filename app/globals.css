@@ -2455,8 +2455,7 @@ h1,h2,h3{font-family:var(--ds-font-heading);font-weight:var(--ds-heading-weight)
 .globalHeader .brandText small{margin-top:4px;color:#9cb0ca;opacity:1;font-size:8px;font-weight:800;letter-spacing:.17em;text-transform:uppercase}
 .globalHeader .menu{gap:21px;font-family:"Arial Narrow",Arial,sans-serif;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.025em}
 .globalHeader .menu a{position:relative;display:flex;min-height:76px;align-items:center;opacity:.9;transition:.18s ease}
-.globalHeader .menu a:after{content:"";position:absolute;left:50%;right:50%;bottom:0;height:3px;background:var(--fc-ref-yellow);transition:.18s ease}
-.globalHeader .menu a:hover{color:#fff;opacity:1}.globalHeader .menu a:hover:after{left:0;right:0}
+.globalHeader .menu a:hover{color:#fff;opacity:1}
 .globalHeader .navActions{gap:8px}
 .globalHeader .searchButton{border:0;width:38px;height:38px;border-radius:0;color:#fff;display:grid;place-items:center}
 .globalHeader .searchButton svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
@@ -2567,11 +2566,11 @@ h1,h2,h3{font-family:var(--ds-font-heading);font-weight:var(--ds-heading-weight)
 .fcRefTableColumn .standingsTableWrap{overflow:hidden!important;width:100%}.fcRefTableColumn .standingsTable{min-width:0!important;width:100%!important;table-layout:fixed}.fcRefTableColumn .standingsTable th,.fcRefTableColumn .standingsTable td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fcRefTableColumn .standingsTable th:nth-child(1),.fcRefTableColumn .standingsTable td:nth-child(1){width:34px}.fcRefTableColumn .standingsTable th:nth-child(2),.fcRefTableColumn .standingsTable td:nth-child(2){width:auto}.fcRefTableColumn .standingsTable th:nth-child(3),.fcRefTableColumn .standingsTable td:nth-child(3),.fcRefTableColumn .standingsTable th:nth-child(7),.fcRefTableColumn .standingsTable td:nth-child(7),.fcRefTableColumn .standingsTable th:nth-child(8),.fcRefTableColumn .standingsTable td:nth-child(8){width:44px}.fcRefTableColumn .standingTeam{min-width:0}.fcRefTableColumn .standingTeam strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fcRefTableColumn .standingsTableWrap::-webkit-scrollbar{display:none}
 
 /* Unified inner page look */
-.managedPageHero,.proManagedHero{background:#041b3b!important;border-bottom:3px solid #ffd328}.managedPageHero:after,.proManagedHero:after{content:"";position:absolute;inset:auto 0 0;height:80px;background:linear-gradient(180deg,transparent,rgba(1,17,42,.22));pointer-events:none;z-index:1}.pageHeroContent,.proManagedHeroInner{z-index:3}.managedPageHero .eyebrow,.proManagedHero .eyebrow{color:#ffd328!important}.managedPageHero h1,.proManagedHero h1{font-family:Impact,"Arial Narrow",Arial,sans-serif;text-transform:uppercase;letter-spacing:.01em!important;text-shadow:0 4px 22px rgba(0,0,0,.28)}
+.managedPageHero,.proManagedHero{background:#041b3b!important;border-bottom:0}.managedPageHero:after,.proManagedHero:after{display:none}.pageHeroContent,.proManagedHeroInner{z-index:3}.managedPageHero .eyebrow,.proManagedHero .eyebrow{color:#ffd328!important}.managedPageHero h1,.proManagedHero h1{font-family:Impact,"Arial Narrow",Arial,sans-serif;text-transform:uppercase;letter-spacing:.01em!important;text-shadow:none}
 .sectionHeading h2,.proSectionHeading h2,.groupHeading h2{font-family:"Arial Narrow",Arial,sans-serif;font-weight:950;text-transform:uppercase;letter-spacing:-.02em}.sectionHeading:before,.proSectionHeading:before{content:"";display:block;width:34px;height:3px;margin-bottom:10px;background:#ffd328}.newsArchiveSection,.standingsPublicSection,.teamPage,.relatedNewsSection{background:#f4f7fb}.newsDbCard,.playerCard,.matchCard,.proMediaAlbumCard,.proMediaVideoCard,.proPartnerCard{border-radius:4px!important;box-shadow:0 10px 30px rgba(4,32,70,.07)!important;border-color:#d8e2ee!important}.newsFilters a,.standingsTabs a{border-radius:3px}.newsFilters a.active,.standingsTabs a.active{background:#0b4b98;border-color:#0b4b98}.readMore{color:#0b4b98;text-transform:uppercase;font-size:10px;letter-spacing:.06em}.primaryButton{border-radius:3px}.pageHero p:last-child,.proManagedHeroInner>p:not(.eyebrow){color:#d7e3f0}
 
 /* Club redesign aligned with home */
-.clubHero{min-height:440px!important;background:#041b3b!important;border-bottom:3px solid #ffd328}.clubHero h1{font-family:Impact,"Arial Narrow",Arial,sans-serif;text-transform:uppercase;color:#fff;letter-spacing:.01em!important}.clubHeroMotto{max-width:620px!important;color:#e3edf8!important}.clubHeroFacts .clubFact{border-radius:3px!important;background:rgba(4,32,70,.72)!important;border:1px solid rgba(255,255,255,.16)!important}.contentBuilderSection{position:relative}.contentBuilderSection h2{font-family:"Arial Narrow",Arial,sans-serif;font-weight:950;text-transform:uppercase;letter-spacing:-.02em!important}.contentBuilderBg-light,.contentBuilderBg-inherit{background:#fff}.contentBuilderBg-surface{background:#f4f7fb}.contentBuilderBg-dark{background:linear-gradient(120deg,#031a37,#062a57)!important}.contentBuilderBg-brand{background:linear-gradient(120deg,#073c7d,#0b58ad)!important}.clubContactCard,.clubStadiumInfo,.clubLeaderCard,.clubAchievementsVariant-cards article{border-radius:4px!important}.clubStadiumImage{border-radius:4px!important}.clubStadiumInfo{background:#07254d!important}.clubLeadershipGrid{gap:14px}.clubLeaderCard{overflow:hidden;border:1px solid #d7e2ef;background:#fff}.clubLeaderCard h3{font-size:18px}.clubAchievementsSection,.contentBuilderBg-dark{border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
+.clubHero{min-height:440px!important;background:#041b3b!important;border-bottom:0}.clubHero h1{font-family:Impact,"Arial Narrow",Arial,sans-serif;text-transform:uppercase;color:#fff;letter-spacing:.01em!important}.clubHeroMotto{max-width:620px!important;color:#e3edf8!important}.clubHeroFacts .clubFact{border-radius:3px!important;background:rgba(4,32,70,.72)!important;border:1px solid rgba(255,255,255,.16)!important}.contentBuilderSection{position:relative}.contentBuilderSection h2{font-family:"Arial Narrow",Arial,sans-serif;font-weight:950;text-transform:uppercase;letter-spacing:-.02em!important}.contentBuilderBg-light,.contentBuilderBg-inherit{background:#fff}.contentBuilderBg-surface{background:#f4f7fb}.contentBuilderBg-dark{background:linear-gradient(120deg,#031a37,#062a57)!important}.contentBuilderBg-brand{background:linear-gradient(120deg,#073c7d,#0b58ad)!important}.clubContactCard,.clubStadiumInfo,.clubLeaderCard,.clubAchievementsVariant-cards article{border-radius:4px!important}.clubStadiumImage{border-radius:4px!important}.clubStadiumInfo{background:#07254d!important}.clubLeadershipGrid{gap:14px}.clubLeaderCard{overflow:hidden;border:1px solid #d7e2ef;background:#fff}.clubLeaderCard h3{font-size:18px}.clubAchievementsSection,.contentBuilderBg-dark{border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
 
 /* Unified Site Builder */
 .unifiedSiteBuilder{background:#e9eef5;min-height:100vh}.unifiedBuilderSurface{display:grid;grid-template-columns:190px minmax(0,1fr);min-height:calc(100vh - 190px)}.unifiedBuilderSidebar{padding:18px 12px;background:#061a35;color:#c5d4e6;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:calc(100vh - 0px);overflow:auto}.unifiedBuilderSidebar>strong{padding:12px 10px 6px;color:#7890ae;font-size:9px;letter-spacing:.12em}.unifiedBuilderSidebar a{padding:10px 11px;border-radius:4px;color:#dce8f6;font-size:12px;font-weight:800}.unifiedBuilderSidebar a:hover,.unifiedBuilderSidebar a.active{background:#0b4b98;color:#fff}.unifiedBuilderSidebar hr{width:100%;border:0;border-top:1px solid rgba(255,255,255,.1);margin:10px 0}.unifiedBuilderMain{min-width:0;padding:12px}.unifiedBuilderTop{min-height:58px;padding:10px 14px;background:#fff;border:1px solid #d5dee9;display:flex;align-items:center;justify-content:space-between;gap:20px}.unifiedBuilderTop>div{display:grid}.unifiedBuilderTop>div span{font-size:10px;color:#73839a}.unifiedBuilderTop nav{display:flex;gap:4px}.unifiedBuilderTop nav a{padding:8px 14px;background:#edf2f7;color:#43566f;font-size:11px;font-weight:900}.unifiedBuilderTop nav a.active{background:#0b4b98;color:#fff}.unifiedBuilderSplit{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(360px,.92fr);gap:10px;margin-top:10px;height:calc(100vh - 280px);min-height:680px}.unifiedBuilderSplit>section{min-width:0;background:#fff;border:1px solid #d5dee9;display:grid;grid-template-rows:38px 1fr}.unifiedBuilderSplit header{display:flex;align-items:center;justify-content:space-between;padding:0 10px;border-bottom:1px solid #d5dee9;background:#f7f9fc}.unifiedBuilderSplit header span{font-size:9px;font-weight:950;letter-spacing:.08em;color:#64758d}.unifiedBuilderSplit header a{font-size:9px;font-weight:850;color:#0b4b98}.unifiedBuilderSplit iframe{width:100%;height:100%;border:0;background:#fff}
@@ -3520,17 +3519,15 @@ body:has(.adminEmbedded){background:#f3f6fa}
 
 /* v2.22.0 — Club / History 2.0 */
 .clubSectionPage{background:#f5f8fc;color:#0b274a;min-height:100vh}
-.clubSectionHero{position:relative;min-height:350px;display:flex;align-items:flex-end;background:#061d3d center/cover no-repeat;overflow:hidden;border-bottom:4px solid #ffd328}
-.clubSectionHeroShade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(3,18,40,.96),rgba(3,22,49,.76) 50%,rgba(3,22,49,.34)),linear-gradient(0deg,rgba(3,17,37,.72),transparent 60%)}
-.clubSectionHeroInner{position:relative;z-index:2;padding-top:92px;padding-bottom:48px}.clubSectionHero .eyebrow{color:#ffd328;font-size:10px;font-weight:950;letter-spacing:.16em}.clubSectionHero h1{max-width:950px;margin:10px 0 0;color:#fff;font:950 clamp(48px,7vw,88px)/.9 "Arial Black",Arial,sans-serif;letter-spacing:-.055em;text-transform:uppercase}.clubSectionHeroLead{max-width:720px;margin:18px 0 0;color:#dce9f7;font-size:18px;line-height:1.45;font-weight:650}
-.clubSubnav{position:sticky;top:var(--header-height,70px);z-index:38;background:rgba(255,255,255,.97);border-bottom:1px solid #d9e3ed;box-shadow:0 8px 24px rgba(9,35,67,.05);backdrop-filter:blur(12px)}.clubSubnavInner{display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none}.clubSubnavInner::-webkit-scrollbar{display:none}.clubSubnav a{display:flex;align-items:center;gap:7px;min-height:58px;padding:0 15px;border-bottom:3px solid transparent;color:#536b83;text-decoration:none;white-space:nowrap;font-size:11px;font-weight:900}.clubSubnav a span{font-size:8px;color:#9aacbf}.clubSubnav a:hover,.clubSubnav a.active{color:#0b4f9e;background:#f3f7fb;border-bottom-color:#ffd328}.clubSubnav a.active span{color:#0b4f9e}
+.clubSectionHero{position:relative;display:flex;align-items:center;background:#041b3b;overflow:hidden;border-bottom:0}.clubSectionHeroShade{display:none}.clubSectionHeroInner{position:relative;z-index:2;padding-top:34px;padding-bottom:34px}.clubSectionHero .eyebrow{color:#ffd328;font-size:10px;font-weight:950;letter-spacing:.16em}.clubSectionHero h1{max-width:950px;margin:8px 0 0;color:#fff;font:950 clamp(36px,5vw,58px)/.92 "Arial Black",Arial,sans-serif;letter-spacing:-.045em;text-transform:uppercase}.clubSectionHeroLead{max-width:720px;margin:12px 0 0;color:#dce9f7;font-size:16px;line-height:1.45;font-weight:650}
+.clubSubnav{position:sticky;top:var(--header-height,70px);z-index:38;background:rgba(255,255,255,.97);border-bottom:1px solid #d9e3ed;box-shadow:0 8px 24px rgba(9,35,67,.05);backdrop-filter:blur(12px)}.clubSubnavInner{display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none}.clubSubnavInner::-webkit-scrollbar{display:none}.clubSubnav a{display:flex;align-items:center;gap:7px;min-height:58px;padding:0 15px;border-bottom:3px solid transparent;color:#536b83;text-decoration:none;white-space:nowrap;font-size:11px;font-weight:900}.clubSubnav a span{font-size:8px;color:#9aacbf}.clubSubnav a:hover,.clubSubnav a.active{color:#0b4f9e;background:#eef5fd;border-bottom-color:transparent}.clubSubnav a.active span{color:#0b4f9e}
 .clubSplitGrid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(290px,.7fr);gap:34px;align-items:start}.clubSectionMain{min-width:0}.clubSectionMain>h2{margin:8px 0 24px;font:950 clamp(38px,5vw,62px)/.95 "Arial Black",Arial,sans-serif;letter-spacing:-.05em;text-transform:uppercase;color:#082d60}.clubInfoPanel{position:sticky;top:148px;padding:24px;background:#08264c;color:#fff;border-top:4px solid #ffd328;box-shadow:0 20px 50px rgba(5,31,63,.16)}.clubInfoStat,.clubInfoContact{display:grid;gap:4px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.11)}.clubInfoStat span,.clubInfoContact span{font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#9eb5cd}.clubInfoStat strong{font-size:24px}.clubInfoContact strong{font-size:14px;overflow-wrap:anywhere}.clubInfoDivider{height:16px}
 .clubNarrativeInner{display:grid;grid-template-columns:180px minmax(0,900px);gap:42px;justify-content:center;align-items:start}.clubHistoryStamp{position:sticky;top:160px;display:grid;padding:24px 18px;background:#08264c;border-top:5px solid #ffd328;color:#fff;text-align:center}.clubHistoryStamp span{font-size:9px;letter-spacing:.14em;font-weight:900;color:#a9bdd3}.clubHistoryStamp strong{font:950 52px/1 "Arial Black",Arial,sans-serif;color:#ffd328}
 .clubStadiumFeature{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(340px,.8fr);gap:0;background:#08264c;color:#fff;box-shadow:0 24px 64px rgba(4,28,58,.16)}.clubStadiumFeatureImage{min-height:520px}.clubStadiumFeatureImage img{width:100%;height:100%;display:block;object-fit:cover}.clubStadiumFeatureCopy{padding:32px}.clubStadiumQuickFacts{display:grid;grid-template-columns:1fr 1fr;gap:1px;margin-bottom:28px;background:rgba(255,255,255,.14)}.clubStadiumQuickFacts>div{display:grid;gap:5px;padding:18px;background:#0d3263}.clubStadiumQuickFacts span{font-size:9px;font-weight:900;letter-spacing:.1em;color:#9eb9d5;text-transform:uppercase}.clubStadiumQuickFacts strong{font-size:17px}.clubStadiumFeatureCopy .clubRichParagraph{color:#d2dfed}.clubStadiumFeatureCopy .clubRichHeading,.clubStadiumFeatureCopy .clubRichSubheading{color:#fff}
 .clubLeadershipStandalone{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.clubAchievementsStandalone{background:#061e40;color:#fff}.clubAchievementsTimeline{max-width:980px;margin:0 auto}.clubAchievementsTimeline article{border-color:rgba(255,255,255,.15)}.clubAchievementsTimeline h3{color:#fff}.clubAchievementsTimeline p{color:#bfd0e2}.clubEmptyState{padding:42px;border:1px dashed #cad7e4;background:#fff;text-align:center;color:#6b8097}.clubEmptyState.dark{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.18);color:#bacbdd}
 .clubFutureSection{max-width:820px;margin:30px auto;padding:70px 44px;border:1px dashed #c7d5e4;background:#fff;text-align:center}.clubFutureSection.hall{border-top:5px solid #ffd328}.clubFutureIcon{width:72px;height:72px;margin:0 auto 20px;display:grid;place-items:center;border-radius:50%;background:#08264c;color:#ffd328;font-size:30px;font-weight:950}.clubFutureSection h2{margin:0 0 12px;font:950 clamp(30px,4vw,48px)/1 "Arial Black",Arial,sans-serif;letter-spacing:-.04em;text-transform:uppercase;color:#082d60}.clubFutureSection p{margin:0 auto;max-width:650px;color:#61758c;font-size:16px;line-height:1.7}
 @media(max-width:980px){.clubSplitGrid,.clubStadiumFeature{grid-template-columns:1fr}.clubInfoPanel,.clubHistoryStamp{position:relative;top:auto}.clubNarrativeInner{grid-template-columns:1fr}.clubHistoryStamp{width:160px}.clubLeadershipStandalone{grid-template-columns:repeat(2,1fr)}.clubStadiumFeatureImage{min-height:420px}}
-@media(max-width:680px){.clubSectionHero{min-height:290px}.clubSectionHeroInner{padding-top:66px;padding-bottom:34px}.clubSectionHero h1{font-size:42px}.clubSectionHeroLead{font-size:15px}.clubSubnav{top:0}.clubSubnav a{min-height:50px;padding:0 12px;font-size:10px}.clubSplitGrid{gap:20px}.clubInfoPanel{padding:18px}.clubStadiumFeatureImage{min-height:300px}.clubStadiumFeatureCopy{padding:20px}.clubStadiumQuickFacts{grid-template-columns:1fr}.clubLeadershipStandalone{grid-template-columns:1fr}.clubFutureSection{padding:48px 22px}.clubFutureSection h2{font-size:30px}.clubNarrativeInner{gap:22px}}
+@media(max-width:680px){.clubSectionHeroInner{padding-top:26px;padding-bottom:26px}.clubSectionHero h1{font-size:36px}.clubSectionHeroLead{font-size:15px}.clubSubnav{top:0}.clubSubnav a{min-height:50px;padding:0 12px;font-size:10px}.clubSplitGrid{gap:20px}.clubInfoPanel{padding:18px}.clubStadiumFeatureImage{min-height:300px}.clubStadiumFeatureCopy{padding:20px}.clubStadiumQuickFacts{grid-template-columns:1fr}.clubLeadershipStandalone{grid-template-columns:1fr}.clubFutureSection{padding:48px 22px}.clubFutureSection h2{font-size:30px}.clubNarrativeInner{gap:22px}}
 
 /* v2.22.1 — Club navigation stability + centered subnav + stadium redesign */
 
@@ -3780,26 +3777,22 @@ body:has(.adminEmbedded){background:#f3f6fa}
 
 /* ===== FC EDINET v2.28.1 — season navigation + cross-browser dropdown ===== */
 .globalHeader .menu{gap:0!important;align-self:stretch}
-.globalHeader .menu>a,.globalHeader .menu>.managedMenuGroup{flex:0 0 clamp(96px,6.2vw,112px);width:clamp(96px,6.2vw,112px);min-width:0;border-left:1px solid rgba(255,255,255,.055)}
-.globalHeader .menu>a:last-child,.globalHeader .menu>.managedMenuGroup:last-child{border-right:1px solid rgba(255,255,255,.055)}
+.globalHeader .menu>a,.globalHeader .menu>.managedMenuGroup{flex:0 0 clamp(96px,6.2vw,112px);width:clamp(96px,6.2vw,112px);min-width:0;border:0}
 .globalHeader .menu>a{justify-content:center;padding:0 8px;text-align:center;white-space:nowrap;background:transparent}
 .globalHeader .menu>a:hover,.globalHeader .menu>a.isActive{background:rgba(26,72,122,.46)}
 .globalHeader .menu .managedMenuGroup{position:relative;display:flex;align-items:stretch}
 .globalHeader .menu .managedMenuTrigger{position:relative;display:flex;width:100%;min-height:76px;align-items:center;justify-content:center;gap:8px;padding:0 8px;border:0;background:transparent;color:#fff;font:inherit;font-weight:inherit;text-transform:inherit;letter-spacing:inherit;opacity:.9;cursor:pointer;white-space:nowrap;-webkit-appearance:none;appearance:none}
-.globalHeader .menu .managedMenuTrigger:before{content:"";position:absolute;left:50%;right:50%;bottom:0;height:3px;background:var(--fc-ref-yellow);transition:left .18s ease,right .18s ease}
 .globalHeader .menu .managedMenuTrigger:hover,.globalHeader .menu .managedMenuTrigger:focus-visible,.globalHeader .menu .managedMenuTrigger.isActive,.globalHeader .menu .managedMenuGroup.isOpen .managedMenuTrigger{opacity:1;color:#fff;outline:none;background:rgba(26,72,122,.46)}
-.globalHeader .menu .managedMenuTrigger:hover:before,.globalHeader .menu .managedMenuTrigger:focus-visible:before,.globalHeader .menu .managedMenuTrigger.isActive:before,.globalHeader .menu .managedMenuGroup.isOpen .managedMenuTrigger:before{left:0;right:0}
 .managedMenuBars{display:grid;width:12px;gap:2px;flex:0 0 12px}.managedMenuBars i{display:block;height:1.5px;border-radius:2px;background:currentColor;opacity:.9}
-.globalHeader .menu .managedMenuDropdown{position:absolute;top:100%;left:0;z-index:500;display:grid;width:230px;min-width:230px;padding:0;border:1px solid rgba(255,255,255,.09);border-top:3px solid var(--fc-ref-yellow);border-radius:0;background:#052b5d;box-shadow:0 20px 44px rgba(0,12,30,.34);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-5px);transition:opacity .14s ease,transform .14s ease,visibility .14s linear}
+.globalHeader .menu .managedMenuDropdown{position:absolute;top:100%;left:0;z-index:500;display:grid;width:230px;min-width:230px;padding:0;border:0;border-radius:0;background:#052b5d;box-shadow:0 20px 44px rgba(0,12,30,.34);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-5px);transition:opacity .14s ease,transform .14s ease,visibility .14s linear}
 .globalHeader .menu .managedMenuDropdown:before{content:"";position:absolute;left:0;right:0;top:-10px;height:10px}
 .globalHeader .menu .managedMenuGroup.isOpen .managedMenuDropdown{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0)}
-.globalHeader .menu .managedMenuDropdown a{display:flex;align-items:center;min-height:42px;padding:10px 14px;border:0;border-bottom:1px solid rgba(255,255,255,.07);border-radius:0;color:rgba(255,255,255,.9);background:#052b5d;line-height:1.18;white-space:nowrap;opacity:1;text-transform:uppercase;letter-spacing:.025em}
+.globalHeader .menu .managedMenuDropdown a{display:flex;align-items:center;min-height:42px;padding:10px 14px;border:0;border-radius:0;color:rgba(255,255,255,.9);background:#052b5d;line-height:1.18;white-space:nowrap;opacity:1;text-transform:uppercase;letter-spacing:.025em}
 .globalHeader .menu .managedMenuDropdown a:last-child{border-bottom:0}.globalHeader .menu .managedMenuDropdown a:after{display:none}
 .globalHeader .menu .managedMenuDropdown a:hover,.globalHeader .menu .managedMenuDropdown a:focus-visible,.globalHeader .menu .managedMenuDropdown a.isActive{color:#fff;background:#123f73;outline:none}
-.globalHeader .menu .managedMenuDropdown a.isActive{box-shadow:inset 3px 0 0 var(--fc-ref-yellow)}
-.mobileManagedGroup{display:grid;border-bottom:1px solid rgba(255,255,255,.08)}
+.mobileManagedGroup{display:grid;border-bottom:0}
 .mobileManagedGroup>a{border-bottom:0!important}.mobileManagedLabel{display:flex;align-items:center;gap:8px;padding:16px 0 10px;color:#fff;font-size:12px;font-weight:950;text-transform:uppercase;letter-spacing:.06em}.mobileManagedLabel:after{content:"☰";font-size:11px;color:#9fb5cf}
-.mobileManagedChild{padding:11px 0 11px 24px!important;border-bottom:0!important;color:rgba(255,255,255,.76)!important;font-size:12px}.mobileManagedChild.isActive{color:#ffd328!important}
+.mobileManagedChild{padding:11px 12px 11px 24px!important;border-bottom:0!important;color:rgba(255,255,255,.76)!important;font-size:12px}.mobileManagedChild.isActive{color:#fff!important;background:rgba(26,72,122,.46)!important}
 @media(max-width:1260px) and (min-width:981px){.globalHeader .menu>a,.globalHeader .menu>.managedMenuGroup{flex-basis:94px;width:94px}.globalHeader .menu{font-size:9px!important}.globalHeader .menu .managedMenuTrigger{padding-inline:5px;gap:5px}}
 @media(max-width:980px){.globalHeader .menu .managedMenuTrigger{min-height:0}.globalHeader .menu>a,.globalHeader .menu>.managedMenuGroup{width:auto;flex:auto;border:0}}
 
@@ -3812,7 +3805,7 @@ body:has(.adminEmbedded){background:#f3f6fa}
 @media(max-width:560px){.teamPositionGroups{gap:42px}.teamPositionGrid{grid-template-columns:1fr}.teamPositionHeading{align-items:center}.teamPositionHeading>b{font-size:24px}}
 
 
-/* v2.28.3 — centered/wider desktop navigation + browser-stable portal dropdown */
+/* v2.28.4 — centered/wider desktop navigation + browser-stable portal dropdown */
 @media(min-width:1181px){
   .globalHeader .nav{
     display:grid!important;
@@ -3855,8 +3848,7 @@ body:has(.adminEmbedded){background:#f3f6fa}
   display:grid!important;
   min-width:260px!important;
   padding:0!important;
-  border:1px solid rgba(255,255,255,.10)!important;
-  border-top:3px solid var(--fc-ref-yellow)!important;
+  border:0!important;
   border-radius:0!important;
   background:#052b5d!important;
   box-shadow:0 22px 50px rgba(0,12,30,.42)!important;
@@ -3871,7 +3863,6 @@ body:has(.adminEmbedded){background:#f3f6fa}
   min-height:46px!important;
   padding:11px 16px!important;
   border:0!important;
-  border-bottom:1px solid rgba(255,255,255,.08)!important;
   color:rgba(255,255,255,.92)!important;
   background:#052b5d!important;
   font-family:"Arial Black",Arial,sans-serif!important;
@@ -3884,109 +3875,14 @@ body:has(.adminEmbedded){background:#f3f6fa}
 }
 .managedMenuDropdownPortal a:last-child{border-bottom:0!important}
 .managedMenuDropdownPortal a:hover,.managedMenuDropdownPortal a:focus-visible,.managedMenuDropdownPortal a.isActive{background:#123f73!important;color:#fff!important;outline:none!important}
-.managedMenuDropdownPortal a.isActive{box-shadow:inset 3px 0 0 var(--fc-ref-yellow)!important}
 
-/* v2.28.3 — retire the legacy managedPageHeroInner/heroBuilderContent wrapper on public pages */
+/* v2.28.4 — compact image-free headings for public landing pages */
 .pageHeroContent{position:relative;z-index:3;display:flex;flex-direction:column}
 .managedPageHero:not(.playerProfileHero):not(.articleHeader):not(.mediaAlbumHero){min-height:auto!important}
 .managedPageHero:not(.playerProfileHero):not(.articleHeader):not(.mediaAlbumHero) .pageHeroContent{padding-top:34px!important;padding-bottom:34px!important}
+.proManagedHero{min-height:auto;background:#041b3b}
+.proManagedHeroInner{padding-top:34px;padding-bottom:34px}
 @media(max-width:680px){
   .managedPageHero:not(.playerProfileHero):not(.articleHeader):not(.mediaAlbumHero) .pageHeroContent{padding-top:26px!important;padding-bottom:26px!important}
-}
-
-/* v2.28.4 — final clean public header + image-free internal page headers */
-.globalHeader .menu>a,
-.globalHeader .menu>.managedMenuGroup{
-  border-left:0!important;
-  border-right:0!important;
-}
-.globalHeader .menu a:after,
-.globalHeader .menu .managedMenuTrigger:before{
-  display:none!important;
-  content:none!important;
-}
-.globalHeader .menu>a:hover,
-.globalHeader .menu>a.isActive,
-.globalHeader .menu .managedMenuTrigger:hover,
-.globalHeader .menu .managedMenuTrigger:focus-visible,
-.globalHeader .menu .managedMenuTrigger.isActive,
-.globalHeader .menu .managedMenuGroup.isOpen .managedMenuTrigger{
-  background:rgba(26,72,122,.28)!important;
-}
-.globalHeader .menu .managedMenuDropdown,
-.managedMenuDropdownPortal{
-  border-top:0!important;
-}
-.globalHeader .menu .managedMenuDropdown a,
-.managedMenuDropdownPortal a{
-  border-bottom:0!important;
-  box-shadow:none!important;
-}
-.globalHeader .menu .managedMenuDropdown a.isActive,
-.managedMenuDropdownPortal a.isActive{
-  box-shadow:none!important;
-  background:#123f73!important;
-}
-
-.managedPageHero,
-.proManagedHero,
-.clubSectionHero,
-.customSiteHero{
-  border-bottom:0!important;
-}
-.managedPageHero:after,
-.proManagedHero:after{
-  display:none!important;
-  content:none!important;
-}
-.managedPageHeroMedia,
-.managedPageHeroOverlay,
-.proManagedHeroMedia,
-.proManagedHeroOverlay,
-.clubSectionHeroShade{
-  display:none!important;
-}
-.imageFreePageHero,
-.imageFreeProHero,
-.imageFreeClubHero,
-.imageFreeCustomHero{
-  min-height:0!important;
-  background:#061f43!important;
-  background-image:none!important;
-  color:#fff!important;
-}
-.imageFreePageHero .pageHeroContent{
-  padding-top:34px!important;
-  padding-bottom:34px!important;
-}
-.imageFreeProHero .proManagedHeroInner{
-  padding-top:34px!important;
-  padding-bottom:34px!important;
-}
-.imageFreeClubHero{
-  align-items:center!important;
-}
-.imageFreeClubHero .clubSectionHeroInner{
-  padding-top:34px!important;
-  padding-bottom:34px!important;
-}
-.imageFreeCustomHero{
-  padding:34px 0!important;
-}
-.imageFreeCustomHero h1{
-  margin-top:8px!important;
-  margin-bottom:10px!important;
-  font-size:clamp(36px,5vw,60px)!important;
-}
-.imageFreeCustomHero p{
-  margin-bottom:0!important;
-}
-@media(max-width:680px){
-  .imageFreePageHero .pageHeroContent,
-  .imageFreeProHero .proManagedHeroInner,
-  .imageFreeClubHero .clubSectionHeroInner{
-    padding-top:26px!important;
-    padding-bottom:26px!important;
-  }
-  .imageFreeCustomHero{padding:26px 0!important}
+  .proManagedHeroInner{padding-top:26px;padding-bottom:26px}
 }

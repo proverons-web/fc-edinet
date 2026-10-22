@@ -43,42 +43,40 @@ const errors = [];
 const warnings = [];
 
 // Static release integrity checks. These run before Next.js starts so a
-// broken package is rejected early with a useful message.
+// broken package is rejected early with a useful message. Runtime routes use
+// lib/release.ts as their canonical version source.
 try {
   const packageJson = JSON.parse(fs.readFileSync(path.join(cwd, "package.json"), "utf8"));
+  const releaseSource = fs.readFileSync(path.join(cwd, "lib", "release.ts"), "utf8");
   const versionRoute = fs.readFileSync(path.join(cwd, "app", "api", "version", "route.ts"), "utf8");
   const healthRoute = fs.readFileSync(path.join(cwd, "app", "api", "health", "route.ts"), "utf8");
-  const routeVersion = versionRoute.match(/const\s+VERSION\s*=\s*["']([^"']+)["']/)?.[1]
-    || versionRoute.match(/version:\s*["']([^"']+)["']/)?.[1]
-    || "";
-  const healthVersion = healthRoute.match(/version:\s*["']([^"']+)["']/)?.[1] || "";
+  const diagnosticsSource = fs.readFileSync(path.join(cwd, "app", "admin", "diagnostics", "page.tsx"), "utf8");
+  const releaseVersion = releaseSource.match(/RELEASE_VERSION\s*=\s*["']([^"']+)["']/)?.[1] || "";
 
   if (!packageJson.version) {
     errors.push("package.json version is missing.");
-  } else if (!routeVersion) {
-    errors.push("/api/version does not expose a static version string.");
-  } else if (packageJson.version !== routeVersion) {
-    errors.push(`Version mismatch: package.json=${packageJson.version}, /api/version=${routeVersion}.`);
+  } else if (!releaseVersion) {
+    errors.push("lib/release.ts does not expose RELEASE_VERSION.");
+  } else if (packageJson.version !== releaseVersion) {
+    errors.push(`Version mismatch: package.json=${packageJson.version}, lib/release.ts=${releaseVersion}.`);
   }
-  if (!healthVersion) {
-    errors.push("/api/health does not expose a static version string.");
-  } else if (packageJson.version !== healthVersion) {
-    errors.push(`Health version mismatch: package.json=${packageJson.version}, /api/health=${healthVersion}.`);
-  }
-} catch (error) {
-  errors.push(`Release metadata check failed: ${error instanceof Error ? error.message : String(error)}`);
-}
 
-// Admin diagnostics must ship with the release and report the same app version.
-try {
-  const packageJson = JSON.parse(fs.readFileSync(path.join(cwd, "package.json"), "utf8"));
-  const diagnosticsSource = fs.readFileSync(path.join(cwd, "app", "admin", "diagnostics", "page.tsx"), "utf8");
-  const diagnosticsVersion = diagnosticsSource.match(/const APP_VERSION = ["']([^"']+)["']/)?.[1] || "";
-  if (!diagnosticsVersion) {
-    errors.push("/admin/diagnostics does not expose APP_VERSION.");
-  } else if (diagnosticsVersion !== packageJson.version) {
-    errors.push(`Diagnostics version mismatch: package.json=${packageJson.version}, diagnostics=${diagnosticsVersion}.`);
+  if (!/RELEASE_VERSION/.test(versionRoute) || !/RELEASE_API_VERSION/.test(versionRoute) || !/RELEASE_NAME/.test(versionRoute)) {
+    errors.push("/api/version is not wired to canonical release constants.");
   }
+  if (!/ok:\s*true/.test(versionRoute) || !/apiVersion:\s*RELEASE_API_VERSION/.test(versionRoute) || !/release:\s*RELEASE_NAME/.test(versionRoute)) {
+    errors.push("/api/version does not expose the expected simple release payload.");
+  }
+  if (!/version:\s*RELEASE_VERSION/.test(healthRoute)) {
+    errors.push("/api/health is not wired to RELEASE_VERSION.");
+  }
+  if (!/const APP_VERSION = RELEASE_VERSION/.test(diagnosticsSource)) {
+    errors.push("/admin/diagnostics is not wired to RELEASE_VERSION.");
+  }
+  if (!/RELEASE_API_VERSION/.test(diagnosticsSource)) {
+    errors.push("/admin/diagnostics does not expose the canonical API version label.");
+  }
+
   // Runtime diagnostics must never inspect the repository filesystem. With
   // Next.js/Turbopack a dynamic process.cwd() + fs access can trace the entire
   // project into the server bundle and fail deployment size/static analysis.
@@ -86,7 +84,7 @@ try {
     errors.push("/admin/diagnostics contains runtime filesystem access. Move release-file checks to scripts/check-deploy.mjs.");
   }
 } catch (error) {
-  errors.push(`Admin diagnostics check failed: ${error instanceof Error ? error.message : String(error)}`);
+  errors.push(`Release metadata check failed: ${error instanceof Error ? error.message : String(error)}`);
 }
 
 const officialCrestPath = path.join(cwd, "public", "brand", "fc-edinet-crest.png");
