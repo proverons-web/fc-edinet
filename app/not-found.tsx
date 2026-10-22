@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getLocale } from "@/lib/locale";
 import { publicText } from "@/lib/i18n";
+
+export const metadata: Metadata = { title: "404", robots: { index: false, follow: true } };
 
 export default async function NotFound(){
   const locale=await getLocale();

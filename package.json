@@ -1,12 +1,13 @@
 {
   "name": "fc-edinet",
-  "version": "2.23.2",
+  "version": "2.24.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "deploy:check": "node scripts/check-deploy.mjs && next build"
+    "deploy:check": "node scripts/check-deploy.mjs && next build",
+    "qa:site": "node scripts/qa-site.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.4",

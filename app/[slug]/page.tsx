@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/locale";
-import { getSiteUrlObject } from "@/lib/site-url";
+import { publicMetadata } from "@/lib/seo";
 import type { CustomSitePage } from "@/lib/site-builder";
 
 type Props={params:Promise<{slug:string}>};
@@ -17,7 +17,7 @@ export async function generateMetadata({params}:Props):Promise<Metadata>{
   const {slug}=await params; const page=await getPage(slug); if(!page)return {};
   const locale=await getLocale(); const title=locale==="ro"?(page.title_ro||page.title_ru):page.title_ru;
   const description=locale==="ro"?(page.intro_ro||page.intro_ru):page.intro_ru;
-  return {title,description,alternates:{canonical:new URL(`/${page.slug}`,getSiteUrlObject())},openGraph:{title,description,images:page.hero_image_url?[page.hero_image_url]:undefined}};
+  return publicMetadata({ title, description, path: `/${page.slug}`, locale, image: page.hero_image_url });
 }
 
 export default async function CustomSitePage({params}:Props){
