@@ -329,9 +329,9 @@ export default async function Home() {
               </div>
               <div className="fcRefMatchBody">
                 <div className="fcRefMatchTeams">
-                  <ReferenceTeam team={nextMatch.home} locale={locale} label={locale === "ro" ? "GAZDE" : "ХОЗЯЕВА"} />
+                  <ReferenceTeam team={nextMatch.home} locale={locale} />
                   <div className="fcRefVs">VS</div>
-                  <ReferenceTeam team={nextMatch.away} locale={locale} label={locale === "ro" ? "OASPEȚI" : "ГОСТИ"} />
+                  <ReferenceTeam team={nextMatch.away} locale={locale} />
                 </div>
                 <div className="fcRefMatchFacts">
                   <span><small>{locale === "ro" ? "DATA" : "ДАТА"}</small><strong>{formatMatchDay(nextMatch.kickoff, locale)}</strong></span>

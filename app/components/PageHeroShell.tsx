@@ -17,6 +17,10 @@ export default function PageHeroShell({
   showBackgroundMedia?: boolean;
   children: ReactNode;
 }) {
+  const classTokens = className.split(/\s+/);
+  const isGenericLandingHero = classTokens.includes("pageHero") && !classTokens.includes("publishingDraftPageHero");
+  if (isGenericLandingHero) return null;
+
   const backgroundVisible = showBackgroundMedia && heroLayerVisible(design.layer_config, "background");
   const selectedDesktop = backgroundVisible
     ? design.background_mode === "custom"

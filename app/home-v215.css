@@ -663,3 +663,159 @@
   .fcRefDashboardSection,.fcRefTeamSection,.fcV215MediaSection{padding-top:38px!important;padding-bottom:42px!important}
   .fcV215AlbumCard>div:last-child,.fcV215VideoCard>div:last-child{padding:18px!important}
 }
+
+
+/* ============================================================
+   FC EDINEȚ v2.28.5 — HOME MATCH CARD CLEANUP
+   ============================================================ */
+/* The top match dashboard uses sharp, broadcast-style geometry. */
+.fcV215DashboardLastMatch,
+.fcV215DashboardForm,
+.fcV215NextMatchDashboard,
+.fcV215DashboardVideo{
+  border-radius:0!important;
+}
+
+/* Next match: no yellow rail, no enclosing outline, no rounded card shell. */
+.fcV215NextMatchDashboard.fcRefNextMatch{
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:0 18px 48px rgba(3,25,55,.13)!important;
+}
+.fcV215NextMatchDashboard.fcRefNextMatch:before{display:none!important}
+
+/* Competition metadata becomes plain typography instead of framed pills. */
+.fcV215NextMatchDashboard .fcRefCompetition{
+  justify-content:flex-start!important;
+  gap:12px!important;
+  padding:16px 20px 2px!important;
+}
+.fcV215NextMatchDashboard .fcRefMatchChip{
+  min-height:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:#9fb8d6!important;
+  font-size:9px!important;
+  letter-spacing:.11em!important;
+}
+.fcV215NextMatchDashboard .fcRefMatchChipAccent{
+  margin-left:auto!important;
+  color:#dbe9f8!important;
+}
+
+/* Teams are no longer cards inside the card: larger crests, no labels or frames. */
+.fcV215NextMatchDashboard .fcRefMatchBody{padding:18px 20px 12px!important}
+.fcV215NextMatchDashboard .fcRefMatchTeams{
+  grid-template-columns:minmax(0,1fr) 74px minmax(0,1fr)!important;
+  align-items:center!important;
+  gap:12px!important;
+  padding:0 0 20px!important;
+}
+.fcV215NextMatchDashboard .fcRefTeamBadge{
+  display:grid!important;
+  grid-template-rows:auto auto!important;
+  align-content:center!important;
+  justify-items:center!important;
+  min-height:168px!important;
+  padding:4px 8px!important;
+  gap:10px!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+}
+.fcV215NextMatchDashboard .fcRefTeamBadge small{display:none!important}
+.fcV215NextMatchDashboard .fcRefTeamBadge img{
+  width:106px!important;
+  height:116px!important;
+  object-fit:contain!important;
+  filter:drop-shadow(0 9px 16px rgba(0,0,0,.24))!important;
+}
+.fcV215NextMatchDashboard .fcRefTeamBadge>span{
+  width:88px!important;
+  height:88px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:rgba(23,78,137,.62)!important;
+}
+.fcV215NextMatchDashboard .fcRefTeamBadge strong{
+  font-size:16px!important;
+  line-height:1.08!important;
+  letter-spacing:-.01em!important;
+}
+
+/* Modern VS separator: typography + fine rules, no circle, no yellow fill. */
+.fcV215NextMatchDashboard .fcRefVs{
+  display:grid!important;
+  grid-template-columns:1fr auto 1fr!important;
+  align-items:center!important;
+  column-gap:7px!important;
+  width:74px!important;
+  height:auto!important;
+  min-height:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  color:#8faac8!important;
+  font-size:10px!important;
+  font-weight:900!important;
+  letter-spacing:.14em!important;
+}
+.fcV215NextMatchDashboard .fcRefVs:before,
+.fcV215NextMatchDashboard .fcRefVs:after{
+  content:"";
+  display:block;
+  height:1px;
+  background:rgba(190,213,237,.34);
+}
+
+/* Date/time/stadium stay readable but lose the three framed mini-cards. */
+.fcV215NextMatchDashboard .fcRefMatchFacts{
+  gap:18px!important;
+  padding:16px 0 2px!important;
+  border-top:1px solid rgba(184,207,232,.15)!important;
+}
+.fcV215NextMatchDashboard .fcRefMatchFacts span{
+  min-height:54px!important;
+  padding:6px 2px!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+}
+.fcV215NextMatchDashboard .fcRefMatchFacts small{font-size:7px!important;color:#7895b5!important}
+.fcV215NextMatchDashboard .fcRefMatchFacts strong{font-size:13px!important}
+.fcV215NextMatchDashboard .fcRefMatchButton{
+  width:calc(100% - 40px)!important;
+  margin:2px 20px 20px!important;
+  border-radius:0!important;
+}
+
+@media(max-width:760px){
+  .fcV215DashboardLastMatch,
+  .fcV215DashboardForm,
+  .fcV215NextMatchDashboard,
+  .fcV215DashboardVideo{border-radius:0!important}
+  .fcV215NextMatchDashboard .fcRefCompetition{padding:14px 14px 0!important;gap:8px!important}
+  .fcV215NextMatchDashboard .fcRefMatchBody{padding:14px 14px 10px!important}
+  .fcV215NextMatchDashboard .fcRefMatchTeams{grid-template-columns:minmax(0,1fr) 56px minmax(0,1fr)!important;gap:6px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge{min-height:142px!important;padding:2px 4px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge img{width:78px!important;height:88px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge strong{font-size:12px!important}
+  .fcV215NextMatchDashboard .fcRefVs{width:56px!important;font-size:9px!important;column-gap:5px!important}
+  .fcV215NextMatchDashboard .fcRefMatchFacts{gap:8px!important;padding-top:12px!important}
+  .fcV215NextMatchDashboard .fcRefMatchButton{width:calc(100% - 28px)!important;margin:2px 14px 14px!important}
+}
+
+@media(max-width:460px){
+  .fcV215NextMatchDashboard .fcRefMatchChip{font-size:7px!important}
+  .fcV215NextMatchDashboard .fcRefMatchTeams{grid-template-columns:minmax(0,1fr) 44px minmax(0,1fr)!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge{min-height:126px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge img{width:66px!important;height:74px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge strong{font-size:10px!important}
+  .fcV215NextMatchDashboard .fcRefVs{width:44px!important;font-size:8px!important}
+  .fcV215NextMatchDashboard .fcRefMatchFacts{grid-template-columns:1fr!important;gap:2px!important}
+  .fcV215NextMatchDashboard .fcRefMatchFacts span{min-height:42px!important}
+}

@@ -22,14 +22,6 @@ export default function ClubSectionShell({
 }) {
   return (
     <main className="clubSectionPage">
-      <section className="clubSectionHero">
-        <div className="container clubSectionHeroInner">
-          <p className="eyebrow">{eyebrow || "FC EDINEȚ • CLUB"}</p>
-          <h1>{title}</h1>
-          {description ? <p className="clubSectionHeroLead">{description}</p> : null}
-        </div>
-      </section>
-
       <nav className="clubSubnav" aria-label={locale === "ro" ? "Secțiunile clubului" : "Разделы клуба"}>
         <div className="container clubSubnavInner">
           {clubPages.map((item, index) => (

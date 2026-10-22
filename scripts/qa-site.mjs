@@ -104,12 +104,23 @@ ok("Site Builder exposes squad and staff", read("app/admin/site-builder/page.tsx
 ok("legacy public hero wrapper removed", !read("app/components/PageHeroShell.tsx").includes("managedPageHeroInner") && !read("app/components/PageHeroShell.tsx").includes("heroBuilderContent"));
 ok("generic PageHero media is opt-in", read("app/components/PageHeroShell.tsx").includes("showBackgroundMedia = false") && read("app/components/PageHeroShell.tsx").includes("showBackgroundMedia && heroLayerVisible"));
 ok("detail heroes retain media opt-in", ["app/news/[slug]/page.tsx","app/media/[slug]/page.tsx","app/team/[slug]/page.tsx"].every((file) => read(file).includes("showBackgroundMedia")));
-ok("club landing heroes are image-free", !read("app/components/ClubSectionShell.tsx").includes("backgroundImage") && !read("app/components/ClubSectionShell.tsx").includes("clubSectionHeroShade"));
-ok("managed landing heroes are image-free", !read("app/components/ManagedPageCanvas.tsx").includes("proManagedHeroMedia") && !read("app/components/ManagedPageCanvas.tsx").includes("heroBuilderContent"));
+ok("club landing hero block removed", !read("app/components/ClubSectionShell.tsx").includes('className="clubSectionHero"'));
+ok("managed public landing hero omitted", read("app/components/ManagedPageCanvas.tsx").includes('section.key === "hero"') && read("app/components/ManagedPageCanvas.tsx").includes('return preview ? <HeroSection'));
 ok("hero yellow bottom borders removed", !read("app/globals.css").includes("border-bottom:3px solid #ffd328") && !read("app/globals.css").includes("border-bottom:4px solid #ffd328"));
+
+ok("generic public PageHeroShell blocks return null", read("app/components/PageHeroShell.tsx").includes('isGenericLandingHero') && read("app/components/PageHeroShell.tsx").includes('if (isGenericLandingHero) return null'));
+ok("custom page hero removed", !read("app/[slug]/page.tsx").includes('className="customSiteHero"'));
+const headerNavSource = read("app/components/HeaderNavClient.tsx");
+ok("admin removed from primary nav but retained in profile menu", (headerNavSource.match(/href=\"\/admin\"/g) || []).length === 1 && headerNavSource.includes('accountMenuDropdown'));
+const homepageSource = read("app/page.tsx");
+ok("next match host guest labels removed", !homepageSource.includes('label={locale === "ro" ? "GAZDE" : "ХОЗЯЕВА"}') && !homepageSource.includes('label={locale === "ro" ? "OASPEȚI" : "ГОСТИ"}'));
+const homeCss = read("app/home-v215.css");
+ok("next match yellow rail removed", homeCss.includes('.fcV215NextMatchDashboard.fcRefNextMatch:before{display:none!important}'));
+ok("next match team frames removed and crests enlarged", homeCss.includes('.fcV215NextMatchDashboard .fcRefTeamBadge{') && homeCss.includes('background:transparent!important;') && homeCss.includes('width:106px!important;'));
+ok("next match VS circle replaced", homeCss.includes('Modern VS separator') && homeCss.includes('border-radius:0!important;') && homeCss.includes('.fcV215NextMatchDashboard .fcRefVs:before'));
 const releaseSource = read("lib/release.ts");
-ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.28.4"'));
-ok("release version", JSON.parse(read("package.json")).version === "2.28.4");
+ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.28.5"'));
+ok("release version", JSON.parse(read("package.json")).version === "2.28.5");
 
 const failed = checks.filter((x) => !x.ok);
 for (const check of checks) console.log(`${check.ok ? "PASS" : "FAIL"}  ${check.name}${check.detail ? ` — ${check.detail}` : ""}`);

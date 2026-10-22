@@ -39,7 +39,7 @@ export default function ManagedPageCanvas({
   const firstMediaContentKey = pageKey === "media" ? visibleSections.find((section) => section.key === "albums" || section.key === "videos")?.key : undefined;
   return <div className={`managedProPage managedProPage-${pageKey}${preview ? " isPreview" : ""}`}>
     {visibleSections.map((section) => {
-      if (section.key === "hero") return <HeroSection key={section.key} pageKey={pageKey} locale={locale} layout={layout} design={heroDesign} section={section}/>;
+      if (section.key === "hero") return preview ? <HeroSection key={section.key} pageKey={pageKey} locale={locale} layout={layout} design={heroDesign} section={section}/> : null;
       if (pageKey === "media" && section.key === "albums") return <div key={section.key}>{section.key === firstMediaContentKey && <MediaHubControls locale={locale} albumCount={albums.length} videoCount={videos.length}/>}<MediaAlbums section={section} albums={albums} locale={locale}/></div>;
       if (pageKey === "media" && section.key === "videos") return <div key={section.key}>{section.key === firstMediaContentKey && <MediaHubControls locale={locale} albumCount={albums.length} videoCount={videos.length}/>}<MediaVideos section={section} videos={videos} locale={locale}/></div>;
       if (pageKey === "partners" && section.key === "partners") return <PartnersGrid key={section.key} section={section} partners={partners} locale={locale}/>;

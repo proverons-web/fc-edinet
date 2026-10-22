@@ -235,7 +235,6 @@ export default function HeaderNavClient({
           <Link href="/" className={isActive("/") ? "isActive" : undefined} aria-current={isActive("/") ? "page" : undefined}>{labels.home}</Link>
           {legacyLinks.map((link) => <Link key={link.href} href={link.href} className={isActive(link.href) ? "isActive" : undefined} aria-current={isActive(link.href) ? "page" : undefined}>{link.label}</Link>)}
         </>}
-        {showAdminLink && isStaff && <Link href="/admin">{labels.admin}</Link>}
       </nav>
 
       <div className="navActions">
@@ -272,7 +271,6 @@ export default function HeaderNavClient({
           <Link href="/" className={isActive("/") ? "isActive" : undefined} aria-current={isActive("/") ? "page" : undefined} onClick={() => setMenuOpen(false)}>{labels.home}</Link>
           {legacyLinks.map((link) => <Link key={link.href} href={link.href} className={isActive(link.href) ? "isActive" : undefined} aria-current={isActive(link.href) ? "page" : undefined} onClick={() => setMenuOpen(false)}>{link.label}</Link>)}
         </>}
-        {showAdminLink && isStaff && <Link href="/admin" onClick={() => setMenuOpen(false)}>{labels.admin}</Link>}
         {showSearch && <Link href="/search" onClick={() => setMenuOpen(false)}>{labels.search}</Link>}
         {showAccount && (isAuthenticated ? <>
           <Link href="/account" onClick={() => setMenuOpen(false)}>{labels.dashboard}</Link>
