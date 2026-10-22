@@ -1,9 +1,0 @@
-FC Edineț v2.28.7 — Restore Next Match Height
-
-Changes:
-- Restored Next Match team-area layout height to the v2.28.5 footprint.
-- Large team crests remain visually enlarged.
-- Crest scaling no longer participates in layout height calculation, so the dashboard row does not grow vertically.
-- Desktop team area restored to 168px; tablet to 142px; mobile to 126px.
-- Previous-match and news sharp-corner cleanup from v2.28.6 remains unchanged.
-- Version synchronized to 2.28.7.

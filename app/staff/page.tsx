@@ -39,7 +39,7 @@ export default async function StaffPage() {
   const supabase = createPublicClient();
   const [design, staffResult] = await Promise.all([
     getPublishedSitePageDesign(supabase, "team"),
-    supabase.from("team_staff").select("*").eq("is_active", true).order("category").order("display_order").order("id"),
+    supabase.from("team_staff").select("*").eq("is_active", true).eq("is_placeholder", false).order("category").order("display_order").order("id"),
   ]);
   const staff = (staffResult.data ?? []) as TeamStaffMember[];
   const hero = {
@@ -68,12 +68,11 @@ export default async function StaffPage() {
           if (!rows.length) return null;
           return <div className="teamStaffGroup" key={category}>
             <div className="teamStaffGroupTitle"><span>{groupTitle(category, locale)}</span><b>{String(rows.length).padStart(2, "0")}</b></div>
-            <div className="teamStaffGrid">{rows.map((member) => <article className={`teamStaffCard${member.is_placeholder ? " isPlaceholder" : ""}`} key={member.id}>
+            <div className="teamStaffGrid">{rows.map((member) => <article className="teamStaffCard" key={member.id}>
               <div className="teamStaffPortrait">
                 {member.photo_url
                   ? <img src={member.photo_url} alt={`${member.first_name} ${member.last_name}`} loading="lazy" decoding="async" />
                   : <img src="/brand/fc-edinet-crest.png" alt="FC Edineț" className="isCrest" />}
-                {member.is_placeholder && <span>{locale === "ro" ? "MODEL" : "ЗАГЛУШКА"}</span>}
               </div>
               <div className="teamStaffCopy">
                 <small>{locale === "ro" ? (member.role_title_ro || member.role_title) : member.role_title}</small>
