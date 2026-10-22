@@ -1,0 +1,8 @@
+import ClubSectionShell from "@/app/components/ClubSectionShell";
+import { getLocale } from "@/lib/locale";
+import { publicMetadata } from "@/lib/seo";
+import { createClient } from "@/lib/supabase/server";
+import type { ClubProfile } from "@/lib/types";
+export const dynamic="force-dynamic";
+export async function generateMetadata(){const locale=await getLocale();return publicMetadata({title:locale==="ro"?"Fotografii de arhivă":"Архивные фото",description:locale==="ro"?"Arhiva foto istorică a FC Edineț.":"Исторический фотоархив FC Edineț.",path:"/club/archive",locale});}
+export default async function ClubArchivePage(){const locale=await getLocale();const supabase=await createClient();const {data}=await supabase.from("club_profile").select("hero_image_url").eq("id",1).maybeSingle();return <ClubSectionShell locale={locale} active="archive" title={locale==="ro"?"Fotografii de arhivă":"Архивные фото"} eyebrow={locale==="ro"?"MEMORIA CLUBULUI":"ПАМЯТЬ КЛУБА"} description={locale==="ro"?"Fotografii din diferite perioade ale istoriei FC Edineț.":"Фотографии разных периодов истории FC Edineț."} imageUrl={(data as Pick<ClubProfile,"hero_image_url">|null)?.hero_image_url}><section className="section"><div className="container"><div className="clubFutureSection"><div className="clubFutureIcon">◎</div><h2>{locale==="ro"?"Arhiva se pregătește":"Архив готовится"}</h2><p>{locale==="ro"?"Aici vor apărea fotografii istorice ale echipei, meciurilor, stadionului și suporterilor. Nu publicăm imagini până când arhiva nu este încărcată și descrisă corect.":"Здесь появятся исторические фотографии команды, матчей, стадиона и болельщиков. Пока архив не загружен и не описан, мы не подставляем случайные изображения."}</p></div></div></section></ClubSectionShell>;}
