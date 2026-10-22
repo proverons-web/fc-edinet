@@ -15,7 +15,7 @@ type DiagnosticCheck = {
   detail?: string;
 };
 
-const APP_VERSION = "2.21.1";
+const APP_VERSION = "2.21.2";
 const BUILDER_VERSION = "2.1";
 const HERO_BUILDER_VERSION = "2.1";
 const CONTENT_SCHEMA_VERSION = "3";
@@ -268,7 +268,6 @@ export default async function AdminDiagnosticsPage() {
             <div className="diagnosticsQuickLinks">
               <Link href="/admin/audit">Журнал действий →</Link>
               <Link href="/admin/users">Пользователи →</Link>
-              <Link href="/admin/site-builder">Site Builder →</Link>
             </div>
           </div>
         </div>

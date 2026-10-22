@@ -41,7 +41,7 @@ export default async function ProPageBuilderPage({ params, searchParams }: PageP
   return <main className={`adminPage proBuilderAdminPage${embedded ? " isEmbedded" : ""}`}>
     {!embedded && <section className="adminHero compactAdminHero"><div className="container adminHeroInner">
       <div><p className="eyebrow">FC EDINEȚ • PAGE BUILDER PRO 2.0</p><h1>{proPageLabels[pageKey]}</h1><p>Простой редактор структуры страницы: секции слева, результат по центру, настройки справа.</p></div>
-      <div className="adminHeroActions"><Link href="/admin/site-builder" className="adminBack">← Редактор сайта</Link><Link href={proPageRoutes[pageKey]} target="_blank" className="rowAction muted">Открыть страницу ↗</Link></div>
+      <div className="adminHeroActions"><Link href="/admin/page-builder" className="adminBack">← Редактор страниц</Link><Link href={proPageRoutes[pageKey]} target="_blank" className="rowAction muted">Открыть страницу ↗</Link></div>
     </div></section>}
     <section className={`section adminSurface proBuilderSurface${embedded ? " embeddedSurface" : ""}`}><div className="proBuilderAdminContainer"><ProPageBuilder pageKey={pageKey} initial={layout} action={saveProPageLayout} locale={locale} heroDesign={heroDesign} albums={albums} videos={videos} partners={partners} embedded={embedded}/></div></section>
   </main>;

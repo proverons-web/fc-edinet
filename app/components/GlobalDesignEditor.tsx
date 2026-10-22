@@ -92,7 +92,7 @@ function HeaderControls({ config, setConfig, assets }: { config: HeaderDesignCon
       <Check label="Аккаунт / Войти" checked={config.show_account} onChange={(value) => update({ show_account: value })}/>
       <Check label="Ссылка Админка для staff" checked={config.show_admin_link} onChange={(value) => update({ show_admin_link: value })}/>
     </ControlSection>
-    <ControlSection title="Меню сайта"><p className="globalNavHint">Пункты, порядок, вложенность и названия RU / RO теперь редактируются в одном месте — в Меню сайта.</p><Link href="/admin/site-builder" className="primaryButton">Открыть Меню сайта →</Link></ControlSection>
+    
   </>;
 }
 

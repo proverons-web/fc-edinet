@@ -60,9 +60,6 @@ export default async function AdminHomePage() {
             <Link href="/admin" className="adminBack">
               ← Админка
             </Link>
-            <Link href="/admin/design" className="rowAction">
-              Visual Editor
-            </Link>
             <Link href="/" className="rowAction muted">
               Открыть главную ↗
             </Link>

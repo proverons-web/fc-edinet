@@ -33,6 +33,7 @@ export default async function AdminPage() {
       { title: "Статистика", text: "Статистика игроков, сезонов и матчей.", href: "/admin/statistics", icon: "S", kicker: "Данные" },
       { title: "Медиа", text: "Фотоальбомы, фотографии и YouTube-видео.", href: "/admin/media", icon: "◎", kicker: "Медиа" },
       { title: "Партнёры", text: "Спонсоры, логотипы, уровни и ссылки.", href: "/admin/partners", icon: "◇", kicker: "Партнёры" },
+      { title: "Клуб", text: "История, стадион, руководство, достижения и контакты.", href: "/admin/club", icon: "C", kicker: "Контент клуба" },
       { title: "Статистика сайта", text: "Уникальные посетители, просмотры, популярные страницы и источники переходов.", href: "/admin/site-analytics", icon: "AN", kicker: "Аналитика" },
     ] : []),
   ];
@@ -59,37 +60,7 @@ export default async function AdminPage() {
         <Stat label="На проверке" value={reviewResult.count} hint="ждут решения" accent={Boolean(reviewResult.count)} />
       </section>
 
-      {canEdit && (
-        <section className="adminFeaturePanel">
-          <div className="adminFeatureCopy">
-            <span className="adminFeatureIcon">✦</span>
-            <div>
-              <p className="eyebrow">ГЛАВНЫЙ РЕДАКТОР САЙТА</p>
-              <h2>Site Builder</h2>
-              <p>Главная точка для работы с внешним видом страниц: дизайн, контент, Desktop/Tablet/Mobile Preview и Live Page.</p>
-            </div>
-          </div>
-          <div className="adminFeatureActions">
-            <Link href="/admin/site-builder" className="primaryButton">Открыть Site Builder</Link>
-            <a href="/" target="_blank" rel="noreferrer" className="secondaryAdminButton">Открыть сайт ↗</a>
-          </div>
-        </section>
-      )}
-
       <DashboardSection eyebrow="КОНТЕНТ И ДАННЫЕ" title="Ежедневная работа" text="Разделы, с которыми редакция работает чаще всего." modules={contentModules} />
-
-      {canEdit && (
-        <DashboardSection
-          eyebrow="САЙТ И ОФОРМЛЕНИЕ"
-          title="Структура сайта"
-          text="Настройка страниц, глобального дизайна и клубного контента."
-          modules={[
-            { title: "Site Builder", text: "Все публичные страницы и Live Preview в одном редакторе.", href: "/admin/site-builder", icon: "✦", kicker: "Рекомендуется" },
-            { title: "Глобальный дизайн", text: "Header, Footer, цвета, шрифты и общая визуальная система.", href: "/admin/design", icon: "◈", kicker: "Дизайн" },
-            { title: "Клуб", text: "История, стадион, руководство, достижения и контакты.", href: "/admin/club", icon: "C", kicker: "Контент клуба" },
-          ]}
-        />
-      )}
 
       {canEdit && (
         <DashboardSection

@@ -10,8 +10,6 @@ const groups = [
     label: "ГЛАВНОЕ",
     items: [
       { href: "/admin", label: "Обзор", icon: "⌂", minRole: "author" as UserRole },
-      { href: "/admin/site-builder", label: "Редактор сайта", icon: "✦", minRole: "editor" as UserRole },
-      { href: "/admin/design", label: "Глобальный дизайн", icon: "◈", minRole: "editor" as UserRole },
     ],
   },
   {
@@ -50,8 +48,6 @@ const rank: Record<UserRole, number> = { fan: 0, author: 1, editor: 2, admin: 3 
 
 const adminRouteLabels: Record<string, string> = {
   admin: "Обзор",
-  "site-builder": "Редактор сайта",
-  design: "Глобальный дизайн",
   news: "Новости",
   players: "Команда",
   matches: "Календарь",
