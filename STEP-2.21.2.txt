@@ -1,9 +1,0 @@
-FC Edineț v2.21.2 — Admin Cleanup
-
-- Removed “Редактор сайта” from the Admin Center navigation.
-- Removed “Глобальный дизайн” from the Admin Center navigation.
-- Removed Site Builder / Global Design promo cards and buttons from the admin dashboard.
-- Removed internal quick links that surfaced these two experimental editors.
-- Preserved all underlying routes, components, database tables and migration 053 for future redesign work.
-- Club management remains available as a normal content module.
-- No Supabase migration required.

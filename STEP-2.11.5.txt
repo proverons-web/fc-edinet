@@ -1,9 +1,0 @@
-FC Edineț v2.11.5 — Match Protocol TypeScript Hotfix
-
-Fix:
-- restored the missing match: ClubMatch prop in HorizontalMatchTimeline props
-- restored the missing match: ClubMatch prop in TimelineSegment props
-- fixes Next.js production type-check errors TS2322 / TS2339 in app/matches/[id]/page.tsx
-- preserves all v2.11.4 timeline, ball, tooltip and diagnostics changes
-
-No SQL migration required.

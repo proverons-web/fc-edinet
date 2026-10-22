@@ -1,4 +1,0 @@
-FC Edineț v2.11.9
-
-- Removed the goal-count bubble beside the ball icon in public match lineups.
-- Multiple-goal information remains in the hover tooltip.

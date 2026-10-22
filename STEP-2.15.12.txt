@@ -1,7 +1,0 @@
-FC EDINEȚ v2.15.12 — Popover & VS Alignment Fix
-
-- Form popovers are no longer clipped by the form card.
-- Popovers render above the last-match card with corrected stacking.
-- Next-match teams use a strict 1fr / 64px / 1fr grid.
-- VS is locked to the mathematical center and cannot overlap team cards.
-- No database migration required.

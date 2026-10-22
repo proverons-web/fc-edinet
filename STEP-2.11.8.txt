@@ -1,6 +1,0 @@
-FC Edineț v2.11.8 — Restore original goal icons
-
-- Restored the original football goal icon: ⚽
-- Same icon used in match timeline and lineups.
-- All other v2.11.7 changes preserved.
-- No SQL migration required.

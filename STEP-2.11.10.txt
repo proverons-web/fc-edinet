@@ -1,4 +1,0 @@
-FC Edineț v2.11.10
-- restored goal count badge for players with 2+ goals
-- one goal keeps only the football icon
-- detailed goal minutes remain in tooltip

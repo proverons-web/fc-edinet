@@ -1,6 +1,0 @@
-FC EDINEȚ v2.15.7 — Three-column Match Command Center
-
-- Form stats: Position, Matches, Wins, Draws, Losses, Goals For-Against, Points.
-- Match command center: Next Match / Last Match + Form / latest YouTube video.
-- Recent matches section now uses the dark-blue visual language of Our Team.
-- No database migration required.

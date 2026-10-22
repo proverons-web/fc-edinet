@@ -1,7 +1,0 @@
-FC Edineț v2.11.3 — Ball Icon + Lineup Tooltips + Name Logic
-
-- Classic black/white football icon in timeline and lineups.
-- Reliable photo preview that opens only when hovering the player thumbnail.
-- Goal summary surname logic now respects FC Edineț (First + Surname) vs opponent (Surname + First).
-- Lineup event tooltips now include minute, event type, player, team, substitutions, and running score for goals.
-- Multi-event tooltips preserve line breaks.

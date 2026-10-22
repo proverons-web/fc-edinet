@@ -1,6 +1,0 @@
-v2.9.9 — Next Match Card Final Polish
-- Centered top chips and refined spacing.
-- Added subtle watermark club crest in the match card background.
-- Reworked date/time/stadium blocks without icons.
-- Switched hero match day formatting to full weekday names.
-- Enlarged team logos and strengthened team names for better balance.

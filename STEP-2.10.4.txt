@@ -1,9 +1,0 @@
-FC EDINEȚ v2.10.4 — Captain Required + Submit Lock Everywhere + Minute Focus Fix
-
-- A captain is now required before any populated lineup can be saved.
-- FC Edineț save button is disabled until a captain is selected; server validation also enforces exactly one captain.
-- Opponent lineup server validation also requires exactly one captain when players are present.
-- Remaining Match Center save/publish/import actions now use the same pending spinner/disabled state as match events.
-- Event Minute and +time fields select their current numeric value on mouse click only.
-- Tab/Shift+Tab navigation remains native and shirt-number fields still allow digit-by-digit entry.
-- No SQL migration required.

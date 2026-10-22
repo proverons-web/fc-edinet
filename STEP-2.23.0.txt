@@ -1,9 +1,0 @@
-FC Edineț v2.23.0 — Staff / Coaching Team
-
-- Added public Team Staff section on /team.
-- Added /admin/staff full CRUD.
-- Added team_staff table with RLS and audit logging.
-- Seeded six clearly marked placeholder staff records using ИМЯ / ФАМИЛИЯ.
-- Missing staff photos fall back to the FC Edineț crest.
-- Categories: coaching, medical, operations.
-- Migration: 056_team_staff.sql (already applied to production Supabase).

@@ -1,7 +1,0 @@
-FC Edineț v2.11.1 — Match Timeline refinement
-
-- Home events moved above the timeline, away events below.
-- Edge-safe tooltips in timeline and lineups.
-- Refined goal-ball icon.
-- Goal scorers summary under the score with centered accent dot.
-- Hover zoom for FC Edineț player photos in lineups.

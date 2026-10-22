@@ -453,9 +453,12 @@ export default async function Home() {
 
 function RecentMatchTeam({ team, locale }: { team: ClubMatch["home"]; locale: Locale }) {
   const logo = team?.logo_url || (team?.is_club ? CLUB_LOGO : null);
+  const fallback = (team?.short_name || team?.name || "FC").slice(0,3).toUpperCase();
   return (
     <div className={`fcRefRecentMatchTeam${team?.is_club ? " is-club" : " is-rival"}`}>
-      {logo ? <img src={logo} alt="" /> : <span>{(team?.short_name || team?.name || "FC").slice(0,3).toUpperCase()}</span>}
+      <div className="fcRefRecentMatchCrest" aria-hidden="true">
+        {logo ? <img src={logo} alt="" /> : <span>{fallback}</span>}
+      </div>
       <strong>{team?.short_name || team?.name || (locale === "ro" ? "Echipă" : "Команда")}</strong>
     </div>
   );

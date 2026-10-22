@@ -1,9 +1,0 @@
-FC Edineț v2.28.8 — Public Staff Publish Guard
-
-Launch Polish:
-- Public /staff now loads only active non-placeholder team_staff records.
-- Placeholder staff records remain available in /admin/staff for editing and completion.
-- If no real staff members are published yet, /staff shows the existing clean empty/publication state instead of placeholder cards.
-- Removed public placeholder badge/render path from staff cards.
-- Previous v2.28.7 next-match dimensions and large crest treatment are preserved.
-- Version synchronized to 2.28.8.

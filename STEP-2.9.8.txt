@@ -1,6 +1,0 @@
-v2.9.8 — Next Match Card Polish
-- Rebuilt the hero next-match card with a tighter, more modern matchday layout.
-- Added compact chips for competition, round, and status.
-- Reworked team presentation with labels, larger logos, and stronger hierarchy.
-- Replaced loose facts list with denser date/time/stadium fact cards.
-- Reduced dead space, improved CTA, and tuned responsive behavior.

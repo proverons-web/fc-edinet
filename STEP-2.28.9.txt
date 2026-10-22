@@ -1,8 +1,0 @@
-FC Edineț v2.28.9 — Recent Matches Crest Boost
-
-What changed
-- Removed public home/away helper labels from the recent matches cards on the homepage.
-- Removed the framed white badges around recent match crests.
-- Doubled the visual scale of recent match crests while preserving the existing card height.
-- Kept previous v2.28.x homepage sharp-corner styling intact.
-- Version synchronized to 2.28.9.

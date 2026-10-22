@@ -1,8 +1,0 @@
-FC Edineț v2.22.5 — Sticky Club CMS Toolbar
-
-- Fixed Club CMS document toolbar leaving the viewport while scrolling.
-- Removed overflow clipping from the document editor container.
-- Toolbar now sticks directly below the 64px admin topbar.
-- Increased stacking level so the toolbar stays above the document canvas.
-- Preserved rounded editor shell after removing overflow clipping.
-- No Supabase migration required.

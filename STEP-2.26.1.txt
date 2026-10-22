@@ -1,3 +1,0 @@
-FC Edineț v2.26.1 — Match Center list responsive layout fix.
-Actions no longer overlap workflow status chips; at regular admin widths the action group moves below the status grid.
-No database migration required.
