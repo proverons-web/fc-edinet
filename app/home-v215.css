@@ -523,3 +523,27 @@
   .fcV215DashboardForm .fcV215FormHead{justify-content:center!important;text-align:center!important}
   .fcV215DashboardForm .fcV215FormHead>div{justify-items:center!important;text-align:center!important;margin:0 auto!important}
 }
+
+/* v2.15.12 — unclipped form popovers + mathematically centered VS */
+.fcV215DashboardLeft{overflow:visible!important}
+.fcV215DashboardLastMatch{position:relative!important;z-index:1!important}
+.fcV215DashboardForm{position:relative!important;z-index:20!important;overflow:visible!important}
+.fcV215DashboardForm .fcV215FormDots{position:relative!important;z-index:30!important;overflow:visible!important}
+.fcV215FormDotWrap{z-index:31!important}
+.fcV215FormDotWrap:hover,.fcV215FormDotWrap:focus-within{z-index:80!important}
+.fcV215FormPopover{z-index:1000!important}
+
+@media(min-width:1251px){
+  .fcV215NextMatchDashboard .fcRefMatchTeams{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 64px minmax(0,1fr)!important;
+    column-gap:18px!important;
+    align-items:center!important;
+    justify-items:stretch!important;
+    position:relative!important;
+  }
+  .fcV215NextMatchDashboard .fcRefMatchTeams>.fcRefTeamBadge:first-child{grid-column:1!important;justify-self:stretch!important}
+  .fcV215NextMatchDashboard .fcRefMatchTeams>.fcRefVs{grid-column:2!important;justify-self:center!important;align-self:center!important;margin:0!important;position:relative!important;left:auto!important;right:auto!important;top:auto!important;transform:none!important;z-index:3!important}
+  .fcV215NextMatchDashboard .fcRefMatchTeams>.fcRefTeamBadge:last-child{grid-column:3!important;justify-self:stretch!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge{min-width:0!important;width:100%!important}
+}
