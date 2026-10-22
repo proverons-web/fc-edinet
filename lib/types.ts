@@ -10,6 +10,8 @@ export type Player = {
   height_cm: number | null;
   photo_url: string | null;
   bio: string | null;
+  bio_rich_content?: unknown | null;
+  bio_rich_content_ro?: unknown | null;
   bio_ro?: string | null;
   ro_translation_locked?: boolean;
   ro_translation_source_hash?: string | null;
@@ -230,6 +232,14 @@ export type StandingEntry = {
 export type ClubProfile = {
   id: number;
   club_name: string;
+  official_name?: string | null;
+  short_name?: string | null;
+  country?: string | null;
+  current_league?: string | null;
+  website_url?: string | null;
+  facebook_url?: string | null;
+  instagram_url?: string | null;
+  youtube_url?: string | null;
   club_name_ro?: string | null;
   city: string;
   city_ro?: string | null;
@@ -273,6 +283,8 @@ export type ClubLeader = {
   role: string;
   role_ro?: string | null;
   bio: string | null;
+  bio_rich_content?: unknown | null;
+  bio_rich_content_ro?: unknown | null;
   bio_ro?: string | null;
   ro_translation_locked?: boolean;
   ro_translation_source_hash?: string | null;
@@ -291,6 +303,8 @@ export type ClubAchievement = {
   title_ro?: string | null;
   description: string | null;
   description_ro?: string | null;
+  description_rich_content?: unknown | null;
+  description_rich_content_ro?: unknown | null;
   ro_translation_locked?: boolean;
   ro_translation_source_hash?: string | null;
   ro_translation_updated_at?: string | null;

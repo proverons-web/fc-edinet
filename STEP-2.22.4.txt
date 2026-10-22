@@ -1,0 +1,11 @@
+FC Edineț v2.22.4 — Club CMS Pro
+
+- Unified Word-like rich document editor for Club pages.
+- Sticky formatting toolbar: paragraph/H2/H3/quote, bold, italic, underline, strike, lists, links, alignment, undo/redo, image, divider.
+- Image inspector: width, text wrapping, radius, caption, alt and delete from document.
+- Rich inline formatting now persists in Club JSON and renders publicly.
+- Leadership and Achievements use rich documents for bios/descriptions.
+- Add-new forms stay on top; existing records are compact collapsible cards below.
+- About Club gains official name, short name, country, current league, website and social links.
+- Club dropdown rewritten to click/hover state using mouse/focus events and explicit rendering for cross-browser behavior.
+- Migration 055_club_cms_pro.sql.

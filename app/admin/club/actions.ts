@@ -210,7 +210,11 @@ export async function saveClubAbout(_previousState: ClubFormState, formData: For
   const { supabase, userId } = await requireEditor();
   const { data: current } = await supabase.from("club_profile").select("*").eq("id", 1).maybeSingle();
   const clubName = text(formData.get("club_name")) || current?.club_name || "FC Edineț";
+  const officialName = nullableText(formData.get("official_name"));
+  const shortName = nullableText(formData.get("short_name"));
   const city = text(formData.get("city")) || current?.city || "Edineț";
+  const country = nullableText(formData.get("country"));
+  const currentLeague = nullableText(formData.get("current_league"));
   const foundedRaw = text(formData.get("founded_year"));
   const foundedYear = foundedRaw ? Number(foundedRaw) : null;
   if (foundedYear !== null && (!Number.isInteger(foundedYear) || foundedYear < 1900 || foundedYear > 2100)) return { error: "Проверь год основания клуба." };
@@ -219,10 +223,13 @@ export async function saveClubAbout(_previousState: ClubFormState, formData: For
   const email = nullableText(formData.get("email"));
   const phone = nullableText(formData.get("phone"));
   const address = nullableText(formData.get("address"));
+  const websiteUrl = validOptionalUrl(formData.get("website_url")); if (websiteUrl === false) return { error: "Проверь адрес официального сайта." };
+  const facebookUrl = validOptionalUrl(formData.get("facebook_url")); if (facebookUrl === false) return { error: "Проверь ссылку Facebook." };
+  const instagramUrl = validOptionalUrl(formData.get("instagram_url")); if (instagramUrl === false) return { error: "Проверь ссылку Instagram." };
+  const youtubeUrl = validOptionalUrl(formData.get("youtube_url")); if (youtubeUrl === false) return { error: "Проверь ссылку YouTube." };
   const aboutRich = normalizeClubRichContent(formData.get("about_rich_content"));
   const aboutRichRo = normalizeClubRichContent(formData.get("about_rich_content_ro"));
-  const aboutText = clubRichContentToPlainText(aboutRich);
-  const aboutTextRo = clubRichContentToPlainText(aboutRichRo);
+  const aboutText = clubRichContentToPlainText(aboutRich); const aboutTextRo = clubRichContentToPlainText(aboutRichRo);
   const locked = formData.get("ro_translation_locked") === "on";
   const translation = await resolveRomanianTranslation({
     source:{club_name:clubName,city,club_colors:clubColors,motto,about_text:aboutText,address},
@@ -234,7 +241,13 @@ export async function saveClubAbout(_previousState: ClubFormState, formData: For
   if (hero instanceof File && hero.size > 0) { const uploaded = await uploadClubImage(supabase,userId,"hero",hero); if(!uploaded.ok)return {error:uploaded.error}; heroImageUrl=uploaded.publicUrl; }
   if(formData.get("clear_hero")==="on") heroImageUrl=null;
   const { error } = await supabase.from("club_profile").upsert({
-    id:1,club_name:clubName,club_name_ro:translation.values.club_name||null,city,city_ro:translation.values.city||null,founded_year:foundedYear,club_colors:clubColors,club_colors_ro:translation.values.club_colors||null,motto,motto_ro:translation.values.motto||null,email,phone,address,address_ro:translation.values.address||null,about_text:aboutText,about_text_ro:translation.values.about_text||null,about_rich_content:aboutRich,about_rich_content_ro:locked&&aboutRichRo?.blocks.length?aboutRichRo:null,hero_image_url:heroImageUrl,ro_translation_locked:locked,ro_translation_source_hash:translation.sourceHash,ro_translation_updated_at:translation.translatedAt??current?.ro_translation_updated_at??null
+    id:1, club_name:clubName, official_name:officialName, short_name:shortName, country, current_league:currentLeague,
+    website_url:websiteUrl || null, facebook_url:facebookUrl || null, instagram_url:instagramUrl || null, youtube_url:youtubeUrl || null,
+    club_name_ro:translation.values.club_name||null, city, city_ro:translation.values.city||null, founded_year:foundedYear,
+    club_colors:clubColors, club_colors_ro:translation.values.club_colors||null, motto, motto_ro:translation.values.motto||null,
+    email, phone, address, address_ro:translation.values.address||null, about_text:aboutText, about_text_ro:translation.values.about_text||null,
+    about_rich_content:aboutRich, about_rich_content_ro:locked&&aboutRichRo?.blocks.length?aboutRichRo:null, hero_image_url:heroImageUrl,
+    ro_translation_locked:locked, ro_translation_source_hash:translation.sourceHash, ro_translation_updated_at:translation.translatedAt??current?.ro_translation_updated_at??null
   },{onConflict:"id"});
   if(error)return {error:`Не удалось сохранить страницу: ${error.message}`};
   revalidatePath("/club/about"); revalidatePath("/admin/club/about"); revalidatePath("/");
@@ -270,8 +283,10 @@ export async function addLeader(
   const name = text(formData.get("name"));
   const role = text(formData.get("role"));
   const roleRo = nullableText(formData.get("role_ro"));
-  const bio = nullableText(formData.get("bio"));
-  const bioRo = nullableText(formData.get("bio_ro"));
+  const bioRich = normalizeClubRichContent(formData.get("bio_rich_content"));
+  const bioRichRo = normalizeClubRichContent(formData.get("bio_rich_content_ro"));
+  const bio = clubRichContentToPlainText(bioRich);
+  const bioRo = clubRichContentToPlainText(bioRichRo);
   const displayOrder = integer(formData.get("display_order"), 100);
   const isActive = formData.get("is_active") === "on";
 
@@ -307,6 +322,8 @@ export async function addLeader(
     role_ro: translation.values.role || null,
     bio,
     bio_ro: translation.values.bio || null,
+    bio_rich_content: bioRich,
+    bio_rich_content_ro: translationLocked && bioRichRo?.blocks.length ? bioRichRo : null,
     ro_translation_locked: translationLocked,
     ro_translation_source_hash: translation.sourceHash,
     ro_translation_updated_at: translation.translatedAt,
@@ -330,12 +347,12 @@ export async function updateLeader(formData: FormData) {
   const { supabase, userId } = await requireEditor();
   const id = text(formData.get("leader_id")); if (!id) return;
   const name = text(formData.get("name")); const role = text(formData.get("role")); if(!name || !role) return;
-  const roleRo = nullableText(formData.get("role_ro")); const bio = nullableText(formData.get("bio")); const bioRo = nullableText(formData.get("bio_ro"));
+  const roleRo = nullableText(formData.get("role_ro")); const bioRich = normalizeClubRichContent(formData.get("bio_rich_content")); const bioRichRo = normalizeClubRichContent(formData.get("bio_rich_content_ro")); const bio = clubRichContentToPlainText(bioRich); const bioRo = clubRichContentToPlainText(bioRichRo);
   const displayOrder = integer(formData.get("display_order"),100); const isActive=formData.get("is_active")==="on";
   const {data:existing}=await supabase.from("club_leadership").select("photo_url,ro_translation_source_hash,ro_translation_updated_at").eq("id",id).maybeSingle();
   let photoUrl=existing?.photo_url??null; const photo=formData.get("photo_file"); if(photo instanceof File&&photo.size>0){const up=await uploadClubImage(supabase,userId,"leadership",photo);if(!up.ok)return;photoUrl=up.publicUrl;} if(formData.get("clear_photo")==="on")photoUrl=null;
   const locked=formData.get("ro_translation_locked")==="on"; const translation=await resolveRomanianTranslation({source:{role,bio},manual:{role:roleRo,bio:bioRo},context:`FC Edinet leadership profile: ${name}`,locked,previousHash:existing?.ro_translation_source_hash??null});
-  await supabase.from("club_leadership").update({name,role,role_ro:translation.values.role||null,bio,bio_ro:translation.values.bio||null,photo_url:photoUrl,ro_translation_locked:locked,ro_translation_source_hash:translation.sourceHash,ro_translation_updated_at:translation.translatedAt??existing?.ro_translation_updated_at??null,display_order:displayOrder,is_active:isActive}).eq("id",id);
+  await supabase.from("club_leadership").update({name,role,role_ro:translation.values.role||null,bio,bio_ro:translation.values.bio||null,bio_rich_content:bioRich,bio_rich_content_ro:locked&&bioRichRo?.blocks.length?bioRichRo:null,photo_url:photoUrl,ro_translation_locked:locked,ro_translation_source_hash:translation.sourceHash,ro_translation_updated_at:translation.translatedAt??existing?.ro_translation_updated_at??null,display_order:displayOrder,is_active:isActive}).eq("id",id);
   revalidatePath("/club/leadership"); revalidatePath("/admin/club/leadership"); revalidatePath("/admin/club");
 }
 
@@ -362,8 +379,10 @@ export async function addAchievement(
   const year = nullableText(formData.get("year"));
   const title = text(formData.get("title"));
   const titleRo = nullableText(formData.get("title_ro"));
-  const description = nullableText(formData.get("description"));
-  const descriptionRo = nullableText(formData.get("description_ro"));
+  const descriptionRich = normalizeClubRichContent(formData.get("description_rich_content"));
+  const descriptionRichRo = normalizeClubRichContent(formData.get("description_rich_content_ro"));
+  const description = clubRichContentToPlainText(descriptionRich);
+  const descriptionRo = clubRichContentToPlainText(descriptionRichRo);
   const displayOrder = integer(formData.get("display_order"), 100);
   const isActive = formData.get("is_active") === "on";
 
@@ -385,6 +404,8 @@ export async function addAchievement(
     title_ro: translation.values.title || null,
     description,
     description_ro: translation.values.description || null,
+    description_rich_content: descriptionRich,
+    description_rich_content_ro: translationLocked && descriptionRichRo?.blocks.length ? descriptionRichRo : null,
     ro_translation_locked: translationLocked,
     ro_translation_source_hash: translation.sourceHash,
     ro_translation_updated_at: translation.translatedAt,
@@ -413,8 +434,10 @@ export async function updateAchievement(formData: FormData) {
   const year = nullableText(formData.get("year"));
   const title = text(formData.get("title"));
   const titleRo = nullableText(formData.get("title_ro"));
-  const description = nullableText(formData.get("description"));
-  const descriptionRo = nullableText(formData.get("description_ro"));
+  const descriptionRich = normalizeClubRichContent(formData.get("description_rich_content"));
+  const descriptionRichRo = normalizeClubRichContent(formData.get("description_rich_content_ro"));
+  const description = clubRichContentToPlainText(descriptionRich);
+  const descriptionRo = clubRichContentToPlainText(descriptionRichRo);
   const displayOrder = integer(formData.get("display_order"), 100);
   const isActive = formData.get("is_active") === "on";
 
@@ -441,6 +464,8 @@ export async function updateAchievement(formData: FormData) {
       title_ro: translation.values.title || null,
       description,
       description_ro: translation.values.description || null,
+      description_rich_content: descriptionRich,
+      description_rich_content_ro: translationLocked && descriptionRichRo?.blocks.length ? descriptionRichRo : null,
       ro_translation_locked: translationLocked,
       ro_translation_source_hash: translation.sourceHash,
       ro_translation_updated_at:
@@ -544,6 +569,12 @@ function nullableText(value: FormDataEntryValue | null) {
 function integer(value: FormDataEntryValue | null, fallback: number) {
   const parsed = Number(text(value));
   return Number.isInteger(parsed) ? parsed : fallback;
+}
+
+function validOptionalUrl(value: FormDataEntryValue | null): string | null | false {
+  const raw = text(value);
+  if (!raw) return null;
+  try { const url = new URL(raw); return url.protocol === "http:" || url.protocol === "https:" ? url.toString() : false; } catch { return false; }
 }
 
 function safeName(value: string) {
