@@ -81,7 +81,7 @@
 @media(max-width:1050px){.fcV215LastMatchHero,.fcV215FormStatsWide{min-height:0!important}}
 @media(max-width:760px){.fcV215PulseSection{padding:12px 0 18px!important}.fcV215FormSummary{gap:8px;font-size:8px}.fcV215FormSummary span+span{padding-left:0}.fcV215FormSummary span+span:before{display:none}.fcV215StatsWideRow{margin-left:-15px!important;margin-right:-15px!important}.fcV215MatchRailWide .fcRefRecentMatchCard{min-height:170px!important}}
 
-/* v2.15.4 — two-column match command center */
+/* v2.15.5 — two-column match command center */
 .fcV215MatchDashboardSection{
   padding:18px 0 22px!important;
   background:#eef3f9!important;
@@ -202,4 +202,21 @@
   .fcV215NextMatchDashboard .fcRefMatchButton{width:calc(100% - 30px)!important;margin:0 15px 15px!important}
   .fcV215DashboardFormSummary{grid-template-columns:1fr}
   .fcV215ResultsSection{padding:16px 0 24px}
+}
+
+/* v2.15.5 — mirrored match command center + larger last-match crests */
+@media(min-width:1051px){
+  .fcV215MatchDashboardSection{padding-top:32px!important;padding-bottom:24px!important}
+  .fcV215MatchDashboard{grid-template-columns:minmax(0,1.38fr) minmax(350px,.82fr)!important;gap:18px!important}
+  .fcV215NextMatchDashboard{order:1}
+  .fcV215DashboardLeft{order:2}
+  .fcV215DashboardLastMatch{padding:13px 16px 0!important}
+  .fcV215DashboardLastMatch .fcV215LastMatchTeams{grid-template-columns:minmax(0,1fr) 82px minmax(0,1fr)!important;gap:8px!important;margin:9px 0 6px!important}
+  .fcV215DashboardLastMatch .fcRefTeamBadge{gap:4px!important}
+  .fcV215DashboardLastMatch .fcRefTeamBadge img{width:86px!important;height:94px!important;object-fit:contain!important}
+  .fcV215DashboardLastMatch .fcRefTeamBadge>span{width:86px!important;height:86px!important}
+  .fcV215DashboardLastMatch .fcRefTeamBadge strong{font-size:10px!important;line-height:1.1!important;max-width:120px!important}
+  .fcV215DashboardLastMatch .fcV215LastScore strong{font-size:39px!important}
+  .fcV215DashboardLastMatch .fcV215LastScore small{font-size:7px!important}
+  .fcV215DashboardLastMatch .fcV215LastScore em{font-size:6px!important}
 }

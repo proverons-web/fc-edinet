@@ -1,4 +1,4 @@
-FC EDINEȚ v2.15.4 — Match Command Center
+FC EDINEȚ v2.15.5 — Match Command Center
 
 НОВОЕ
 - Карточка следующего матча перенесена из Hero в отдельный матчевый dashboard.
