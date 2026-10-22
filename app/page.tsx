@@ -16,6 +16,8 @@ import type {
   HomepageHero,
   HomepageSection,
   HomepageSettings,
+  MediaAlbum,
+  MediaVideo,
   NewsArticle,
   Partner,
   Player,
@@ -49,7 +51,7 @@ export default async function Home() {
   const sectionRows = (sectionsResult.data ?? []) as HomepageSection[];
   const sectionEnabled = (key: string) => sectionRows.find((row) => row.section_key === key)?.is_enabled !== false;
 
-  const [playersResult, newsResult, nextMatchResult, lastMatchResult, recentMatchesResult, competitionResult, partnersResult, pinnedNewsResult] = await Promise.all([
+  const [playersResult, newsResult, nextMatchResult, lastMatchResult, recentMatchesResult, competitionResult, partnersResult, pinnedNewsResult, albumsResult, videosResult] = await Promise.all([
     supabase
       .from("players")
       .select("*")
@@ -117,6 +119,20 @@ export default async function Home() {
           .lte("published_at", now)
           .maybeSingle()
       : Promise.resolve({ data: null, error: null }),
+    supabase
+      .from("media_albums")
+      .select("*")
+      .eq("is_published", true)
+      .order("event_date", { ascending: false, nullsFirst: false })
+      .order("created_at", { ascending: false })
+      .limit(3),
+    supabase
+      .from("media_videos")
+      .select("*")
+      .eq("is_published", true)
+      .order("published_at", { ascending: false, nullsFirst: false })
+      .order("created_at", { ascending: false })
+      .limit(3),
   ]);
 
   const players = (playersResult.data ?? []) as Player[];
@@ -131,6 +147,8 @@ export default async function Home() {
     ? allFinishedMatches.filter((match) => String(match.competition?.season ?? "").trim() === activeSeasonName)
     : allFinishedMatches;
   const partners = (partnersResult.data ?? []) as Partner[];
+  const mediaAlbums = (albumsResult.data ?? []) as MediaAlbum[];
+  const mediaVideos = (videosResult.data ?? []) as MediaVideo[];
 
   const leadNews = pinnedNews || allNews[0] || null;
   const latestNews = allNews.filter((article) => String(article.id) !== String(leadNews?.id ?? "")).slice(0, 3);
@@ -152,6 +170,24 @@ export default async function Home() {
       .order("goals_for", { ascending: false });
     standings = (data ?? []) as unknown as StandingEntry[];
   }
+
+  const formMatches = recentMatches.slice(0, 5);
+  const seasonPulse = recentMatches.reduce((acc, match) => {
+    const clubIsHome = Boolean(match.home?.is_club);
+    const gf = Number((clubIsHome ? match.home_score : match.away_score) ?? 0);
+    const ga = Number((clubIsHome ? match.away_score : match.home_score) ?? 0);
+    acc.played += 1;
+    acc.goalsFor += gf;
+    acc.goalsAgainst += ga;
+    if (gf > ga) acc.wins += 1;
+    else if (gf === ga) acc.draws += 1;
+    else acc.losses += 1;
+    return acc;
+  }, { played: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0 });
+  const clubStandingIndex = standings.findIndex((row) => Boolean(row.team?.is_club));
+  const clubStandingPosition = clubStandingIndex >= 0 ? clubStandingIndex + 1 : null;
+  const featuredAlbum = mediaAlbums[0] ?? null;
+  const featuredVideo = mediaVideos[0] ?? null;
 
   const heroTitleMain = localized(hero?.title_main, hero?.title_main_ro, locale) || (locale === "ro" ? "UN ORAȘ. O ECHIPĂ." : "ОДИН ГОРОД. ОДНА КОМАНДА.");
   const heroTitleAccent = localized(hero?.title_accent, hero?.title_accent_ro, locale) || (locale === "ro" ? "ȚINTE MAI MARI" : "БОЛЬШИЕ ЦЕЛИ");
@@ -269,6 +305,48 @@ export default async function Home() {
 
       {settings?.banner_enabled && <section className="fcRefAnnouncement"><div className="container fcRefAnnouncementInner"><div><small>{localized(settings.banner_eyebrow, settings.banner_eyebrow_ro, locale)}</small><strong>{localized(settings.banner_title, settings.banner_title_ro, locale)}</strong></div><Link href={settings.banner_button_href || "/club"}>{localized(settings.banner_button_text, settings.banner_button_text_ro, locale) || text.more} →</Link></div></section>}
 
+      {sectionEnabled("matches") && (lastMatch || formMatches.length > 0) && <section className="fcV215PulseSection">
+        <div className="container fcV215PulseGrid">
+          <div className="fcV215PulseIntro">
+            <small>{locale === "ro" ? "PULSUL SEZONULUI" : "ПУЛЬС СЕЗОНА"}</small>
+            <h2>{locale === "ro" ? "Forma echipei" : "Форма команды"}</h2>
+            <p>{locale === "ro" ? "Ultimele rezultate și cifrele esențiale ale FC Edineț într-un singur loc." : "Последние результаты и ключевые цифры FC Edineț — сразу на главной."}</p>
+          </div>
+
+          {lastMatch && <Link href={`/matches/${lastMatch.id}`} className="fcV215LastMatch">
+            <span className="fcV215CardLabel">{locale === "ro" ? "ULTIMUL MECI" : "ПОСЛЕДНИЙ МАТЧ"}</span>
+            <div className="fcV215LastMatchTeams">
+              <ReferenceTeam team={lastMatch.home} locale={locale} />
+              <div className="fcV215LastScore"><small>{formatMatchShortDate(lastMatch.kickoff, locale)}</small><strong>{lastMatch.home_score}:{lastMatch.away_score}</strong><em>{lastMatch.competition?.name || competition?.name || "Liga 2"}</em></div>
+              <ReferenceTeam team={lastMatch.away} locale={locale} />
+            </div>
+            <b>{locale === "ro" ? "PROTOCOLUL MECIULUI" : "ПРОТОКОЛ МАТЧА"} →</b>
+          </Link>}
+
+          <div className="fcV215FormCard">
+            <span className="fcV215CardLabel">{locale === "ro" ? "ULTIMELE 5" : "ПОСЛЕДНИЕ 5"}</span>
+            <div className="fcV215FormDots">
+              {formMatches.length ? formMatches.map((match) => {
+                const clubIsHome = Boolean(match.home?.is_club);
+                const gf = Number((clubIsHome ? match.home_score : match.away_score) ?? 0);
+                const ga = Number((clubIsHome ? match.away_score : match.home_score) ?? 0);
+                const result = gf > ga ? "W" : gf === ga ? "D" : "L";
+                const label = result === "W" ? (locale === "ro" ? "V" : "В") : result === "D" ? (locale === "ro" ? "E" : "Н") : (locale === "ro" ? "Î" : "П");
+                return <Link key={match.id} href={`/matches/${match.id}`} className={`fcV215FormDot is-${result.toLowerCase()}`} title={`${match.home?.short_name || match.home?.name} ${match.home_score}:${match.away_score} ${match.away?.short_name || match.away?.name}`}>{label}</Link>;
+              }) : <span className="fcV215NoData">—</span>}
+            </div>
+            <p>{locale === "ro" ? `${seasonPulse.wins} victorii · ${seasonPulse.draws} egaluri · ${seasonPulse.losses} înfrângeri` : `${seasonPulse.wins} побед · ${seasonPulse.draws} ничьих · ${seasonPulse.losses} поражений`}</p>
+          </div>
+
+          <div className="fcV215SeasonNumbers">
+            <span><small>{locale === "ro" ? "MECIURI" : "МАТЧИ"}</small><strong>{seasonPulse.played}</strong></span>
+            <span><small>{locale === "ro" ? "GOLURI" : "ГОЛЫ"}</small><strong>{seasonPulse.goalsFor}</strong></span>
+            <span><small>{locale === "ro" ? "POZIȚIE" : "МЕСТО"}</small><strong>{clubStandingPosition ? `${clubStandingPosition}` : "—"}</strong></span>
+            <Link href="/statistics">{locale === "ro" ? "STATISTICI" : "СТАТИСТИКА"} →</Link>
+          </div>
+        </div>
+      </section>}
+
       {sectionEnabled("matches") && recentMatches.length > 0 && (
         <section className="fcRefRecentMatchesSection">
           <div className="container">
@@ -346,6 +424,25 @@ export default async function Home() {
         </div>
       </section>}
 
+      {sectionEnabled("media") && (featuredAlbum || featuredVideo) && <section className="fcV215MediaSection">
+        <div className="container">
+          <div className="fcV215SectionHead">
+            <div><small>FC EDINEȚ • MEDIA</small><h2>{locale === "ro" ? "Mai aproape de echipă" : "Ближе к команде"}</h2></div>
+            <Link href="/media">{locale === "ro" ? "TOT MEDIA" : "ВСЕ МЕДИА"} →</Link>
+          </div>
+          <div className="fcV215MediaGrid">
+            {featuredAlbum && <Link href={`/media/${featuredAlbum.slug}`} className="fcV215AlbumCard">
+              <div className="fcV215MediaImage">{featuredAlbum.cover_image_url ? <img src={featuredAlbum.cover_image_url} alt={featuredAlbum.title} loading="lazy" decoding="async" /> : <span>FC EDINEȚ</span>}<i>{locale === "ro" ? "FOTO" : "ФОТО"}</i></div>
+              <div><small>{featuredAlbum.event_date ? formatMediaDate(featuredAlbum.event_date, locale) : (locale === "ro" ? "GALERIE" : "ГАЛЕРЕЯ")}</small><h3>{featuredAlbum.title}</h3>{featuredAlbum.location && <p>{featuredAlbum.location}</p>}<b>{locale === "ro" ? "DESCHIDE GALERIA" : "ОТКРЫТЬ АЛЬБОМ"} →</b></div>
+            </Link>}
+            {featuredVideo && <a href={featuredVideo.youtube_url} target="_blank" rel="noreferrer" className="fcV215VideoCard">
+              <div className="fcV215MediaImage">{featuredVideo.youtube_id ? <img src={`https://i.ytimg.com/vi/${featuredVideo.youtube_id}/hqdefault.jpg`} alt={featuredVideo.title} loading="lazy" decoding="async" /> : <span>FC EDINEȚ</span>}<i>VIDEO</i><em className="fcV215Play">▶</em></div>
+              <div><small>{featuredVideo.published_at ? formatMediaDate(featuredVideo.published_at, locale) : "YOUTUBE"}</small><h3>{featuredVideo.title}</h3>{featuredVideo.description && <p>{featuredVideo.description}</p>}<b>{locale === "ro" ? "VEZI VIDEO" : "СМОТРЕТЬ ВИДЕО"} →</b></div>
+            </a>}
+          </div>
+        </div>
+      </section>}
+
       {sectionEnabled("partners") && <section className="fcRefPartnersStrip"><div className="container fcRefPartnersInner"><strong>{locale === "ro" ? "PARTENERII NOȘTRI" : "НАШИ ПАРТНЁРЫ"}</strong><div className="fcRefPartnerLogos">{partners.map((partner) => partner.website_url ? <a key={partner.id} href={partner.website_url} target="_blank" rel="noreferrer"><img src={partner.logo_url} alt={partner.name} loading="lazy" decoding="async"/></a> : <span key={partner.id}><img src={partner.logo_url} alt={partner.name} loading="lazy" decoding="async"/></span>)}</div><Link href="/partners">{locale === "ro" ? "ÎMPREUNĂ CONSTRUIM MAI MULT" : "ВМЕСТЕ СТРОИМ БОЛЬШЕ"}</Link></div></section>}
     </main>
   );
@@ -395,6 +492,10 @@ function formatMatchTime(value: string, locale: Locale) {
 
 function formatMatchShortDate(value: string, locale: Locale) {
   return new Intl.DateTimeFormat(dateLocale(locale), { day: "2-digit", month: "short", timeZone: "Europe/Chisinau" }).format(new Date(value));
+}
+
+function formatMediaDate(value: string, locale: Locale) {
+  return new Intl.DateTimeFormat(dateLocale(locale), { day: "2-digit", month: "long", year: "numeric", timeZone: "Europe/Chisinau" }).format(new Date(value));
 }
 
 function legacyHeroCoordinates(position?: HomepageHero["background_position"] | null) {
