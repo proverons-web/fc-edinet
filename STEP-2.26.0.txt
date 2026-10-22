@@ -1,0 +1,11 @@
+FC Edinet v2.26.0 — Match Center 2.0
+
+- Rebuilt admin Match Center as a six-step workbench.
+- Added sticky stage navigation.
+- Added compact basic match editor for status, score, stadium, round and internal notes.
+- Kept date/teams/competition behind the advanced match editor to prevent accidental protocol damage.
+- Unified lineups, events/timeline, team statistics, report/MVP and publication on one page.
+- Added editor for match_team_statistics (home/away) with nullable real-data semantics.
+- Added publication readiness checklist.
+- Improved Match Center index with team-statistics and publication state.
+- No Supabase migration required; uses existing schema through migration 057.

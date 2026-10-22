@@ -63,9 +63,10 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
     matchesQuery = matchesQuery.in("status", ["scheduled", "live", "postponed"]);
   }
 
-  const [matchesResult, progressResult] = await Promise.all([
+  const [matchesResult, progressResult, reportsResult] = await Promise.all([
     matchesQuery,
     supabase.from("match_center_progress").select("*"),
+    supabase.from("match_reports").select("match_id,is_published"),
   ]);
 
   if (progressResult.error) {
@@ -75,10 +76,11 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
   const matches = (matchesResult.data ?? []) as unknown as ClubMatch[];
   const progressRows = (progressResult.data ?? []) as MatchCenterProgress[];
   const progressByMatch = new Map(progressRows.map((row) => [String(row.match_id), row]));
+  const publishedByMatch = new Map((reportsResult.data ?? []).map((row) => [String(row.match_id), Boolean(row.is_published)]));
 
   const total = matches.length;
   const finished = matches.filter((match) => match.status === "finished").length;
-  const foundations = matches.filter((match) => progressByMatch.get(String(match.id))?.report_has_metadata).length;
+  const published = matches.filter((match) => publishedByMatch.get(String(match.id))).length;
   const playersComplete = matches.filter((match) => progressByMatch.get(String(match.id))?.player_stats_status === "complete").length;
 
   return (
@@ -86,9 +88,9 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
       <section className="adminHero compactAdminHero">
         <div className="container adminHeroInner">
           <div>
-            <p className="eyebrow">FC EDINEȚ • MATCH CENTER</p>
+            <p className="eyebrow">FC EDINEȚ • MATCH CENTER 2.0</p>
             <h1>Матч-центр</h1>
-            <p>Единая точка для состава, событий, статистики игроков, отчёта и публикации протокола.</p>
+            <p>Выбери матч и веди его по одному рабочему потоку: составы → события → статистика → отчёт → публикация.</p>
           </div>
           <div className="adminHeroActions">
             <Link href="/admin" className="adminBack">← Админка</Link>
@@ -102,7 +104,7 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
           <section className="matchCenterSummary">
             <SummaryStat label="Матчей в списке" value={total} />
             <SummaryStat label="Завершено" value={finished} />
-            <SummaryStat label="Основа отчёта" value={foundations} />
+            <SummaryStat label="Опубликовано" value={published} />
             <SummaryStat label="Игроки готовы" value={playersComplete} />
           </section>
 
@@ -138,10 +140,12 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
                   ? `${match.home_score ?? 0} : ${match.away_score ?? 0}`
                   : "VS";
 
-                const hasCompleteProtocol = Boolean(
-                  progress?.report_has_metadata &&
-                  progress?.player_stats_status !== "empty" &&
-                  (progress?.events_count ?? 0) > 0
+                const isPublished = Boolean(publishedByMatch.get(String(match.id)));
+                const hasCompleteProtocol = isPublished || Boolean(
+                  match.status === "finished" &&
+                  (progress?.events_count ?? 0) > 0 &&
+                  (progress?.home_starters ?? 0) === 11 &&
+                  (progress?.away_starters ?? 0) === 11
                 );
 
                 return (
@@ -184,12 +188,22 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
                         value={`${progress?.home_starters ?? 0}/11 • ${progress?.away_starters ?? 0}/11`}
                         tone={(progress?.home_starters ?? 0) === 11 && (progress?.away_starters ?? 0) === 11 ? "ready" : ((progress?.home_starters ?? 0) + (progress?.away_starters ?? 0)) > 0 ? "draft" : "empty"}
                       />
+                      <WorkflowChip
+                        label="Статистика"
+                        value={(progress?.team_stats_filled ?? 0) > 0 ? "Есть" : "Пусто"}
+                        tone={(progress?.team_stats_filled ?? 0) > 0 ? "ready" : "empty"}
+                      />
+                      <WorkflowChip
+                        label="Протокол"
+                        value={isPublished ? "Опубликован" : "Черновик"}
+                        tone={isPublished ? "ready" : "draft"}
+                      />
                     </div>
 
                     <div className="matchCenterRowActions">
                       <Link href={`/admin/match-center/${match.id}`} className="primaryButton">Открыть матч-центр</Link>
                       {match.status === "finished" && (
-                        <Link href={`/admin/match-center/${match.id}#squad-stats`} className="rowAction muted">Состав и статистика</Link>
+                        <Link href={`/admin/match-center/${match.id}#lineups`} className="rowAction muted">Составы</Link>
                       )}
                     </div>
                   </article>

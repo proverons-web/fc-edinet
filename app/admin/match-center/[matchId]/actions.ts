@@ -1120,3 +1120,116 @@ export async function saveClubSquadAndStats(formData: FormData) {
   go(matchId, { saved: completed ? "squad-complete" : "squad-draft" });
 }
 
+
+const MATCH_CENTER_STATUSES = new Set(["scheduled", "live", "finished", "postponed", "cancelled"]);
+
+function nullableNumber(
+  formData: FormData,
+  key: string,
+  min: number,
+  max: number,
+  label: string,
+  matchId: string,
+  decimals = false,
+) {
+  const raw = text(formData, key);
+  if (!raw) return null;
+  const value = Number(raw.replace(",", "."));
+  if (!Number.isFinite(value) || value < min || value > max || (!decimals && !Number.isInteger(value))) {
+    go(matchId, { error: `${label}: допустимо значение от ${min} до ${max}.` });
+  }
+  return value;
+}
+
+export async function saveMatchBasics(formData: FormData) {
+  const { supabase } = await requireEditor();
+  const matchId = text(formData, "match_id");
+  if (!/^\d+$/.test(matchId)) redirect("/admin/match-center");
+
+  const status = text(formData, "status");
+  if (!MATCH_CENTER_STATUSES.has(status)) go(matchId, { error: "Некорректный статус матча." });
+
+  const homeScore = nullableNumber(formData, "home_score", 0, 99, "Счёт хозяев", matchId);
+  const awayScore = nullableNumber(formData, "away_score", 0, 99, "Счёт гостей", matchId);
+  if (status === "finished" && (homeScore == null || awayScore == null)) {
+    go(matchId, { error: "Для завершённого матча укажи итоговый счёт." });
+  }
+
+  const { error } = await supabase
+    .from("matches")
+    .update({
+      status,
+      home_score: status === "scheduled" ? null : homeScore,
+      away_score: status === "scheduled" ? null : awayScore,
+      stadium: nullableText(formData, "stadium", 180),
+      round: nullableText(formData, "round", 120),
+      notes: nullableText(formData, "notes", 2000),
+    })
+    .eq("id", matchId);
+
+  if (error) go(matchId, { error: `Не удалось сохранить основные данные: ${error.message}` });
+
+  revalidateMatchCenter(matchId);
+  revalidatePath("/");
+  revalidatePath("/matches");
+  revalidatePath(`/matches/${matchId}`);
+  revalidatePath("/admin/matches");
+  go(matchId, { saved: "basics" });
+}
+
+export async function saveMatchTeamStatistics(formData: FormData) {
+  const { supabase, userId } = await requireEditor();
+  const matchId = text(formData, "match_id");
+  if (!/^\d+$/.test(matchId)) redirect("/admin/match-center");
+
+  const match = await loadMatchContext(supabase, matchId);
+
+  const rows = ([
+    ["home", String(match.home_team_id)],
+    ["away", String(match.away_team_id)],
+  ] as const).map(([side, teamId]) => {
+    const p = `${side}_`;
+    const shots = nullableNumber(formData, `${p}shots`, 0, 100, `${side}: удары`, matchId);
+    const shotsOnTarget = nullableNumber(formData, `${p}shots_on_target`, 0, 100, `${side}: удары в створ`, matchId);
+    const passesAttempted = nullableNumber(formData, `${p}passes_attempted`, 0, 1500, `${side}: пасы`, matchId);
+    const passesCompleted = nullableNumber(formData, `${p}passes_completed`, 0, 1500, `${side}: точные пасы`, matchId);
+
+    if (shots != null && shotsOnTarget != null && shotsOnTarget > shots) {
+      go(matchId, { error: `${side === "home" ? "Хозяева" : "Гости"}: удары в створ не могут превышать все удары.` });
+    }
+    if (passesAttempted != null && passesCompleted != null && passesCompleted > passesAttempted) {
+      go(matchId, { error: `${side === "home" ? "Хозяева" : "Гости"}: точные пасы не могут превышать все пасы.` });
+    }
+
+    return {
+      match_id: matchId,
+      team_id: teamId,
+      side,
+      possession_percent: nullableNumber(formData, `${p}possession_percent`, 0, 100, `${side}: владение`, matchId, true),
+      shots,
+      shots_on_target: shotsOnTarget,
+      corners: nullableNumber(formData, `${p}corners`, 0, 60, `${side}: угловые`, matchId),
+      fouls: nullableNumber(formData, `${p}fouls`, 0, 80, `${side}: фолы`, matchId),
+      offsides: nullableNumber(formData, `${p}offsides`, 0, 40, `${side}: офсайды`, matchId),
+      yellow_cards: nullableNumber(formData, `${p}yellow_cards`, 0, 20, `${side}: жёлтые карточки`, matchId),
+      red_cards: nullableNumber(formData, `${p}red_cards`, 0, 10, `${side}: красные карточки`, matchId),
+      passes_attempted: passesAttempted,
+      passes_completed: passesCompleted,
+      saves: nullableNumber(formData, `${p}saves`, 0, 100, `${side}: сейвы`, matchId),
+      expected_goals: nullableNumber(formData, `${p}expected_goals`, 0, 30, `${side}: xG`, matchId, true),
+      notes: nullableText(formData, `${p}notes`, 600),
+      updated_by: userId,
+      created_by: userId,
+    };
+  });
+
+  const { error } = await supabase
+    .from("match_team_statistics")
+    .upsert(rows, { onConflict: "match_id,side" });
+
+  if (error) go(matchId, { error: `Не удалось сохранить командную статистику: ${error.message}` });
+
+  revalidateMatchCenter(matchId);
+  revalidatePath(`/matches/${matchId}`);
+  go(matchId, { saved: "team-stats" });
+}
