@@ -1411,3 +1411,80 @@
   .fcV215ResultsSection .fcRefRecentMatchTeam strong{width:82px!important;min-width:82px!important;max-width:82px!important;min-height:24px!important;max-height:24px!important;}
   .fcV215ResultsSection .fcRefRecentMatchScore{width:68px!important;min-width:68px!important;}
 }
+
+
+/* ============================================================
+   FC EDINEȚ v2.28.14 — RECENT MATCH CARD COMPACTION
+   ============================================================ */
+/* Same fixed logo boxes, but with tighter side padding and tighter spacing
+   around the score so the composition feels denser and less empty. */
+.fcV215ResultsSection .fcRefRecentMatchBody{
+  grid-template-columns:82px 72px 82px!important;
+  column-gap:6px!important;
+  padding:4px 10px 6px!important;
+}
+.fcV215ResultsSection .fcRefRecentMatchTeam{
+  width:82px!important;
+  min-width:82px!important;
+  max-width:82px!important;
+  grid-template-rows:104px 26px!important;
+  min-height:130px!important;
+}
+.fcV215ResultsSection .fcRefRecentMatchLogoBox{
+  width:82px!important;
+  height:104px!important;
+}
+.fcV215ResultsSection .fcRefRecentMatchCrest{
+  width:76px!important;
+  height:88px!important;
+}
+.fcV215ResultsSection .fcRefRecentMatchCrest img,
+.fcV215ResultsSection .fcRefRecentMatchCrest span{
+  width:76px!important;
+  height:88px!important;
+}
+.fcV215ResultsSection .fcRefRecentMatchTeam strong{
+  width:82px!important;
+  min-width:82px!important;
+  max-width:82px!important;
+}
+.fcV215ResultsSection .fcRefRecentMatchScore{
+  width:72px!important;
+  min-width:72px!important;
+}
+
+@media(max-width:760px){
+  .fcV215ResultsSection .fcRefRecentMatchBody{
+    grid-template-columns:78px 68px 78px!important;
+    column-gap:5px!important;
+    padding:4px 9px 6px!important;
+  }
+  .fcV215ResultsSection .fcRefRecentMatchTeam{
+    width:78px!important; min-width:78px!important; max-width:78px!important;
+    grid-template-rows:96px 26px!important; min-height:122px!important;
+  }
+  .fcV215ResultsSection .fcRefRecentMatchLogoBox{width:78px!important;height:96px!important;}
+  .fcV215ResultsSection .fcRefRecentMatchCrest{width:72px!important;height:82px!important;}
+  .fcV215ResultsSection .fcRefRecentMatchCrest img,
+  .fcV215ResultsSection .fcRefRecentMatchCrest span{width:72px!important;height:82px!important;}
+  .fcV215ResultsSection .fcRefRecentMatchTeam strong{width:78px!important;min-width:78px!important;max-width:78px!important;}
+  .fcV215ResultsSection .fcRefRecentMatchScore{width:68px!important;min-width:68px!important;}
+}
+
+@media(max-width:460px){
+  .fcV215ResultsSection .fcRefRecentMatchBody{
+    grid-template-columns:72px 64px 72px!important;
+    column-gap:4px!important;
+    padding:4px 8px 6px!important;
+  }
+  .fcV215ResultsSection .fcRefRecentMatchTeam{
+    width:72px!important; min-width:72px!important; max-width:72px!important;
+    grid-template-rows:88px 24px!important; min-height:112px!important;
+  }
+  .fcV215ResultsSection .fcRefRecentMatchLogoBox{width:72px!important;height:88px!important;}
+  .fcV215ResultsSection .fcRefRecentMatchCrest{width:66px!important;height:76px!important;}
+  .fcV215ResultsSection .fcRefRecentMatchCrest img,
+  .fcV215ResultsSection .fcRefRecentMatchCrest span{width:66px!important;height:76px!important;}
+  .fcV215ResultsSection .fcRefRecentMatchTeam strong{width:72px!important;min-width:72px!important;max-width:72px!important;min-height:24px!important;max-height:24px!important;}
+  .fcV215ResultsSection .fcRefRecentMatchScore{width:64px!important;min-width:64px!important;}
+}

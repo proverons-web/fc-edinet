@@ -1,8 +1,0 @@
-FC Edineț v2.28.13 — Recent Match Logo Boxes
-
-What changed
-- Added explicit fixed-size logo-box blocks for home and away teams in homepage recent match cards.
-- Centered each crest inside its own identical logo box.
-- Locked equal spacing from card edges and from the central score block.
-- Preserved no frames and no home/away helper labels.
-- Version synchronized to 2.28.13.
