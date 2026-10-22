@@ -9,8 +9,8 @@ type Props={searchParams?:Promise<Record<string,string|string[]|undefined>>};
 const systemPages=[
  {key:"home",label:"Главная",preview:"/",design:"/admin/design?page=home",content:"/admin/home",kind:"system" as const},
  {key:"news",label:"Новости",preview:"/news",design:"/admin/design?page=news",content:"/admin/news",kind:"system" as const},
- {key:"team_squad",label:"Команда — Состав",preview:"/team/squad",design:"/admin/design?page=team",content:"/admin/players",kind:"system" as const},
- {key:"team_staff",label:"Команда — Тренерский штаб",preview:"/team/staff",design:"/admin/design?page=team",content:"/admin/staff",kind:"system" as const},
+ {key:"team_squad",label:"Сезон 26/27 — Состав",preview:"/team",design:"/admin/design?page=team",content:"/admin/players",kind:"system" as const},
+ {key:"team_staff",label:"Сезон 26/27 — Тренерский штаб",preview:"/staff",design:"/admin/design?page=team",content:"/admin/staff",kind:"system" as const},
  {key:"matches",label:"Календарь",preview:"/matches",design:"/admin/design?page=matches",content:"/admin/matches",kind:"system" as const},
  {key:"statistics",label:"Статистика",preview:"/statistics",design:"/admin/statistics",content:"/admin/statistics",kind:"system" as const},
  {key:"standings",label:"Таблица",preview:"/standings",design:"/admin/design?page=standings",content:"/admin/standings",kind:"system" as const},

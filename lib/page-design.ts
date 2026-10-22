@@ -20,7 +20,7 @@ export type SitePageDesignCatalogItem = {
 
 export const sitePageDesignCatalog: SitePageDesignCatalogItem[] = [
   { key: "news", label: "Новости", group: "sections", route: "/news", editableText: true, supportsContentImage: false, preview: { eyebrow: "FC EDINEȚ", title: "Новости", description: "Последние новости и события футбольного клуба." } },
-  { key: "team", label: "Команда — Состав", group: "sections", route: "/team/squad", editableText: true, supportsContentImage: false, preview: { eyebrow: "FC EDINEȚ", title: "Состав", description: "Игроки основного состава FC Edineț." } },
+  { key: "team", label: "Сезон 26/27 — Состав", group: "sections", route: "/team", editableText: true, supportsContentImage: false, preview: { eyebrow: "FC EDINEȚ", title: "Состав", description: "Игроки основного состава FC Edineț." } },
   { key: "matches", label: "Матчи", group: "sections", route: "/matches", editableText: true, supportsContentImage: false, preview: { eyebrow: "FC EDINEȚ", title: "Матчи", description: "Календарь, результаты и ближайшие игры клуба." } },
   { key: "standings", label: "Турнирная таблица", group: "sections", route: "/standings", editableText: true, supportsContentImage: false, preview: { eyebrow: "FC EDINEȚ", title: "Турнирная таблица", description: "Положение команд в текущем соревновании." } },
   { key: "club", label: "Клуб", group: "sections", route: "/club/about", editableText: false, supportsContentImage: true, preview: { eyebrow: "EDINEȚ • MOLDOVA", title: "FC EDINEȚ", description: "История, стадион и люди клуба." } },

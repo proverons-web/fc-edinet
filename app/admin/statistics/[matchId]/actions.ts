@@ -259,7 +259,7 @@ export async function saveMatchStatistics(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/admin/statistics");
   revalidatePath(`/admin/statistics/${matchId}`);
-  revalidatePath("/team/squad");
+  revalidatePath("/team");
   revalidatePath("/statistics");
 
   go(matchId, { saved: completed ? "complete" : "draft" });

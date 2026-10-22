@@ -36,6 +36,7 @@ const RESERVED_SITE_SLUGS = new Set([
   "search",
   "news",
   "team",
+  "staff",
   "statistics",
   "matches",
   "standings",

@@ -243,7 +243,7 @@ export async function savePlayer(
   }
 
   revalidatePath("/");
-  revalidatePath("/team/squad");
+  revalidatePath("/team");
   revalidatePath(`/team/${slug}`);
   revalidatePath("/admin");
   revalidatePath("/admin/players");
@@ -287,7 +287,7 @@ export async function deletePlayer(formData: FormData) {
   }
 
   revalidatePath("/");
-  revalidatePath("/team/squad");
+  revalidatePath("/team");
   revalidatePath(`/team/${player.slug}`);
   revalidatePath("/admin");
   revalidatePath("/admin/players");

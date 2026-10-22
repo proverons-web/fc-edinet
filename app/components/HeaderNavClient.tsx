@@ -61,7 +61,7 @@ export default function HeaderNavClient({
 
   const linkMap: Record<HeaderNavKey, { href: string; label: string }> = {
     news: { href: "/news", label: labels.nav.news },
-    team: { href: "/team/squad", label: labels.nav.team },
+    team: { href: "/team", label: labels.nav.team },
     statistics: { href: "/statistics", label: labels.nav.statistics },
     matches: { href: "/matches", label: labels.nav.matches },
     standings: { href: "/standings", label: labels.nav.standings },
@@ -155,8 +155,8 @@ export default function HeaderNavClient({
           return <div
             className={`managedMenuGroup${isOpen ? " isOpen" : ""}`}
             key={item.id}
-            onPointerEnter={() => openManagedMenu(item.id)}
-            onPointerLeave={scheduleManagedMenuClose}
+            onMouseEnter={() => openManagedMenu(item.id)}
+            onMouseLeave={scheduleManagedMenuClose}
             onBlur={(event) => {
               if (!event.currentTarget.contains(event.relatedTarget as Node | null)) scheduleManagedMenuClose();
             }}
@@ -177,7 +177,7 @@ export default function HeaderNavClient({
                   requestAnimationFrame(() => trigger.parentElement?.querySelector<HTMLAnchorElement>(".managedMenuDropdown a")?.focus());
                 }
               }}
-            >{localizedMenuLabel(item)}</button>
+            >{localizedMenuLabel(item)}<span className="managedMenuBars" aria-hidden="true"><i/><i/><i/></span></button>
             <div className="managedMenuDropdown" id={dropdownId} role="menu" aria-hidden={!isOpen}>
               {children.map((child) => <Link role="menuitem" key={child.id} href={child.href} className={isActive(child.href) ? "isActive" : undefined} onClick={() => setOpenManagedMenuId(null)}>{localizedMenuLabel(child)}</Link>)}
             </div>

@@ -3778,25 +3778,30 @@ body:has(.adminEmbedded){background:#f3f6fa}
 .siteBuilderNotice{max-width:1180px;margin:14px auto 0;padding:12px 16px;border:1px solid #c9d9ea;border-radius:12px;background:#f7fbff;color:#0b2f57;font-size:14px;font-weight:700;box-shadow:0 8px 20px rgba(7,35,68,.06)}
 .builderFieldHint{display:block;margin-top:7px;color:#70839a;font-size:12px;line-height:1.45;font-weight:500}
 
-/* ===== FC EDINET v2.28.0 — canonical cross-browser managed navigation ===== */
-.globalHeader .menu .managedMenuGroup{position:relative;display:flex;align-items:stretch;min-width:0}
-.globalHeader .menu .managedMenuTrigger{position:relative;display:flex;min-height:76px;align-items:center;gap:6px;padding:0;border:0;background:transparent;color:#fff;font:inherit;font-weight:inherit;text-transform:inherit;letter-spacing:inherit;opacity:.9;cursor:pointer;white-space:nowrap;-webkit-appearance:none;appearance:none}
-.globalHeader .menu .managedMenuTrigger:after{content:"⌄";font-size:9px;line-height:1;opacity:.72;transform:translateY(-1px);transition:transform .16s ease}
+/* ===== FC EDINET v2.28.1 — season navigation + cross-browser dropdown ===== */
+.globalHeader .menu{gap:0!important;align-self:stretch}
+.globalHeader .menu>a,.globalHeader .menu>.managedMenuGroup{flex:0 0 clamp(96px,6.2vw,112px);width:clamp(96px,6.2vw,112px);min-width:0;border-left:1px solid rgba(255,255,255,.055)}
+.globalHeader .menu>a:last-child,.globalHeader .menu>.managedMenuGroup:last-child{border-right:1px solid rgba(255,255,255,.055)}
+.globalHeader .menu>a{justify-content:center;padding:0 8px;text-align:center;white-space:nowrap;background:transparent}
+.globalHeader .menu>a:hover,.globalHeader .menu>a.isActive{background:rgba(26,72,122,.46)}
+.globalHeader .menu .managedMenuGroup{position:relative;display:flex;align-items:stretch}
+.globalHeader .menu .managedMenuTrigger{position:relative;display:flex;width:100%;min-height:76px;align-items:center;justify-content:center;gap:8px;padding:0 8px;border:0;background:transparent;color:#fff;font:inherit;font-weight:inherit;text-transform:inherit;letter-spacing:inherit;opacity:.9;cursor:pointer;white-space:nowrap;-webkit-appearance:none;appearance:none}
 .globalHeader .menu .managedMenuTrigger:before{content:"";position:absolute;left:50%;right:50%;bottom:0;height:3px;background:var(--fc-ref-yellow);transition:left .18s ease,right .18s ease}
-.globalHeader .menu .managedMenuTrigger:hover,.globalHeader .menu .managedMenuTrigger:focus-visible,.globalHeader .menu .managedMenuTrigger.isActive{opacity:1;color:#fff;outline:none}
-.globalHeader .menu .managedMenuTrigger:hover:before,.globalHeader .menu .managedMenuTrigger:focus-visible:before,.globalHeader .menu .managedMenuTrigger.isActive:before{left:0;right:0}
-.globalHeader .menu .managedMenuGroup.isOpen .managedMenuTrigger:after{transform:translateY(-1px) rotate(180deg)}
-.globalHeader .menu .managedMenuDropdown{position:absolute;top:100%;left:50%;z-index:500;display:grid;width:max-content;min-width:230px;max-width:320px;padding:7px;transform:translate(-50%,-6px);border:1px solid rgba(255,255,255,.11);border-top:3px solid var(--fc-ref-yellow);border-radius:0 0 8px 8px;background:linear-gradient(180deg,#052b5d 0%,#031a3b 100%);box-shadow:0 20px 44px rgba(0,12,30,.34);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .14s ease,transform .14s ease,visibility .14s linear}
+.globalHeader .menu .managedMenuTrigger:hover,.globalHeader .menu .managedMenuTrigger:focus-visible,.globalHeader .menu .managedMenuTrigger.isActive,.globalHeader .menu .managedMenuGroup.isOpen .managedMenuTrigger{opacity:1;color:#fff;outline:none;background:rgba(26,72,122,.46)}
+.globalHeader .menu .managedMenuTrigger:hover:before,.globalHeader .menu .managedMenuTrigger:focus-visible:before,.globalHeader .menu .managedMenuTrigger.isActive:before,.globalHeader .menu .managedMenuGroup.isOpen .managedMenuTrigger:before{left:0;right:0}
+.managedMenuBars{display:grid;width:12px;gap:2px;flex:0 0 12px}.managedMenuBars i{display:block;height:1.5px;border-radius:2px;background:currentColor;opacity:.9}
+.globalHeader .menu .managedMenuDropdown{position:absolute;top:100%;left:0;z-index:500;display:grid;width:230px;min-width:230px;padding:0;border:1px solid rgba(255,255,255,.09);border-top:3px solid var(--fc-ref-yellow);border-radius:0;background:#052b5d;box-shadow:0 20px 44px rgba(0,12,30,.34);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-5px);transition:opacity .14s ease,transform .14s ease,visibility .14s linear}
 .globalHeader .menu .managedMenuDropdown:before{content:"";position:absolute;left:0;right:0;top:-10px;height:10px}
-.globalHeader .menu .managedMenuGroup.isOpen .managedMenuDropdown{opacity:1;visibility:visible;pointer-events:auto;transform:translate(-50%,0)}
-.globalHeader .menu .managedMenuDropdown a{display:flex;align-items:center;min-height:38px;padding:9px 12px;border-radius:4px;color:rgba(255,255,255,.88);background:transparent;line-height:1.18;white-space:nowrap;opacity:1;text-transform:uppercase;letter-spacing:.025em}
-.globalHeader .menu .managedMenuDropdown a:after{display:none}
-.globalHeader .menu .managedMenuDropdown a:hover,.globalHeader .menu .managedMenuDropdown a:focus-visible,.globalHeader .menu .managedMenuDropdown a.isActive{color:#fff;background:rgba(255,255,255,.09);outline:none}
+.globalHeader .menu .managedMenuGroup.isOpen .managedMenuDropdown{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0)}
+.globalHeader .menu .managedMenuDropdown a{display:flex;align-items:center;min-height:42px;padding:10px 14px;border:0;border-bottom:1px solid rgba(255,255,255,.07);border-radius:0;color:rgba(255,255,255,.9);background:#052b5d;line-height:1.18;white-space:nowrap;opacity:1;text-transform:uppercase;letter-spacing:.025em}
+.globalHeader .menu .managedMenuDropdown a:last-child{border-bottom:0}.globalHeader .menu .managedMenuDropdown a:after{display:none}
+.globalHeader .menu .managedMenuDropdown a:hover,.globalHeader .menu .managedMenuDropdown a:focus-visible,.globalHeader .menu .managedMenuDropdown a.isActive{color:#fff;background:#123f73;outline:none}
 .globalHeader .menu .managedMenuDropdown a.isActive{box-shadow:inset 3px 0 0 var(--fc-ref-yellow)}
 .mobileManagedGroup{display:grid;border-bottom:1px solid rgba(255,255,255,.08)}
-.mobileManagedGroup>a{border-bottom:0!important}.mobileManagedLabel{display:block;padding:16px 0 10px;color:#fff;font-size:12px;font-weight:950;text-transform:uppercase;letter-spacing:.06em}
+.mobileManagedGroup>a{border-bottom:0!important}.mobileManagedLabel{display:flex;align-items:center;gap:8px;padding:16px 0 10px;color:#fff;font-size:12px;font-weight:950;text-transform:uppercase;letter-spacing:.06em}.mobileManagedLabel:after{content:"☰";font-size:11px;color:#9fb5cf}
 .mobileManagedChild{padding:11px 0 11px 24px!important;border-bottom:0!important;color:rgba(255,255,255,.76)!important;font-size:12px}.mobileManagedChild.isActive{color:#ffd328!important}
-@media(max-width:980px){.globalHeader .menu .managedMenuTrigger{min-height:0}}
+@media(max-width:1260px) and (min-width:981px){.globalHeader .menu>a,.globalHeader .menu>.managedMenuGroup{flex-basis:94px;width:94px}.globalHeader .menu{font-size:9px!important}.globalHeader .menu .managedMenuTrigger{padding-inline:5px;gap:5px}}
+@media(max-width:980px){.globalHeader .menu .managedMenuTrigger{min-height:0}.globalHeader .menu>a,.globalHeader .menu>.managedMenuGroup{width:auto;flex:auto;border:0}}
 
 /* v2.28.0 — simplified team pages */
 .teamPositionGroups{display:grid;gap:62px}.teamPositionGroup{min-width:0}.teamPositionHeading{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.14)}

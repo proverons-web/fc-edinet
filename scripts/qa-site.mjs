@@ -29,7 +29,7 @@ ok("login noindex", exists("app/login/layout.tsx") && /index:\s*false/.test(read
 ok("register noindex", exists("app/register/layout.tsx") && /index:\s*false/.test(read("app/register/layout.tsx")));
 
 const sitemap = read("app/sitemap.ts");
-for (const route of ["/team/squad","/team/staff","/club/about","/club/history","/club/stadium","/club/leadership","/club/achievements","/club/archive","/club/hall-of-fame"]) {
+for (const route of ["/team","/staff","/club/about","/club/history","/club/stadium","/club/leadership","/club/achievements","/club/archive","/club/hall-of-fame"]) {
   ok(`sitemap ${route}`, sitemap.includes(route));
 }
 ok("custom pages in sitemap", sitemap.includes("site_custom_pages"));
@@ -66,14 +66,22 @@ for (const cssFile of walk(path.join(root, "app"), [".css"])) {
   ok(`CSS braces ${path.relative(root, cssFile)}`, (css.match(/{/g) || []).length === (css.match(/}/g) || []).length);
 }
 
-ok("team root redirects to squad", read("app/team/page.tsx").includes('redirect("/team/squad")'));
-ok("team squad page exists", exists("app/team/squad/page.tsx"));
-ok("team staff page exists", exists("app/team/staff/page.tsx"));
+ok("team root is squad page", read("app/team/page.tsx").includes("positionOrder"));
+ok("team squad page exists", exists("app/team/page.tsx"));
+ok("team staff page exists", exists("app/staff/page.tsx"));
+ok("legacy team squad redirects", read("app/team/squad/page.tsx").includes('redirect("/team")'));
+ok("legacy team staff redirects", read("app/team/staff/page.tsx").includes('redirect("/staff")'));
 ok("legacy roster filter removed", !exists("app/components/TeamRosterBrowser.tsx"));
 ok("managed navigation has one canonical CSS block", (read("app/globals.css").match(/^\.globalHeader \.menu \.managedMenuDropdown\{/gm) || []).length === 1);
-ok("managed navigation is dark", read("app/globals.css").includes('background:linear-gradient(180deg,#052b5d 0%,#031a3b 100%)'));
+ok("managed navigation matches header palette", read("app/globals.css").includes("background:#052b5d"));
+ok("managed navigation uses hamburger bars", read("app/components/HeaderNavClient.tsx").includes("managedMenuBars"));
+ok("desktop menu blocks equal width", read("app/globals.css").includes(".globalHeader .menu>a,.globalHeader .menu>.managedMenuGroup"));
+ok("dropdown hover uses mouse events", read("app/components/HeaderNavClient.tsx").includes("onMouseEnter") && !read("app/components/HeaderNavClient.tsx").includes("onPointerEnter"));
+ok("season migration exists", exists("database/059_navigation_season_2627.sql"));
+ok("season contains calendar statistics standings", ["system_key='matches'","system_key='statistics'","system_key='standings'"].every((x) => read("database/059_navigation_season_2627.sql").includes(x)));
+ok("fallback nav uses season label", read("lib/i18n.ts").includes('team: "Сезон 26/27"'));
 ok("Site Builder exposes squad and staff", read("app/admin/site-builder/page.tsx").includes('key:"team_squad"') && read("app/admin/site-builder/page.tsx").includes('key:"team_staff"'));
-ok("release version", JSON.parse(read("package.json")).version === "2.28.0");
+ok("release version", JSON.parse(read("package.json")).version === "2.28.1");
 
 const failed = checks.filter((x) => !x.ok);
 for (const check of checks) console.log(`${check.ok ? "PASS" : "FAIL"}  ${check.name}${check.detail ? ` — ${check.detail}` : ""}`);

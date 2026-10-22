@@ -421,7 +421,7 @@ export default async function Home() {
 
       {sectionEnabled("players") && <section className="fcRefTeamSection">
         <div className="container">
-          <div className="fcRefTeamHead"><div><h2>{locale === "ro" ? "ECHIPA NOASTRĂ" : "НАША КОМАНДА"}</h2><p>{locale === "ro" ? "TALENT. CARACTER. UNITATE." : "ТАЛАНТ. ХАРАКТЕР. ЕДИНСТВО."}</p></div><Link href="/team/squad" className="fcOutlineButton">{locale === "ro" ? "TOT LOTUL" : "ВЕСЬ СОСТАВ"} →</Link></div>
+          <div className="fcRefTeamHead"><div><h2>{locale === "ro" ? "ECHIPA NOASTRĂ" : "НАША КОМАНДА"}</h2><p>{locale === "ro" ? "TALENT. CARACTER. UNITATE." : "ТАЛАНТ. ХАРАКТЕР. ЕДИНСТВО."}</p></div><Link href="/team" className="fcOutlineButton">{locale === "ro" ? "TOT LOTUL" : "ВЕСЬ СОСТАВ"} →</Link></div>
           <div className="fcRefPlayers">{players.slice(0,4).map((player) => <ReferencePlayer key={player.id} player={player} locale={locale} />)}</div>
           <div className="fcRefSignature">Edineț<br/><span>{locale === "ro" ? "în inima noastră!" : "в нашем сердце!"}</span></div>
         </div>

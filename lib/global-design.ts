@@ -112,14 +112,15 @@ export const defaultFooterDesign: FooterDesignConfig = {
     },
     {
       id: "team",
-      title_ru: "Команда",
-      title_ro: "Echipa",
+      title_ru: "Сезон 26/27",
+      title_ro: "Sezon 26/27",
       visible: true,
       links: [
-        { id: "players", label_ru: "Состав", label_ro: "Lot", href: "/team/squad" },
-        { id: "staff", label_ru: "Тренерский штаб", label_ro: "Staff tehnic", href: "/team/staff" },
-        { id: "statistics", label_ru: "Статистика", label_ro: "Statistici", href: "/statistics" },
+        { id: "players", label_ru: "Состав", label_ro: "Lot", href: "/team" },
+        { id: "staff", label_ru: "Тренерский штаб", label_ro: "Staff tehnic", href: "/staff" },
         { id: "matches", label_ru: "Календарь", label_ro: "Calendar", href: "/matches" },
+        { id: "statistics", label_ru: "Статистика", label_ro: "Statistici", href: "/statistics" },
+        { id: "standings", label_ru: "Таблица", label_ro: "Clasament", href: "/standings" },
       ],
     },
     {

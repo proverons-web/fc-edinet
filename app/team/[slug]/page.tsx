@@ -321,10 +321,10 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
               className="profileIntro"
               style={heroLayerStyle(design.layer_config, "intro")}
             >
-              <PublicBackLink fallbackHref="/team/squad" locale={locale} className="publicBackOnDark" />
+              <PublicBackLink fallbackHref="/team" locale={locale} className="publicBackOnDark" />
               <PublicBreadcrumbs
                 locale={locale}
-                items={[{ label: text.title, href: "/team/squad" }, { label: `${player.first_name} ${player.last_name}`.trim() }]}
+                items={[{ label: text.title, href: "/team" }, { label: `${player.first_name} ${player.last_name}`.trim() }]}
                 className="breadcrumbsOnDark"
               />
               {design.show_eyebrow && <p className="eyebrow">{pos}</p>}

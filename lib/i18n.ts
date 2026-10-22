@@ -25,7 +25,7 @@ export const publicText = {
     officialSite: "Официальный сайт FC Edineț",
     nav: {
       news: "Новости",
-      team: "Команда",
+      team: "Сезон 26/27",
       statistics: "Статистика",
       matches: "Календарь",
       standings: "Таблица",
@@ -295,7 +295,7 @@ export const publicText = {
     officialSite: "Site-ul oficial FC Edineț",
     nav: {
       news: "Știri",
-      team: "Echipa",
+      team: "Sezon 26/27",
       statistics: "Statistici",
       matches: "Calendar",
       standings: "Clasament",

@@ -1116,7 +1116,7 @@ export async function saveClubSquadAndStats(formData: FormData) {
   revalidatePath(`/admin/statistics/${matchId}`);
   revalidatePath("/admin/statistics");
   revalidatePath("/statistics");
-  revalidatePath("/team/squad");
+  revalidatePath("/team");
   go(matchId, { saved: completed ? "squad-complete" : "squad-draft" });
 }
 

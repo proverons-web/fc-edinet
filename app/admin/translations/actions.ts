@@ -331,8 +331,8 @@ export async function translateExistingContent(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/news");
-  revalidatePath("/team/squad");
-  revalidatePath("/team/staff");
+  revalidatePath("/team");
+  revalidatePath("/staff");
   revalidatePath("/club/about");
   revalidatePath("/club/history");
   revalidatePath("/club/stadium");
