@@ -32,7 +32,7 @@ const fallbackSettings: HomepageSettings = {
   banner_title: "Вместе с клубом",
   banner_text: "",
   banner_button_text: "Подробнее",
-  banner_button_href: "/club",
+  banner_button_href: "/club/about",
   banner_image_url: null,
   banner_overlay_opacity: 72,
   banner_background_position: "center",
@@ -311,7 +311,7 @@ export default function HomepageLayoutForm({
                   id="banner_button_href"
                   name="banner_button_href"
                   defaultValue={initial.banner_button_href}
-                  placeholder="/club"
+                  placeholder="/club/about"
                 />
               </div>
             </div>

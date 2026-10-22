@@ -13,7 +13,7 @@ export default async function ClubPageBuilderPage() {
   return <main className="adminPage pageBuilder2Page">
     <section className="adminHero compactAdminHero"><div className="container adminHeroInner">
       <div><p className="eyebrow">FC EDINEȚ • PAGE BUILDER 3.0</p><h1>Конструктор страницы «Клуб»</h1><p>Два готовых дизайна, реальное Live Preview, свободное позиционирование и фокус фото отдельно для Desktop / Tablet / Mobile.</p></div>
-      <div className="adminHeroActions"><Link href="/admin/club" className="adminBack">← Контент клуба</Link><Link href="/club" target="_blank" className="rowAction muted">Открыть /club ↗</Link></div>
+      <div className="adminHeroActions"><Link href="/admin/club" className="adminBack">← Контент клуба</Link><Link href="/club/about" target="_blank" className="rowAction muted">Открыть /club/about ↗</Link></div>
     </div></section>
     <section className="section adminSurface pageBuilder2Surface"><div className="pageBuilder2Container"><ClubPageBuilder initial={layout} action={saveClubPageLayout}/></div></section>
   </main>;

@@ -1,0 +1,16 @@
+FC Edineț v2.27.0 — Final Product QA
+
+Stability and guardrail release:
+- separate cookie-free Supabase client for public read-only data;
+- public header menu/global design/home/public pages are no longer affected by stale auth cookies;
+- proxy clears invalid Supabase auth cookies on HTTP 401 as well as known 400/refresh-token failures;
+- admin dashboard now calls requireStaff() before reading profile data (prevents profiles?id=undefined);
+- Site Builder blocks reserved custom-page slugs and empty slugs;
+- Site Builder validates managed-menu href values;
+- custom-page publication date is preserved on later edits;
+- old and new custom-page paths are revalidated after slug changes;
+- UI control buttons in Site Builder explicitly use type=button;
+- club links/defaults now target canonical /club/about and split club routes;
+- expanded qa:site checks include auth/public-client isolation, Site Builder guardrails, target=_blank rel, and CSS integrity.
+
+No database migration required.

@@ -7,7 +7,7 @@ import PublicBackLink from "@/app/components/PublicBackLink";
 import LineupSubstitutionBadge from "./LineupSubstitutionBadge";
 import JsonLd from "@/app/components/JsonLd";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { getLocale } from "@/lib/locale";
 import { secondYellowEventIds } from "@/lib/match-discipline";
 import { publicText } from "@/lib/i18n";
@@ -189,7 +189,7 @@ function matchSelect() {
 
 const getMatch = cache(async (id: string): Promise<ClubMatch | null> => {
   if (!/^\d+$/.test(id)) return null;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("matches")
     .select(matchSelect())
@@ -252,7 +252,7 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
   const t = copy[locale] ?? copy.ru;
   const match = await getMatch(id);
   if (!match) notFound();
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const { data: reportData } = await supabase
     .from("match_reports")

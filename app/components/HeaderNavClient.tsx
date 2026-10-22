@@ -64,7 +64,7 @@ export default function HeaderNavClient({
     statistics: { href: "/statistics", label: labels.nav.statistics },
     matches: { href: "/matches", label: labels.nav.matches },
     standings: { href: "/standings", label: labels.nav.standings },
-    club: { href: "/club", label: labels.nav.club },
+    club: { href: "/club/about", label: labels.nav.club },
     academy: { href: "/academy", label: labels.nav.academy },
     media: { href: "/media", label: labels.nav.media },
     partners: { href: "/partners", label: labels.nav.partners },

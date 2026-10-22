@@ -4,7 +4,7 @@ import StandingsTable from "@/app/components/StandingsTable";
 import RecentMatchesCarousel from "@/app/components/RecentMatchesCarousel";
 import YouTubePlayer from "@/app/components/YouTubePlayer";
 import FormMatchDots from "@/app/components/FormMatchDots";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { getLocale } from "@/lib/locale";
 import { publicSectionMetadata } from "@/lib/seo";
 import { dateLocale, localized, publicText, type Locale } from "@/lib/i18n";
@@ -39,7 +39,7 @@ const CLUB_LOGO = "/brand/fc-edinet-crest.png";
 export default async function Home() {
   const locale = await getLocale();
   const text = publicText[locale].home;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const now = new Date().toISOString();
 
   const [heroResult, settingsResult, sectionsResult] = await Promise.all([
@@ -270,7 +270,7 @@ export default async function Home() {
             <h1 style={heroLayerStyle(heroLayers, "intro")}>{heroTitleMain}<span>{heroTitleAccent}</span></h1>
             <p style={heroLayerStyle(heroLayers, "intro")}>{heroDescription}</p>
             <div className="fcRefHeroActions">
-              <Link className="fcYellowButton" href={hero?.primary_button_href || "/club"}>
+              <Link className="fcYellowButton" href={hero?.primary_button_href || "/club/about"}>
                 {localized(hero?.primary_button_text, hero?.primary_button_text_ro, locale) || (locale === "ro" ? "DRUMUL NOSTRU" : "НАШ ПУТЬ")} <span>→</span>
               </Link>
               {(hero?.show_secondary_button ?? false) && <Link className="fcGhostButton" href={hero?.secondary_button_href || "/news"}>{localized(hero?.secondary_button_text, hero?.secondary_button_text_ro, locale) || text.allNews}</Link>}
@@ -284,7 +284,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {settings?.banner_enabled && <section className="fcRefAnnouncement"><div className="container fcRefAnnouncementInner"><div><small>{localized(settings.banner_eyebrow, settings.banner_eyebrow_ro, locale)}</small><strong>{localized(settings.banner_title, settings.banner_title_ro, locale)}</strong></div><Link href={settings.banner_button_href || "/club"}>{localized(settings.banner_button_text, settings.banner_button_text_ro, locale) || text.more} →</Link></div></section>}
+      {settings?.banner_enabled && <section className="fcRefAnnouncement"><div className="container fcRefAnnouncementInner"><div><small>{localized(settings.banner_eyebrow, settings.banner_eyebrow_ro, locale)}</small><strong>{localized(settings.banner_title, settings.banner_title_ro, locale)}</strong></div><Link href={settings.banner_button_href || "/club/about"}>{localized(settings.banner_button_text, settings.banner_button_text_ro, locale) || text.more} →</Link></div></section>}
 
       {sectionEnabled("matches") && (lastMatch || nextMatch || formMatches.length > 0) && <section className="fcV215PulseSection fcV215MatchDashboardSection">
         <div className="container fcV215MatchDashboard">

@@ -5,7 +5,7 @@ import MediaGallery from "@/app/components/MediaGallery";
 import PageHeroShell from "@/app/components/PageHeroShell";
 import PublicBreadcrumbs from "@/app/components/PublicBreadcrumbs";
 import PublicBackLink from "@/app/components/PublicBackLink";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import type { MediaAlbum, MediaPhoto } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { dateLocale, publicText, type Locale } from "@/lib/i18n";
@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
 type PageProps = { params: Promise<{ slug: string }> };
 
 const getAlbum = cache(async (slug: string): Promise<MediaAlbum | null> => {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("media_albums")
     .select("*")
@@ -45,7 +45,7 @@ export default async function MediaAlbumPage({ params }: PageProps) {
   const locale = await getLocale();
   const text = publicText[locale].media;
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const [album, design] = await Promise.all([
     getAlbum(slug),
     getPublishedSitePageDesign(supabase, "template_album"),

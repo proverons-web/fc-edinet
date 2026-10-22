@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 
 type GlobalDesignKey = "header" | "footer" | "design_system";
 type GlobalDesignConfigs = Partial<Record<GlobalDesignKey, unknown>>;
@@ -10,7 +10,7 @@ type GlobalDesignConfigs = Partial<Record<GlobalDesignKey, unknown>>;
  * SiteFooter during the same server render.
  */
 export const getGlobalDesignConfigs = cache(async (): Promise<GlobalDesignConfigs> => {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("site_global_designs")
     .select("component_key,config")

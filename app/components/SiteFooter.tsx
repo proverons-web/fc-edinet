@@ -3,13 +3,13 @@ import { getLocale } from "@/lib/locale";
 import { publicText } from "@/lib/i18n";
 import { defaultFooterDesign, localizedValue, normalizeFooterDesign } from "@/lib/global-design";
 import { getGlobalDesignConfigs } from "@/lib/site-global-designs";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 
 type VisitCounts = { unique_24h: number; unique_7d: number; unique_30d: number };
 
 async function getVisitCounts(): Promise<VisitCounts | null> {
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase.rpc("get_public_visit_counts");
     if (error) return null;
     const row = Array.isArray(data) ? data[0] : data;

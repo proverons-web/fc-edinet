@@ -3,7 +3,7 @@ import NewsCard, { formatNewsDate } from "@/app/components/NewsCard";
 import NewsArchiveSearch from "@/app/components/NewsArchiveSearch";
 import PageHeroShell from "@/app/components/PageHeroShell";
 import { PublicMessageState } from "@/app/components/PublicRouteState";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import type { NewsArticle, NewsCategory, SitePageDesignSnapshot } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { publicSectionMetadata } from "@/lib/seo";
@@ -26,7 +26,7 @@ export default async function NewsPage({ searchParams }: PageProps) {
   const text = publicText[locale].news;
   const params = await searchParams;
   const selectedSlug = Array.isArray(params.category) ? params.category[0] : params.category;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const [{ data: categoryData }, design] = await Promise.all([
     supabase.from("news_categories").select("id,name,name_ro,slug,display_order,is_active").eq("is_active", true).order("display_order", { ascending: true }),

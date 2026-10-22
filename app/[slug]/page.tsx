@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { getLocale } from "@/lib/locale";
 import { publicMetadata } from "@/lib/seo";
 import type { CustomSitePage } from "@/lib/site-builder";
@@ -8,7 +8,7 @@ import type { CustomSitePage } from "@/lib/site-builder";
 type Props={params:Promise<{slug:string}>};
 
 async function getPage(slug:string){
-  const supabase=await createClient();
+  const supabase=createPublicClient();
   const {data}=await supabase.from("site_custom_pages").select("*").eq("slug",slug).eq("status","published").maybeSingle();
   return data as CustomSitePage|null;
 }

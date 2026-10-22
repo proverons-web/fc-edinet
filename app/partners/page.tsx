@@ -1,5 +1,5 @@
 import ManagedPageCanvas from "@/app/components/ManagedPageCanvas";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import type { Partner } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { publicSectionMetadata } from "@/lib/seo";
@@ -16,7 +16,7 @@ export async function generateMetadata() {
 
 export default async function PartnersPage() {
   const locale = await getLocale();
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const [{ data }, design, layout] = await Promise.all([
     supabase.from("partners").select("*").eq("is_active", true).order("display_order").order("name"),
     getPublishedSitePageDesign(supabase, "partners"),

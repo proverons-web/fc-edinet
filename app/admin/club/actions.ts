@@ -198,7 +198,13 @@ export async function saveClubProfile(
     return { error: `Не удалось сохранить данные клуба: ${error.message}` };
   }
 
-  revalidatePath("/club");
+  revalidatePath("/club/about");
+  revalidatePath("/club/history");
+  revalidatePath("/club/stadium");
+  revalidatePath("/club/leadership");
+  revalidatePath("/club/achievements");
+  revalidatePath("/club/archive");
+  revalidatePath("/club/hall-of-fame");
   revalidatePath("/admin/club");
   revalidatePath("/");
 
@@ -419,7 +425,7 @@ export async function addAchievement(
     };
   }
 
-  revalidatePath("/club");
+  revalidatePath("/club/achievements");
   revalidatePath("/admin/club");
 
   return { success: translation.warning ? `Достижение добавлено. ${translation.warning}` : "Достижение добавлено." };

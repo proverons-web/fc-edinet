@@ -65,7 +65,7 @@ export function defaultHomepageBlockContent(type: HomepageBlockType): HomepageBl
     image_alt_ro: "",
     button_text_ru: type === "cta" || type === "text_image" ? "Подробнее" : "",
     button_text_ro: "",
-    button_href: type === "cta" || type === "text_image" ? "/club" : "",
+    button_href: type === "cta" || type === "text_image" ? "/club/about" : "",
   };
 }
 

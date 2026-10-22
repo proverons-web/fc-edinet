@@ -10,11 +10,11 @@ type CustomPageItem={key:string;label:string;preview:string;design:string;conten
 type PageItem=SystemPage|CustomPageItem;
 type Device="desktop"|"tablet"|"mobile";
 
-type Props={pages:PageItem[];selectedKey:string;customPages:CustomSitePage[];menuItems:SiteMenuItem[]};
+type Props={pages:PageItem[];selectedKey:string;customPages:CustomSitePage[];menuItems:SiteMenuItem[];notice?:string};
 
 const widths:Record<Device,number>={desktop:1440,tablet:768,mobile:390};
 
-export default function UnifiedSiteBuilderClient({pages,selectedKey,menuItems}:Props){
+export default function UnifiedSiteBuilderClient({pages,selectedKey,menuItems,notice}:Props){
  const selected=pages.find(p=>p.key===selectedKey)??pages[0];
  const [device,setDevice]=useState<Device>("desktop");
  const [panel,setPanel]=useState<"none"|"edit"|"pages"|"menu"|"global"|"new">("none");
@@ -48,29 +48,31 @@ export default function UnifiedSiteBuilderClient({pages,selectedKey,menuItems}:P
        <button type="button" onClick={()=>setPanel("global")}>Глобально</button>
      </div>
      <div className="siteBuilderTopActions">
-       <div className="siteBuilderDevices">{(["desktop","tablet","mobile"] as Device[]).map(d=><button key={d} className={device===d?"active":""} onClick={()=>setDevice(d)}>{d==="desktop"?"Desktop":d==="tablet"?"Tablet":"Mobile"}</button>)}</div>
-       <button className="primary" onClick={()=>setPanel("edit")}>Редактировать страницу</button>
+       <div className="siteBuilderDevices">{(["desktop","tablet","mobile"] as Device[]).map(d=><button type="button" key={d} className={device===d?"active":""} onClick={()=>setDevice(d)}>{d==="desktop"?"Desktop":d==="tablet"?"Tablet":"Mobile"}</button>)}</div>
+       <button type="button" className="primary" onClick={()=>setPanel("edit")}>Редактировать страницу</button>
        <a href={selected.preview} target="_blank" rel="noreferrer">Открыть ↗</a>
      </div>
    </header>
 
+   {notice&&<div className="siteBuilderNotice" role="status">{notice}</div>}
+
    <section className="siteBuilderCanvasShell">
      <div className={`siteBuilderCanvas device-${device}`} style={{maxWidth:previewWidth}}>
-       <div className="siteBuilderCanvasBadge"><b>{selected.label}</b><span>{selected.preview}</span><button onClick={()=>setPanel("edit")}>✎ Редактировать</button></div>
+       <div className="siteBuilderCanvasBadge"><b>{selected.label}</b><span>{selected.preview}</span><button type="button" onClick={()=>setPanel("edit")}>✎ Редактировать</button></div>
        <iframe title={`Предпросмотр ${selected.label}`} src={`${selected.preview}${selected.preview.includes("?")?"&":"?"}builder_preview=1`} />
      </div>
    </section>
 
    {panel!=="none"&&<div className="siteBuilderOverlay" onMouseDown={e=>{if(e.target===e.currentTarget)setPanel("none")}}>
      <aside className={`siteBuilderDrawer panel-${panel}`}>
-       <div className="siteBuilderDrawerHead"><div><small>FC EDINEȚ SITE BUILDER</small><h2>{panel==="new"?"Новая страница":panel==="pages"?"Страницы":panel==="menu"?"Меню сайта":panel==="global"?"Глобальные настройки":`Редактировать: ${selected.label}`}</h2></div><button onClick={()=>setPanel("none")}>✕</button></div>
+       <div className="siteBuilderDrawerHead"><div><small>FC EDINEȚ SITE BUILDER</small><h2>{panel==="new"?"Новая страница":panel==="pages"?"Страницы":panel==="menu"?"Меню сайта":panel==="global"?"Глобальные настройки":`Редактировать: ${selected.label}`}</h2></div><button type="button" onClick={()=>setPanel("none")}>✕</button></div>
 
        {panel==="edit"&&<div className="siteBuilderDrawerBody">
          {selectedCustom?<form action={saveCustomPage} className="simpleBuilderForm">
            <input type="hidden" name="id" value={selectedCustom.id}/>
            <label>Название RU<input name="title_ru" defaultValue={selectedCustom.title_ru}/></label>
            <label>Название RO<input name="title_ro" defaultValue={selectedCustom.title_ro}/></label>
-           <label>Адрес страницы<div className="slugField"><span>/</span><input name="slug" defaultValue={selectedCustom.slug}/></div></label>
+           <label>Адрес страницы<div className="slugField"><span>/</span><input name="slug" defaultValue={selectedCustom.slug}/></div><small className="builderFieldHint">Системные адреса вроде news, team, club, admin и api зарезервированы.</small></label>
            <label>Короткое описание RU<textarea name="intro_ru" defaultValue={selectedCustom.intro_ru} rows={3}/></label>
            <label>Короткое описание RO<textarea name="intro_ro" defaultValue={selectedCustom.intro_ro} rows={3}/></label>
            <label>Текст страницы RU<textarea name="body_ru" defaultValue={selectedCustom.body_ru} rows={10}/></label>
@@ -79,7 +81,7 @@ export default function UnifiedSiteBuilderClient({pages,selectedKey,menuItems}:P
            <label>Статус<select name="status" defaultValue={selectedCustom.status}><option value="draft">Черновик</option><option value="published">Опубликована</option></select></label>
            <div className="drawerActions"><button type="submit" className="primary">Сохранить</button></div>
          </form>:<>
-           <div className="builderEditTabs"><button className={editorTab==="design"?"active":""} onClick={()=>setEditorTab("design")}>Дизайн</button><button className={editorTab==="content"?"active":""} onClick={()=>setEditorTab("content")}>Контент</button></div>
+           <div className="builderEditTabs"><button type="button" className={editorTab==="design"?"active":""} onClick={()=>setEditorTab("design")}>Дизайн</button><button type="button" className={editorTab==="content"?"active":""} onClick={()=>setEditorTab("content")}>Контент</button></div>
            <p className="builderHint">Основной экран остаётся предпросмотром. Настройки открываются только здесь и не занимают место постоянно.</p>
            <iframe className="siteBuilderEditorFrame" title={`Редактор ${selected.label}`} src={embeddedEditorUrl}/>
          </>}
@@ -88,7 +90,7 @@ export default function UnifiedSiteBuilderClient({pages,selectedKey,menuItems}:P
        {panel==="new"&&<div className="siteBuilderDrawerBody"><form action={createCustomPage} className="simpleBuilderForm">
          <label>Название страницы RU<input name="title_ru" required placeholder="История клуба"/></label>
          <label>Название страницы RO<input name="title_ro" placeholder="Istoria clubului"/></label>
-         <label>Адрес<input name="slug" placeholder="history"/></label>
+         <label>Адрес<input name="slug" placeholder="history"/><small className="builderFieldHint">Только латиница, цифры и дефис. Системные адреса зарезервированы.</small></label>
          <label className="checkRow"><input type="checkbox" name="add_to_menu" defaultChecked/> Сразу добавить в меню сайта</label>
          <p className="builderHint">После создания страница откроется в редакторе. Её можно оставить черновиком до публикации.</p>
          <button type="submit" className="primary">Создать страницу</button>

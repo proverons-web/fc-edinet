@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { getLocale } from "@/lib/locale";
 import { localized } from "@/lib/i18n";
 
@@ -63,7 +63,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
   let failed = false;
 
   if (q.length >= 2) {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const pattern = `%${q}%`;
     const [newsResult, playersResult, albumsResult] = await Promise.all([
       supabase

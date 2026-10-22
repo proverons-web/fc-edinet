@@ -3,6 +3,7 @@ import Link from "next/link";
 import HeaderNavClient from "@/app/components/HeaderNavClient";
 import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import type { Profile } from "@/lib/types";
 import { staffRoles } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
@@ -17,10 +18,11 @@ export default async function SiteHeader() {
   const text = publicText[locale];
   const account = accountText[locale];
   const supabase = await createClient();
+  const publicSupabase = createPublicClient();
   const [{ data: claimsData }, globalDesigns, menuResult] = await Promise.all([
     supabase.auth.getClaims(),
     getGlobalDesignConfigs(),
-    supabase.from("site_menu_items").select("*").eq("visible", true).order("display_order").order("id"),
+    publicSupabase.from("site_menu_items").select("*").eq("visible", true).order("display_order").order("id"),
   ]);
   const userId = claimsData?.claims?.sub;
   const design = normalizeHeaderDesign(globalDesigns.header, defaultHeaderDesign);

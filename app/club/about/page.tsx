@@ -3,7 +3,7 @@ import ClubSectionShell from "@/app/components/ClubSectionShell";
 import { mergeTranslatedTextIntoRichContent } from "@/lib/club-rich-content";
 import { getLocale } from "@/lib/locale";
 import { publicMetadata } from "@/lib/seo";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import type { ClubProfile } from "@/lib/types";
 import { localized } from "@/lib/i18n";
 
@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata(){ const locale=await getLocale(); return publicMetadata({title:locale==="ro"?"Despre club":"О клубе",description:locale==="ro"?"Informații despre FC Edineț, identitatea clubului și date de contact.":"Информация о FC Edineț, идентичность клуба и контакты.",path:"/club/about",locale}); }
 
 export default async function ClubAboutPage(){
-  const locale=await getLocale(); const supabase=await createClient();
+  const locale=await getLocale(); const supabase=createPublicClient();
   const {data}=await supabase.from("club_profile").select("*").eq("id",1).maybeSingle(); const profile=data as ClubProfile|null;
   const clubName=localized(profile?.club_name,profile?.club_name_ro,locale)||"FC Edineț";
   const city=localized(profile?.city,profile?.city_ro,locale)||"Edineț";

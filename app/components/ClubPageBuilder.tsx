@@ -109,7 +109,7 @@ export default function ClubPageBuilder({initial,action}:{initial:ClubPageLayout
       </aside>
 
       <section className="pageBuilder2Preview" ref={previewAreaRef}>
-        <div className="pageBuilder2PreviewHead"><div><b>ПРЕДПРОСМОТР • РЕАЛЬНАЯ СТРАНИЦА</b><span>/club • {spec.width}×{spec.height}</span></div><a href="/club" target="_blank" rel="noreferrer">Открыть реальную страницу ↗</a></div>
+        <div className="pageBuilder2PreviewHead"><div><b>ПРЕДПРОСМОТР • РЕАЛЬНАЯ СТРАНИЦА</b><span>/club/about • {spec.width}×{spec.height}</span></div><a href="/club/about" target="_blank" rel="noreferrer">Открыть реальную страницу ↗</a></div>
         <div className="pageBuilder2ViewportScroll">
           <div className="pageBuilder2ScaledOuter" style={{width:spec.width*scale,height:spec.height*scale}}>
             <iframe ref={iframeRef} src="/admin/page-builder/club/preview" title="Предпросмотр /club" onLoad={sendPreview} className="pageBuilder2Iframe" style={{width:spec.width,height:spec.height,transform:`scale(${scale})`}}/>

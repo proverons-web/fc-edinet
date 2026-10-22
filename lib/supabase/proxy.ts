@@ -54,6 +54,7 @@ export async function updateSession(request: NextRequest) {
     // signed-out visitor.
     if (
       status === 400 ||
+      status === 401 ||
       code === "refresh_token_not_found" ||
       code === "refresh_token_already_used"
     ) {

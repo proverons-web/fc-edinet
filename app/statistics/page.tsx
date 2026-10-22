@@ -1,6 +1,6 @@
 import Link from "next/link";
 import PageHeroShell from "@/app/components/PageHeroShell";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import type {
   ClubMatch,
   ClubSeasonHistory,
@@ -398,7 +398,7 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
   const locale = await getLocale();
   const text = textByLocale[locale];
   const params = await searchParams;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const design = await getPublishedSitePageDesign(supabase, "team");
 
   const requestedSort = one(params.sort);

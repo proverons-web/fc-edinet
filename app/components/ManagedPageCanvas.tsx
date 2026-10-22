@@ -43,11 +43,11 @@ export default function ManagedPageCanvas({
       if (pageKey === "media" && section.key === "albums") return <div key={section.key}>{section.key === firstMediaContentKey && <MediaHubControls locale={locale} albumCount={albums.length} videoCount={videos.length}/>}<MediaAlbums section={section} albums={albums} locale={locale}/></div>;
       if (pageKey === "media" && section.key === "videos") return <div key={section.key}>{section.key === firstMediaContentKey && <MediaHubControls locale={locale} albumCount={albums.length} videoCount={videos.length}/>}<MediaVideos section={section} videos={videos} locale={locale}/></div>;
       if (pageKey === "partners" && section.key === "partners") return <PartnersGrid key={section.key} section={section} partners={partners} locale={locale}/>;
-      if (pageKey === "partners" && section.key === "cta") return <CtaSection key={section.key} section={section} eyebrow={labels.ctaEyebrow} title={labels.ctaTitle} body={labels.ctaBody} href="/club" button={labels.ctaButton}/>;
+      if (pageKey === "partners" && section.key === "cta") return <CtaSection key={section.key} section={section} eyebrow={labels.ctaEyebrow} title={labels.ctaTitle} body={labels.ctaBody} href="/club/about" button={labels.ctaButton}/>;
       if (pageKey === "academy" && section.key === "intro") return <AcademyIntro key={section.key} section={section} layout={layout} locale={locale}/>;
       if (pageKey === "academy" && section.key === "groups") return <AcademyGroups key={section.key} section={section} locale={locale}/>;
       if (pageKey === "academy" && section.key === "pathway") return <AcademyPathway key={section.key} section={section} locale={locale}/>;
-      if (pageKey === "academy" && section.key === "contact") return <CtaSection key={section.key} section={section} eyebrow={locale === "ro" ? "ACADEMIA FC EDINEȚ" : "АКАДЕМИЯ FC EDINEȚ"} title={localizedAcademy(layout, "contact_title", locale)} body={localizedAcademy(layout, "contact_text", locale)} href="/club" button={locale === "ro" ? "Contacte" : "Контакты клуба"}/>;
+      if (pageKey === "academy" && section.key === "contact") return <CtaSection key={section.key} section={section} eyebrow={locale === "ro" ? "ACADEMIA FC EDINEȚ" : "АКАДЕМИЯ FC EDINEȚ"} title={localizedAcademy(layout, "contact_title", locale)} body={localizedAcademy(layout, "contact_text", locale)} href="/club/about" button={locale === "ro" ? "Contacte" : "Контакты клуба"}/>;
       return null;
     })}
   </div>;

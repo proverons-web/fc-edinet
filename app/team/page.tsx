@@ -1,7 +1,7 @@
 import TeamRosterBrowser from "@/app/components/TeamRosterBrowser";
 import PageHeroShell from "@/app/components/PageHeroShell";
 import { PublicMessageState } from "@/app/components/PublicRouteState";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import type { Player, PlayerSeasonTotal, Season, TeamStaffMember } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { publicSectionMetadata } from "@/lib/seo";
@@ -43,7 +43,7 @@ function playerLeaderDefinitions(rows: LeaderRow[], locale: Locale) {
 export default async function TeamPage() {
   const locale = await getLocale();
   const text = publicText[locale].team;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const [{ data, error }, design, seasonResult, staffResult] = await Promise.all([
     supabase.from("players").select("*").eq("is_active", true).order("display_order", { ascending: true }).order("shirt_number", { ascending: true }),
     getPublishedSitePageDesign(supabase, "team"),

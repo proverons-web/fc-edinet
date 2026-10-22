@@ -52,7 +52,7 @@ export async function saveClubPageLayout(_state: PageBuilderState, formData: For
     if (publishError) return { error: `Черновик сохранён, но публикация не удалась: ${publishError.message}` };
   }
 
-  revalidatePath("/club");
+  revalidatePath("/club/about");
   revalidatePath("/admin/page-builder/club");
   return { success: intent === "publish" ? "Макет страницы опубликован." : "Черновик макета сохранён." };
 }

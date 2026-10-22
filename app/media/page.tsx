@@ -1,5 +1,5 @@
 import ManagedPageCanvas from "@/app/components/ManagedPageCanvas";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import type { MediaAlbum, MediaVideo } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { publicSectionMetadata } from "@/lib/seo";
@@ -16,7 +16,7 @@ export async function generateMetadata() {
 
 export default async function MediaPage() {
   const locale = await getLocale();
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const [{ data: albumsData }, { data: videosData }, design, layout] = await Promise.all([
     supabase.from("media_albums").select("*").eq("is_published", true).order("display_order").order("event_date", { ascending: false }).order("created_at", { ascending: false }),
     supabase.from("media_videos").select("*").eq("is_published", true).order("display_order").order("published_at", { ascending: false }).limit(12),

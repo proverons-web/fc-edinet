@@ -105,8 +105,8 @@ export const defaultFooterDesign: FooterDesignConfig = {
       title_ro: "Club",
       visible: true,
       links: [
-        { id: "history", label_ru: "История", label_ro: "Istorie", href: "/club" },
-        { id: "stadium", label_ru: "Стадион", label_ro: "Stadion", href: "/club" },
+        { id: "history", label_ru: "История", label_ro: "Istorie", href: "/club/history" },
+        { id: "stadium", label_ru: "Стадион", label_ro: "Stadion", href: "/club/stadium" },
         { id: "partners", label_ru: "Партнёры", label_ro: "Parteneri", href: "/partners" },
       ],
     },

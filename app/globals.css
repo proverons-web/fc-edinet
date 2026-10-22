@@ -3802,3 +3802,7 @@ body:has(.adminEmbedded){background:#f3f6fa}
 
 /* v2.26.0 — match list now exposes the full six-step workflow */
 @media(min-width:901px){.matchCenterWorkflow{grid-template-columns:repeat(6,minmax(68px,1fr))}}
+
+/* v2.27.0 Final QA — Site Builder validation feedback */
+.siteBuilderNotice{max-width:1180px;margin:14px auto 0;padding:12px 16px;border:1px solid #c9d9ea;border-radius:12px;background:#f7fbff;color:#0b2f57;font-size:14px;font-weight:700;box-shadow:0 8px 20px rgba(7,35,68,.06)}
+.builderFieldHint{display:block;margin-top:7px;color:#70839a;font-size:12px;line-height:1.45;font-weight:500}

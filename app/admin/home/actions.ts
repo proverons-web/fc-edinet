@@ -285,7 +285,7 @@ export async function saveHomepageLayout(
   const bannerTextRo = text(formData.get("banner_text_ro"));
   const bannerButtonText = text(formData.get("banner_button_text")) || "Подробнее";
   const bannerButtonTextRo = text(formData.get("banner_button_text_ro"));
-  const bannerButtonHref = safeHref(text(formData.get("banner_button_href"))) || "/club";
+  const bannerButtonHref = safeHref(text(formData.get("banner_button_href"))) || "/club/about";
 
   const bannerOverlayRaw = Number(text(formData.get("banner_overlay_opacity")));
   const bannerOverlayOpacity =

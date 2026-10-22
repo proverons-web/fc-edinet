@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { requireStaff } from "@/lib/editorial";
 import type { Profile } from "@/lib/types";
 import { roleLabels } from "@/lib/types";
 
@@ -8,11 +8,8 @@ export const metadata = { title: "Админ-панель" };
 type Module = { title: string; text: string; href: string; kicker?: string; icon: string };
 
 export default async function AdminPage() {
-  const supabase = await createClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
-  const userId = claimsData?.claims?.sub as string;
-  const { data: profileData } = await supabase.from("profiles").select("id,email,full_name,display_name,role").eq("id", userId).single();
-  const profile = profileData as Pick<Profile, "id" | "email" | "full_name" | "display_name" | "role">;
+  const { supabase, profile: staffProfile } = await requireStaff();
+  const profile = staffProfile as Pick<Profile, "id" | "email" | "full_name" | "display_name" | "role">;
   const canEdit = profile.role === "editor" || profile.role === "admin";
   const isAdmin = profile.role === "admin";
 
@@ -60,7 +57,7 @@ export default async function AdminPage() {
           { title: "Штаб команды", text: "Тренеры, медицина и организационный персонал.", href: "/admin/staff", icon: "ST", kicker: "Команда" },
         ]} />
 
-        <DashboardSection eyebrow="МАТЧИ И ТУРНИР" title="Спортивные данные" text="Календарь, турнир и статистика. Матч-центр пока остаётся без переработки." modules={[
+        <DashboardSection eyebrow="МАТЧИ И ТУРНИР" title="Спортивные данные" text="Календарь, турнир и статистика. Единый матч-центр объединяет составы, события, статистику, отчёт и публикацию." modules={[
           { title: "Календарь", text: "Матчи, результаты, соперники и команды.", href: "/admin/matches", icon: "M", kicker: "Матчи" },
           { title: "Протокол матча", text: "События, составы и подробности созданных матчей.", href: "/admin/match-center", icon: "MC", kicker: "Матч-центр" },
           { title: "Таблица", text: "Турниры, положение команд и очки.", href: "/admin/standings", icon: "T", kicker: "Турнир" },

@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 type Props={searchParams?:Promise<Record<string,string|string[]|undefined>>};
 const systemPages=[
  {key:"home",label:"Главная",preview:"/",design:"/admin/design?page=home",content:"/admin/home",kind:"system" as const},
- {key:"club",label:"Клуб",preview:"/club",design:"/admin/page-builder/club",content:"/admin/club",kind:"system" as const},
+ {key:"club",label:"Клуб",preview:"/club/about",design:"/admin/page-builder/club",content:"/admin/club",kind:"system" as const},
  {key:"news",label:"Новости",preview:"/news",design:"/admin/design?page=news",content:"/admin/news",kind:"system" as const},
  {key:"team",label:"Команда",preview:"/team",design:"/admin/design?page=team",content:"/admin/players",kind:"system" as const},
  {key:"matches",label:"Календарь",preview:"/matches",design:"/admin/design?page=matches",content:"/admin/matches",kind:"system" as const},
@@ -30,5 +30,10 @@ export default async function UnifiedSiteBuilder({searchParams}:Props){
  const pages=[...systemPages,...customPages.map(p=>({key:`custom:${p.id}`,label:p.title_ru,preview:`/${p.slug}`,design:"",content:"",kind:"custom" as const,custom:p}))];
  const requested=String(first(q.page)??"");
  const selectedKey=pages.some(p=>p.key===requested)?requested:pages[0].key;
- return <UnifiedSiteBuilderClient pages={pages} selectedKey={selectedKey} customPages={customPages} menuItems={(menuData??[]) as SiteMenuItem[]}/>;
+ const error=String(first(q.error)??"");
+ const noticeMap:Record<string,string>={
+   invalid_slug:"Укажи корректный адрес страницы латиницей.", reserved_slug:"Этот адрес зарезервирован системным разделом сайта. Выбери другой slug.", slug_taken:"Страница с таким адресом уже существует.", create_failed:"Не удалось создать страницу.", invalid_page:"Некорректная страница.", page_not_found:"Страница не найдена.", save_failed:"Не удалось сохранить страницу.", delete_failed:"Не удалось удалить страницу.", invalid_href:"Некорректная ссылка меню. Используй /раздел, https://, mailto: или tel:.", invalid_menu_item:"Некорректный пункт меню.", menu_save_failed:"Не удалось сохранить пункт меню.", menu_create_failed:"Не удалось создать пункт меню."
+ };
+ const notice=error?noticeMap[error]||"Операция не выполнена.":first(q.saved)?"Страница сохранена.":first(q.created)?"Страница создана.":first(q.deleted)?"Страница удалена.":undefined;
+ return <UnifiedSiteBuilderClient pages={pages} selectedKey={selectedKey} customPages={customPages} menuItems={(menuData??[]) as SiteMenuItem[]} notice={notice}/>;
 }

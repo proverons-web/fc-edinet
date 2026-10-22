@@ -1,7 +1,7 @@
 import Link from "next/link";
 import StandingsTable from "@/app/components/StandingsTable";
 import PageHeroShell from "@/app/components/PageHeroShell";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import type { Competition, StandingEntry } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { publicSectionMetadata } from "@/lib/seo";
@@ -22,7 +22,7 @@ type PageProps = { searchParams: Promise<{ competition?: string | string[] }> };
 export default async function StandingsPage({ searchParams }: PageProps) {
   const locale = await getLocale();
   const text = publicText[locale].standings;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const params = await searchParams;
   const [{ data: competitionsData }, design] = await Promise.all([
     supabase.from("competitions").select("*").eq("is_active", true).order("name"),

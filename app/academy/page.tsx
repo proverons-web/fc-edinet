@@ -1,5 +1,5 @@
 import ManagedPageCanvas from "@/app/components/ManagedPageCanvas";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { getLocale } from "@/lib/locale";
 import { publicSectionMetadata } from "@/lib/seo";
 import { getPublishedSitePageDesign } from "@/lib/page-design";
@@ -15,7 +15,7 @@ export async function generateMetadata() {
 
 export default async function AcademyPage() {
   const locale = await getLocale();
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const [design, layout] = await Promise.all([
     getPublishedSitePageDesign(supabase, "academy"),
     getPublishedProPageLayout(supabase, "academy"),
