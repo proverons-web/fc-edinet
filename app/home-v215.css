@@ -220,3 +220,35 @@
   .fcV215DashboardLastMatch .fcV215LastScore small{font-size:7px!important}
   .fcV215DashboardLastMatch .fcV215LastScore em{font-size:6px!important}
 }
+
+/* v2.15.6 — remove forced empty space and equalize command-center height */
+@media(min-width:1051px){
+  .fcV215MatchDashboardSection{padding-top:30px!important;padding-bottom:22px!important}
+  .fcV215MatchDashboard{min-height:0!important;align-items:stretch!important}
+  .fcV215DashboardLeft{grid-template-rows:auto auto!important;align-content:start!important;gap:14px!important}
+  .fcV215DashboardLastMatch,.fcV215DashboardForm{height:auto!important;min-height:0!important}
+  .fcV215DashboardLastMatch{padding:12px 16px 0!important}
+  .fcV215DashboardLastMatch .fcV215LastMatchTeams{margin:7px 0 5px!important}
+  .fcV215DashboardLastMatch .fcV215LastMatchFooter{margin-top:6px!important;padding:8px 16px!important}
+  .fcV215DashboardForm{padding:12px 16px 0!important}
+  .fcV215DashboardForm .fcV215FormDots{margin:8px 0 5px!important}
+  .fcV215DashboardFormSummary{margin:0 0 6px!important}
+  .fcV215DashboardKpis{margin:7px -16px 0!important}
+  .fcV215DashboardKpis>span{padding:7px 6px 6px!important}
+
+  .fcV215NextMatchDashboard{height:100%!important;min-height:0!important}
+  .fcV215NextMatchDashboard .fcRefMatchHead{padding:16px 22px 11px!important}
+  .fcV215NextMatchDashboard .fcRefMatchHead strong{font-size:21px!important}
+  .fcV215NextMatchDashboard .fcRefCompetition{padding:9px 22px 0!important}
+  .fcV215NextMatchDashboard .fcRefMatchBody{padding:9px 22px 8px!important}
+  .fcV215NextMatchDashboard .fcRefMatchTeams{gap:14px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge{min-height:154px!important;padding:11px 12px 9px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge img{width:82px!important;height:90px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge>span{width:82px!important;height:82px!important}
+  .fcV215NextMatchDashboard .fcRefTeamBadge strong{font-size:13px!important;margin-top:4px!important}
+  .fcV215NextMatchDashboard .fcRefVs{width:52px!important;height:52px!important;font-size:15px!important}
+  .fcV215NextMatchDashboard .fcRefMatchFacts{margin-top:8px!important}
+  .fcV215NextMatchDashboard .fcRefMatchFacts span{min-height:52px!important;padding:7px 10px!important}
+  .fcV215NextMatchDashboard .fcRefMatchFacts strong{font-size:12px!important}
+  .fcV215NextMatchDashboard .fcRefMatchButton{width:calc(100% - 44px)!important;margin:0 22px 14px!important;min-height:42px!important}
+}
