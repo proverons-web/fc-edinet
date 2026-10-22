@@ -1,5 +1,6 @@
 import Link from "next/link";
 import YouTubePlayer from "@/app/components/YouTubePlayer";
+import MediaHubControls from "@/app/components/MediaHubControls";
 import type { MediaAlbum, MediaVideo, Partner, PartnerLevel, SitePageDesignSnapshot } from "@/lib/types";
 import type { CSSProperties } from "react";
 import { dateLocale, localized, partnerLevelLabelsI18n, publicText, type Locale } from "@/lib/i18n";
@@ -34,11 +35,13 @@ export default function ManagedPageCanvas({
   preview?: boolean;
 }) {
   const labels = pageLabels(pageKey, locale, layout);
+  const visibleSections = layout.sections.filter((section) => section.visible);
+  const firstMediaContentKey = pageKey === "media" ? visibleSections.find((section) => section.key === "albums" || section.key === "videos")?.key : undefined;
   return <div className={`managedProPage managedProPage-${pageKey}${preview ? " isPreview" : ""}`}>
-    {layout.sections.filter((section) => section.visible).map((section) => {
+    {visibleSections.map((section) => {
       if (section.key === "hero") return <HeroSection key={section.key} pageKey={pageKey} locale={locale} layout={layout} design={heroDesign} section={section}/>;
-      if (pageKey === "media" && section.key === "albums") return <MediaAlbums key={section.key} section={section} albums={albums} locale={locale}/>;
-      if (pageKey === "media" && section.key === "videos") return <MediaVideos key={section.key} section={section} videos={videos} locale={locale}/>;
+      if (pageKey === "media" && section.key === "albums") return <div key={section.key}>{section.key === firstMediaContentKey && <MediaHubControls locale={locale} albumCount={albums.length} videoCount={videos.length}/>}<MediaAlbums section={section} albums={albums} locale={locale}/></div>;
+      if (pageKey === "media" && section.key === "videos") return <div key={section.key}>{section.key === firstMediaContentKey && <MediaHubControls locale={locale} albumCount={albums.length} videoCount={videos.length}/>}<MediaVideos section={section} videos={videos} locale={locale}/></div>;
       if (pageKey === "partners" && section.key === "partners") return <PartnersGrid key={section.key} section={section} partners={partners} locale={locale}/>;
       if (pageKey === "partners" && section.key === "cta") return <CtaSection key={section.key} section={section} eyebrow={labels.ctaEyebrow} title={labels.ctaTitle} body={labels.ctaBody} href="/club" button={labels.ctaButton}/>;
       if (pageKey === "academy" && section.key === "intro") return <AcademyIntro key={section.key} section={section} layout={layout} locale={locale}/>;
@@ -88,10 +91,10 @@ function HeroSection({ pageKey, locale, layout, design, section }: { pageKey: Pr
 
 function MediaAlbums({ section, albums, locale }: { section: ProPageLayoutConfig["sections"][number]; albums: MediaAlbum[]; locale: Locale }) {
   const text = publicText[locale].media;
-  return <section className={proSectionClass(section)} style={proSectionStyle(section)}><div className="proSectionMotion"><div className="proSectionInner">
+  return <section data-media-section="albums" className={proSectionClass(section)} style={proSectionStyle(section)}><div className="proSectionMotion"><div className="proSectionInner">
     <SectionHeading eyebrow={text.photo} title={text.albums} align={section.align}/>
     {albums.length ? <div className={`proCardGrid proMediaAlbums proAlbums-${section.variant}`}>
-      {albums.map((album, index) => <Link href={`/media/${album.slug}`} className={`proMediaAlbumCard${index === 0 ? " isLeadAlbum" : ""}${section.variant === "featured" && index === 0 ? " isFeatured" : ""}`} key={album.id}>
+      {albums.map((album, index) => <Link data-media-card data-media-kind="albums" data-media-search={`${album.title} ${album.description || ""} ${album.location || ""}`} href={`/media/${album.slug}`} className={`proMediaAlbumCard${index === 0 ? " isLeadAlbum" : ""}${section.variant === "featured" && index === 0 ? " isFeatured" : ""}`} key={album.id}>
         <div className="proMediaAlbumImage">{album.cover_image_url ? <img src={album.cover_image_url} alt={album.title} loading="lazy" decoding="async"/> : <span>FC EDINEȚ</span>}<div className="proMediaShade"/></div>
         <div className="proMediaAlbumIndex" aria-hidden="true">{String(index + 1).padStart(2, "0")}</div>
         <div className="proMediaAlbumCopy">
@@ -108,10 +111,10 @@ function MediaAlbums({ section, albums, locale }: { section: ProPageLayoutConfig
 function MediaVideos({ section, videos, locale }: { section: ProPageLayoutConfig["sections"][number]; videos: MediaVideo[]; locale: Locale }) {
   const text = publicText[locale].media;
   const watchLabel = locale === "ro" ? "Vezi video" : "Смотреть видео";
-  return <section className={proSectionClass(section)} style={proSectionStyle(section)}><div className="proSectionMotion"><div className="proSectionInner">
+  return <section data-media-section="videos" className={proSectionClass(section)} style={proSectionStyle(section)}><div className="proSectionMotion"><div className="proSectionInner">
     <SectionHeading eyebrow="FC EDINEȚ TV" title={text.videos} align={section.align}/>
     {videos.length ? <div className={`proCardGrid proMediaVideos proVideos-${section.variant}`}>
-      {videos.map((video, index) => <article className={`proMediaVideoCard${index === 0 ? " isLeadVideo" : ""}`} key={video.id}>
+      {videos.map((video, index) => <article data-media-card data-media-kind="videos" data-media-search={`${video.title} ${video.description || ""}`} className={`proMediaVideoCard${index === 0 ? " isLeadVideo" : ""}`} key={video.id}>
         <div className="proMediaVideoPreview">
           <YouTubePlayer videoId={video.youtube_id} title={video.title} />
           <span className="proMediaVideoPlatform">FC EDINEȚ TV</span>

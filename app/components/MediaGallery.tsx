@@ -23,6 +23,8 @@ export default function MediaGallery({ photos, albumTitle, text }: { photos: Med
   const closeRef = useRef<HTMLButtonElement>(null);
   const lightboxRef = useRef<HTMLDivElement>(null);
   const openerRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
   const active = activeIndex === null ? null : photos[activeIndex] ?? null;
   const shareText = { share: text.share, copied: text.copied, copyLink: text.copyLink, close: text.close };
 
@@ -55,6 +57,21 @@ export default function MediaGallery({ photos, albumTitle, text }: { photos: Med
 
   const previous = () => setActiveIndex((current) => current === null ? null : (current - 1 + photos.length) % photos.length);
   const next = () => setActiveIndex((current) => current === null ? null : (current + 1) % photos.length);
+  const onTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    const touch = event.touches[0];
+    touchStartX.current = touch?.clientX ?? null;
+    touchStartY.current = touch?.clientY ?? null;
+  };
+  const onTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (touchStartX.current === null || touchStartY.current === null || photos.length < 2) return;
+    const touch = event.changedTouches[0];
+    if (!touch) return;
+    const dx = touch.clientX - touchStartX.current;
+    const dy = touch.clientY - touchStartY.current;
+    touchStartX.current = null; touchStartY.current = null;
+    if (Math.abs(dx) < 48 || Math.abs(dx) <= Math.abs(dy) * 1.15) return;
+    if (dx < 0) next(); else previous();
+  };
 
   return <>
     <div className="mediaMasonry">
@@ -64,7 +81,7 @@ export default function MediaGallery({ photos, albumTitle, text }: { photos: Med
       </button>)}
     </div>
 
-    {active && activeIndex !== null && <div ref={lightboxRef} className="mediaLightbox" role="dialog" aria-modal="true" aria-label={active.caption || albumTitle}>
+    {active && activeIndex !== null && <div ref={lightboxRef} className="mediaLightbox" role="dialog" aria-modal="true" aria-label={active.caption || albumTitle} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       <button ref={closeRef} type="button" className="mediaLightboxClose" onClick={() => setActiveIndex(null)} aria-label={text.close}>✕</button>
       {photos.length > 1 && <><button type="button" className="mediaLightboxArrow previous" onClick={previous} aria-label={text.previousPhoto}>‹</button><button type="button" className="mediaLightboxArrow next" onClick={next} aria-label={text.nextPhoto}>›</button></>}
       <div className="mediaLightboxContent"><div className="mediaLightboxImage"><img src={active.image_url} alt={active.caption || albumTitle} /></div>
