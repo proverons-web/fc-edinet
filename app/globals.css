@@ -3675,3 +3675,32 @@ body:has(.adminEmbedded){background:#f3f6fa}
 .clubArchiveAdminLayout{display:grid;grid-template-columns:minmax(300px,.72fr) minmax(0,1.28fr);gap:24px;align-items:start}.clubArchiveAdminLayout>.clubAddCard{position:sticky;top:96px}.clubArchiveAdminGrid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.clubArchiveAdminGrid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.clubArchiveAdminCard .staffAdminCardBody{display:grid;gap:22px}.clubArchiveUploadBox{padding:18px;border-radius:14px;background:#f4f7fb;border:1px solid #dbe5ef}.clubArchiveUploadBox h3{margin:0 0 14px;color:#0a315f}.clubArchiveAdminPhotos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.clubArchiveAdminPhotos article{overflow:hidden;border:1px solid #d9e4ef;border-radius:14px;background:#fff}.clubArchiveAdminPhotos article>img{width:100%;height:190px;object-fit:cover;background:#eef3f8}.clubArchiveAdminPhotos form{display:grid;gap:8px;padding:12px}.clubArchiveAdminPhotos input{min-width:0;width:100%;padding:9px;border:1px solid #d4dfeb;border-radius:8px}
 @media(max-width:1050px){.clubArchiveAdminLayout{grid-template-columns:1fr}.clubArchiveAdminLayout>.clubAddCard{position:relative;top:auto}.clubArchivePhotoGrid{grid-template-columns:repeat(2,1fr)}.clubHallGrid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:700px){.clubArchiveAlbumHead{grid-template-columns:1fr}.clubArchiveAlbumHead>img{max-height:280px}.clubArchiveAlbumHead>div{padding:24px}.clubArchivePhotoGrid{grid-template-columns:1fr}.clubHallGrid{grid-template-columns:1fr}.clubHallSquad{grid-template-columns:1fr}.clubHallSquadBadge{min-height:220px}.clubArchiveLightboxInner{grid-template-columns:1fr}.clubArchiveLightboxInner>img{height:60vh}.clubArchiveAdminGrid2,.clubArchiveAdminGrid3,.clubArchiveAdminPhotos{grid-template-columns:1fr}}
+
+/* v2.23.2 — canonical CRUD admin pattern: create first, existing records below */
+.clubArchiveAdminLayout{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:30px!important;
+  align-items:start!important;
+}
+.clubArchiveAdminLayout>.clubAddCard{
+  position:relative!important;
+  top:auto!important;
+  width:100%!important;
+  max-width:none!important;
+  padding:28px!important;
+}
+.clubArchiveAdminLayout>.staffAdminExisting{
+  width:100%!important;
+  max-width:none!important;
+}
+.clubArchiveAdminLayout>.clubAddCard .staffAdminForm{
+  max-width:none!important;
+}
+.clubArchiveAdminLayout>.clubAddCard .primaryButton{
+  justify-self:start;
+}
+@media(max-width:760px){
+  .clubArchiveAdminLayout{gap:20px!important}
+  .clubArchiveAdminLayout>.clubAddCard{padding:18px!important}
+}

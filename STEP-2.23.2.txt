@@ -1,0 +1,9 @@
+FC Edinet v2.23.2 — Admin Form Pattern Fix
+
+- Archive Photos admin now follows canonical vertical CRUD layout.
+- Hall of Fame admin now follows canonical vertical CRUD layout.
+- Create/add form is always full-width at the top.
+- Existing records are always shown below in a separate section.
+- Removed sticky two-column create/list behavior from clubArchiveAdminLayout.
+- This layout is now the canonical pattern for future CRUD admin modules.
+- No Supabase migration required.
