@@ -9,6 +9,7 @@ import { getLocale } from "@/lib/locale";
 import { publicText } from "@/lib/i18n";
 import { accountText } from "@/lib/account-i18n";
 import { defaultHeaderDesign, localizedValue, normalizeHeaderDesign } from "@/lib/global-design";
+import type { SiteMenuItem } from "@/lib/site-builder";
 import { getGlobalDesignConfigs } from "@/lib/site-global-designs";
 
 export default async function SiteHeader() {
@@ -16,9 +17,10 @@ export default async function SiteHeader() {
   const text = publicText[locale];
   const account = accountText[locale];
   const supabase = await createClient();
-  const [{ data: claimsData }, globalDesigns] = await Promise.all([
+  const [{ data: claimsData }, globalDesigns, menuResult] = await Promise.all([
     supabase.auth.getClaims(),
     getGlobalDesignConfigs(),
+    supabase.from("site_menu_items").select("*").eq("visible", true).order("display_order").order("id"),
   ]);
   const userId = claimsData?.claims?.sub;
   const design = normalizeHeaderDesign(globalDesigns.header, defaultHeaderDesign);
@@ -85,6 +87,7 @@ export default async function SiteHeader() {
             showAccount={design.show_account}
             showAdminLink={design.show_admin_link}
             showLanguageMobile={design.show_language}
+            managedMenu={(menuResult.data ?? []) as SiteMenuItem[]}
           />
         </div>
       </header>

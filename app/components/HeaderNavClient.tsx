@@ -7,6 +7,7 @@ import { logout } from "@/app/account/actions";
 import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 import type { Locale } from "@/lib/i18n";
 import type { HeaderNavKey } from "@/lib/global-design";
+import type { SiteMenuItem } from "@/lib/site-builder";
 
 type HeaderClientLabels = {
   home: string;
@@ -35,6 +36,7 @@ export default function HeaderNavClient({
   showAccount = true,
   showAdminLink = true,
   showLanguageMobile = true,
+  managedMenu = [],
 }: {
   isAuthenticated: boolean;
   isStaff: boolean;
@@ -47,6 +49,7 @@ export default function HeaderNavClient({
   showAccount?: boolean;
   showAdminLink?: boolean;
   showLanguageMobile?: boolean;
+  managedMenu?: SiteMenuItem[];
 }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -64,7 +67,12 @@ export default function HeaderNavClient({
     partners: { href: "/partners", label: labels.nav.partners },
   };
   const order = navOrder?.length ? navOrder : Object.keys(linkMap) as HeaderNavKey[];
-  const links = order.filter((key) => navVisibility?.[key] !== false).map((key) => linkMap[key]);
+  const legacyLinks = order.filter((key) => navVisibility?.[key] !== false).map((key) => linkMap[key]);
+  const useManagedMenu = managedMenu.length > 0;
+  const topManaged = managedMenu.filter((item) => !item.parent_id);
+  const childMap = new Map<number, SiteMenuItem[]>();
+  for (const item of managedMenu) if (item.parent_id) childMap.set(item.parent_id, [...(childMap.get(item.parent_id) ?? []), item]);
+  const localizedMenuLabel = (item: SiteMenuItem) => locale === "ro" ? (item.label_ro || item.label_ru) : item.label_ru;
   const isActive = (href: string) => href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
   useEffect(() => {
@@ -101,8 +109,13 @@ export default function HeaderNavClient({
   return (
     <>
       <nav className="menu">
-        <Link href="/" className={isActive("/") ? "isActive" : undefined} aria-current={isActive("/") ? "page" : undefined}>{labels.home}</Link>
-        {links.map((link) => <Link key={link.href} href={link.href} className={isActive(link.href) ? "isActive" : undefined} aria-current={isActive(link.href) ? "page" : undefined}>{link.label}</Link>)}
+        {useManagedMenu ? topManaged.map((item) => {
+          const children = childMap.get(item.id) ?? [];
+          return children.length ? <span className="managedMenuGroup" key={item.id}><Link href={item.href} className={isActive(item.href) ? "isActive" : undefined}>{localizedMenuLabel(item)}</Link><span className="managedMenuDropdown">{children.map((child) => <Link key={child.id} href={child.href}>{localizedMenuLabel(child)}</Link>)}</span></span> : <Link key={item.id} href={item.href} className={isActive(item.href) ? "isActive" : undefined} aria-current={isActive(item.href) ? "page" : undefined}>{localizedMenuLabel(item)}</Link>;
+        }) : <>
+          <Link href="/" className={isActive("/") ? "isActive" : undefined} aria-current={isActive("/") ? "page" : undefined}>{labels.home}</Link>
+          {legacyLinks.map((link) => <Link key={link.href} href={link.href} className={isActive(link.href) ? "isActive" : undefined} aria-current={isActive(link.href) ? "page" : undefined}>{link.label}</Link>)}
+        </>}
         {showAdminLink && isStaff && <Link href="/admin">{labels.admin}</Link>}
       </nav>
 
@@ -129,8 +142,10 @@ export default function HeaderNavClient({
       </div>
 
       {menuOpen && <div className="mobileMenu mobileMenuAbsolute" id="mobile-site-menu" role="dialog" aria-modal="true" aria-label={labels.openMenu}><div className="container mobileMenuInner">
-        <Link href="/" className={isActive("/") ? "isActive" : undefined} aria-current={isActive("/") ? "page" : undefined} onClick={() => setMenuOpen(false)}>{labels.home}</Link>
-        {links.map((link) => <Link key={link.href} href={link.href} className={isActive(link.href) ? "isActive" : undefined} aria-current={isActive(link.href) ? "page" : undefined} onClick={() => setMenuOpen(false)}>{link.label}</Link>)}
+        {useManagedMenu ? topManaged.map((item) => <div className="mobileManagedGroup" key={item.id}><Link href={item.href} className={isActive(item.href) ? "isActive" : undefined} onClick={() => setMenuOpen(false)}>{localizedMenuLabel(item)}</Link>{(childMap.get(item.id) ?? []).map((child) => <Link className="mobileManagedChild" key={child.id} href={child.href} onClick={() => setMenuOpen(false)}>{localizedMenuLabel(child)}</Link>)}</div>) : <>
+          <Link href="/" className={isActive("/") ? "isActive" : undefined} aria-current={isActive("/") ? "page" : undefined} onClick={() => setMenuOpen(false)}>{labels.home}</Link>
+          {legacyLinks.map((link) => <Link key={link.href} href={link.href} className={isActive(link.href) ? "isActive" : undefined} aria-current={isActive(link.href) ? "page" : undefined} onClick={() => setMenuOpen(false)}>{link.label}</Link>)}
+        </>}
         {showAdminLink && isStaff && <Link href="/admin" onClick={() => setMenuOpen(false)}>{labels.admin}</Link>}
         {showSearch && <Link href="/search" onClick={() => setMenuOpen(false)}>{labels.search}</Link>}
         {showAccount && (isAuthenticated ? <>
