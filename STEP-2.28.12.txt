@@ -1,0 +1,8 @@
+FC Edineț v2.28.12 — Recent Match Side Padding Fix
+
+What changed
+- Simplified the homepage recent-match team layout to restore symmetric inner spacing.
+- Home crest now has the same left-side breathing room as the away crest has on the right side.
+- Removed the over-constrained fixed side-column lock that caused clipping and asymmetry.
+- Preserved sharp corners, no crest frames, and no home/away helper labels.
+- Version synchronized to 2.28.12.
