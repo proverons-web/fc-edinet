@@ -1,0 +1,8 @@
+FC Edineț v2.28.10 — Recent Match Crest Alignment
+
+What changed
+- Fixed the staircase effect in recent-match cards by giving every team the same fixed crest row and name row.
+- Removed bottom alignment that made one-line and two-line team names shift crest positions.
+- Increased recent-match crests again using visual scaling while keeping card height unchanged.
+- Preserved the no-frame / no-home-away-label styling from v2.28.9.
+- Version synchronized to 2.28.10.

@@ -1072,3 +1072,79 @@
     font-size:9px!important;
   }
 }
+
+
+/* ============================================================
+   FC EDINEȚ v2.28.10 — RECENT MATCH CREST ALIGNMENT
+   ============================================================ */
+/* All team cells reserve identical logo/name rows. This removes the visual
+   "staircase" caused by bottom alignment + one/two-line club names. */
+.fcV215ResultsSection .fcRefRecentMatchBody{
+  align-items:center!important;
+}
+.fcV215ResultsSection .fcRefRecentMatchTeam{
+  grid-template-rows:104px 26px!important;
+  align-content:center!important;
+  align-items:center!important;
+  justify-items:center!important;
+  gap:2px!important;
+  min-height:132px!important;
+}
+.fcV215ResultsSection .fcRefRecentMatchTeam img,
+.fcV215ResultsSection .fcRefRecentMatchTeam span{
+  width:82px!important;
+  height:94px!important;
+  max-width:none!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  transform:scale(1.18)!important;
+  transform-origin:center center!important;
+}
+.fcV215ResultsSection .fcRefRecentMatchTeam strong{
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:center!important;
+  min-height:26px!important;
+  max-height:26px!important;
+  width:100%!important;
+  margin:0!important;
+  overflow:hidden!important;
+  text-align:center!important;
+  font-size:10px!important;
+  line-height:1.08!important;
+  -webkit-line-clamp:2!important;
+}
+.fcV215ResultsSection .fcRefRecentMatchScore{
+  align-self:center!important;
+}
+
+@media(max-width:760px){
+  .fcV215ResultsSection .fcRefRecentMatchTeam{
+    grid-template-rows:96px 26px!important;
+    min-height:124px!important;
+  }
+  .fcV215ResultsSection .fcRefRecentMatchTeam img,
+  .fcV215ResultsSection .fcRefRecentMatchTeam span{
+    width:76px!important;
+    height:86px!important;
+    transform:scale(1.16)!important;
+  }
+}
+
+@media(max-width:460px){
+  .fcV215ResultsSection .fcRefRecentMatchTeam{
+    grid-template-rows:86px 24px!important;
+    min-height:112px!important;
+  }
+  .fcV215ResultsSection .fcRefRecentMatchTeam img,
+  .fcV215ResultsSection .fcRefRecentMatchTeam span{
+    width:68px!important;
+    height:78px!important;
+    transform:scale(1.14)!important;
+  }
+  .fcV215ResultsSection .fcRefRecentMatchTeam strong{
+    min-height:24px!important;
+    max-height:24px!important;
+    font-size:9px!important;
+  }
+}

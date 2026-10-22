@@ -122,8 +122,8 @@ ok("next match VS circle replaced", homeCss.includes('Modern VS separator') && h
 ok("results rail frame and rounding removed", homeCss.includes('.fcV215ResultsSection .fcV215MatchRailWide{') && homeCss.includes('.fcV215ResultsSection .fcRefRecentMatchCard,') && homeCss.includes('border:0!important;') && homeCss.includes('border-radius:0!important;'));
 ok("homepage news rounding removed", homeCss.includes('.fcRefLeadColumn,\n.fcRefLatestColumn{') && homeCss.includes('.fcRefNewsRow>div{\n  border-radius:0!important;'));
 const releaseSource = read("lib/release.ts");
-ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.28.9"'));
-ok("release version", JSON.parse(read("package.json")).version === "2.28.9");
+ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.28.10"'));
+ok("release version", JSON.parse(read("package.json")).version === "2.28.10");
 
 const failed = checks.filter((x) => !x.ok);
 for (const check of checks) console.log(`${check.ok ? "PASS" : "FAIL"}  ${check.name}${check.detail ? ` — ${check.detail}` : ""}`);
@@ -132,5 +132,8 @@ ok("v2.28.8 next-match footprint restored", homeCss.includes("FC EDINEȚ v2.28.8
 ok("v2.28.8 crests enlarge without layout growth", homeCss.includes("transform:scale(1.58) translateY(-7px)!important"));
 ok("v2.28.9 recent match labels removed", !homepageSource.includes('side={locale === "ro" ? "GAZDE" : "ДОМА"}') && !homepageSource.includes('side={locale === "ro" ? "OASPEȚI" : "ГОСТИ"}') && !homepageSource.includes('<small>{side}</small>'));
 ok("v2.28.9 recent match crest frames removed and enlarged", homeCss.includes("FC EDINEȚ v2.28.9 — RECENT MATCHES CRESTS UP, NO FRAMES") && homeCss.includes("width:78px!important") && homeCss.includes("border:0!important") && homeCss.includes("background:transparent!important"));
+
+ok("v2.28.10 recent match crest alignment fixed", homeCss.includes("FC EDINEȚ v2.28.10 — RECENT MATCH CREST ALIGNMENT") && homeCss.includes("grid-template-rows:104px 26px!important") && homeCss.includes("align-items:center!important") && !homeCss.slice(homeCss.indexOf("FC EDINEȚ v2.28.10 — RECENT MATCH CREST ALIGNMENT")).includes("align-items:end!important"));
+ok("v2.28.10 recent match crests larger without card height change", homeCss.includes("width:82px!important") && homeCss.includes("height:94px!important") && homeCss.includes("transform:scale(1.18)!important"));
 console.log(`\n${checks.length - failed.length}/${checks.length} checks passed.`);
 if (failed.length) process.exit(1);
