@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const VERSION = "2.28.2";
+const VERSION = "2.28.3";
 
 export async function GET() {
   return NextResponse.json(
@@ -12,7 +12,9 @@ export async function GET() {
       version: VERSION,
       apiVersion: `v${VERSION}`,
       release: `FC Edineț v${VERSION}`,
-      databaseNavigationMigration: "061",
+      navigation: "SEASON_26_27",
+      staffRoute: "/team?view=staff",
+      databaseNavigationMigration: "062",
       environment: process.env.VERCEL_ENV || process.env.NODE_ENV || "unknown",
       deployment:
         process.env.VERCEL_PROJECT_PRODUCTION_URL ||

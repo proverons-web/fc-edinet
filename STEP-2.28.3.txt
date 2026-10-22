@@ -1,0 +1,11 @@
+FC Edineț v2.28.3 — Header & Team Route Recovery
+
+- Wider centered desktop menu between brand and search/account.
+- Equal-width desktop menu blocks.
+- Real ☰ glyph on SEASON 26/27 and CLUB dropdown triggers.
+- Dropdown rendered through document.body portal for consistent Chrome/Edge/Firefox/Safari behavior.
+- Staff public view moved to stable /team?view=staff route.
+- /staff and /team/staff remain compatibility redirects.
+- Public PageHeroShell no longer emits managedPageHeroInner / heroBuilderContent.
+- Ordinary public heroes are compact instead of using large forced hero heights.
+- API/health/diagnostics bumped to 2.28.3; navigation migration 062.

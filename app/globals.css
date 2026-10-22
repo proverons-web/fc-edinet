@@ -1374,21 +1374,21 @@ a.homePartnerCard:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(1
 .managedPageHeroOverlay{z-index:1;background:rgb(2 13 31 / var(--page-hero-overlay-alpha,.58))}
 .managedPageHeroOverlay.gradient-left{background:linear-gradient(90deg,rgb(2 13 31 / var(--page-hero-overlay-alpha,.58)),rgb(2 13 31 / calc(var(--page-hero-overlay-alpha,.58) * .35)))}
 .managedPageHeroOverlay.gradient-right{background:linear-gradient(90deg,rgb(2 13 31 / calc(var(--page-hero-overlay-alpha,.58) * .35)),rgb(2 13 31 / var(--page-hero-overlay-alpha,.58)))}
-.managedPageHeroInner{position:relative;z-index:2;width:min(100% - 40px,1200px);margin-left:auto;margin-right:auto}
-.managedPageHero.align-center .managedPageHeroInner{text-align:center}
-.managedPageHero.align-right .managedPageHeroInner{text-align:right}
-.managedPageHero:not(.clubHero):not(.playerProfileHero) .managedPageHeroInner>h1,
-.managedPageHero:not(.clubHero):not(.playerProfileHero) .managedPageHeroInner>p,
-.managedPageHero:not(.clubHero):not(.playerProfileHero) .managedPageHeroInner>.articleLead{max-width:var(--page-hero-content-width,720px)}
-.managedPageHero.align-center:not(.clubHero):not(.playerProfileHero) .managedPageHeroInner>h1,
-.managedPageHero.align-center:not(.clubHero):not(.playerProfileHero) .managedPageHeroInner>p,
-.managedPageHero.align-center:not(.clubHero):not(.playerProfileHero) .managedPageHeroInner>.articleLead{margin-left:auto;margin-right:auto}
-.managedPageHero.align-right:not(.clubHero):not(.playerProfileHero) .managedPageHeroInner>h1,
-.managedPageHero.align-right:not(.clubHero):not(.playerProfileHero) .managedPageHeroInner>p,
-.managedPageHero.align-right:not(.clubHero):not(.playerProfileHero) .managedPageHeroInner>.articleLead{margin-left:auto}
+.pageHeroContent{position:relative;z-index:2;width:min(100% - 40px,1200px);margin-left:auto;margin-right:auto}
+.managedPageHero.align-center .pageHeroContent{text-align:center}
+.managedPageHero.align-right .pageHeroContent{text-align:right}
+.managedPageHero:not(.clubHero):not(.playerProfileHero) .pageHeroContent>h1,
+.managedPageHero:not(.clubHero):not(.playerProfileHero) .pageHeroContent>p,
+.managedPageHero:not(.clubHero):not(.playerProfileHero) .pageHeroContent>.articleLead{max-width:var(--page-hero-content-width,720px)}
+.managedPageHero.align-center:not(.clubHero):not(.playerProfileHero) .pageHeroContent>h1,
+.managedPageHero.align-center:not(.clubHero):not(.playerProfileHero) .pageHeroContent>p,
+.managedPageHero.align-center:not(.clubHero):not(.playerProfileHero) .pageHeroContent>.articleLead{margin-left:auto;margin-right:auto}
+.managedPageHero.align-right:not(.clubHero):not(.playerProfileHero) .pageHeroContent>h1,
+.managedPageHero.align-right:not(.clubHero):not(.playerProfileHero) .pageHeroContent>p,
+.managedPageHero.align-right:not(.clubHero):not(.playerProfileHero) .pageHeroContent>.articleLead{margin-left:auto}
 .managedPageHero.articleHeader .articleHeaderInner{padding-top:36px;padding-bottom:36px}
-.managedPageHero.mediaAlbumHero .managedPageHeroInner{padding-top:42px;padding-bottom:42px}
-.managedPageHero.clubHero .managedPageHeroInner{padding-top:54px;padding-bottom:54px}
+.managedPageHero.mediaAlbumHero .pageHeroContent{padding-top:42px;padding-bottom:42px}
+.managedPageHero.clubHero .pageHeroContent{padding-top:54px;padding-bottom:54px}
 .managedPageHero.playerProfileHero{align-items:flex-end}
 .managedPageHero.playerProfileHero .playerProfileGrid{min-height:var(--page-hero-height-desktop,660px)}
 .managedPageHero.playerProfileHero.align-center .profileIntro{text-align:center}
@@ -1425,9 +1425,9 @@ a.homePartnerCard:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(1
 @media(max-width:680px){
   .managedPageHero{min-height:var(--page-hero-height-mobile,250px)}
   
-  .managedPageHeroInner{width:min(100% - 24px,1200px)}
+  .pageHeroContent{width:min(100% - 24px,1200px)}
   .managedPageHero.playerProfileHero .playerProfileGrid{min-height:var(--page-hero-height-mobile,760px)}
-  .managedPageHero.clubHero .managedPageHeroInner,.managedPageHero.mediaAlbumHero .managedPageHeroInner,.managedPageHero.articleHeader .articleHeaderInner{padding-top:28px;padding-bottom:28px}
+  .managedPageHero.clubHero .pageHeroContent,.managedPageHero.mediaAlbumHero .pageHeroContent,.managedPageHero.articleHeader .articleHeaderInner{padding-top:28px;padding-bottom:28px}
   .sitePagePreviewContent{width:calc(100% - 40px)}
 }
 
@@ -2567,7 +2567,7 @@ h1,h2,h3{font-family:var(--ds-font-heading);font-weight:var(--ds-heading-weight)
 .fcRefTableColumn .standingsTableWrap{overflow:hidden!important;width:100%}.fcRefTableColumn .standingsTable{min-width:0!important;width:100%!important;table-layout:fixed}.fcRefTableColumn .standingsTable th,.fcRefTableColumn .standingsTable td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fcRefTableColumn .standingsTable th:nth-child(1),.fcRefTableColumn .standingsTable td:nth-child(1){width:34px}.fcRefTableColumn .standingsTable th:nth-child(2),.fcRefTableColumn .standingsTable td:nth-child(2){width:auto}.fcRefTableColumn .standingsTable th:nth-child(3),.fcRefTableColumn .standingsTable td:nth-child(3),.fcRefTableColumn .standingsTable th:nth-child(7),.fcRefTableColumn .standingsTable td:nth-child(7),.fcRefTableColumn .standingsTable th:nth-child(8),.fcRefTableColumn .standingsTable td:nth-child(8){width:44px}.fcRefTableColumn .standingTeam{min-width:0}.fcRefTableColumn .standingTeam strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fcRefTableColumn .standingsTableWrap::-webkit-scrollbar{display:none}
 
 /* Unified inner page look */
-.managedPageHero,.proManagedHero{background:#041b3b!important;border-bottom:3px solid #ffd328}.managedPageHero:after,.proManagedHero:after{content:"";position:absolute;inset:auto 0 0;height:80px;background:linear-gradient(180deg,transparent,rgba(1,17,42,.22));pointer-events:none;z-index:1}.managedPageHeroInner,.proManagedHeroInner{z-index:3}.managedPageHero .eyebrow,.proManagedHero .eyebrow{color:#ffd328!important}.managedPageHero h1,.proManagedHero h1{font-family:Impact,"Arial Narrow",Arial,sans-serif;text-transform:uppercase;letter-spacing:.01em!important;text-shadow:0 4px 22px rgba(0,0,0,.28)}
+.managedPageHero,.proManagedHero{background:#041b3b!important;border-bottom:3px solid #ffd328}.managedPageHero:after,.proManagedHero:after{content:"";position:absolute;inset:auto 0 0;height:80px;background:linear-gradient(180deg,transparent,rgba(1,17,42,.22));pointer-events:none;z-index:1}.pageHeroContent,.proManagedHeroInner{z-index:3}.managedPageHero .eyebrow,.proManagedHero .eyebrow{color:#ffd328!important}.managedPageHero h1,.proManagedHero h1{font-family:Impact,"Arial Narrow",Arial,sans-serif;text-transform:uppercase;letter-spacing:.01em!important;text-shadow:0 4px 22px rgba(0,0,0,.28)}
 .sectionHeading h2,.proSectionHeading h2,.groupHeading h2{font-family:"Arial Narrow",Arial,sans-serif;font-weight:950;text-transform:uppercase;letter-spacing:-.02em}.sectionHeading:before,.proSectionHeading:before{content:"";display:block;width:34px;height:3px;margin-bottom:10px;background:#ffd328}.newsArchiveSection,.standingsPublicSection,.teamPage,.relatedNewsSection{background:#f4f7fb}.newsDbCard,.playerCard,.matchCard,.proMediaAlbumCard,.proMediaVideoCard,.proPartnerCard{border-radius:4px!important;box-shadow:0 10px 30px rgba(4,32,70,.07)!important;border-color:#d8e2ee!important}.newsFilters a,.standingsTabs a{border-radius:3px}.newsFilters a.active,.standingsTabs a.active{background:#0b4b98;border-color:#0b4b98}.readMore{color:#0b4b98;text-transform:uppercase;font-size:10px;letter-spacing:.06em}.primaryButton{border-radius:3px}.pageHero p:last-child,.proManagedHeroInner>p:not(.eyebrow){color:#d7e3f0}
 
 /* Club redesign aligned with home */
@@ -3810,3 +3810,86 @@ body:has(.adminEmbedded){background:#f3f6fa}
 @media(max-width:1100px){.teamPositionGrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:820px){.teamPositionGroups{gap:48px}.teamPositionGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.teamPositionGroups{gap:42px}.teamPositionGrid{grid-template-columns:1fr}.teamPositionHeading{align-items:center}.teamPositionHeading>b{font-size:24px}}
+
+
+/* v2.28.3 — centered/wider desktop navigation + browser-stable portal dropdown */
+@media(min-width:1181px){
+  .globalHeader .nav{
+    display:grid!important;
+    grid-template-columns:minmax(250px,1fr) auto minmax(250px,1fr)!important;
+    align-items:center!important;
+    gap:24px!important;
+  }
+  .globalHeader .brand{justify-self:start!important;min-width:0!important}
+  .globalHeader .menu{justify-self:center!important;align-self:stretch!important}
+  .globalHeader .navActions{justify-self:end!important;min-width:0!important}
+  .globalHeader .menu>a,.globalHeader .menu>.managedMenuGroup{
+    flex:0 0 132px!important;
+    width:132px!important;
+    min-width:132px!important;
+  }
+  .globalHeader .menu .managedMenuTrigger{padding-inline:12px!important;gap:10px!important}
+}
+@media(min-width:981px) and (max-width:1180px){
+  .globalHeader .menu>a,.globalHeader .menu>.managedMenuGroup{flex-basis:112px!important;width:112px!important}
+  .globalHeader .menu{font-size:9px!important}
+}
+.managedMenuBars{
+  display:inline-flex!important;
+  width:auto!important;
+  min-width:16px!important;
+  flex:0 0 auto!important;
+  align-items:center!important;
+  justify-content:center!important;
+  font-family:Arial,sans-serif!important;
+  font-size:15px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  letter-spacing:0!important;
+  opacity:1!important;
+  transform:translateY(-1px)
+}
+.managedMenuDropdownPortal{
+  position:fixed!important;
+  z-index:2147483000!important;
+  display:grid!important;
+  min-width:260px!important;
+  padding:0!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  border-top:3px solid var(--fc-ref-yellow)!important;
+  border-radius:0!important;
+  background:#052b5d!important;
+  box-shadow:0 22px 50px rgba(0,12,30,.42)!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  transform:none!important;
+}
+.managedMenuDropdownPortal a{
+  display:flex!important;
+  align-items:center!important;
+  min-height:46px!important;
+  padding:11px 16px!important;
+  border:0!important;
+  border-bottom:1px solid rgba(255,255,255,.08)!important;
+  color:rgba(255,255,255,.92)!important;
+  background:#052b5d!important;
+  font-family:"Arial Black",Arial,sans-serif!important;
+  font-size:10px!important;
+  font-weight:900!important;
+  line-height:1.15!important;
+  letter-spacing:.025em!important;
+  text-transform:uppercase!important;
+  white-space:nowrap!important;
+}
+.managedMenuDropdownPortal a:last-child{border-bottom:0!important}
+.managedMenuDropdownPortal a:hover,.managedMenuDropdownPortal a:focus-visible,.managedMenuDropdownPortal a.isActive{background:#123f73!important;color:#fff!important;outline:none!important}
+.managedMenuDropdownPortal a.isActive{box-shadow:inset 3px 0 0 var(--fc-ref-yellow)!important}
+
+/* v2.28.3 — retire the legacy managedPageHeroInner/heroBuilderContent wrapper on public pages */
+.pageHeroContent{position:relative;z-index:3;display:flex;flex-direction:column}
+.managedPageHero:not(.playerProfileHero):not(.articleHeader):not(.mediaAlbumHero){min-height:auto!important}
+.managedPageHero:not(.playerProfileHero):not(.articleHeader):not(.mediaAlbumHero) .pageHeroContent{padding-top:34px!important;padding-bottom:34px!important}
+@media(max-width:680px){
+  .managedPageHero:not(.playerProfileHero):not(.articleHeader):not(.mediaAlbumHero) .pageHeroContent{padding-top:26px!important;padding-bottom:26px!important}
+}

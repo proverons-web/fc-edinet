@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { createPortal } from "react-dom";
 import { logout } from "@/app/account/actions";
 import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 import type { Locale } from "@/lib/i18n";
@@ -58,6 +59,9 @@ export default function HeaderNavClient({
   const managedMenuCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const accountWrapRef = useRef<HTMLDivElement>(null);
   const managedMenuRootRef = useRef<HTMLElement | null>(null);
+  const managedDropdownRef = useRef<HTMLDivElement | null>(null);
+  const managedTriggerRefs = useRef(new Map<number, HTMLButtonElement>());
+  const [dropdownPosition, setDropdownPosition] = useState<{ left: number; top: number; width: number } | null>(null);
 
   const linkMap: Record<HeaderNavKey, { href: string; label: string }> = {
     news: { href: "/news", label: labels.nav.news },
@@ -78,7 +82,10 @@ export default function HeaderNavClient({
   const childMap = new Map<number, SiteMenuItem[]>();
   for (const item of managedMenu) if (item.parent_id) childMap.set(item.parent_id, [...(childMap.get(item.parent_id) ?? []), item]);
   const localizedMenuLabel = (item: SiteMenuItem) => locale === "ro" ? (item.label_ro || item.label_ru) : item.label_ru;
-  const isActive = (href: string) => href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+  const isActive = (href: string) => {
+    const targetPath = href.split("?")[0];
+    return targetPath === "/" ? pathname === "/" : pathname === targetPath || pathname.startsWith(`${targetPath}/`);
+  };
 
   useEffect(() => {
     setMenuOpen(false);
@@ -119,7 +126,10 @@ export default function HeaderNavClient({
   useEffect(() => {
     if (openManagedMenuId === null) return;
     const closeOnOutside = (event: MouseEvent) => {
-      if (managedMenuRootRef.current && !managedMenuRootRef.current.contains(event.target as Node)) setOpenManagedMenuId(null);
+      const target = event.target as Node;
+      const insideTriggerArea = managedMenuRootRef.current?.contains(target);
+      const insideDropdown = managedDropdownRef.current?.contains(target);
+      if (!insideTriggerArea && !insideDropdown) setOpenManagedMenuId(null);
     };
     const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setOpenManagedMenuId(null); };
     document.addEventListener("mousedown", closeOnOutside);
@@ -127,6 +137,30 @@ export default function HeaderNavClient({
     return () => {
       document.removeEventListener("mousedown", closeOnOutside);
       window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [openManagedMenuId]);
+
+  const updateDropdownPosition = (id: number) => {
+    const trigger = managedTriggerRefs.current.get(id);
+    if (!trigger) return;
+    const rect = trigger.getBoundingClientRect();
+    const width = Math.max(260, rect.width);
+    const maxLeft = Math.max(12, window.innerWidth - width - 12);
+    setDropdownPosition({ left: Math.min(Math.max(12, rect.left), maxLeft), top: rect.bottom, width });
+  };
+
+  useLayoutEffect(() => {
+    if (openManagedMenuId === null) {
+      setDropdownPosition(null);
+      return;
+    }
+    const update = () => updateDropdownPosition(openManagedMenuId);
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
     };
   }, [openManagedMenuId]);
 
@@ -163,6 +197,7 @@ export default function HeaderNavClient({
           >
             <button
               type="button"
+              ref={(node) => { if (node) managedTriggerRefs.current.set(item.id, node); else managedTriggerRefs.current.delete(item.id); }}
               className={`managedMenuTrigger${groupActive ? " isActive" : ""}`}
               aria-expanded={isOpen}
               aria-haspopup="menu"
@@ -172,15 +207,29 @@ export default function HeaderNavClient({
               onKeyDown={(event) => {
                 if (event.key === "ArrowDown") {
                   event.preventDefault();
-                  const trigger = event.currentTarget;
                   openManagedMenu(item.id);
-                  requestAnimationFrame(() => trigger.parentElement?.querySelector<HTMLAnchorElement>(".managedMenuDropdown a")?.focus());
+                  requestAnimationFrame(() => {
+                    requestAnimationFrame(() => document.getElementById(dropdownId)?.querySelector<HTMLAnchorElement>("a")?.focus());
+                  });
                 }
               }}
-            >{localizedMenuLabel(item)}<span className="managedMenuBars" aria-hidden="true"><i/><i/><i/></span></button>
-            <div className="managedMenuDropdown" id={dropdownId} role="menu" aria-hidden={!isOpen}>
-              {children.map((child) => <Link role="menuitem" key={child.id} href={child.href} className={isActive(child.href) ? "isActive" : undefined} onClick={() => setOpenManagedMenuId(null)}>{localizedMenuLabel(child)}</Link>)}
-            </div>
+            >{localizedMenuLabel(item)}<span className="managedMenuBars" aria-hidden="true">☰</span></button>
+            {isOpen && dropdownPosition && typeof document !== "undefined" && createPortal(
+              <div
+                ref={managedDropdownRef}
+                className="managedMenuDropdown managedMenuDropdownPortal"
+                id={dropdownId}
+                role="menu"
+                style={{ left: dropdownPosition.left, top: dropdownPosition.top, width: dropdownPosition.width }}
+                onMouseEnter={() => openManagedMenu(item.id)}
+                onMouseLeave={scheduleManagedMenuClose}
+                onFocus={() => openManagedMenu(item.id)}
+                onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) scheduleManagedMenuClose(); }}
+              >
+                {children.map((child) => <Link role="menuitem" key={child.id} href={child.href} className={isActive(child.href) ? "isActive" : undefined} onClick={() => setOpenManagedMenuId(null)}>{localizedMenuLabel(child)}</Link>)}
+              </div>,
+              document.body,
+            )}
           </div>;
         }) : <>
           <Link href="/" className={isActive("/") ? "isActive" : undefined} aria-current={isActive("/") ? "page" : undefined}>{labels.home}</Link>

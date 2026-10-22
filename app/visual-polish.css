@@ -14,7 +14,7 @@ img{max-width:100%}
 .players,.homeNewsDbGrid,.homeMediaGrid,.homePartnersGrid,.matchGrid,.sectionBuilderGrid{align-items:stretch}
 .playerCard,.newsCard,.homeMediaCard,.homePartnerCard{height:100%}
 .homeMediaImage img,.newsCard img,.mediaAlbumCard img,.mediaVideoCard img{display:block;width:100%}
-.managedPageHeroInner,.articleHeaderInner{min-width:0}
+.pageHeroContent,.articleHeaderInner{min-width:0}
 
 @media(max-width:980px){
   .sectionHeading{align-items:flex-start}
@@ -291,7 +291,7 @@ body :where(h1,h2,h3,h4,h5,h6){text-wrap:balance}
 .homePartnerCard{border-radius:6px!important;height:104px!important}
 
 /* Managed internal page heroes: same breathing room on every page. */
-.managedPageHero:not(.playerProfileHero) .managedPageHeroInner{padding-top:clamp(46px,5vw,68px)!important;padding-bottom:clamp(46px,5vw,68px)!important}
+.managedPageHero:not(.playerProfileHero) .pageHeroContent{padding-top:clamp(46px,5vw,68px)!important;padding-bottom:clamp(46px,5vw,68px)!important}
 .managedPageHero:not(.playerProfileHero) h1{line-height:.94!important;letter-spacing:-.035em!important}
 
 /* Homepage reference composition — align spacing with the new system. */
@@ -319,7 +319,7 @@ body :where(h1,h2,h3,h4,h5,h6){text-wrap:balance}
 @media(max-width:980px){
   .section{padding-top:76px;padding-bottom:76px}
   .publicMatchCard{padding:26px 24px!important}
-  .managedPageHero:not(.playerProfileHero) .managedPageHeroInner{padding-top:50px!important;padding-bottom:50px!important}
+  .managedPageHero:not(.playerProfileHero) .pageHeroContent{padding-top:50px!important;padding-bottom:50px!important}
   .fcRefLeadColumn,.fcRefLatestColumn,.fcRefTableColumn{padding:18px!important}
 }
 @media(max-width:680px){
@@ -332,7 +332,7 @@ body :where(h1,h2,h3,h4,h5,h6){text-wrap:balance}
   .partnersPublicGroups{gap:40px!important}
   .partnerPublicGrid{gap:12px!important}
   .partnersContactBox{align-items:flex-start!important;flex-direction:column;padding:24px 20px!important}
-  .managedPageHero:not(.playerProfileHero) .managedPageHeroInner{padding-top:42px!important;padding-bottom:42px!important}
+  .managedPageHero:not(.playerProfileHero) .pageHeroContent{padding-top:42px!important;padding-bottom:42px!important}
   .managedPageHero:not(.playerProfileHero) h1{line-height:.98!important}
   .fcRefDashboardSection{padding:18px 0 24px!important}
   .fcRefTeamSection{padding:34px 0 38px!important}
@@ -483,7 +483,7 @@ body :where(h1,h2,h3,h4,h5,h6){text-wrap:balance}
 /* TEAM — squad overview and stronger editorial rhythm */
 .teamHero{position:relative;isolation:isolate}
 .teamHero:after{content:"FC EDINEȚ";position:absolute;right:max(24px,calc((100vw - 1200px)/2));bottom:-.08em;z-index:0;color:rgba(255,255,255,.035);font-family:var(--font-fce-display),Arial,sans-serif;font-size:clamp(90px,13vw,190px);font-weight:900;line-height:.75;letter-spacing:-.055em;white-space:nowrap;pointer-events:none}
-.teamHero .managedPageHeroInner{position:relative;z-index:1}
+.teamHero .pageHeroContent{position:relative;z-index:1}
 .teamPage{padding-top:54px!important;background:linear-gradient(180deg,#04152e 0%,#06244a 46%,#03162f 100%)!important}
 .teamGroup{position:relative;margin-bottom:82px!important}
 .teamGroupHeading{position:relative;display:flex;align-items:flex-end;gap:18px;margin-bottom:24px!important;padding-bottom:15px;border-bottom:1px solid rgba(255,255,255,.13)}
@@ -754,7 +754,7 @@ body :where(h1,h2,h3,h4,h5,h6){text-wrap:balance}
 .proVideos-list .proMediaVideoCard{grid-template-columns:minmax(320px,.92fr) 1.08fr!important;align-items:stretch}.proVideos-list .proMediaVideoPreview{aspect-ratio:auto;min-height:240px}.proVideos-list .proMediaVideoCopy{display:flex;flex-direction:column;justify-content:center;padding:30px!important}
 
 /* Album page + gallery */
-.mediaAlbumHero{position:relative;isolation:isolate}.mediaAlbumHero:after{content:"FC EDINEȚ";position:absolute;right:max(18px,calc((100vw - 1220px)/2));bottom:-.1em;z-index:0;font-family:var(--font-fce-display),Arial,sans-serif;font-size:clamp(82px,12vw,170px);font-weight:900;line-height:.8;letter-spacing:-.06em;color:rgba(255,255,255,.035);pointer-events:none}.mediaAlbumHero .managedPageHeroInner{position:relative;z-index:2}
+.mediaAlbumHero{position:relative;isolation:isolate}.mediaAlbumHero:after{content:"FC EDINEȚ";position:absolute;right:max(18px,calc((100vw - 1220px)/2));bottom:-.1em;z-index:0;font-family:var(--font-fce-display),Arial,sans-serif;font-size:clamp(82px,12vw,170px);font-weight:900;line-height:.8;letter-spacing:-.06em;color:rgba(255,255,255,.035);pointer-events:none}.mediaAlbumHero .pageHeroContent{position:relative;z-index:2}
 .mediaAlbumNavigation{display:flex;align-items:center;gap:18px;flex-wrap:wrap}.mediaBackLink{margin:0!important;padding-left:18px;position:relative;color:#d4e1ef!important;font-size:9px!important;font-weight:900!important;letter-spacing:.075em;text-transform:uppercase}.mediaBackLink:before{content:"←";position:absolute;left:0;color:#ffd328;font-size:14px;top:-3px}.mediaAlbumNavigation .eyebrow{margin:0!important;color:#ffd328!important}
 .mediaAlbumHero h1{font-family:var(--font-fce-display),Arial,sans-serif!important;font-weight:900!important;line-height:.88!important;letter-spacing:-.045em!important;text-transform:uppercase}
 .mediaAlbumCount{border:1px solid rgba(255,255,255,.18)!important;border-radius:3px!important;background:rgba(2,16,35,.54)!important;padding:8px 11px!important;font-size:9px!important;letter-spacing:.08em;text-transform:uppercase}
@@ -985,7 +985,7 @@ iframe{max-width:100%}
   .sectionHeading,.proSectionHeading,.playerStatsHeader,.playerCareerHeader{min-width:0;gap:14px;flex-wrap:wrap}
   .sectionHeading h2,.proSectionHeading h2{overflow-wrap:anywhere;text-wrap:balance}
   .managedPageHero,.proManagedHero{min-height:300px!important}
-  .managedPageHeroInner,.proManagedHeroInner{padding-top:56px!important;padding-bottom:48px!important}
+  .pageHeroContent,.proManagedHeroInner{padding-top:56px!important;padding-bottom:48px!important}
   .managedPageHero h1,.proManagedHero h1{font-size:clamp(42px,14vw,64px)!important;line-height:.88!important;text-wrap:balance}
   .managedPageHero p:last-child,.proManagedHeroInner>p:not(.eyebrow){font-size:13px!important;line-height:1.6!important}
 
@@ -1109,7 +1109,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   isolation:isolate;
   overflow:hidden;
 }
-.pageHero .container,.managedPageHeroInner,.proManagedHeroInner{
+.pageHero .container,.pageHeroContent,.proManagedHeroInner{
   width:min(calc(100% - 48px),var(--fce-release-content));
   margin-inline:auto;
 }
@@ -1264,7 +1264,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 }
 
 @media(max-width:920px){
-  .container,.pageHero .container,.managedPageHeroInner,.proManagedHeroInner{width:min(calc(100% - 36px),var(--fce-release-content))}
+  .container,.pageHero .container,.pageHeroContent,.proManagedHeroInner{width:min(calc(100% - 36px),var(--fce-release-content))}
   .fcRefDashboard{grid-template-columns:1fr!important}
   .fcRefTableColumn{grid-column:auto!important}
   .fcRefHeroGrid{grid-template-columns:1fr!important}
@@ -1277,7 +1277,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 }
 
 @media(max-width:760px){
-  .container,.pageHero .container,.managedPageHeroInner,.proManagedHeroInner{width:min(calc(100% - 30px),var(--fce-release-content))}
+  .container,.pageHero .container,.pageHeroContent,.proManagedHeroInner{width:min(calc(100% - 30px),var(--fce-release-content))}
   .fcRefHeroGrid{gap:30px!important}
   .fcRefHeroCopy h1{font-size:clamp(54px,16vw,80px)!important}
   .fcRefHeroActions{display:flex;flex-wrap:wrap;gap:10px}
@@ -1302,7 +1302,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 }
 
 @media(max-width:520px){
-  .container,.pageHero .container,.managedPageHeroInner,.proManagedHeroInner{width:min(calc(100% - 24px),var(--fce-release-content))}
+  .container,.pageHero .container,.pageHeroContent,.proManagedHeroInner{width:min(calc(100% - 24px),var(--fce-release-content))}
   .fcRefMatchTeams{grid-template-columns:1fr!important;gap:10px!important}
   .fcRefVs{min-height:46px!important;justify-self:center!important}
   .fcRefMatchFacts{grid-template-columns:1fr!important}
@@ -2078,9 +2078,9 @@ button:disabled:hover,[aria-disabled="true"]:hover{transform:none!important}
 
 /* v2.12.0 — site-wide QA & final polish */
 main:not(.adminPage){overflow-x:clip}
-main:not(.adminPage) :where(.container,.managedPageHeroInner,.proSectionInner,.newsEditorialLeadGrid,.newsEditorialSecondary,.players,.publicMatchList,.standingsClubFocus,.standingsTopThree,.teamStatisticsTableWrap,.playerStatsContainer,.playerCareerContainer,.premiumMatchContent,.premiumLineupGrid,.proCardGrid)>*{min-width:0}
+main:not(.adminPage) :where(.container,.pageHeroContent,.proSectionInner,.newsEditorialLeadGrid,.newsEditorialSecondary,.players,.publicMatchList,.standingsClubFocus,.standingsTopThree,.teamStatisticsTableWrap,.playerStatsContainer,.playerCareerContainer,.premiumMatchContent,.premiumLineupGrid,.proCardGrid)>*{min-width:0}
 .pageHero h1,.managedPageHero h1,.proManagedHero h1,.sectionHeading h2,.proSectionHeading h2,.newsEditorialHeading h2,.teamGroupHeading h2,.playerStatsHeader h2,.playerCareerHeader h2{overflow-wrap:anywhere;text-wrap:balance}
-.pageHero p,.managedPageHeroInner>p,.proManagedHeroInner>p{max-width:min(760px,100%);overflow-wrap:anywhere}
+.pageHero p,.pageHeroContent>p,.proManagedHeroInner>p{max-width:min(760px,100%);overflow-wrap:anywhere}
 .globalHeader a:focus-visible,.globalHeader button:focus-visible,.globalFooter a:focus-visible,main:not(.adminPage) a:focus-visible,main:not(.adminPage) button:focus-visible,main:not(.adminPage) input:focus-visible,main:not(.adminPage) select:focus-visible,main:not(.adminPage) summary:focus-visible{outline:3px solid rgba(255,211,40,.92);outline-offset:3px}
 .globalHeader .searchButton{display:grid;place-items:center;text-decoration:none}
 .mobileMenu .searchMobileLink{display:block}

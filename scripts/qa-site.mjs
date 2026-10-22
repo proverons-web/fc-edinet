@@ -29,7 +29,7 @@ ok("login noindex", exists("app/login/layout.tsx") && /index:\s*false/.test(read
 ok("register noindex", exists("app/register/layout.tsx") && /index:\s*false/.test(read("app/register/layout.tsx")));
 
 const sitemap = read("app/sitemap.ts");
-for (const route of ["/team","/staff","/club/about","/club/history","/club/stadium","/club/leadership","/club/achievements","/club/archive","/club/hall-of-fame"]) {
+for (const route of ["/team","/club/about","/club/history","/club/stadium","/club/leadership","/club/achievements","/club/archive","/club/hall-of-fame"]) {
   ok(`sitemap ${route}`, sitemap.includes(route));
 }
 ok("custom pages in sitemap", sitemap.includes("site_custom_pages"));
@@ -68,13 +68,16 @@ for (const cssFile of walk(path.join(root, "app"), [".css"])) {
 
 ok("team root is squad page", read("app/team/page.tsx").includes("positionOrder"));
 ok("team squad page exists", exists("app/team/page.tsx"));
-ok("team staff page exists", exists("app/staff/page.tsx"));
+ok("team staff lives on stable team route", read("app/team/page.tsx").includes('view === "staff"') && read("lib/site-navigation.ts").includes('/team?view=staff'));
 ok("legacy team squad redirects", read("app/team/squad/page.tsx").includes('redirect("/team")'));
-ok("legacy team staff redirects", read("app/team/staff/page.tsx").includes('redirect("/staff")'));
+ok("legacy team staff redirects", read("app/team/staff/page.tsx").includes('redirect("/team?view=staff")'));
+ok("staff compatibility redirect", read("app/staff/page.tsx").includes('redirect("/team?view=staff")'));
 ok("legacy roster filter removed", !exists("app/components/TeamRosterBrowser.tsx"));
 ok("managed navigation has one canonical CSS block", (read("app/globals.css").match(/^\.globalHeader \.menu \.managedMenuDropdown\{/gm) || []).length === 1);
 ok("managed navigation matches header palette", read("app/globals.css").includes("background:#052b5d"));
-ok("managed navigation uses hamburger bars", read("app/components/HeaderNavClient.tsx").includes("managedMenuBars"));
+ok("managed navigation uses visible hamburger glyph", read("app/components/HeaderNavClient.tsx").includes('>☰</span>'));
+ok("dropdown rendered through body portal", read("app/components/HeaderNavClient.tsx").includes("createPortal") && read("app/globals.css").includes("managedMenuDropdownPortal"));
+ok("desktop nav centered with balanced grid", read("app/globals.css").includes("grid-template-columns:minmax(250px,1fr) auto minmax(250px,1fr)"));
 ok("desktop menu blocks equal width", read("app/globals.css").includes(".globalHeader .menu>a,.globalHeader .menu>.managedMenuGroup"));
 ok("dropdown hover uses mouse events", read("app/components/HeaderNavClient.tsx").includes("onMouseEnter") && !read("app/components/HeaderNavClient.tsx").includes("onPointerEnter"));
 ok("season migration exists", exists("database/059_navigation_season_2627.sql"));
@@ -86,9 +89,11 @@ ok("header always supplies managed hierarchy", read("app/components/SiteHeader.t
 ok("public menu RLS migration exists", exists("database/060_fix_public_site_menu_rls.sql") && read("database/060_fix_public_site_menu_rls.sql").includes('to anon') && !read("database/060_fix_public_site_menu_rls.sql").includes('to anon,authenticated'));
 ok("public custom pages RLS migration exists", exists("database/061_fix_public_custom_pages_rls.sql") && read("database/061_fix_public_custom_pages_rls.sql").includes('to anon'));
 ok("API version cache disabled", read("app/api/version/route.ts").includes('Vercel-CDN-Cache-Control') && read("app/api/version/route.ts").includes('revalidate = 0'));
-ok("API version display field exists", read("app/api/version/route.ts").includes('apiVersion:') && read("app/admin/diagnostics/page.tsx").includes('API v2.28.2'));
+ok("API version display field exists", read("app/api/version/route.ts").includes('apiVersion:') && read("app/admin/diagnostics/page.tsx").includes('API v2.28.3'));
 ok("Site Builder exposes squad and staff", read("app/admin/site-builder/page.tsx").includes('key:"team_squad"') && read("app/admin/site-builder/page.tsx").includes('key:"team_staff"'));
-ok("release version", JSON.parse(read("package.json")).version === "2.28.2");
+ok("legacy public hero wrapper removed", !read("app/components/PageHeroShell.tsx").includes("managedPageHeroInner") && !read("app/components/PageHeroShell.tsx").includes("heroBuilderContent"));
+ok("staff stable route migration exists", exists("database/062_team_staff_stable_route.sql"));
+ok("release version", JSON.parse(read("package.json")).version === "2.28.3");
 
 const failed = checks.filter((x) => !x.ok);
 for (const check of checks) console.log(`${check.ok ? "PASS" : "FAIL"}  ${check.name}${check.detail ? ` — ${check.detail}` : ""}`);

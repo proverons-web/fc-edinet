@@ -15,7 +15,7 @@ type DiagnosticCheck = {
   detail?: string;
 };
 
-const APP_VERSION = "2.28.2";
+const APP_VERSION = "2.28.3";
 const BUILDER_VERSION = "2.1";
 const HERO_BUILDER_VERSION = "2.1";
 const CONTENT_SCHEMA_VERSION = "3";
@@ -158,7 +158,7 @@ export default async function AdminDiagnosticsPage() {
     ["Главная", "app/page.tsx"],
     ["Новости", "app/news/page.tsx"],
     ["Состав", "app/team/page.tsx"],
-    ["Тренерский штаб", "app/staff/page.tsx"],
+    ["Тренерский штаб", "app/team/page.tsx"],
     ["Календарь", "app/matches/page.tsx"],
     ["Таблица", "app/standings/page.tsx"],
     ["Статистика", "app/statistics/page.tsx"],
@@ -192,7 +192,7 @@ export default async function AdminDiagnosticsPage() {
             <p>Состояние приложения, окружения, базы, редакторов и ключевых файлов — без отображения секретных значений.</p>
           </div>
           <div className="adminHeroActions">
-            <a href="/api/version" target="_blank" rel="noreferrer" className="secondaryButton">API v2.28.2 ↗</a>
+            <a href="/api/version" target="_blank" rel="noreferrer" className="secondaryButton">API v2.28.3 ↗</a>
             <a href={siteUrl} target="_blank" rel="noreferrer" className="primaryButton">Открыть сайт ↗</a>
           </div>
         </div>

@@ -332,7 +332,7 @@ export async function translateExistingContent(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/news");
   revalidatePath("/team");
-  revalidatePath("/staff");
+  revalidatePath("/team");
   revalidatePath("/club/about");
   revalidatePath("/club/history");
   revalidatePath("/club/stadium");

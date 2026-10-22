@@ -78,7 +78,7 @@ export default function PageHeroShell({
         </div>
       )}
       {hasMedia && <div className={`managedPageHeroOverlay ${design.overlay_style}`} aria-hidden="true" />}
-      <div className={`${contentClassName} managedPageHeroInner heroBuilderContent`}>{children}</div>
+      <div className={`${contentClassName} pageHeroContent`}>{children}</div>
     </section>
   );
 }
