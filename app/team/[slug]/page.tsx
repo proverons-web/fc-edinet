@@ -343,6 +343,31 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
                   <Fact label={text.foot} value={foot} />
                 </div>
               )}
+              {seasonTotal && numberValue(seasonTotal.appearances) > 0 && (
+                <div className="playerHeroSeasonPanel">
+                  <div className="playerHeroSeasonLabel">
+                    <small>{locale === "ro" ? "SEZON CURENT" : "ТЕКУЩИЙ СЕЗОН"}</small>
+                    <strong>{selectedSeason?.name ?? "FC Edineț"}</strong>
+                  </div>
+                  <div className="playerHeroSeasonKpis">
+                    {player.position === "goalkeeper" ? (
+                      <>
+                        <HeroSeasonKpi label={text.statsMatches} value={seasonTotal.appearances} />
+                        <HeroSeasonKpi label={text.statsCleanSheets} value={seasonTotal.clean_sheets} />
+                        <HeroSeasonKpi label={text.statsSaves} value={seasonTotal.saves} />
+                        <HeroSeasonKpi label={text.statsGoalsConceded} value={seasonTotal.goals_conceded} />
+                      </>
+                    ) : (
+                      <>
+                        <HeroSeasonKpi label={text.statsMatches} value={seasonTotal.appearances} />
+                        <HeroSeasonKpi label={text.statsGoals} value={seasonTotal.goals} />
+                        <HeroSeasonKpi label={text.statsAssists} value={seasonTotal.assists} />
+                        <HeroSeasonKpi label={text.statsGoalContributions} value={numberValue(seasonTotal.goals) + numberValue(seasonTotal.assists)} />
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
               <div className="playerFavoriteAction">
                 {userId ? (
                   <form action={toggleFavoritePlayer.bind(null, String(player.id), currentPath)}>
@@ -877,6 +902,10 @@ function formatScore(match: ClubMatch) {
   const home = match.home_score ?? "—";
   const away = match.away_score ?? "—";
   return `${home} : ${away}`;
+}
+
+function HeroSeasonKpi({ label, value }: { label: string; value: string | number }) {
+  return <span className="playerHeroSeasonKpi"><small>{label}</small><strong>{value}</strong></span>;
 }
 
 function Fact({ label, value }: { label: string; value?: string | null }) {
