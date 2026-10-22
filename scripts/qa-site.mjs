@@ -23,7 +23,7 @@ for (const route of ["/club/about","/club/history","/club/stadium","/club/leader
 ok("custom pages in sitemap", sitemap.includes("site_custom_pages"));
 ok("robots blocks API", read("app/robots.ts").includes('"/api/"'));
 ok("security headers configured", read("next.config.ts").includes("X-Content-Type-Options"));
-ok("release version", JSON.parse(read("package.json")).version === "2.24.0");
+ok("release version", JSON.parse(read("package.json")).version === "2.25.0");
 
 const failed = checks.filter((x) => !x.ok);
 for (const check of checks) console.log(`${check.ok ? "PASS" : "FAIL"}  ${check.name}${check.detail ? ` — ${check.detail}` : ""}`);

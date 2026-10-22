@@ -2,45 +2,66 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { UserRole } from "@/lib/types";
 
-const groups = [
+type NavItem = { href: string; label: string; icon: string; minRole: UserRole; keywords?: string };
+type NavGroup = { id: string; label: string; items: NavItem[] };
+
+const groups: NavGroup[] = [
   {
+    id: "main",
     label: "ГЛАВНОЕ",
+    items: [{ href: "/admin", label: "Обзор", icon: "⌂", minRole: "author" }],
+  },
+  {
+    id: "editorial",
+    label: "РЕДАКЦИЯ",
     items: [
-      { href: "/admin", label: "Обзор", icon: "⌂", minRole: "author" as UserRole },
+      { href: "/admin/news", label: "Новости", icon: "N", minRole: "author", keywords: "статьи публикации черновики" },
+      { href: "/admin/media", label: "Медиа", icon: "◎", minRole: "editor", keywords: "фото видео альбомы youtube" },
+      { href: "/admin/comments", label: "Комментарии", icon: "#", minRole: "editor", keywords: "модерация жалобы" },
+      { href: "/admin/translations", label: "Переводы RU → RO", icon: "RO", minRole: "editor", keywords: "румынский локализация" },
     ],
   },
   {
-    label: "КОНТЕНТ",
+    id: "team",
+    label: "КОМАНДА",
     items: [
-      { href: "/admin/news", label: "Новости", icon: "N", minRole: "author" as UserRole },
-      { href: "/admin/players", label: "Команда", icon: "P", minRole: "editor" as UserRole },
-      { href: "/admin/staff", label: "Штаб команды", icon: "ST", minRole: "editor" as UserRole },
-      { href: "/admin/matches", label: "Календарь", icon: "M", minRole: "editor" as UserRole },
-      { href: "/admin/match-center", label: "Протокол матча", icon: "MC", minRole: "editor" as UserRole },
-      { href: "/admin/standings", label: "Таблица", icon: "T", minRole: "editor" as UserRole },
-      { href: "/admin/statistics", label: "Статистика", icon: "S", minRole: "editor" as UserRole },
-      { href: "/admin/media", label: "Медиа", icon: "◎", minRole: "editor" as UserRole },
-      { href: "/admin/club", label: "Клуб", icon: "C", minRole: "editor" as UserRole },
-      { href: "/admin/partners", label: "Партнёры", icon: "◇", minRole: "editor" as UserRole },
+      { href: "/admin/players", label: "Игроки", icon: "P", minRole: "editor", keywords: "состав футболисты профили" },
+      { href: "/admin/staff", label: "Штаб команды", icon: "ST", minRole: "editor", keywords: "тренеры медицина персонал" },
     ],
   },
   {
-    label: "УПРАВЛЕНИЕ",
+    id: "competition",
+    label: "МАТЧИ И ТУРНИР",
     items: [
-      { href: "/admin/comments", label: "Комментарии", icon: "#", minRole: "editor" as UserRole },
-      { href: "/admin/translations", label: "Переводы RU → RO", icon: "RO", minRole: "editor" as UserRole },
-      { href: "/admin/site-analytics", label: "Статистика сайта", icon: "AN", minRole: "editor" as UserRole },
+      { href: "/admin/matches", label: "Календарь", icon: "M", minRole: "editor", keywords: "матчи результаты соперники" },
+      { href: "/admin/match-center", label: "Протокол матча", icon: "MC", minRole: "editor", keywords: "события составы статистика матч центр" },
+      { href: "/admin/standings", label: "Таблица", icon: "T", minRole: "editor", keywords: "турнир очки положение" },
+      { href: "/admin/statistics", label: "Статистика", icon: "S", minRole: "editor", keywords: "игроки сезоны матчи данные" },
     ],
   },
   {
+    id: "club",
+    label: "КЛУБ И ПАРТНЁРЫ",
+    items: [
+      { href: "/admin/club", label: "Клуб", icon: "C", minRole: "editor", keywords: "история стадион руководство достижения архив зал славы" },
+      { href: "/admin/partners", label: "Партнёры", icon: "◇", minRole: "editor", keywords: "спонсоры логотипы" },
+    ],
+  },
+  {
+    id: "analytics",
+    label: "АНАЛИТИКА",
+    items: [{ href: "/admin/site-analytics", label: "Статистика сайта", icon: "AN", minRole: "editor", keywords: "посетители просмотры трафик" }],
+  },
+  {
+    id: "system",
     label: "СИСТЕМА",
     items: [
-      { href: "/admin/users", label: "Пользователи", icon: "U", minRole: "admin" as UserRole },
-      { href: "/admin/audit", label: "Журнал действий", icon: "A", minRole: "admin" as UserRole },
-      { href: "/admin/diagnostics", label: "Диагностика", icon: "D", minRole: "admin" as UserRole },
+      { href: "/admin/users", label: "Пользователи", icon: "U", minRole: "admin", keywords: "роли доступ аккаунты" },
+      { href: "/admin/audit", label: "Журнал действий", icon: "A", minRole: "admin", keywords: "аудит история изменения" },
+      { href: "/admin/diagnostics", label: "Диагностика", icon: "D", minRole: "admin", keywords: "версия окружение seo проверка" },
     ],
   },
 ];
@@ -50,7 +71,7 @@ const rank: Record<UserRole, number> = { fan: 0, author: 1, editor: 2, admin: 3 
 const adminRouteLabels: Record<string, string> = {
   admin: "Обзор",
   news: "Новости",
-  players: "Команда",
+  players: "Игроки",
   staff: "Штаб команды",
   matches: "Календарь",
   "match-center": "Протокол матча",
@@ -58,6 +79,13 @@ const adminRouteLabels: Record<string, string> = {
   statistics: "Статистика",
   media: "Медиа",
   club: "Клуб",
+  about: "О клубе",
+  history: "История",
+  stadium: "Стадион",
+  leadership: "Руководство",
+  achievements: "Достижения",
+  archive: "Архивные фото",
+  "hall-of-fame": "Зал славы",
   partners: "Партнёры",
   comments: "Комментарии",
   translations: "Переводы RU → RO",
@@ -65,7 +93,7 @@ const adminRouteLabels: Record<string, string> = {
   users: "Пользователи",
   audit: "Журнал действий",
   diagnostics: "Диагностика",
-  "page-builder": "Расширенный редактор",
+  "page-builder": "Редактор страницы",
   new: "Новая запись",
   teams: "Команды",
 };
@@ -90,10 +118,20 @@ export default function AdminShellClient({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [navQuery, setNavQuery] = useState("");
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     setMobileOpen(false);
+    setNavQuery("");
   }, [pathname]);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem("fc-admin-nav-collapsed");
+      if (raw) setCollapsed(JSON.parse(raw));
+    } catch {}
+  }, []);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -109,12 +147,28 @@ export default function AdminShellClient({
     };
   }, [mobileOpen]);
 
+  const normalizedQuery = navQuery.trim().toLocaleLowerCase("ru");
+  const visibleGroups = useMemo(() => groups.map((group) => ({
+    ...group,
+    items: group.items.filter((item) => {
+      if (rank[role] < rank[item.minRole]) return false;
+      if (!normalizedQuery) return true;
+      return `${item.label} ${item.keywords || ""}`.toLocaleLowerCase("ru").includes(normalizedQuery);
+    }),
+  })).filter((group) => group.items.length), [role, normalizedQuery]);
+
   if (pathname.includes("/preview") || searchParams.get("embedded") === "1") {
     return <div className="adminEmbedded">{children}</div>;
   }
 
   const isActive = (href: string) => href === "/admin" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
   const trail = getAdminTrail(pathname);
+
+  const toggleGroup = (id: string) => {
+    const next = { ...collapsed, [id]: !collapsed[id] };
+    setCollapsed(next);
+    try { window.localStorage.setItem("fc-admin-nav-collapsed", JSON.stringify(next)); } catch {}
+  };
 
   return (
     <div className="adminAppShell">
@@ -124,21 +178,32 @@ export default function AdminShellClient({
           <div><strong>FC EDINEȚ</strong><span>ADMIN CENTER</span></div>
         </div>
 
+        <div className="adminNavSearch">
+          <span aria-hidden="true">⌕</span>
+          <input value={navQuery} onChange={(event) => setNavQuery(event.target.value)} placeholder="Найти раздел…" aria-label="Найти раздел админки" />
+          {navQuery && <button type="button" onClick={() => setNavQuery("")} aria-label="Очистить поиск">×</button>}
+        </div>
+
         <nav className="adminSidebarNav" aria-label="Админ-навигация">
-          {groups.map((group) => {
-            const items = group.items.filter((item) => rank[role] >= rank[item.minRole]);
-            if (!items.length) return null;
+          {visibleGroups.map((group) => {
+            const hasActive = group.items.some((item) => isActive(item.href));
+            const isCollapsed = !normalizedQuery && !hasActive && Boolean(collapsed[group.id]);
             return (
-              <section key={group.label} className="adminNavGroup">
-                <span>{group.label}</span>
-                {items.map((item) => (
-                  <Link key={item.href} href={item.href} className={isActive(item.href) ? "active" : ""} onClick={() => setMobileOpen(false)}>
-                    <i aria-hidden="true">{item.icon}</i><b>{item.label}</b>
-                  </Link>
-                ))}
+              <section key={group.id} className={`adminNavGroup${isCollapsed ? " isCollapsed" : ""}`}>
+                <button type="button" className="adminNavGroupToggle" onClick={() => toggleGroup(group.id)} aria-expanded={!isCollapsed}>
+                  <span>{group.label}</span><i aria-hidden="true">⌄</i>
+                </button>
+                {!isCollapsed && <div className="adminNavGroupItems">
+                  {group.items.map((item) => (
+                    <Link key={item.href} href={item.href} className={isActive(item.href) ? "active" : ""} onClick={() => setMobileOpen(false)}>
+                      <i aria-hidden="true">{item.icon}</i><b>{item.label}</b>
+                    </Link>
+                  ))}
+                </div>}
               </section>
             );
           })}
+          {normalizedQuery && !visibleGroups.length && <div className="adminNavEmpty">Раздел не найден</div>}
         </nav>
 
         <div className="adminSidebarBottom">

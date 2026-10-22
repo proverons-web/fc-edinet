@@ -1,0 +1,9 @@
+FC Edineț v2.25.0 — Admin Cleanup 2.0
+
+- Reorganized sidebar into task-oriented groups.
+- Added collapsible navigation groups with persisted state.
+- Added admin navigation search.
+- Fixed breadcrumbs for all Club subsections.
+- Reorganized admin dashboard into Editorial / Team / Competition / Club / System sections.
+- Match Center functionality intentionally unchanged.
+- No Supabase migration required.
