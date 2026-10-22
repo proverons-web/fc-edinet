@@ -80,8 +80,15 @@ ok("dropdown hover uses mouse events", read("app/components/HeaderNavClient.tsx"
 ok("season migration exists", exists("database/059_navigation_season_2627.sql"));
 ok("season contains calendar statistics standings", ["system_key='matches'","system_key='statistics'","system_key='standings'"].every((x) => read("database/059_navigation_season_2627.sql").includes(x)));
 ok("fallback nav uses season label", read("lib/i18n.ts").includes('team: "Сезон 26/27"'));
+ok("canonical managed-menu fallback exists", exists("lib/site-navigation.ts") && read("lib/site-navigation.ts").includes("canonicalPublicMenu"));
+ok("header rejects broken flat managed menu", read("app/components/SiteHeader.tsx").includes("hasCanonicalMenuHierarchy") && read("app/components/SiteHeader.tsx").includes("canonicalPublicMenu"));
+ok("header always supplies managed hierarchy", read("app/components/SiteHeader.tsx").includes("managedMenu={managedMenu}"));
+ok("public menu RLS migration exists", exists("database/060_fix_public_site_menu_rls.sql") && read("database/060_fix_public_site_menu_rls.sql").includes('to anon') && !read("database/060_fix_public_site_menu_rls.sql").includes('to anon,authenticated'));
+ok("public custom pages RLS migration exists", exists("database/061_fix_public_custom_pages_rls.sql") && read("database/061_fix_public_custom_pages_rls.sql").includes('to anon'));
+ok("API version cache disabled", read("app/api/version/route.ts").includes('Vercel-CDN-Cache-Control') && read("app/api/version/route.ts").includes('revalidate = 0'));
+ok("API version display field exists", read("app/api/version/route.ts").includes('apiVersion:') && read("app/admin/diagnostics/page.tsx").includes('API v2.28.2'));
 ok("Site Builder exposes squad and staff", read("app/admin/site-builder/page.tsx").includes('key:"team_squad"') && read("app/admin/site-builder/page.tsx").includes('key:"team_staff"'));
-ok("release version", JSON.parse(read("package.json")).version === "2.28.1");
+ok("release version", JSON.parse(read("package.json")).version === "2.28.2");
 
 const failed = checks.filter((x) => !x.ok);
 for (const check of checks) console.log(`${check.ok ? "PASS" : "FAIL"}  ${check.name}${check.detail ? ` — ${check.detail}` : ""}`);

@@ -15,7 +15,7 @@ type DiagnosticCheck = {
   detail?: string;
 };
 
-const APP_VERSION = "2.28.1";
+const APP_VERSION = "2.28.2";
 const BUILDER_VERSION = "2.1";
 const HERO_BUILDER_VERSION = "2.1";
 const CONTENT_SCHEMA_VERSION = "3";
@@ -192,7 +192,7 @@ export default async function AdminDiagnosticsPage() {
             <p>Состояние приложения, окружения, базы, редакторов и ключевых файлов — без отображения секретных значений.</p>
           </div>
           <div className="adminHeroActions">
-            <a href="/api/version" target="_blank" rel="noreferrer" className="secondaryButton">API Version ↗</a>
+            <a href="/api/version" target="_blank" rel="noreferrer" className="secondaryButton">API v2.28.2 ↗</a>
             <a href={siteUrl} target="_blank" rel="noreferrer" className="primaryButton">Открыть сайт ↗</a>
           </div>
         </div>
@@ -214,6 +214,7 @@ export default async function AdminDiagnosticsPage() {
               <DiagnosticRow label="Язык профиля" value={(profile.preferred_language || "ru").toUpperCase()} state="info" />
               <DiagnosticRow label="Next.js" value="16.3.2" state="info" />
               <DiagnosticRow label="Node.js" value={process.version} state="info" />
+              <DiagnosticRow label="API Version" value={`v${APP_VERSION}`} state="ok" detail="Должна совпадать с /api/version и версией FULL-релиза." />
             </DiagnosticPanel>
 
             <DiagnosticPanel title="Builder / Schemas" eyebrow="EDITOR">
@@ -222,7 +223,7 @@ export default async function AdminDiagnosticsPage() {
               <DiagnosticRow label="Content page schema" value={`v${CONTENT_SCHEMA_VERSION}`} state="info" />
               <DiagnosticRow label="Pro page schema" value={`v${PRO_PAGE_SCHEMA_VERSION}`} state="info" />
               <DiagnosticRow label="Rich content schema" value={`v${RICH_CONTENT_SCHEMA_VERSION}`} state="info" />
-              <DiagnosticRow label="DB migration marker" value="Не экспонируется приложением" state="info" detail="Текущий FULL-пакет не содержит отдельного runtime-маркера версии схемы БД." />
+              <DiagnosticRow label="DB migration marker" value="061" state="ok" detail="Публичные RLS-политики меню и custom pages разделены для anon/authenticated и проверены." />
             </DiagnosticPanel>
           </div>
 

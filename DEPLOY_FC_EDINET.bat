@@ -1,4 +1,4 @@
-﻿@echo off
+@echo off
 setlocal EnableExtensions
 title FC Edinet - Deploy
 
@@ -34,7 +34,8 @@ if errorlevel 1 (
 
 for /f "delims=" %%V in ('node -p "require('./package.json').version"') do set "VERSION=%%V"
 
-echo Version: %VERSION%
+echo Local release: v%VERSION%
+echo Expected API version after Vercel deployment: v%VERSION%
 echo.
 
 echo [1/8] Installing dependencies...
@@ -126,8 +127,11 @@ echo FC Edinet v%VERSION% pushed to GitHub.
 echo Vercel should start deployment automatically.
 echo ==========================================
 echo.
-echo After deployment check:
-echo https://fc-edinet.vercel.app/api/version
+echo After Vercel finishes deployment, verify:
+echo   API: https://fc-edinet.vercel.app/api/version
+echo   Expected: v%VERSION%
+echo.
+echo Tip: if the API still reports an older version, the Vercel deployment is not live yet.
 echo.
 pause
 exit /b 0

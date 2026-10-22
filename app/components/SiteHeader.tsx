@@ -11,6 +11,7 @@ import { publicText } from "@/lib/i18n";
 import { accountText } from "@/lib/account-i18n";
 import { defaultHeaderDesign, localizedValue, normalizeHeaderDesign } from "@/lib/global-design";
 import type { SiteMenuItem } from "@/lib/site-builder";
+import { canonicalPublicMenu, hasCanonicalMenuHierarchy } from "@/lib/site-navigation";
 import { getGlobalDesignConfigs } from "@/lib/site-global-designs";
 
 export default async function SiteHeader() {
@@ -26,6 +27,10 @@ export default async function SiteHeader() {
   ]);
   const userId = claimsData?.claims?.sub;
   const design = normalizeHeaderDesign(globalDesigns.header, defaultHeaderDesign);
+  const fetchedMenu = (menuResult.data ?? []) as SiteMenuItem[];
+  const managedMenu = !menuResult.error && hasCanonicalMenuHierarchy(fetchedMenu)
+    ? fetchedMenu
+    : canonicalPublicMenu;
 
   let profile: Profile | null = null;
   if (userId) {
@@ -89,7 +94,7 @@ export default async function SiteHeader() {
             showAccount={design.show_account}
             showAdminLink={design.show_admin_link}
             showLanguageMobile={design.show_language}
-            managedMenu={(menuResult.data ?? []) as SiteMenuItem[]}
+            managedMenu={managedMenu}
           />
         </div>
       </header>

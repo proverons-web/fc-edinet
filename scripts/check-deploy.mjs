@@ -48,7 +48,9 @@ try {
   const packageJson = JSON.parse(fs.readFileSync(path.join(cwd, "package.json"), "utf8"));
   const versionRoute = fs.readFileSync(path.join(cwd, "app", "api", "version", "route.ts"), "utf8");
   const healthRoute = fs.readFileSync(path.join(cwd, "app", "api", "health", "route.ts"), "utf8");
-  const routeVersion = versionRoute.match(/version:\s*["']([^"']+)["']/)?.[1] || "";
+  const routeVersion = versionRoute.match(/const\s+VERSION\s*=\s*["']([^"']+)["']/)?.[1]
+    || versionRoute.match(/version:\s*["']([^"']+)["']/)?.[1]
+    || "";
   const healthVersion = healthRoute.match(/version:\s*["']([^"']+)["']/)?.[1] || "";
 
   if (!packageJson.version) {

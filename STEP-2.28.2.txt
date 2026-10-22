@@ -1,0 +1,11 @@
+FC Edineț v2.28.2 — Header Navigation Recovery
+
+- Fixed public site_menu_items RLS: anon no longer executes editor-only is_editor_or_admin().
+- Added canonical hierarchical menu fallback. A Data API/RLS failure can no longer restore the legacy flat header.
+- Canonical header: Главная / Новости / Сезон 26/27 / Клуб / Медиа.
+- Сезон 26/27: Состав / Тренерский штаб / Календарь / Статистика / Таблица.
+- Kept dark cross-browser React-state dropdown and equal-width desktop menu blocks.
+- /api/version now exposes apiVersion + release, disables browser/CDN caching, and reports migration 061.
+- Admin Diagnostics displays API v2.28.2 explicitly.
+- DEPLOY_FC_EDINET.bat rewritten without UTF-8 BOM so @echo off works correctly and version output is clearer.
+- Supabase migrations 060-061 applied to production; anon reads verified without editor-only helper calls.
