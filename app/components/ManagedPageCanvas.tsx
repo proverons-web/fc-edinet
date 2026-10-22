@@ -60,9 +60,6 @@ function HeroSection({ pageKey, locale, layout, design, section }: { pageKey: Pr
       ? { eyebrow: publicText[locale].partners.eyebrow, title: publicText[locale].partners.title, description: publicText[locale].partners.description }
       : { eyebrow: localizedAcademy(layout, "hero_eyebrow", locale), title: localizedAcademy(layout, "hero_title", locale), description: localizedAcademy(layout, "hero_text", locale) };
   const hero = resolvePageHeroText(design, locale, fallback);
-  const desktop = design.background_mode === "custom" ? design.desktop_image_url : null;
-  const tablet = design.background_mode === "custom" ? design.tablet_image_url || desktop : desktop;
-  const mobile = design.background_mode === "custom" ? design.mobile_image_url || tablet || desktop : desktop;
   const style = {
     ...proSectionStyle(section),
     "--pro-hero-height-d": `${design.hero_height_desktop}px`,
@@ -76,10 +73,8 @@ function HeroSection({ pageKey, locale, layout, design, section }: { pageKey: Pr
   } as CSSProperties;
   return <div className={proSectionClass(section)} style={style}>
     <div className="proSectionMotion">
-      <section className={`proManagedHero proHero-${section.variant} align-${design.text_alignment}`}>
-        {desktop && <div className="proManagedHeroMedia" aria-hidden="true"><picture>{mobile && <source media="(max-width: 560px)" srcSet={mobile}/>} {tablet && <source media="(max-width: 1000px)" srcSet={tablet}/>}<img className="proHeroImage proHeroImageResponsive" src={desktop} alt="" loading="eager" decoding="async" fetchPriority="high"/></picture></div>}
-        <div className={`proManagedHeroOverlay ${design.overlay_style}`} aria-hidden="true"/>
-        <div className="proManagedHeroInner heroBuilderContent">
+      <section className={`proManagedHero imageFreeProHero proHero-${section.variant} align-${design.text_alignment}`}>
+        <div className="proManagedHeroInner pageHeroContent">
           {design.show_eyebrow && heroLayerVisible(design.layer_config, "eyebrow") && <p className="eyebrow" style={heroLayerStyle(design.layer_config, "eyebrow")}>{hero.eyebrow}</p>}
           {heroLayerVisible(design.layer_config, "title") && <h1 style={heroLayerStyle(design.layer_config, "title")}>{hero.title}</h1>}
           {design.show_description && heroLayerVisible(design.layer_config, "description") && <p style={heroLayerStyle(design.layer_config, "description")}>{hero.description}</p>}

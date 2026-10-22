@@ -54,6 +54,7 @@ export async function createStaffMember(formData: FormData) {
   }
   await supabase.from("team_staff").insert({ ...payload, photo_url });
   revalidatePath("/admin/staff");
+  revalidatePath("/staff");
   revalidatePath("/team");
 }
 
@@ -74,6 +75,7 @@ export async function updateStaffMember(formData: FormData) {
   if (formData.get("clear_photo") === "on") photo_url = null;
   await supabase.from("team_staff").update({ ...payload, photo_url }).eq("id", id);
   revalidatePath("/admin/staff");
+  revalidatePath("/staff");
   revalidatePath("/team");
 }
 
@@ -84,5 +86,6 @@ export async function deleteStaffMember(formData: FormData) {
   if (!id) return;
   await supabase.from("team_staff").delete().eq("id", id);
   revalidatePath("/admin/staff");
+  revalidatePath("/staff");
   revalidatePath("/team");
 }

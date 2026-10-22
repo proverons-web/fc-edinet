@@ -9,7 +9,6 @@ export default function ClubSectionShell({
   title,
   eyebrow,
   description,
-  imageUrl,
   children,
 }: {
   locale: Locale;
@@ -22,8 +21,7 @@ export default function ClubSectionShell({
 }) {
   return (
     <main className="clubSectionPage">
-      <section className={`clubSectionHero${imageUrl ? " has-image" : ""}`} style={imageUrl ? { backgroundImage: `url(${imageUrl})` } : undefined}>
-        <div className="clubSectionHeroShade" />
+      <section className="clubSectionHero imageFreeClubHero">
         <div className="container clubSectionHeroInner">
           <p className="eyebrow">{eyebrow || "FC EDINEȚ • CLUB"}</p>
           <h1>{title}</h1>

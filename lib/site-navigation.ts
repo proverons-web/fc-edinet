@@ -8,7 +8,7 @@ export const canonicalPublicMenu: SiteMenuItem[] = [
   { id: -200, system_key: "news", label_ru: "Новости", label_ro: "Știri", href: "/news", visible: true, display_order: 20, parent_id: null, custom_page_id: null },
   { id: -300, system_key: "team", label_ru: "Сезон 26/27", label_ro: "Sezon 26/27", href: "/team", visible: true, display_order: 30, parent_id: null, custom_page_id: null },
   { id: -310, system_key: "team_squad", label_ru: "Состав", label_ro: "Lot", href: "/team", visible: true, display_order: 10, parent_id: -300, custom_page_id: null },
-  { id: -320, system_key: "team_staff", label_ru: "Тренерский штаб", label_ro: "Staff tehnic", href: "/team?view=staff", visible: true, display_order: 20, parent_id: -300, custom_page_id: null },
+  { id: -320, system_key: "team_staff", label_ru: "Тренерский штаб", label_ro: "Staff tehnic", href: "/staff", visible: true, display_order: 20, parent_id: -300, custom_page_id: null },
   { id: -330, system_key: "matches", label_ru: "Календарь", label_ro: "Calendar", href: "/matches", visible: true, display_order: 30, parent_id: -300, custom_page_id: null },
   { id: -340, system_key: "statistics", label_ru: "Статистика", label_ro: "Statistici", href: "/statistics", visible: true, display_order: 40, parent_id: -300, custom_page_id: null },
   { id: -350, system_key: "standings", label_ru: "Таблица", label_ro: "Clasament", href: "/standings", visible: true, display_order: 50, parent_id: -300, custom_page_id: null },

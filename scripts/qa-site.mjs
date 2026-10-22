@@ -68,10 +68,10 @@ for (const cssFile of walk(path.join(root, "app"), [".css"])) {
 
 ok("team root is squad page", read("app/team/page.tsx").includes("positionOrder"));
 ok("team squad page exists", exists("app/team/page.tsx"));
-ok("team staff lives on stable team route", read("app/team/page.tsx").includes('view === "staff"') && read("lib/site-navigation.ts").includes('/team?view=staff'));
+ok("team staff is first-class public route", exists("app/staff/page.tsx") && read("app/staff/page.tsx").includes('from("team_staff")') && read("lib/site-navigation.ts").includes('href: "/staff"'));
 ok("legacy team squad redirects", read("app/team/squad/page.tsx").includes('redirect("/team")'));
-ok("legacy team staff redirects", read("app/team/staff/page.tsx").includes('redirect("/team?view=staff")'));
-ok("staff compatibility redirect", read("app/staff/page.tsx").includes('redirect("/team?view=staff")'));
+ok("legacy team staff redirects", read("app/team/staff/page.tsx").includes('redirect("/staff")'));
+ok("team legacy staff query redirects", read("app/team/page.tsx").includes('redirect("/staff")'));
 ok("legacy roster filter removed", !exists("app/components/TeamRosterBrowser.tsx"));
 ok("managed navigation has one canonical CSS block", (read("app/globals.css").match(/^\.globalHeader \.menu \.managedMenuDropdown\{/gm) || []).length === 1);
 ok("managed navigation matches header palette", read("app/globals.css").includes("background:#052b5d"));
@@ -89,11 +89,17 @@ ok("header always supplies managed hierarchy", read("app/components/SiteHeader.t
 ok("public menu RLS migration exists", exists("database/060_fix_public_site_menu_rls.sql") && read("database/060_fix_public_site_menu_rls.sql").includes('to anon') && !read("database/060_fix_public_site_menu_rls.sql").includes('to anon,authenticated'));
 ok("public custom pages RLS migration exists", exists("database/061_fix_public_custom_pages_rls.sql") && read("database/061_fix_public_custom_pages_rls.sql").includes('to anon'));
 ok("API version cache disabled", read("app/api/version/route.ts").includes('Vercel-CDN-Cache-Control') && read("app/api/version/route.ts").includes('revalidate = 0'));
-ok("API version display field exists", read("app/api/version/route.ts").includes('apiVersion:') && read("app/admin/diagnostics/page.tsx").includes('API v2.28.3'));
+ok("API version display field exists", read("app/api/version/route.ts").includes('apiVersion:') && read("app/admin/diagnostics/page.tsx").includes('API v2.28.4'));
 ok("Site Builder exposes squad and staff", read("app/admin/site-builder/page.tsx").includes('key:"team_squad"') && read("app/admin/site-builder/page.tsx").includes('key:"team_staff"'));
 ok("legacy public hero wrapper removed", !read("app/components/PageHeroShell.tsx").includes("managedPageHeroInner") && !read("app/components/PageHeroShell.tsx").includes("heroBuilderContent"));
-ok("staff stable route migration exists", exists("database/062_team_staff_stable_route.sql"));
-ok("release version", JSON.parse(read("package.json")).version === "2.28.3");
+ok("staff route restore migration exists", exists("database/063_restore_staff_route.sql") && read("database/063_restore_staff_route.sql").includes("href = '/staff'"));
+
+ok("internal page heroes render without background media", !read("app/components/PageHeroShell.tsx").includes("managedPageHeroMedia") && !read("app/components/ManagedPageCanvas.tsx").includes("proManagedHeroMedia"));
+ok("club hero no longer renders background image", !read("app/components/ClubSectionShell.tsx").includes("backgroundImage"));
+ok("menu separators removed", read("app/globals.css").includes("v2.28.4 — final clean public header") && read("app/globals.css").includes("border-left:0!important"));
+ok("menu yellow underlines removed", read("app/globals.css").includes(".globalHeader .menu a:after") && read("app/globals.css").includes("content:none!important"));
+ok("sitemap includes staff", read("app/sitemap.ts").includes('route(base, "/staff"'));
+ok("release version", JSON.parse(read("package.json")).version === "2.28.4");
 
 const failed = checks.filter((x) => !x.ok);
 for (const check of checks) console.log(`${check.ok ? "PASS" : "FAIL"}  ${check.name}${check.detail ? ` — ${check.detail}` : ""}`);

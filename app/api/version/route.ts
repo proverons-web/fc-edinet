@@ -2,26 +2,21 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
-const VERSION = "2.28.3";
+const VERSION = "2.28.4";
 
 export async function GET() {
   return NextResponse.json(
     {
-      app: "fc-edinet",
       version: VERSION,
-      apiVersion: `v${VERSION}`,
+      apiVersion: VERSION,
       release: `FC Edineț v${VERSION}`,
-      navigation: "SEASON_26_27",
-      staffRoute: "/team?view=staff",
-      databaseNavigationMigration: "062",
+      staffRoute: "/staff",
+      navigationMigration: "063",
       environment: process.env.VERCEL_ENV || process.env.NODE_ENV || "unknown",
-      deployment:
-        process.env.VERCEL_PROJECT_PRODUCTION_URL ||
-        process.env.VERCEL_URL ||
-        null,
-      commit:
-        process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) || null,
+      deployment: process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL || null,
+      commit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) || null,
       generatedAt: new Date().toISOString(),
     },
     {
@@ -32,6 +27,6 @@ export async function GET() {
         Pragma: "no-cache",
         Expires: "0",
       },
-    }
+    },
   );
 }

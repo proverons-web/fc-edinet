@@ -3893,3 +3893,100 @@ body:has(.adminEmbedded){background:#f3f6fa}
 @media(max-width:680px){
   .managedPageHero:not(.playerProfileHero):not(.articleHeader):not(.mediaAlbumHero) .pageHeroContent{padding-top:26px!important;padding-bottom:26px!important}
 }
+
+/* v2.28.4 — final clean public header + image-free internal page headers */
+.globalHeader .menu>a,
+.globalHeader .menu>.managedMenuGroup{
+  border-left:0!important;
+  border-right:0!important;
+}
+.globalHeader .menu a:after,
+.globalHeader .menu .managedMenuTrigger:before{
+  display:none!important;
+  content:none!important;
+}
+.globalHeader .menu>a:hover,
+.globalHeader .menu>a.isActive,
+.globalHeader .menu .managedMenuTrigger:hover,
+.globalHeader .menu .managedMenuTrigger:focus-visible,
+.globalHeader .menu .managedMenuTrigger.isActive,
+.globalHeader .menu .managedMenuGroup.isOpen .managedMenuTrigger{
+  background:rgba(26,72,122,.28)!important;
+}
+.globalHeader .menu .managedMenuDropdown,
+.managedMenuDropdownPortal{
+  border-top:0!important;
+}
+.globalHeader .menu .managedMenuDropdown a,
+.managedMenuDropdownPortal a{
+  border-bottom:0!important;
+  box-shadow:none!important;
+}
+.globalHeader .menu .managedMenuDropdown a.isActive,
+.managedMenuDropdownPortal a.isActive{
+  box-shadow:none!important;
+  background:#123f73!important;
+}
+
+.managedPageHero,
+.proManagedHero,
+.clubSectionHero,
+.customSiteHero{
+  border-bottom:0!important;
+}
+.managedPageHero:after,
+.proManagedHero:after{
+  display:none!important;
+  content:none!important;
+}
+.managedPageHeroMedia,
+.managedPageHeroOverlay,
+.proManagedHeroMedia,
+.proManagedHeroOverlay,
+.clubSectionHeroShade{
+  display:none!important;
+}
+.imageFreePageHero,
+.imageFreeProHero,
+.imageFreeClubHero,
+.imageFreeCustomHero{
+  min-height:0!important;
+  background:#061f43!important;
+  background-image:none!important;
+  color:#fff!important;
+}
+.imageFreePageHero .pageHeroContent{
+  padding-top:34px!important;
+  padding-bottom:34px!important;
+}
+.imageFreeProHero .proManagedHeroInner{
+  padding-top:34px!important;
+  padding-bottom:34px!important;
+}
+.imageFreeClubHero{
+  align-items:center!important;
+}
+.imageFreeClubHero .clubSectionHeroInner{
+  padding-top:34px!important;
+  padding-bottom:34px!important;
+}
+.imageFreeCustomHero{
+  padding:34px 0!important;
+}
+.imageFreeCustomHero h1{
+  margin-top:8px!important;
+  margin-bottom:10px!important;
+  font-size:clamp(36px,5vw,60px)!important;
+}
+.imageFreeCustomHero p{
+  margin-bottom:0!important;
+}
+@media(max-width:680px){
+  .imageFreePageHero .pageHeroContent,
+  .imageFreeProHero .proManagedHeroInner,
+  .imageFreeClubHero .clubSectionHeroInner{
+    padding-top:26px!important;
+    padding-bottom:26px!important;
+  }
+  .imageFreeCustomHero{padding:26px 0!important}
+}

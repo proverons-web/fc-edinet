@@ -1,0 +1,33 @@
+FC Edineț v2.28.4 — Staff route + clean internal headers
+
+PUBLIC ROUTES
+- /team is the squad only.
+- /staff is a real first-class coaching/staff page backed by team_staff.
+- /team?view=staff redirects to /staff for compatibility.
+- /team/staff redirects to /staff for compatibility.
+
+NAVIGATION
+- Season 26/27 -> Coaching Staff points to /staff.
+- Removed desktop menu separators.
+- Removed yellow active/hover underlines and dropdown yellow accents.
+- Active items use a subtle blue background only.
+
+INTERNAL PAGE HEADERS
+- Removed background photos/images from internal page hero/header blocks.
+- Page titles/eyebrows/descriptions remain on a compact solid navy header.
+- Applies to standard PageHeroShell, Club pages, Managed Page Canvas and custom pages.
+
+API VERSION
+- /api/version is forced dynamic and no-store.
+- version/apiVersion/release are synchronized to 2.28.4.
+- staffRoute=/staff, navigationMigration=063.
+
+DATABASE
+- database/063_restore_staff_route.sql
+- Migration 063 has already been applied to production Supabase.
+
+VALIDATION
+- qa:site: 68/68 passed.
+- TS/TSX syntax: 252 files, 0 errors.
+- CSS braces balanced.
+- Production Next build is still performed by DEPLOY_FC_EDINET.bat on the user's Windows machine before Git push.

@@ -15,7 +15,7 @@ type DiagnosticCheck = {
   detail?: string;
 };
 
-const APP_VERSION = "2.28.3";
+const APP_VERSION = "2.28.4";
 const BUILDER_VERSION = "2.1";
 const HERO_BUILDER_VERSION = "2.1";
 const CONTENT_SCHEMA_VERSION = "3";
@@ -192,7 +192,7 @@ export default async function AdminDiagnosticsPage() {
             <p>Состояние приложения, окружения, базы, редакторов и ключевых файлов — без отображения секретных значений.</p>
           </div>
           <div className="adminHeroActions">
-            <a href="/api/version" target="_blank" rel="noreferrer" className="secondaryButton">API v2.28.3 ↗</a>
+            <a href="/api/version" target="_blank" rel="noreferrer" className="secondaryButton">API v2.28.4 ↗</a>
             <a href={siteUrl} target="_blank" rel="noreferrer" className="primaryButton">Открыть сайт ↗</a>
           </div>
         </div>
