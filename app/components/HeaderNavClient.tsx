@@ -57,6 +57,7 @@ export default function HeaderNavClient({
   const [openManagedMenuId, setOpenManagedMenuId] = useState<number | null>(null);
   const managedMenuCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const accountWrapRef = useRef<HTMLDivElement>(null);
+  const managedMenuRootRef = useRef<HTMLElement | null>(null);
   const linkMap: Record<HeaderNavKey, { href: string; label: string }> = {
     news: { href: "/news", label: labels.nav.news },
     team: { href: "/team", label: labels.nav.team },
@@ -113,6 +114,20 @@ export default function HeaderNavClient({
     };
   }, [accountOpen]);
 
+  useEffect(() => {
+    if (openManagedMenuId === null) return;
+    const closeOnOutside = (event: PointerEvent) => {
+      if (managedMenuRootRef.current && !managedMenuRootRef.current.contains(event.target as Node)) setOpenManagedMenuId(null);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setOpenManagedMenuId(null); };
+    document.addEventListener("pointerdown", closeOnOutside);
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutside);
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [openManagedMenuId]);
+
   const openManagedMenu = (id: number) => {
     if (managedMenuCloseTimer.current) {
       clearTimeout(managedMenuCloseTimer.current);
@@ -127,10 +142,27 @@ export default function HeaderNavClient({
 
   return (
     <>
-      <nav className="menu">
+      <nav className="menu" ref={managedMenuRootRef}>
         {useManagedMenu ? topManaged.map((item) => {
           const children = childMap.get(item.id) ?? [];
-          return children.length ? <span className={`managedMenuGroup${openManagedMenuId === item.id ? " isOpen" : ""}`} key={item.id} onMouseEnter={() => openManagedMenu(item.id)} onMouseLeave={scheduleManagedMenuClose} onFocus={() => openManagedMenu(item.id)}><Link href={item.href} className={isActive(item.href) ? "isActive" : undefined} aria-expanded={openManagedMenuId === item.id} aria-haspopup="menu">{localizedMenuLabel(item)}</Link><span className="managedMenuDropdown" role="menu" onMouseEnter={() => openManagedMenu(item.id)}>{children.map((child) => <Link role="menuitem" key={child.id} href={child.href}>{localizedMenuLabel(child)}</Link>)}</span></span> : <Link key={item.id} href={item.href} className={isActive(item.href) ? "isActive" : undefined} aria-current={isActive(item.href) ? "page" : undefined}>{localizedMenuLabel(item)}</Link>;
+          return children.length ? <span
+            className={`managedMenuGroup${openManagedMenuId === item.id ? " isOpen" : ""}`}
+            key={item.id}
+            onPointerEnter={() => openManagedMenu(item.id)}
+            onPointerLeave={scheduleManagedMenuClose}
+          >
+            <button
+              type="button"
+              className={`managedMenuTrigger${isActive(item.href) ? " isActive" : ""}`}
+              aria-expanded={openManagedMenuId === item.id}
+              aria-haspopup="menu"
+              onClick={() => setOpenManagedMenuId((current) => current === item.id ? null : item.id)}
+              onFocus={() => openManagedMenu(item.id)}
+            >{localizedMenuLabel(item)}</button>
+            <span className="managedMenuDropdown" role="menu" onPointerEnter={() => openManagedMenu(item.id)} onPointerLeave={scheduleManagedMenuClose}>
+              {children.map((child) => <Link role="menuitem" key={child.id} href={child.href} onClick={() => setOpenManagedMenuId(null)}>{localizedMenuLabel(child)}</Link>)}
+            </span>
+          </span> : <Link key={item.id} href={item.href} className={isActive(item.href) ? "isActive" : undefined} aria-current={isActive(item.href) ? "page" : undefined}>{localizedMenuLabel(item)}</Link>;
         }) : <>
           <Link href="/" className={isActive("/") ? "isActive" : undefined} aria-current={isActive("/") ? "page" : undefined}>{labels.home}</Link>
           {legacyLinks.map((link) => <Link key={link.href} href={link.href} className={isActive(link.href) ? "isActive" : undefined} aria-current={isActive(link.href) ? "page" : undefined}>{link.label}</Link>)}

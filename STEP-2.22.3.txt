@@ -1,0 +1,9 @@
+FC EDINET v2.22.3 — Club editor rebuild
+
+- Rebuilt managed Club dropdown with explicit pointer/click state for Chrome, Firefox and Safari.
+- Replaced block-card ClubRichEditor with a continuous document editor.
+- Existing rich JSON content opens as one document and saves back to the same schema.
+- Removed Text #1..#N cards, per-block arrows, duplicate preview and nested scrolling.
+- Added document toolbar for paragraphs, H2/H3, quotes, alignment, photos, dividers and undo/redo.
+- Reworked achievements admin cards to stop horizontal overflow.
+- No Supabase migration required.

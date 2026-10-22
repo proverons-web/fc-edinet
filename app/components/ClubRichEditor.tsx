@@ -1,17 +1,14 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import ClubRichContentView from "@/app/components/ClubRichContent";
 import {
   emptyClubRichContent,
   normalizeClubRichContent,
   plainTextToClubRichContent,
   type ClubRichAlign,
   type ClubRichBlock,
-  type ClubRichBlockType,
   type ClubRichContent,
-  type ClubRichImageWrap,
 } from "@/lib/club-rich-content";
 
 function token() {
@@ -32,57 +29,48 @@ export default function ClubRichEditor({
   fallbackText?: string | null;
   compact?: boolean;
 }) {
-  const start = normalizeClubRichContent(initial) ?? (fallbackText ? plainTextToClubRichContent(fallbackText) : emptyClubRichContent());
-  const [content, setContent] = useState<ClubRichContent>(start);
+  const start = useMemo(
+    () => normalizeClubRichContent(initial) ?? (fallbackText ? plainTextToClubRichContent(fallbackText) : emptyClubRichContent()),
+    [initial, fallbackText],
+  );
+  const [json, setJson] = useState(() => JSON.stringify(start));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const editorRef = useRef<HTMLDivElement | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
-  const insertAfterRef = useRef<string | null>(null);
-  const json = useMemo(() => JSON.stringify(content), [content]);
+  const initializedRef = useRef(false);
 
-  function insert(type: ClubRichBlockType, afterId?: string | null) {
-    if (type === "image") {
-      insertAfterRef.current = afterId ?? null;
-      fileRef.current?.click();
-      return;
+  useEffect(() => {
+    if (!editorRef.current) return;
+    editorRef.current.innerHTML = contentToEditorHtml(start);
+    setJson(JSON.stringify(start));
+    initializedRef.current = true;
+  }, [name, start]);
+
+  function sync() {
+    if (!editorRef.current || !initializedRef.current) return;
+    setJson(JSON.stringify(editorToContent(editorRef.current)));
+  }
+
+  function command(commandName: string, value?: string) {
+    editorRef.current?.focus();
+    try {
+      document.execCommand("defaultParagraphSeparator", false, "p");
+      document.execCommand(commandName, false, value);
+    } catch {
+      // execCommand is still the widest cross-browser bridge for a small CMS toolbar.
     }
-    const block: ClubRichBlock = type === "divider"
-      ? { id: token(), type }
-      : { id: token(), type, text: type === "heading" ? "Новый заголовок" : type === "quote" ? "Цитата или важный факт" : "Новый текст", align: "left" };
-    setContent((prev) => ({ ...prev, blocks: insertBlock(prev.blocks, block, afterId) }));
+    sync();
   }
 
-  function update(id: string, patch: Partial<ClubRichBlock>) {
-    setContent((prev) => ({ ...prev, blocks: prev.blocks.map((block) => block.id === id ? { ...block, ...patch } : block) }));
+  function format(tag: "p" | "h2" | "h3" | "blockquote") {
+    command("formatBlock", tag);
   }
 
-  function remove(id: string) {
-    setContent((prev) => ({ ...prev, blocks: prev.blocks.filter((block) => block.id !== id) }));
-  }
-
-  function move(id: string, delta: number) {
-    setContent((prev) => {
-      const blocks = [...prev.blocks];
-      const index = blocks.findIndex((block) => block.id === id);
-      const next = index + delta;
-      if (index < 0 || next < 0 || next >= blocks.length) return prev;
-      [blocks[index], blocks[next]] = [blocks[next], blocks[index]];
-      return { ...prev, blocks };
-    });
-  }
-
-  function dropBefore(targetId: string) {
-    if (!draggedId || draggedId === targetId) return;
-    setContent((prev) => {
-      const source = prev.blocks.find((block) => block.id === draggedId);
-      if (!source) return prev;
-      const blocks = prev.blocks.filter((block) => block.id !== draggedId);
-      const targetIndex = blocks.findIndex((block) => block.id === targetId);
-      blocks.splice(Math.max(0, targetIndex), 0, source);
-      return { ...prev, blocks };
-    });
-    setDraggedId(null);
+  function insertDivider() {
+    editorRef.current?.focus();
+    insertHtmlAtSelection('<hr data-club-divider="1"><p><br></p>');
+    sync();
   }
 
   async function upload(file: File | undefined) {
@@ -106,9 +94,9 @@ export default function ClubRichEditor({
       const { error: uploadError } = await supabase.storage.from("club").upload(path, file, { cacheControl: "31536000", upsert: false, contentType: file.type });
       if (uploadError) throw uploadError;
       const imageUrl = supabase.storage.from("club").getPublicUrl(path).data.publicUrl;
-      const block: ClubRichBlock = { id: token(), type: "image", image_url: imageUrl, alt: file.name.replace(/\.[^.]+$/, ""), width: 100, align: "center", wrap: "none", radius: 18 };
-      setContent((prev) => ({ ...prev, blocks: insertBlock(prev.blocks, block, insertAfterRef.current) }));
-      insertAfterRef.current = null;
+      editorRef.current?.focus();
+      insertHtmlAtSelection(`<figure data-club-image="1" contenteditable="false"><img src="${escapeAttr(imageUrl)}" alt="${escapeAttr(file.name.replace(/\.[^.]+$/, ""))}"><figcaption>${escapeHtml(file.name.replace(/\.[^.]+$/, ""))}</figcaption></figure><p><br></p>`);
+      sync();
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : "Не удалось загрузить фотографию.");
     } finally {
@@ -117,69 +105,168 @@ export default function ClubRichEditor({
     }
   }
 
-  return <section className={`clubRichEditor ${compact ? "compact" : ""}`}>
+  return <section className={`clubDocumentEditor ${compact ? "compact" : ""}`}>
     <input type="hidden" name={name} value={json}/>
     <input ref={fileRef} className="clubRichHiddenFile" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void upload(event.target.files?.[0])}/>
-    <header className="clubRichEditorHead">
-      <div><span>VISUAL TEXT COMPOSER</span><h3>{label}</h3><p>Текст, заголовки и фотографии можно ставить в любом порядке. Фото может быть полноширинным или обтекаться текстом.</p></div>
-      <div className="clubRichAddBar">
-        <button type="button" onClick={() => insert("paragraph")}>+ Текст</button>
-        <button type="button" onClick={() => insert("heading")}>+ Заголовок</button>
-        <button type="button" onClick={() => insert("quote")}>+ Цитата</button>
-        <button type="button" onClick={() => insert("image")} disabled={busy}>{busy ? "Загрузка…" : "+ Фото"}</button>
-        <button type="button" onClick={() => insert("divider")}>+ Линия</button>
+
+    <header className="clubDocumentEditorHead">
+      <div>
+        <span>ДОКУМЕНТ</span>
+        <h3>{label}</h3>
+        <p>Редактируй страницу как обычный текстовый документ. Все изменения сохраняются в структурированном виде.</p>
       </div>
     </header>
-    {error && <div className="formError">{error}</div>}
-    <div className="clubRichEditorWorkspace">
-      <div className="clubRichBlockList">
-        {!content.blocks.length && <div className="clubRichEmpty"><strong>Пока пусто</strong><span>Добавь текст, заголовок или фотографию.</span></div>}
-        {content.blocks.map((block, index) => <article
-          key={block.id}
-          className={`clubRichEditBlock type-${block.type}`}
-          draggable
-          onDragStart={() => setDraggedId(block.id)}
-          onDragOver={(event) => event.preventDefault()}
-          onDrop={() => dropBefore(block.id)}
-        >
-          <div className="clubRichEditBlockTop">
-            <div><span className="clubRichDrag">⋮⋮</span><b>{blockTitle(block.type)}</b><small>#{index + 1}</small></div>
-            <div><button type="button" onClick={() => move(block.id, -1)} disabled={index === 0}>↑</button><button type="button" onClick={() => move(block.id, 1)} disabled={index === content.blocks.length - 1}>↓</button><button type="button" className="danger" onClick={() => remove(block.id)}>Удалить</button></div>
-          </div>
-          {block.type !== "image" && block.type !== "divider" && <>
-            <textarea value={block.text ?? ""} rows={block.type === "paragraph" ? 5 : 2} onChange={(event) => update(block.id, { text: event.target.value })}/>
-            <AlignButtons value={block.align ?? "left"} onChange={(align) => update(block.id, { align })}/>
-          </>}
-          {block.type === "image" && <div className="clubRichImageEdit">
-            <div className="clubRichImageThumb"><img src={block.image_url} alt=""/></div>
-            <div className="clubRichImageControls">
-              <label><span>Подпись</span><input value={block.caption ?? ""} onChange={(event) => update(block.id, { caption: event.target.value })}/></label>
-              <label><span>Alt</span><input value={block.alt ?? ""} onChange={(event) => update(block.id, { alt: event.target.value })}/></label>
-              <label><span>Ширина</span><select value={block.width ?? 100} onChange={(event) => update(block.id, { width: Number(event.target.value) })}>{[25,33,40,50,60,66,75,100].map((value) => <option key={value} value={value}>{value}%</option>)}</select></label>
-              <label><span>Обтекание</span><select value={block.wrap ?? "none"} onChange={(event) => update(block.id, { wrap: event.target.value as ClubRichImageWrap })}><option value="none">Без обтекания</option><option value="left">Фото слева, текст справа</option><option value="right">Фото справа, текст слева</option></select></label>
-              <label><span>Скругление</span><input type="number" min={0} max={40} value={block.radius ?? 18} onChange={(event) => update(block.id, { radius: Number(event.target.value) })}/></label>
-              <AlignButtons value={block.align ?? "center"} onChange={(align) => update(block.id, { align })}/>
-            </div>
-          </div>}
-          <div className="clubRichInsertAfter"><button type="button" onClick={() => insert("paragraph", block.id)}>+ текст ниже</button><button type="button" onClick={() => insert("image", block.id)}>+ фото ниже</button></div>
-        </article>)}
+
+    <div className="clubDocumentToolbar" role="toolbar" aria-label={`Панель форматирования: ${label}`}>
+      <div className="clubDocumentToolbarGroup">
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => format("p")}>Абзац</button>
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => format("h2")}>H2</button>
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => format("h3")}>H3</button>
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => format("blockquote")}>Цитата</button>
       </div>
-      <aside className="clubRichLivePreview"><div className="clubRichLivePreviewHead"><span>ПРЕДПРОСМОТР</span><b>{content.blocks.length} блоков</b></div><ClubRichContentView content={content}/></aside>
+      <div className="clubDocumentToolbarGroup">
+        <button type="button" title="По левому краю" onMouseDown={(e) => e.preventDefault()} onClick={() => command("justifyLeft")}>←</button>
+        <button type="button" title="По центру" onMouseDown={(e) => e.preventDefault()} onClick={() => command("justifyCenter")}>≡</button>
+        <button type="button" title="По правому краю" onMouseDown={(e) => e.preventDefault()} onClick={() => command("justifyRight")}>→</button>
+      </div>
+      <div className="clubDocumentToolbarGroup clubDocumentToolbarMedia">
+        <button type="button" onClick={() => fileRef.current?.click()} disabled={busy}>{busy ? "Загрузка…" : "+ Фото"}</button>
+        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={insertDivider}>+ Разделитель</button>
+      </div>
+      <div className="clubDocumentToolbarGroup clubDocumentToolbarHistory">
+        <button type="button" title="Отменить" onMouseDown={(e) => e.preventDefault()} onClick={() => command("undo")}>↶</button>
+        <button type="button" title="Повторить" onMouseDown={(e) => e.preventDefault()} onClick={() => command("redo")}>↷</button>
+      </div>
     </div>
+
+    {error && <div className="formError">{error}</div>}
+
+    <div className="clubDocumentCanvasWrap">
+      <div
+        ref={editorRef}
+        className="clubDocumentCanvas"
+        contentEditable
+        suppressContentEditableWarning
+        spellCheck
+        data-placeholder="Начни писать историю клуба…"
+        onInput={sync}
+        onBlur={sync}
+        onPaste={(event) => {
+          event.preventDefault();
+          const text = event.clipboardData.getData("text/plain");
+          document.execCommand("insertText", false, text);
+          sync();
+        }}
+      />
+    </div>
+
+    <footer className="clubDocumentEditorFoot">
+      <span>Совет: выдели абзац и выбери H2, H3, цитату или выравнивание.</span>
+      <b>Автосохранение в форму</b>
+    </footer>
   </section>;
 }
 
-function AlignButtons({ value, onChange }: { value: ClubRichAlign; onChange: (value: ClubRichAlign) => void }) {
-  return <div className="clubRichAlignButtons"><span>Выравнивание</span>{(["left", "center", "right"] as ClubRichAlign[]).map((item) => <button type="button" key={item} className={value === item ? "active" : ""} onClick={() => onChange(item)}>{item === "left" ? "≡←" : item === "center" ? "≡" : "→≡"}</button>)}</div>;
+function contentToEditorHtml(content: ClubRichContent): string {
+  if (!content.blocks.length) return "<p><br></p>";
+  return content.blocks.map((block) => {
+    const align = block.align ?? "left";
+    const alignAttr = align !== "left" ? ` style="text-align:${align}"` : "";
+    if (block.type === "divider") return '<hr data-club-divider="1">';
+    if (block.type === "image") {
+      return `<figure data-club-image="1" data-width="${block.width ?? 100}" data-align="${escapeAttr(align)}" contenteditable="false"><img src="${escapeAttr(block.image_url ?? "")}" alt="${escapeAttr(block.alt ?? "")}">${block.caption ? `<figcaption>${escapeHtml(block.caption)}</figcaption>` : ""}</figure>`;
+    }
+    const text = richTextToHtml(block.text ?? "");
+    if (block.type === "heading") return `<h2${alignAttr}>${text}</h2>`;
+    if (block.type === "subheading") return `<h3${alignAttr}>${text}</h3>`;
+    if (block.type === "quote") return `<blockquote${alignAttr}>${text}</blockquote>`;
+    return `<p${alignAttr}>${text || "<br>"}</p>`;
+  }).join("");
 }
-function blockTitle(type: ClubRichBlockType) {
-  return type === "paragraph" ? "Текст" : type === "heading" ? "Заголовок" : type === "subheading" ? "Подзаголовок" : type === "quote" ? "Цитата" : type === "image" ? "Фотография" : "Разделитель";
+
+function editorToContent(root: HTMLElement): ClubRichContent {
+  const blocks: ClubRichBlock[] = [];
+  const addText = (type: "paragraph" | "heading" | "subheading" | "quote", element: HTMLElement, textOverride?: string) => {
+    const text = String(textOverride ?? element.innerText ?? element.textContent ?? "").replace(/\u00a0/g, " ").trim();
+    if (!text) return;
+    blocks.push({ id: token(), type, text, align: readAlign(element) });
+  };
+
+  const visit = (node: Element) => {
+    const tag = node.tagName.toLowerCase();
+    if (tag === "figure" && node.hasAttribute("data-club-image")) {
+      const image = node.querySelector("img");
+      if (!image?.getAttribute("src")) return;
+      const caption = node.querySelector("figcaption")?.textContent?.trim() || undefined;
+      blocks.push({
+        id: token(),
+        type: "image",
+        image_url: image.getAttribute("src") || "",
+        alt: image.getAttribute("alt") || undefined,
+        caption,
+        align: readAlign(node as HTMLElement),
+        width: Number(node.getAttribute("data-width") || 100),
+        wrap: "none",
+        radius: 18,
+      });
+      return;
+    }
+    if (tag === "hr") {
+      blocks.push({ id: token(), type: "divider" });
+      return;
+    }
+    if (tag === "h1" || tag === "h2") return addText("heading", node as HTMLElement);
+    if (tag === "h3" || tag === "h4") return addText("subheading", node as HTMLElement);
+    if (tag === "blockquote") return addText("quote", node as HTMLElement);
+    if (tag === "ul" || tag === "ol") {
+      const ordered = tag === "ol";
+      const items = Array.from(node.children).filter((child) => child.tagName.toLowerCase() === "li");
+      items.forEach((li, index) => addText("paragraph", li as HTMLElement, `${ordered ? `${index + 1}.` : "•"} ${(li.textContent || "").trim()}`));
+      return;
+    }
+    if (tag === "p" || tag === "div") {
+      const hasBlockChildren = Array.from(node.children).some((child) => ["p","div","h1","h2","h3","h4","blockquote","ul","ol","figure","hr"].includes(child.tagName.toLowerCase()));
+      if (hasBlockChildren) Array.from(node.children).forEach(visit);
+      else addText("paragraph", node as HTMLElement);
+      return;
+    }
+    Array.from(node.children).forEach(visit);
+  };
+
+  Array.from(root.children).forEach(visit);
+  return { version: 1, blocks };
 }
-function insertBlock(blocks: ClubRichBlock[], block: ClubRichBlock, afterId?: string | null) {
-  if (!afterId) return [...blocks, block];
-  const index = blocks.findIndex((item) => item.id === afterId);
-  if (index < 0) return [...blocks, block];
-  const next = [...blocks];
-  next.splice(index + 1, 0, block);
-  return next;
+
+function readAlign(element: HTMLElement): ClubRichAlign {
+  const align = element.style.textAlign || window.getComputedStyle(element).textAlign;
+  return align === "center" || align === "right" ? align : "left";
+}
+
+function insertHtmlAtSelection(html: string) {
+  const selection = window.getSelection();
+  if (!selection?.rangeCount) {
+    document.execCommand("insertHTML", false, html);
+    return;
+  }
+  const range = selection.getRangeAt(0);
+  range.deleteContents();
+  const fragment = range.createContextualFragment(html);
+  const lastNode = fragment.lastChild;
+  range.insertNode(fragment);
+  if (lastNode) {
+    range.setStartAfter(lastNode);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+}
+
+function richTextToHtml(value: string): string {
+  return escapeHtml(value).replace(/\n/g, "<br>");
+}
+function escapeHtml(value: string): string {
+  return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function escapeAttr(value: string): string {
+  return escapeHtml(value).replace(/'/g, "&#39;");
 }
