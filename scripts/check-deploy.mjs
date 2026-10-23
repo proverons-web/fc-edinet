@@ -182,6 +182,7 @@ const siteUrl = readValue("NEXT_PUBLIC_SITE_URL");
 const openaiKey = readValue("OPENAI_API_KEY");
 const translationModel = readValue("OPENAI_TRANSLATION_MODEL") || "gpt-5.6-luna";
 const supabaseAdminSecret = readValue("SUPABASE_SECRET_KEY") || readValue("SUPABASE_SERVICE_ROLE_KEY");
+const analyticsIpSalt = readValue("ANALYTICS_IP_SALT");
 
 if (!supabaseUrl) {
   errors.push("NEXT_PUBLIC_SUPABASE_URL is missing.");
@@ -224,6 +225,12 @@ if (!openaiKey) {
 if (!supabaseAdminSecret) {
   warnings.push(
     "SUPABASE_SECRET_KEY is not set. Admin user creation will use the email-confirmation fallback and user blocking will be disabled."
+  );
+}
+
+if (!analyticsIpSalt) {
+  warnings.push(
+    "ANALYTICS_IP_SALT is not set. Production visitor analytics will skip IP-based tracking until this server-only secret is configured."
   );
 }
 

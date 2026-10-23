@@ -3,20 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
-const STORAGE_KEY = "fc_edinet_visitor_id";
 const PRIVATE_PREFIXES = ["/admin", "/login", "/register", "/account", "/api"];
-
-function visitorId() {
-  try {
-    const existing = window.localStorage.getItem(STORAGE_KEY);
-    if (existing) return existing;
-    const value = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
-    window.localStorage.setItem(STORAGE_KEY, value);
-    return value;
-  } catch {
-    return `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  }
-}
 
 function currentLocale() {
   const lang = document.documentElement.lang || navigator.language || "";
@@ -37,7 +24,6 @@ export default function VisitorTracker() {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          visitorId: visitorId(),
           path: pathname,
           referrer: document.referrer || null,
           viewportWidth: window.innerWidth,

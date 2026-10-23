@@ -4,6 +4,7 @@ LOCAL
 [ ] .env.local copied
 [ ] NEXT_PUBLIC_SUPABASE_URL
 [ ] NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+[ ] ANALYTICS_IP_SALT (server-only, production)
 [ ] NEXT_PUBLIC_SITE_URL=http://localhost:3000
 [ ] npm install
 [ ] npm run build
@@ -23,6 +24,7 @@ VERCEL
 [ ] Framework = Next.js
 [ ] NEXT_PUBLIC_SUPABASE_URL added
 [ ] NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY added
+[ ] ANALYTICS_IP_SALT (server-only, production)
 [ ] first Deploy successful
 [ ] production URL opened
 [ ] NEXT_PUBLIC_SITE_URL set to production URL

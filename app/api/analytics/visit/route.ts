@@ -1,8 +1,9 @@
-import { createHash } from "node:crypto";
+import { createHmac } from "node:crypto";
+import { isIP } from "node:net";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-const BOT_RE = /bot|crawler|spider|slurp|bingpreview|facebookexternalhit|whatsapp|telegrambot|discordbot|preview/i;
+const BOT_RE = /bot|crawler|spider|slurp|bingpreview|facebookexternalhit|whatsapp|telegrambot|discordbot|preview|headlesschrome|phantomjs|playwright|puppeteer|curl|wget|python-requests|python\/|go-http-client|axios|okhttp/i;
 const PRIVATE_PREFIXES = ["/admin", "/login", "/register", "/account", "/api"];
 
 function cleanPath(value: unknown) {
@@ -44,7 +45,19 @@ function deviceType(width: number | null, userAgent: string) {
   return "desktop";
 }
 
+function clientIp(request: Request) {
+  const raw = request.headers.get("x-vercel-forwarded-for")
+    || request.headers.get("x-forwarded-for")
+    || request.headers.get("x-real-ip")
+    || "";
+  const ip = raw.split(",")[0]?.trim() || "";
+  return isIP(ip) ? ip : null;
+}
+
 export async function POST(request: Request) {
+  // Preview/development deployments are excluded from production audience statistics.
+  if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production") return new NextResponse(null, { status: 204 });
+
   const fetchSite = request.headers.get("sec-fetch-site");
   if (fetchSite === "cross-site") return new NextResponse(null, { status: 403 });
 
@@ -52,7 +65,6 @@ export async function POST(request: Request) {
   if (!userAgent || BOT_RE.test(userAgent)) return new NextResponse(null, { status: 204 });
 
   let body: {
-    visitorId?: unknown;
     path?: unknown;
     referrer?: unknown;
     viewportWidth?: unknown;
@@ -65,11 +77,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
-  const visitorId = typeof body.visitorId === "string" ? body.visitorId.trim() : "";
   const path = cleanPath(body.path);
-  if (!visitorId || visitorId.length > 120 || !path) return new NextResponse(null, { status: 204 });
+  const ip = clientIp(request);
+  const salt = process.env.ANALYTICS_IP_SALT?.trim();
+  if (!path || !ip || !salt) {
+    if (process.env.NODE_ENV !== "production" && !salt) console.error("visitor analytics error: ANALYTICS_IP_SALT is not configured");
+    return new NextResponse(null, { status: 204 });
+  }
 
-  const visitorHash = createHash("sha256").update(visitorId).digest("hex");
+  // Privacy-preserving stable identifier: raw IP never leaves this request handler.
+  const visitorHash = createHmac("sha256", salt).update(ip).digest("hex");
   const referrer = cleanReferrer(body.referrer, request);
   const viewportWidth = cleanViewport(body.viewportWidth);
   const viewportHeight = cleanViewport(body.viewportHeight);
@@ -78,7 +95,8 @@ export async function POST(request: Request) {
   const device = deviceType(viewportWidth, userAgent);
 
   const supabase = await createClient();
-  const { error } = await supabase.rpc("record_site_visit_v2", {
+  const { error } = await supabase.rpc("record_site_visit_v4", {
+    p_ingest_proof: salt,
     p_visitor_hash: visitorHash,
     p_path: path,
     p_referrer: referrer,

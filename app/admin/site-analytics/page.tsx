@@ -128,7 +128,7 @@ export default async function SiteAnalyticsPage({ searchParams }: PageProps) {
   if (error || !analytics) {
     return <main className="adminPage siteAnalyticsPage">
       <section className="adminDashboardIntro"><div><p className="eyebrow blue">АНАЛИТИКА САЙТА</p><h1>Статистика посещений</h1><p>Аналитика временно недоступна.</p></div><Link href="/admin" className="secondaryAdminButton">← Админка</Link></section>
-      <section className="analyticsSetupNotice"><strong>Проверь migration 049_visitor_analytics_dimensions.sql</strong><p>Он добавляет страны, устройства, viewport, языки и сравнение периодов.</p><code>{error?.message || "RPC admin_site_analytics недоступен"}</code></section>
+      <section className="analyticsSetupNotice"><strong>Проверь migration 064_ip_unique_analytics.sql</strong><p>Он включает IP-уникальность, production-only сбор и корректные доли аудитории.</p><code>{error?.message || "RPC admin_site_analytics недоступен"}</code></section>
     </main>;
   }
 
@@ -143,15 +143,17 @@ export default async function SiteAnalyticsPage({ searchParams }: PageProps) {
 
   return <main className="adminPage siteAnalyticsPage">
     <section className="adminDashboardIntro siteAnalyticsIntro">
-      <div><p className="eyebrow blue">АНАЛИТИКА САЙТА · 2.1</p><h1>Статистика посещений</h1><p>Анонимные посетители, страницы, страны, устройства и язык интерфейса. IP-адреса и координаты не сохраняются.</p></div>
+      <div><p className="eyebrow blue">АНАЛИТИКА САЙТА · IP 1.0</p><h1>Статистика посещений</h1><p>Один публичный IP = один уникальный посетитель. Сырые IP не сохраняются: используется только серверный HMAC-хэш. Preview-трафик Vercel не учитывается.</p></div>
       <div className="analyticsPeriodTabs" aria-label="Период статистики">{allowedPeriods.map((period) => <Link key={period} className={days === period ? "active" : ""} href={`/admin/site-analytics?period=${period}`}>{period === 365 ? "1 год" : `${period} дней`}</Link>)}</div>
     </section>
 
+    <div className="analyticsLegacyNote"><strong>Методика с v2.28.18</strong><span>Уникальность считается по HMAC-хэшу публичного IP. Старые browser-ID записи сохранены как legacy, но больше не влияют на KPI, географию и проценты.</span></div>
+
     <section className="analyticsKpiGrid">
-      <AnalyticsKpi label="Уникальные · 24 часа" value={summary.unique_24h} hint="активных посетителей" accent="blue" />
-      <AnalyticsKpi label="Уникальные · 7 дней" value={summary.unique_7d} hint="за последнюю неделю" />
-      <AnalyticsKpi label="Уникальные · 30 дней" value={summary.unique_30d} hint="за последние 30 дней" />
-      <AnalyticsKpi label="Уникальные · всего" value={summary.unique_total} hint="за всё время" />
+      <AnalyticsKpi label="Уникальные IP · 24 часа" value={summary.unique_24h} hint="активных IP" accent="blue" />
+      <AnalyticsKpi label="Уникальные IP · 7 дней" value={summary.unique_7d} hint="за последнюю неделю" />
+      <AnalyticsKpi label="Уникальные IP · 30 дней" value={summary.unique_30d} hint="за последние 30 дней" />
+      <AnalyticsKpi label="Уникальные IP · всего" value={summary.unique_total} hint="по новой методике" />
       <AnalyticsKpi label={`Просмотры · ${days} дней`} value={summary.period_pageviews} hint={`${avgPages.toFixed(1)} страницы на посетителя`} accent="yellow" />
       <AnalyticsKpi label="Новые" value={summary.period_new} hint={`за ${days} дней`} />
       <AnalyticsKpi label="Вернувшиеся" value={summary.period_returning} hint={`${returnRate}% от аудитории периода`} />
@@ -161,28 +163,28 @@ export default async function SiteAnalyticsPage({ searchParams }: PageProps) {
     <section className="analyticsPanel">
       <header><div><p className="eyebrow blue">СРАВНЕНИЕ</p><h2>Текущий период против предыдущего</h2></div><span className="analyticsPrivacy">по {days} дней</span></header>
       <div className="analyticsKpiGrid">
-        <AnalyticsKpi label="Уникальные" value={comparison.current_unique} hint={deltaText(comparison.current_unique, comparison.previous_unique)} accent="blue" />
+        <AnalyticsKpi label="Уникальные IP" value={comparison.current_unique} hint={deltaText(comparison.current_unique, comparison.previous_unique)} accent="blue" />
         <AnalyticsKpi label="Просмотры" value={comparison.current_pageviews} hint={deltaText(comparison.current_pageviews, comparison.previous_pageviews)} />
         <AnalyticsKpi label="Новые посетители" value={comparison.current_new} hint={deltaText(comparison.current_new, comparison.previous_new)} />
       </div>
     </section>
 
     <section className="analyticsPanel analyticsTrafficPanel">
-      <header><div><p className="eyebrow blue">ДИНАМИКА</p><h2>{chartTitle}</h2><small className="analyticsSubtle">Автоматическая детализация: 7/30 дней — день, 90 дней — неделя, 1 год — месяц.</small></div><div className="analyticsLegend"><span><i className="unique" />Уникальные</span><span><i className="views" />Просмотры</span></div></header>
+      <header><div><p className="eyebrow blue">ДИНАМИКА</p><h2>{chartTitle}</h2><small className="analyticsSubtle">Автоматическая детализация: 7/30 дней — день, 90 дней — неделя, 1 год — месяц.</small></div><div className="analyticsLegend"><span><i className="unique" />Уникальные IP</span><span><i className="views" />Просмотры</span></div></header>
       <div className={`analyticsChart analyticsChart-${traffic.granularity}`} style={{ "--chart-days": String(Math.max(traffic.rows.length, 7)) } as React.CSSProperties}>{traffic.rows.map((row) => <div className="analyticsChartDay" key={`${row.start}-${row.end}`} title={`${chartLabel(row, traffic.granularity)} · уникальные ${fmt(number(row.unique))} · просмотры ${fmt(number(row.pageviews))}`}><div className="analyticsBars"><i className="views" style={{ height: number(row.pageviews) ? `${Math.max(4, (number(row.pageviews) / maxDaily) * 100)}%` : "0%" }} /><i className="unique" style={{ height: number(row.unique) ? `${Math.max(4, (number(row.unique) / maxDaily) * 100)}%` : "0%" }} /></div><span>{chartLabel(row, traffic.granularity)}</span></div>)}</div>
     </section>
 
     <section className="analyticsTwoColumns">
-      <AnalyticsRank title="Страны посетителей" eyebrow="ГЕОГРАФИЯ" rows={analytics.countries.map((row) => ({ key: row.country_code, label: countryName(row.country_code), badge: row.country_code === "XX" ? "—" : row.country_code, hint: `${fmt(number(row.unique_visitors))} уникальных · ${fmt(number(row.pageviews))} просмотров`, value: `${share(number(row.pageviews), summary.period_pageviews)}%`, share: share(number(row.pageviews), summary.period_pageviews), muted: row.country_code === "XX" }))} valueTitle="доля просмотров" />
-      <AnalyticsRank title="Устройства" eyebrow="УСТРОЙСТВА" rows={analytics.devices.map((row) => ({ key: row.device, label: deviceLabel(row.device), hint: `${fmt(number(row.unique_visitors))} уникальных · ${fmt(number(row.pageviews))} просмотров`, value: `${share(number(row.pageviews), summary.period_pageviews)}%`, share: share(number(row.pageviews), summary.period_pageviews), muted: row.device === "unknown" }))} valueTitle="доля просмотров" />
+      <AnalyticsRank title="Страны посетителей" eyebrow="ГЕОГРАФИЯ" rows={analytics.countries.map((row) => ({ key: row.country_code, label: countryName(row.country_code), badge: row.country_code === "XX" ? "—" : row.country_code, hint: `${fmt(number(row.unique_visitors))} уникальных · ${fmt(number(row.pageviews))} просмотров`, value: `${share(number(row.unique_visitors), summary.period_unique)}%`, share: share(number(row.unique_visitors), summary.period_unique), muted: row.country_code === "XX" }))} valueTitle="доля уникальных IP" />
+      <AnalyticsRank title="Устройства" eyebrow="УСТРОЙСТВА" rows={analytics.devices.map((row) => ({ key: row.device, label: deviceLabel(row.device), hint: `${fmt(number(row.unique_visitors))} уникальных · ${fmt(number(row.pageviews))} просмотров`, value: `${share(number(row.unique_visitors), summary.period_unique)}%`, share: share(number(row.unique_visitors), summary.period_unique), muted: row.device === "unknown" }))} valueTitle="доля уникальных IP" />
     </section>
 
     <section className="analyticsTwoColumns">
-      <AnalyticsRank title="Язык сайта" eyebrow="RU / RO" rows={analytics.locales.map((row) => ({ key: row.locale, label: localeLabel(row.locale), hint: `${fmt(number(row.unique_visitors))} уникальных · ${fmt(number(row.pageviews))} просмотров`, value: `${share(number(row.pageviews), summary.period_pageviews)}%`, share: share(number(row.pageviews), summary.period_pageviews), muted: row.locale === "unknown" }))} valueTitle="доля просмотров" />
-      <AnalyticsRank title="Ширина экрана" eyebrow="VIEWPORT" rows={analytics.viewports.map((row) => ({ key: row.bucket, label: row.bucket, hint: `${fmt(number(row.unique_visitors))} уникальных · ${fmt(number(row.pageviews))} просмотров`, value: `${share(number(row.pageviews), summary.period_pageviews)}%`, share: share(number(row.pageviews), summary.period_pageviews), muted: row.bucket === "Не определено" }))} valueTitle="доля просмотров" />
+      <AnalyticsRank title="Язык сайта" eyebrow="RU / RO" rows={analytics.locales.map((row) => ({ key: row.locale, label: localeLabel(row.locale), hint: `${fmt(number(row.unique_visitors))} уникальных · ${fmt(number(row.pageviews))} просмотров`, value: `${share(number(row.unique_visitors), summary.period_unique)}%`, share: share(number(row.unique_visitors), summary.period_unique), muted: row.locale === "unknown" }))} valueTitle="доля уникальных IP" />
+      <AnalyticsRank title="Ширина экрана" eyebrow="VIEWPORT" rows={analytics.viewports.map((row) => ({ key: row.bucket, label: row.bucket, hint: `${fmt(number(row.unique_visitors))} уникальных · ${fmt(number(row.pageviews))} просмотров`, value: `${share(number(row.unique_visitors), summary.period_unique)}%`, share: share(number(row.unique_visitors), summary.period_unique), muted: row.bucket === "Не определено" }))} valueTitle="доля уникальных IP" />
     </section>
 
-    {unknownDetails ? <div className="analyticsLegacyNote"><strong>Почему есть «Не определено»?</strong><span>Это посещения, записанные до включения Analytics 2.0. Новые визиты уже получают страну, устройство, viewport и язык.</span></div> : null}
+    {unknownDetails ? <div className="analyticsLegacyNote"><strong>Почему есть «Не определено»?</strong><span>Vercel не смог определить часть параметров для этих IP. Они остаются в общей аудитории, но показываются отдельно.</span></div> : null}
 
     <section className="analyticsTwoColumns">
       <AnalyticsRank title="Популярные страницы" eyebrow="КОНТЕНТ" rows={analytics.top_pages.map((row) => ({ key: row.path, label: row.path, hint: `${fmt(number(row.unique_visitors))} уникальных`, value: fmt(number(row.pageviews)) }))} valueTitle="просмотров" />
@@ -190,8 +192,8 @@ export default async function SiteAnalyticsPage({ searchParams }: PageProps) {
     </section>
 
     <section className="analyticsPanel">
-      <header><div><p className="eyebrow blue">ПОСЛЕДНЯЯ АКТИВНОСТЬ</p><h2>Недавние посетители</h2></div><span className="analyticsPrivacy">Анонимные ID · без IP</span></header>
-      <div className="analyticsTableWrap"><table className="analyticsTable"><thead><tr><th>Посетитель</th><th>Страна</th><th>Устройство / экран</th><th>Язык</th><th>Последний визит</th><th>Просмотры</th><th>Страница</th><th>Источник</th></tr></thead><tbody>{analytics.recent.map((row) => <tr key={`${row.visitor}-${row.last_seen}`}><td><code>{row.visitor}</code></td><td><span className="analyticsCountryInline"><i className="analyticsCountryBadge">{row.country_code && row.country_code !== "XX" ? row.country_code : "—"}</i>{countryName(row.country_code)}</span></td><td><span className="analyticsCellStack"><strong>{deviceLabel(row.device)}</strong><small>{row.viewport_width && row.viewport_height ? `${row.viewport_width}×${row.viewport_height}` : "Экран не определён"}</small></span></td><td>{localeLabel(row.locale)}</td><td>{fmtDate(row.last_seen, true)}</td><td><strong>{fmt(number(row.pageviews))}</strong></td><td>{row.last_path || "—"}</td><td>{row.referrer || "Прямой заход"}</td></tr>)}</tbody></table></div>
+      <header><div><p className="eyebrow blue">ПОСЛЕДНЯЯ АКТИВНОСТЬ</p><h2>Недавние посетители</h2></div><span className="analyticsPrivacy">Хэш IP · исходный IP не хранится</span></header>
+      <div className="analyticsTableWrap"><table className="analyticsTable"><thead><tr><th>IP-хэш</th><th>Страна</th><th>Устройство / экран</th><th>Язык</th><th>Последний визит</th><th>Просмотры</th><th>Страница</th><th>Источник</th></tr></thead><tbody>{analytics.recent.map((row) => <tr key={`${row.visitor}-${row.last_seen}`}><td><code>{row.visitor}</code></td><td><span className="analyticsCountryInline"><i className="analyticsCountryBadge">{row.country_code && row.country_code !== "XX" ? row.country_code : "—"}</i>{countryName(row.country_code)}</span></td><td><span className="analyticsCellStack"><strong>{deviceLabel(row.device)}</strong><small>{row.viewport_width && row.viewport_height ? `${row.viewport_width}×${row.viewport_height}` : "Экран не определён"}</small></span></td><td>{localeLabel(row.locale)}</td><td>{fmtDate(row.last_seen, true)}</td><td><strong>{fmt(number(row.pageviews))}</strong></td><td>{row.last_path || "—"}</td><td>{row.referrer || "Прямой заход"}</td></tr>)}</tbody></table></div>
     </section>
   </main>;
 }

@@ -113,6 +113,12 @@ export default async function AdminDiagnosticsPage() {
       detail: adminConfigured ? "Полный режим управления пользователями активен." : "Создание пользователей работает в fallback-режиме; блокировка/разблокировка ограничена.",
     },
     {
+      label: "ANALYTICS_IP_SALT",
+      value: process.env.ANALYTICS_IP_SALT ? "Настроено" : "Отсутствует",
+      state: process.env.ANALYTICS_IP_SALT ? "ok" : "error",
+      detail: "Серверный секрет для HMAC-хэширования IP в статистике сайта. Сырые IP не сохраняются.",
+    },
+    {
       label: "NEXT_PUBLIC_SITE_URL",
       value: process.env.NEXT_PUBLIC_SITE_URL ? "Задано явно" : "Используется Vercel fallback",
       state: process.env.NEXT_PUBLIC_SITE_URL ? "ok" : "info",
