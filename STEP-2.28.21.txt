@@ -1,0 +1,8 @@
+FC Edineț v2.28.21 — Player profile navigation + bottom portrait alignment
+
+What changed
+- Moved Back + breadcrumbs into a dedicated navigation block above the player portrait on desktop.
+- Anchored the portrait to the bottom edge of the hero.
+- Kept the player details in the right column, without navigation clutter.
+- Preserved mobile stacking.
+- Version synchronized to 2.28.21.

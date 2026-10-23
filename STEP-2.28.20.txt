@@ -1,8 +1,0 @@
-FC Edineț v2.28.20 — Player profile hero alignment polish
-
-What changed
-- Repositioned the player profile hero content for a cleaner desktop composition.
-- Moved the back link and breadcrumbs into a tighter, visually aligned navigation block above the player identity.
-- Removed the excessive empty space above the portrait and intro by dropping the forced bottom-alignment/min-height behavior.
-- Kept the two-column desktop layout: photo left, player details right.
-- Version synchronized to 2.28.20.

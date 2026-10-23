@@ -304,6 +304,14 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
         showBackgroundMedia
       >
         <>
+          <div className="playerProfileNavigation">
+            <PublicBackLink fallbackHref="/team" locale={locale} className="publicBackOnDark" />
+            <PublicBreadcrumbs
+              locale={locale}
+              items={[{ label: text.title, href: "/team" }, { label: `${player.first_name} ${player.last_name}`.trim() }]}
+              className="breadcrumbsOnDark"
+            />
+          </div>
           {heroLayerVisible(design.layer_config, "photo") && (
             <div
               className="profilePhotoWrap"
@@ -322,12 +330,6 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
               className="profileIntro"
               style={heroLayerStyle(design.layer_config, "intro")}
             >
-              <PublicBackLink fallbackHref="/team" locale={locale} className="publicBackOnDark" />
-              <PublicBreadcrumbs
-                locale={locale}
-                items={[{ label: text.title, href: "/team" }, { label: `${player.first_name} ${player.last_name}`.trim() }]}
-                className="breadcrumbsOnDark"
-              />
               {design.show_eyebrow && <p className="eyebrow">{pos}</p>}
               <h1>
                 {player.first_name}
