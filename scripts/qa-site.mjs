@@ -122,8 +122,8 @@ ok("next match VS circle replaced", homeCss.includes('Modern VS separator') && h
 ok("results rail frame and rounding removed", homeCss.includes('.fcV215ResultsSection .fcV215MatchRailWide{') && homeCss.includes('.fcV215ResultsSection .fcRefRecentMatchCard,') && homeCss.includes('border:0!important;') && homeCss.includes('border-radius:0!important;'));
 ok("homepage news rounding removed", homeCss.includes('.fcRefLeadColumn,\n.fcRefLatestColumn{') && homeCss.includes('.fcRefNewsRow>div{\n  border-radius:0!important;'));
 const releaseSource = read("lib/release.ts");
-ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.28.19"'));
-ok("release version", JSON.parse(read("package.json")).version === "2.28.19");
+ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.28.20"'));
+ok("release version", JSON.parse(read("package.json")).version === "2.28.20");
 
 ok("v2.28.8 next-match footprint restored", homeCss.includes("FC EDINEȚ v2.28.8 — LARGE CRESTS WITHOUT TALLER MATCH CARD") && homeCss.includes("min-height:168px!important") && homeCss.includes("height:168px!important"));
 ok("v2.28.8 crests enlarge without layout growth", homeCss.includes("transform:scale(1.58) translateY(-7px)!important"));
@@ -133,7 +133,7 @@ ok("v2.28.10 recent match crest alignment fixed", homeCss.includes("FC EDINEȚ v
 ok("v2.28.11 recent match crest stage added", homepageSource.includes('className="fcRefRecentMatchCrest"') && homeCss.includes("FC EDINEȚ v2.28.11 — RECENT MATCHES HORIZONTAL CREST LINE"));
 ok("recent match crests aligned", homeCss.includes("object-position:center center!important") && homepageSource.includes('className="fcRefRecentMatchLogoBox"'));
 const legacyTxt = fs.readdirSync(root).filter((name)=>/^(STEP-|DEPLOY-|FIX-).*\.txt$/.test(name));
-ok("v2.28.19 legacy step/deploy/fix txt pruned", legacyTxt.length === 1 && legacyTxt[0] === 'STEP-2.28.19.txt', legacyTxt.join(', '));
+ok("v2.28.20 legacy step/deploy/fix txt pruned", legacyTxt.length === 1 && legacyTxt[0] === 'STEP-2.28.20.txt', legacyTxt.join(', '));
 ok("v2.28.12 recent match side padding restored", homeCss.includes("FC EDINEȚ v2.28.12 — RECENT MATCH SIDE PADDING FIX"));
 ok("v2.28.13 recent match logo boxes added", homepageSource.includes('className="fcRefRecentMatchLogoBox"') && homeCss.includes("FC EDINEȚ v2.28.13 — RECENT MATCH LOGO BOXES"));
 ok("v2.28.14 recent match card compacted", homeCss.includes("FC EDINEȚ v2.28.14 — RECENT MATCH CARD COMPACTION"));
@@ -143,16 +143,17 @@ ok("v2.28.16 news aside sticky unit", read("app/visual-polish.css").includes("FC
 ok("v2.28.17 homepage shows four latest news", homepageSource.includes('.slice(0, 4);'));
 ok("v2.28.17 public structural geometry unified", homeCss.length > 0 && read("app/visual-polish.css").includes("FC EDINEȚ v2.28.17 — PUBLIC VISUAL POLISH") && read("app/visual-polish.css").includes(".teamStaffCard,.playerCard,.bioCard,.detailsCard") && read("app/visual-polish.css").includes(".teamStatisticsFilters,.statisticsFeaturedPlayer") && read("app/visual-polish.css").includes(".proMediaAlbumCard,.proMediaVideoCard,.proPartnerCard"));
 ok("v2.28.17 four-row homepage news layout", read("app/visual-polish.css").includes("grid-template-rows:repeat(4,minmax(0,1fr))!important"));
-ok("v2.28.19 IP analytics migration exists", exists("database/064_ip_unique_analytics.sql") && read("database/064_ip_unique_analytics.sql").includes("identity_version = 'ip_v1'") && read("database/064_ip_unique_analytics.sql").includes("record_site_visit_v3") && read("database/064_ip_unique_analytics.sql").includes("period_dimensions"));
-ok("v2.28.19 legacy analytics RPCs retired", exists("database/065_retire_legacy_analytics_rpc.sql") && read("database/065_retire_legacy_analytics_rpc.sql").includes("record_site_visit(text, text, text)") && read("database/065_retire_legacy_analytics_rpc.sql").includes("record_site_visit_v2"));
-ok("v2.28.19 analytics ingest guarded", exists("database/066_guard_analytics_ingest.sql") && read("database/066_guard_analytics_ingest.sql").includes("private.analytics_ingest_config") && read("database/066_guard_analytics_ingest.sql").includes("record_site_visit_v4") && read("app/api/analytics/visit/route.ts").includes("p_ingest_proof: salt"));
-ok("v2.28.19 tracker no longer creates browser visitor IDs", !read("app/components/VisitorTracker.tsx").includes("localStorage") && !read("app/components/VisitorTracker.tsx").includes("visitorId"));
-ok("v2.28.19 analytics hashes trusted client IP server-side", read("app/api/analytics/visit/route.ts").includes("x-vercel-forwarded-for") && read("app/api/analytics/visit/route.ts").includes("createHmac") && read("app/api/analytics/visit/route.ts").includes("ANALYTICS_IP_SALT") && read("app/api/analytics/visit/route.ts").includes('supabase.rpc("record_site_visit_v4"'));
-ok("v2.28.19 preview analytics excluded", read("app/api/analytics/visit/route.ts").includes('process.env.VERCEL_ENV !== "production"'));
-ok("v2.28.19 demographic shares use unique IP denominator", read("app/admin/site-analytics/page.tsx").includes("share(number(row.unique_visitors), summary.period_unique)") && read("app/admin/site-analytics/page.tsx").includes('valueTitle="доля уникальных IP"'));
-ok("v2.28.19 analytics salt diagnostics present", read("app/admin/diagnostics/page.tsx").includes('label: "ANALYTICS_IP_SALT"') && read("scripts/check-deploy.mjs").includes("ANALYTICS_IP_SALT"));
-ok("v2.28.19 generic hero flex excludes player profile grid", read("app/globals.css").includes(".pageHeroContent:not(.playerProfileGrid){display:flex;flex-direction:column}"));
-ok("v2.28.19 player profile desktop grid restored", read("app/visual-polish.css").includes("FC EDINEȚ v2.28.19 — PLAYER PROFILE HERO GRID RESTORE") && read("app/visual-polish.css").includes("display:grid!important") && read("app/visual-polish.css").includes("grid-template-columns:minmax(330px,.78fr) minmax(0,1.22fr)!important") && read("app/visual-polish.css").includes("grid-column:1!important") && read("app/visual-polish.css").includes("grid-column:2!important"));
+ok("v2.28.20 IP analytics migration exists", exists("database/064_ip_unique_analytics.sql") && read("database/064_ip_unique_analytics.sql").includes("identity_version = 'ip_v1'") && read("database/064_ip_unique_analytics.sql").includes("record_site_visit_v3") && read("database/064_ip_unique_analytics.sql").includes("period_dimensions"));
+ok("v2.28.20 legacy analytics RPCs retired", exists("database/065_retire_legacy_analytics_rpc.sql") && read("database/065_retire_legacy_analytics_rpc.sql").includes("record_site_visit(text, text, text)") && read("database/065_retire_legacy_analytics_rpc.sql").includes("record_site_visit_v2"));
+ok("v2.28.20 analytics ingest guarded", exists("database/066_guard_analytics_ingest.sql") && read("database/066_guard_analytics_ingest.sql").includes("private.analytics_ingest_config") && read("database/066_guard_analytics_ingest.sql").includes("record_site_visit_v4") && read("app/api/analytics/visit/route.ts").includes("p_ingest_proof: salt"));
+ok("v2.28.20 tracker no longer creates browser visitor IDs", !read("app/components/VisitorTracker.tsx").includes("localStorage") && !read("app/components/VisitorTracker.tsx").includes("visitorId"));
+ok("v2.28.20 analytics hashes trusted client IP server-side", read("app/api/analytics/visit/route.ts").includes("x-vercel-forwarded-for") && read("app/api/analytics/visit/route.ts").includes("createHmac") && read("app/api/analytics/visit/route.ts").includes("ANALYTICS_IP_SALT") && read("app/api/analytics/visit/route.ts").includes('supabase.rpc("record_site_visit_v4"'));
+ok("v2.28.20 preview analytics excluded", read("app/api/analytics/visit/route.ts").includes('process.env.VERCEL_ENV !== "production"'));
+ok("v2.28.20 demographic shares use unique IP denominator", read("app/admin/site-analytics/page.tsx").includes("share(number(row.unique_visitors), summary.period_unique)") && read("app/admin/site-analytics/page.tsx").includes('valueTitle="доля уникальных IP"'));
+ok("v2.28.20 analytics salt diagnostics present", read("app/admin/diagnostics/page.tsx").includes('label: "ANALYTICS_IP_SALT"') && read("scripts/check-deploy.mjs").includes("ANALYTICS_IP_SALT"));
+ok("v2.28.20 generic hero flex excludes player profile grid", read("app/globals.css").includes(".pageHeroContent:not(.playerProfileGrid){display:flex;flex-direction:column}"));
+ok("v2.28.20 player profile desktop grid restored", read("app/visual-polish.css").includes("FC EDINEȚ v2.28.20 — PLAYER PROFILE HERO GRID RESTORE") && read("app/visual-polish.css").includes("display:grid!important") && read("app/visual-polish.css").includes("grid-template-columns:minmax(330px,.78fr) minmax(0,1.22fr)!important") && read("app/visual-polish.css").includes("grid-column:1!important") && read("app/visual-polish.css").includes("grid-column:2!important"));
+ok("v2.28.20 player profile hero aligned", read("app/visual-polish.css").includes("FC EDINEȚ v2.28.20 — PLAYER PROFILE HERO ALIGNMENT POLISH") && read("app/visual-polish.css").includes("min-height:auto!important") && read("app/visual-polish.css").includes("padding-top:52px!important") && read("app/visual-polish.css").includes("publicBackLink") && read("app/visual-polish.css").includes("breadcrumbsOnDark"));
 const failed = checks.filter((x) => !x.ok);
 for (const check of checks) console.log(`${check.ok ? "PASS" : "FAIL"}  ${check.name}${check.detail ? ` — ${check.detail}` : ""}`);
 console.log(`\n${checks.length - failed.length}/${checks.length} checks passed.`);

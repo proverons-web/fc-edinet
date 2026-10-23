@@ -1,8 +1,0 @@
-FC Edineț v2.28.19 — Player Profile Hero Restore
-
-What changed
-- Restored the player profile hero to the intended two-column desktop layout.
-- Player photo is on the left; position, name, facts, current-season KPIs and favorite action are on the right.
-- Fixed the root CSS conflict where the generic pageHeroContent flex rule overrode playerProfileGrid display:grid.
-- Added a defensive player-profile grid lock for desktop/tablet while keeping the existing stacked mobile layout.
-- Version synchronized to 2.28.19.
