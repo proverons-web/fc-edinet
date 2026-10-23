@@ -154,7 +154,7 @@ export default async function Home() {
   const mediaVideos = (videosResult.data ?? []) as MediaVideo[];
 
   const leadNews = pinnedNews || allNews[0] || null;
-  const latestNews = allNews.filter((article) => String(article.id) !== String(leadNews?.id ?? "")).slice(0, 3);
+  const latestNews = allNews.filter((article) => String(article.id) !== String(leadNews?.id ?? "")).slice(0, 4);
 
   let standings: StandingEntry[] = [];
   if (competition) {

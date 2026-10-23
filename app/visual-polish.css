@@ -2271,3 +2271,96 @@ main:not(.adminPage) :where(.container,.pageHeroContent,.proSectionInner,.newsEd
     margin-top:26px!important;
   }
 }
+
+
+/* ============================================================
+   FC EDINEȚ v2.28.17 — PUBLIC VISUAL POLISH
+   ============================================================ */
+/* One structural geometry language across public pages. Pills/badges stay
+   rounded; large content surfaces use the sharper editorial silhouette. */
+
+/* Homepage/news */
+.fcRefLeadColumn,.fcRefLatestColumn,.fcRefTableColumn,
+.fcRefLeadNews,.newsLeadStory,.newsSecondaryStory,.newsEditorialGrid .newsDbCard,
+.newsLiveSearchResults{
+  border-radius:2px!important;
+}
+.fcRefNewsRow>div,.articleCoverFrame,.articleEditorialInfo,.articleShareMain,.articleShareMenu{
+  border-radius:2px!important;
+}
+
+/* Team / staff / player */
+.teamStaffCard,.playerCard,.bioCard,.detailsCard,.playerStatsBlock,
+.playerRecentMatch,.playerCompetitionStatsWrap{
+  border-radius:2px!important;
+}
+.teamStaffCard{
+  box-shadow:0 12px 34px rgba(0,0,0,.14)!important;
+}
+
+/* Matches / standings / statistics */
+.publicMatchCard,.standingsSpotlight,.standingsTableWrap,
+.teamStatisticsFilters,.statisticsFeaturedPlayer,.teamStatisticsLeaderboards,
+.teamStatisticsTableWrap,.teamStatisticsHistoryTableWrap,.teamStatisticsHistoryScoreboard{
+  border-radius:2px!important;
+}
+.teamStatisticsFilters{
+  box-shadow:0 10px 28px rgba(6,22,46,.045)!important;
+}
+
+/* Managed media / partners / academy */
+.proMediaAlbumCard,.proMediaVideoCard,.proPartnerCard,.proCta,
+.proAcademyFact,.proAcademyGroupCard,.managedProPage-academy .proCta,
+.mediaPhotoTile{
+  border-radius:2px!important;
+}
+.proPartnerCard,.proAcademyGroupCard{
+  box-shadow:0 10px 28px rgba(10,42,73,.05)!important;
+}
+
+/* Empty states should look like content placeholders, not app widgets. */
+.archiveMessage,.adminEmpty,.teamStatisticsEmpty,.fcRefEmptyCard,.clubDarkEmpty,.proEmpty,
+.mediaEmpty,.partnersEmpty,.standingsEmpty{
+  border-radius:2px!important;
+}
+
+/* Preserve deliberately round controls only. */
+.standingsTabs a,.teamStatisticsPills a,.featuredPill,.fcV215FormDot,
+.favoriteButton,.favoriteActiveButton{
+  border-radius:999px;
+}
+
+/* Four homepage latest-news rows now use the available column height. */
+.fcRefLatestColumn{
+  display:flex!important;
+  flex-direction:column!important;
+}
+.fcRefLatestColumn .fcRefNewsList{
+  display:grid!important;
+  grid-template-rows:repeat(4,minmax(0,1fr))!important;
+  flex:1 1 auto!important;
+}
+.fcRefLatestColumn .fcRefNewsRow{
+  min-height:0!important;
+  height:100%!important;
+}
+
+@media(max-width:920px){
+  .fcRefLatestColumn{
+    display:block!important;
+  }
+  .fcRefLatestColumn .fcRefNewsList{
+    grid-template-rows:none!important;
+  }
+}
+
+/* Match report and community surfaces — remove the last app-like rounded shells. */
+.premiumOverview,.premiumMatchContent .publicMatchPanel,.premiumLineupTeam,
+.premiumTimelineCard,.premiumMatchFacts>div,
+.commentComposer,.commentsLoginPrompt,.commentBlockedNotice,.commentsEmpty,.commentCard,
+.clubPageDocument .clubAchievementsVariant-cards article{
+  border-radius:2px!important;
+}
+.commentComposer,.commentCard{
+  box-shadow:0 8px 24px rgba(16,43,74,.035)!important;
+}

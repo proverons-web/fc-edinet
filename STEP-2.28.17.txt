@@ -1,0 +1,8 @@
+FC Edineț v2.28.17 — Public Visual Polish
+
+What changed
+- Homepage latest-news column now renders four articles instead of three.
+- Audited all public routes and unified structural card geometry to the current sharp editorial style.
+- Reduced legacy large radii and heavy shadows on staff, statistics, article details, standings, match, player, news, media, partners and academy surfaces.
+- Pills, status badges, avatar circles and functional round controls remain rounded.
+- Version synchronized to 2.28.17.
