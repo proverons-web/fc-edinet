@@ -2364,3 +2364,50 @@ main:not(.adminPage) :where(.container,.pageHeroContent,.proSectionInner,.newsEd
 .commentComposer,.commentCard{
   box-shadow:0 8px 24px rgba(16,43,74,.035)!important;
 }
+
+
+/* ============================================================
+   FC EDINEȚ v2.28.19 — PLAYER PROFILE HERO GRID RESTORE
+   ============================================================ */
+/* Generic landing-hero cleanup must never collapse the player profile hero.
+   Desktop: portrait left, identity/stats right. Mobile remains stacked. */
+.playerProfileHero .playerProfileGrid{
+  display:grid!important;
+  grid-template-columns:minmax(330px,.78fr) minmax(0,1.22fr)!important;
+  gap:clamp(44px,5vw,76px)!important;
+  align-items:end!important;
+}
+.playerProfileHero .profilePhotoWrap{
+  grid-column:1!important;
+  grid-row:1!important;
+  align-self:end!important;
+}
+.playerProfileHero .profileIntro{
+  grid-column:2!important;
+  grid-row:1!important;
+  align-self:end!important;
+  text-align:left!important;
+}
+.playerProfileHero .playerFavoriteAction{justify-content:flex-start!important;}
+
+@media(max-width:1200px){
+  .playerProfileHero .playerProfileGrid{
+    grid-template-columns:minmax(300px,.8fr) minmax(0,1.2fr)!important;
+    gap:38px!important;
+  }
+}
+
+@media(max-width:780px){
+  .playerProfileHero .playerProfileGrid{
+    grid-template-columns:1fr!important;
+    gap:0!important;
+  }
+  .playerProfileHero .profileIntro{
+    grid-column:1!important;
+    grid-row:1!important;
+  }
+  .playerProfileHero .profilePhotoWrap{
+    grid-column:1!important;
+    grid-row:2!important;
+  }
+}

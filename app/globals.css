@@ -3877,7 +3877,7 @@ body:has(.adminEmbedded){background:#f3f6fa}
 .managedMenuDropdownPortal a:hover,.managedMenuDropdownPortal a:focus-visible,.managedMenuDropdownPortal a.isActive{background:#123f73!important;color:#fff!important;outline:none!important}
 
 /* v2.28.4 — compact image-free headings for public landing pages */
-.pageHeroContent{position:relative;z-index:3;display:flex;flex-direction:column}
+.pageHeroContent{position:relative;z-index:3}.pageHeroContent:not(.playerProfileGrid){display:flex;flex-direction:column}
 .managedPageHero:not(.playerProfileHero):not(.articleHeader):not(.mediaAlbumHero){min-height:auto!important}
 .managedPageHero:not(.playerProfileHero):not(.articleHeader):not(.mediaAlbumHero) .pageHeroContent{padding-top:34px!important;padding-bottom:34px!important}
 .proManagedHero{min-height:auto;background:#041b3b}
