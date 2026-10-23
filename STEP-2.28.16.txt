@@ -1,0 +1,9 @@
+FC Edineț v2.28.16 — News Article Polish
+
+What changed
+- Removed the incorrect hardcoded “История клуба / Povestea clubului” kicker from news articles.
+- Added proper top spacing before article body text after the cover image.
+- Moved sticky behavior from the Details card to the full article aside, so Details + Share stay together while scrolling.
+- Kept mobile/tablet behavior non-sticky.
+- Public Facebook share remains a user-initiated share dialog; it does not auto-publish to the club Facebook Page.
+- Version synchronized to 2.28.16.

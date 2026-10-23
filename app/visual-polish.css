@@ -2231,3 +2231,43 @@ main:not(.adminPage) :where(.container,.pageHeroContent,.proSectionInner,.newsEd
 .articleShare{position:relative;margin-top:14px}.articleShareMain{width:100%;min-height:48px;border:0;border-radius:4px;background:#ffd328;color:#071d3b;font-family:var(--font-fce-display),Arial,sans-serif;font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:-.015em;cursor:pointer}.articleShareMenu{position:absolute;right:0;top:56px;width:230px;padding:7px;border:1px solid #d9e3ed;border-radius:5px;background:#fff;box-shadow:0 18px 55px rgba(0,0,0,.2);z-index:40}.articleShareMenu button{display:block;width:100%;min-height:40px;padding:9px 10px;border:0;border-radius:3px;background:#fff;color:#20344f;text-align:left;font-weight:800;cursor:pointer}.articleShareMenu button:hover,.articleShareMenu button:focus{background:#f0f5fb;outline:none}.articleShareMenu .articleShareClose{color:#78879a}.newsArticlePage .articleAside{min-width:0}
 @media(max-width:900px){.newsArchiveSearchBar{margin-top:-8px}.articleShare{margin-top:0}.articleShareMenu{left:0;right:auto}.articleEditorialInfo+.articleShare{margin-top:14px}}
 @media(max-width:680px){.newsArchiveSearchBar{align-items:stretch;flex-direction:column;gap:9px;margin:0 0 24px}.newsArchiveSearchBar label{max-width:none}.newsArchiveSearchBar>span{text-align:left;min-width:0}.newsLiveSearchResults{margin-bottom:30px;padding:14px}.articleShareMain{font-size:16px}}
+
+
+/* ============================================================
+   FC EDINEȚ v2.28.16 — NEWS ARTICLE POLISH
+   ============================================================ */
+/* News body no longer carries the irrelevant club-history kicker. */
+.newsArticlePage .articleContent{
+  margin-top:34px!important;
+}
+.newsArticlePage .articleStoryKicker{
+  display:none!important;
+}
+
+/* Keep Details and Share as one sticky unit. */
+.newsArticlePage .articleAside{
+  position:sticky!important;
+  top:96px!important;
+  align-self:start!important;
+  min-width:0;
+}
+.newsArticlePage .articleEditorialInfo{
+  position:static!important;
+  top:auto!important;
+}
+.newsArticlePage .articleEditorialInfo + .articleShare{
+  margin-top:14px!important;
+}
+
+@media(max-width:980px){
+  .newsArticlePage .articleAside{
+    position:static!important;
+    top:auto!important;
+  }
+}
+
+@media(max-width:680px){
+  .newsArticlePage .articleContent{
+    margin-top:26px!important;
+  }
+}

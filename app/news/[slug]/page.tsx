@@ -115,7 +115,6 @@ export default async function NewsArticlePage({ params, searchParams }: PageProp
   const category = localized(article.category?.name, article.category?.name_ro, locale) || text.defaultCategory;
   const paragraphs = content.split(/\n\s*\n/g).map((p) => p.trim()).filter(Boolean);
 
-  const articleStoryLabel = locale === "ro" ? "POVESTEA CLUBULUI" : "ИСТОРИЯ КЛУБА";
   const articleInfoLabel = locale === "ro" ? "DETALII" : "ДЕТАЛИ";
   const readingMinutes = Math.max(1, Math.ceil(content.split(/\s+/).filter(Boolean).length / 200));
   const readingLabel = locale === "ro" ? "LECTURĂ" : "ЧТЕНИЕ";
@@ -144,7 +143,7 @@ export default async function NewsArticlePage({ params, searchParams }: PageProp
     </PageHeroShell>
     <div className="container articleLayout articleEditorialLayout"><div className="articleMain">
       {article.cover_image_url ? <div className="articleCoverFrame"><img className="articleCover newsCoverManaged" src={article.cover_image_url} alt={title} style={newsCoverStyle(article)} /><span>{category}</span></div> : <div className="articleCoverFallback">FC EDINEȚ</div>}
-      <div className="articleContent"><div className="articleStoryKicker"><span>{articleStoryLabel}</span><i></i></div>{paragraphs.length ? paragraphs.map((p, i) => <p key={i}>{p}</p>) : <p>{text.emptyText}</p>}</div>
+      <div className="articleContent">{paragraphs.length ? paragraphs.map((p, i) => <p key={i}>{p}</p>) : <p>{text.emptyText}</p>}</div>
     </div><aside className="articleAside"><div className="articleInfoBox articleEditorialInfo"><b>{articleInfoLabel}</b>
       <small>{text.category}</small><strong>{category}</strong><small>{text.published}</small><strong>{formatNewsDate(article.published_at, locale)}</strong>{showUpdated && <><small>{updatedLabel}</small><strong>{formatNewsDate(article.updated_at || article.published_at, locale)}</strong></>}<small>{readingLabel}</small><strong>{readingValue}</strong><small>{text.author.toUpperCase()}</small><strong>{article.author_name || "FC Edineț"}</strong>
     </div><ArticleShareButton slug={article.slug} title={title} locale={locale} /></aside></div>

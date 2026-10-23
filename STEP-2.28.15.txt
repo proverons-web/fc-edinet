@@ -1,8 +1,0 @@
-FC Edineț v2.28.15 — Recent Match Left/Right Edge Balance
-
-What changed
-- Kept the fixed logo-box layout for homepage recent match cards.
-- Compensated for the left result-status rail so the inner spacing now reads balanced left vs right.
-- Reduced left inner padding relative to the right padding in the results cards.
-- Preserved compact spacing around the score and fixed logo boxes.
-- Version synchronized to 2.28.15.
