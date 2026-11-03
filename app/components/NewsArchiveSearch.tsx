@@ -2,10 +2,10 @@
 
 import { useMemo, useState } from "react";
 import NewsCard from "@/app/components/NewsCard";
-import type { NewsArticle } from "@/lib/types";
+import type { NewsListArticle } from "@/lib/types";
 import { localized, type Locale } from "@/lib/i18n";
 
-export default function NewsArchiveSearch({ articles, locale }: { articles: NewsArticle[]; locale: Locale }) {
+export default function NewsArchiveSearch({ articles, locale }: { articles: NewsListArticle[]; locale: Locale }) {
   const [query, setQuery] = useState("");
   const normalized = query.trim().toLocaleLowerCase(locale === "ro" ? "ro" : "ru");
   const filtered = useMemo(() => {

@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
+import PublicImage from "@/app/components/PublicImage";
 import StandingsTable from "@/app/components/StandingsTable";
 import RecentMatchesCarousel from "@/app/components/RecentMatchesCarousel";
 import YouTubePlayer from "@/app/components/YouTubePlayer";
@@ -20,7 +21,7 @@ import type {
   HomepageSettings,
   MediaAlbum,
   MediaVideo,
-  NewsArticle,
+  NewsListArticle,
   Partner,
   Player,
   StandingEntry,
@@ -53,17 +54,17 @@ export default async function Home() {
   const sectionRows = (sectionsResult.data ?? []) as HomepageSection[];
   const sectionEnabled = (key: string) => sectionRows.find((row) => row.section_key === key)?.is_enabled !== false;
 
-  const [playersResult, newsResult, nextMatchResult, lastMatchResult, recentMatchesResult, competitionResult, partnersResult, pinnedNewsResult, albumsResult, videosResult] = await Promise.all([
+  const [playersResult, newsResult, nextMatchResult, recentMatchesResult, competitionResult, partnersResult, pinnedNewsResult, albumsResult, videosResult] = await Promise.all([
     supabase
       .from("players")
-      .select("*")
+      .select("id,first_name,last_name,slug,shirt_number,position,photo_url")
       .eq("is_active", true)
       .order("display_order", { ascending: true })
-      .limit(8),
+      .limit(4),
     supabase
       .from("news")
       .select(`
-        id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,cover_image_url,cover_position_x,cover_position_y,cover_zoom,author_name,status,
+        id,title,title_ro,slug,excerpt,excerpt_ro,cover_image_url,cover_position_x,cover_position_y,cover_zoom,author_name,status,
         published_at,views,is_featured,category_id,
         category:news_categories(id,name,name_ro,slug)
       `)
@@ -85,13 +86,6 @@ export default async function Home() {
       .select(matchSelect())
       .eq("status", "finished")
       .order("kickoff", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-    supabase
-      .from("matches")
-      .select(matchSelect())
-      .eq("status", "finished")
-      .order("kickoff", { ascending: false })
       .limit(80),
     supabase
       .from("competitions")
@@ -102,7 +96,7 @@ export default async function Home() {
       .maybeSingle(),
     supabase
       .from("partners")
-      .select("*")
+      .select("id,name,website_url,logo_url")
       .eq("is_active", true)
       .eq("show_on_homepage", true)
       .order("display_order")
@@ -112,7 +106,7 @@ export default async function Home() {
       ? supabase
           .from("news")
           .select(`
-            id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,cover_image_url,cover_position_x,cover_position_y,cover_zoom,author_name,status,
+            id,title,title_ro,slug,excerpt,excerpt_ro,cover_image_url,cover_position_x,cover_position_y,cover_zoom,author_name,status,
             published_at,views,is_featured,category_id,
             category:news_categories(id,name,name_ro,slug)
           `)
@@ -123,14 +117,14 @@ export default async function Home() {
       : Promise.resolve({ data: null, error: null }),
     supabase
       .from("media_albums")
-      .select("*")
+      .select("id,title,slug,description,event_date,location,cover_image_url")
       .eq("is_published", true)
       .order("event_date", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false })
       .limit(3),
     supabase
       .from("media_videos")
-      .select("*")
+      .select("id,title,description,youtube_id,show_on_homepage,published_at")
       .eq("is_published", true)
       .order("show_on_homepage", { ascending: false })
       .order("published_at", { ascending: false, nullsFirst: false })
@@ -138,20 +132,21 @@ export default async function Home() {
       .limit(3),
   ]);
 
-  const players = (playersResult.data ?? []) as Player[];
-  const allNews = (newsResult.data ?? []) as unknown as NewsArticle[];
-  const pinnedNews = pinnedNewsResult.data as unknown as NewsArticle | null;
+  const players = (playersResult.data ?? []) as Pick<Player, "id" | "first_name" | "last_name" | "slug" | "shirt_number" | "position" | "photo_url">[];
+  const allNews = (newsResult.data ?? []) as unknown as NewsListArticle[];
+  const pinnedNews = pinnedNewsResult.data as unknown as NewsListArticle | null;
   const nextMatch = nextMatchResult.data as unknown as ClubMatch | null;
-  const lastMatch = lastMatchResult.data as unknown as ClubMatch | null;
+  // The first row of the finished-match feed is also the last match; avoid a duplicate request.
+  const lastMatch = (recentMatchesResult.data?.[0] ?? null) as unknown as ClubMatch | null;
   const competition = (nextMatch?.competition || lastMatch?.competition || competitionResult.data) as Competition | null;
   const allFinishedMatches = (recentMatchesResult.data ?? []) as unknown as ClubMatch[];
   const activeSeasonName = String(competition?.season ?? "").trim();
   const recentMatches = activeSeasonName
     ? allFinishedMatches.filter((match) => String(match.competition?.season ?? "").trim() === activeSeasonName)
     : allFinishedMatches;
-  const partners = (partnersResult.data ?? []) as Partner[];
-  const mediaAlbums = (albumsResult.data ?? []) as MediaAlbum[];
-  const mediaVideos = (videosResult.data ?? []) as MediaVideo[];
+  const partners = (partnersResult.data ?? []) as Pick<Partner, "id" | "name" | "website_url" | "logo_url">[];
+  const mediaAlbums = (albumsResult.data ?? []) as Pick<MediaAlbum, "id" | "title" | "slug" | "description" | "event_date" | "location" | "cover_image_url">[];
+  const mediaVideos = (videosResult.data ?? []) as Pick<MediaVideo, "id" | "title" | "description" | "youtube_id" | "show_on_homepage" | "published_at">[];
 
   const leadNews = pinnedNews || allNews[0] || null;
   const latestNews = allNews.filter((article) => String(article.id) !== String(leadNews?.id ?? "")).slice(0, 4);
@@ -401,14 +396,14 @@ export default async function Home() {
           {sectionEnabled("news") && <>
             <div className="fcRefLeadColumn">
               {leadNews ? <Link href={`/news/${leadNews.slug}`} className="fcRefLeadNews">
-                <div className="fcRefLeadNewsMedia">{leadNews.cover_image_url ? <img className="newsCoverManaged" src={leadNews.cover_image_url} alt="" style={newsCoverStyle(leadNews)} loading="lazy" decoding="async" /> : <div className="fcRefNewsFallback">FC EDINEȚ</div>}<span>{locale === "ro" ? "ȘTIREA PRINCIPALĂ" : "ГЛАВНАЯ НОВОСТЬ"}</span></div>
+                <div className="fcRefLeadNewsMedia">{leadNews.cover_image_url ? <PublicImage className="newsCoverManaged" src={leadNews.cover_image_url} alt="" style={newsCoverStyle(leadNews)} width={900} height={620} sizes="(max-width: 767px) 100vw, (max-width: 1200px) 45vw, 600px" /> : <div className="fcRefNewsFallback">FC EDINEȚ</div>}<span>{locale === "ro" ? "ȘTIREA PRINCIPALĂ" : "ГЛАВНАЯ НОВОСТЬ"}</span></div>
                 <div className="fcRefLeadNewsBody"><time>{formatNewsDate(leadNews.published_at, locale)}</time><h2>{localized(leadNews.title, leadNews.title_ro, locale)}</h2>{localized(leadNews.excerpt, leadNews.excerpt_ro, locale) && <p>{localized(leadNews.excerpt, leadNews.excerpt_ro, locale)}</p>}<b>{locale === "ro" ? "CITEȘTE" : "ЧИТАТЬ ДАЛЬШЕ"} →</b></div>
               </Link> : <div className="fcRefEmptyCard">{locale === "ro" ? "Publică prima știre." : "Опубликуй первую новость."}</div>}
             </div>
 
             <div className="fcRefLatestColumn">
               <div className="fcRefPanelTitle"><h2>{locale === "ro" ? "ULTIMELE ȘTIRI" : "ПОСЛЕДНИЕ НОВОСТИ"}</h2><Link href="/news">{locale === "ro" ? "TOATE ȘTIRILE" : "ВСЕ НОВОСТИ"} →</Link></div>
-              <div className="fcRefNewsList">{latestNews.length ? latestNews.map((article) => <Link key={article.id} href={`/news/${article.slug}`} className="fcRefNewsRow"><div>{article.cover_image_url ? <img className="newsCoverManaged" src={article.cover_image_url} alt="" style={newsCoverStyle(article)} loading="lazy" decoding="async" /> : <span>FCE</span>}</div><section><time>{formatNewsDate(article.published_at, locale)}</time><h3>{localized(article.title, article.title_ro, locale)}</h3></section></Link>) : <div className="fcRefEmptyCard compact">{locale === "ro" ? "Nu sunt alte știri." : "Других новостей пока нет."}</div>}</div>
+              <div className="fcRefNewsList">{latestNews.length ? latestNews.map((article) => <Link key={article.id} href={`/news/${article.slug}`} className="fcRefNewsRow"><div>{article.cover_image_url ? <PublicImage className="newsCoverManaged" src={article.cover_image_url} alt="" style={newsCoverStyle(article)} width={300} height={200} sizes="(max-width: 767px) 35vw, 140px" /> : <span>FCE</span>}</div><section><time>{formatNewsDate(article.published_at, locale)}</time><h3>{localized(article.title, article.title_ro, locale)}</h3></section></Link>) : <div className="fcRefEmptyCard compact">{locale === "ro" ? "Nu sunt alte știri." : "Других новостей пока нет."}</div>}</div>
             </div>
           </>}
 
@@ -435,7 +430,7 @@ export default async function Home() {
           </div>
           <div className="fcV215MediaGrid">
             {featuredAlbum && <Link href={`/media/${featuredAlbum.slug}`} className="fcV215AlbumCard">
-              <div className="fcV215MediaImage">{featuredAlbum.cover_image_url ? <img src={featuredAlbum.cover_image_url} alt={featuredAlbum.title} loading="lazy" decoding="async" /> : <span>FC EDINEȚ</span>}<i>{locale === "ro" ? "FOTO" : "ФОТО"}</i></div>
+              <div className="fcV215MediaImage">{featuredAlbum.cover_image_url ? <PublicImage src={featuredAlbum.cover_image_url} alt={featuredAlbum.title} width={900} height={600} sizes="(max-width: 767px) 100vw, 50vw" /> : <span>FC EDINEȚ</span>}<i>{locale === "ro" ? "FOTO" : "ФОТО"}</i></div>
               <div><small>{featuredAlbum.event_date ? formatMediaDate(featuredAlbum.event_date, locale) : (locale === "ro" ? "GALERIE" : "ГАЛЕРЕЯ")}</small><h3>{featuredAlbum.title}</h3>{featuredAlbum.location && <p>{featuredAlbum.location}</p>}<b>{locale === "ro" ? "DESCHIDE GALERIA" : "ОТКРЫТЬ АЛЬБОМ"} →</b></div>
             </Link>}
             {featuredVideo && <article className="fcV215VideoCard">
@@ -471,13 +466,13 @@ function ReferenceTeam({ team, locale, label }: { team: ClubMatch["home"]; local
   return <div className="fcRefTeamBadge">{label ? <small>{label}</small> : null}{logo ? <img src={logo} alt="" /> : <span>{(team?.short_name || team?.name || "FC").slice(0,3).toUpperCase()}</span>}<strong>{team?.short_name || team?.name || (locale === "ro" ? "Echipă" : "Команда")}</strong></div>;
 }
 
-function ReferencePlayer({ player, locale }: { player: Player; locale: Locale }) {
+function ReferencePlayer({ player, locale }: { player: Pick<Player, "id" | "first_name" | "last_name" | "slug" | "shirt_number" | "position" | "photo_url">; locale: Locale }) {
   const fullName = `${player.first_name} ${player.last_name}`.trim();
   const positionMap = locale === "ro"
     ? { goalkeeper: "PORTAR", defender: "FUNDAȘ", midfielder: "MIJLOCAȘ", forward: "ATACANT" }
     : { goalkeeper: "ВРАТАРЬ", defender: "ЗАЩИТНИК", midfielder: "ПОЛУЗАЩИТНИК", forward: "НАПАДАЮЩИЙ" };
   return <Link href={`/team/${player.slug}`} className="fcRefPlayerCard">
-    <div className="fcRefPlayerPhoto">{player.photo_url ? <img src={player.photo_url} alt={fullName} loading="lazy" decoding="async"/> : <span>FC EDINEȚ</span>}</div>
+    <div className="fcRefPlayerPhoto">{player.photo_url ? <PublicImage src={player.photo_url} alt={fullName} width={600} height={760} sizes="(max-width: 767px) 90vw, (max-width: 1200px) 38vw, 300px" /> : <span>FC EDINEȚ</span>}</div>
     <div className="fcRefPlayerShade"/>
     <div className="fcRefPlayerNumber">{player.shirt_number ?? "—"}</div>
     <div className="fcRefPlayerMeta"><strong>{fullName}</strong><span>{positionMap[player.position as keyof typeof positionMap] ?? player.position}</span></div>

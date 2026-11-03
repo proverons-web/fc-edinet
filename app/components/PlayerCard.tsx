@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PublicImage from "@/app/components/PublicImage";
 import type { Player, PlayerSeasonTotal } from "@/lib/types";
 import { positionLabelsI18n, publicText, type Locale } from "@/lib/i18n";
 
@@ -23,7 +24,7 @@ export default function PlayerCard({ player, locale = "ru", seasonStats = null }
   return (
     <Link href={`/team/${player.slug}`} className="playerCard playerCardLink">
       {player.photo_url ? (
-        <div className="playerPhoto playerPhotoReal"><img src={player.photo_url} alt={fullName} loading="lazy" decoding="async" /></div>
+        <div className="playerPhoto playerPhotoReal"><PublicImage src={player.photo_url} alt={fullName} width={640} height={800} sizes="(max-width: 767px) 90vw, (max-width: 980px) 48vw, 285px" /></div>
       ) : (
         <div className="playerPhoto playerPhotoPlaceholder">
           <img className="playerPhotoPlaceholderCrest" src="/brand/fc-edinet-crest.png" alt="" aria-hidden="true" />

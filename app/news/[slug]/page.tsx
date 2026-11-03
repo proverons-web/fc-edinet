@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { cache } from "react";
 import Link from "next/link";
+import PublicImage from "@/app/components/PublicImage";
 import { notFound } from "next/navigation";
 import NewsCard, { formatNewsDate } from "@/app/components/NewsCard";
 import NewsComments from "@/app/components/NewsComments";
@@ -10,7 +11,7 @@ import PublicBackLink from "@/app/components/PublicBackLink";
 import JsonLd from "@/app/components/JsonLd";
 import ArticleShareButton from "@/app/components/ArticleShareButton";
 import { createClient } from "@/lib/supabase/server";
-import type { CommentBlock, NewsArticle, NewsComment } from "@/lib/types";
+import type { CommentBlock, NewsArticle, NewsComment, NewsListArticle } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { localized, publicText } from "@/lib/i18n";
 import { getPublishedSitePageDesign } from "@/lib/page-design";
@@ -82,7 +83,7 @@ export default async function NewsArticlePage({ params, searchParams }: PageProp
 
   const relatedPromise = article.category_id
     ? supabase.from("news").select(`
-        id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,cover_image_url,cover_position_x,cover_position_y,cover_zoom,author_name,status,
+        id,title,title_ro,slug,excerpt,excerpt_ro,cover_image_url,cover_position_x,cover_position_y,cover_zoom,author_name,status,
         published_at,created_at,updated_at,views,is_featured,category_id,category:news_categories(id,name,name_ro,slug)
       `).eq("category_id", article.category_id).eq("status", "published").neq("id", article.id)
       .lte("published_at", new Date().toISOString()).order("published_at", { ascending: false }).limit(3)
@@ -106,7 +107,7 @@ export default async function NewsArticlePage({ params, searchParams }: PageProp
     blockPromise,
   ]);
 
-  const related = (relatedResult.data ?? []) as unknown as NewsArticle[];
+  const related = (relatedResult.data ?? []) as unknown as NewsListArticle[];
   const comments = (commentsResult.data ?? []) as unknown as NewsComment[];
   const activeBlock = (blockResult.data ?? null) as CommentBlock | null;
   const title = localized(article.title, article.title_ro, locale);
@@ -142,7 +143,7 @@ export default async function NewsArticlePage({ params, searchParams }: PageProp
       </>
     </PageHeroShell>
     <div className="container articleLayout articleEditorialLayout"><div className="articleMain">
-      {article.cover_image_url ? <div className="articleCoverFrame"><img className="articleCover newsCoverManaged" src={article.cover_image_url} alt={title} style={newsCoverStyle(article)} /><span>{category}</span></div> : <div className="articleCoverFallback">FC EDINEȚ</div>}
+      {article.cover_image_url ? <div className="articleCoverFrame"><PublicImage className="articleCover newsCoverManaged" src={article.cover_image_url} alt={title} style={newsCoverStyle(article)} width={1280} height={850} sizes="(max-width: 767px) 100vw, (max-width: 1200px) 75vw, 920px" eager /><span>{category}</span></div> : <div className="articleCoverFallback">FC EDINEȚ</div>}
       <div className="articleContent">{paragraphs.length ? paragraphs.map((p, i) => <p key={i}>{p}</p>) : <p>{text.emptyText}</p>}</div>
     </div><aside className="articleAside"><div className="articleInfoBox articleEditorialInfo"><b>{articleInfoLabel}</b>
       <small>{text.category}</small><strong>{category}</strong><small>{text.published}</small><strong>{formatNewsDate(article.published_at, locale)}</strong>{showUpdated && <><small>{updatedLabel}</small><strong>{formatNewsDate(article.updated_at || article.published_at, locale)}</strong></>}<small>{readingLabel}</small><strong>{readingValue}</strong><small>{text.author.toUpperCase()}</small><strong>{article.author_name || "FC Edineț"}</strong>

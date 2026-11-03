@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireEditor } from "@/lib/editorial";
 import {
@@ -85,6 +85,9 @@ export async function saveGlobalDesign(_prev: State, formData: FormData): Promis
 
   await supabase.from("site_global_design_drafts").delete().eq("component_key", key);
 
+  // Invalidate the shared public config as soon as the published row changes.
+  // Draft/autosave actions must NOT invalidate the live site.
+  updateTag("fce-public-global-designs");
   revalidatePath("/");
   revalidatePath("/admin/design");
   return { success: key === "header" ? "Header опубликован." : key === "footer" ? "Footer опубликован." : "Design System опубликован." };

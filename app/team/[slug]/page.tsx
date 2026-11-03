@@ -1,3 +1,4 @@
+import PublicImage from "@/app/components/PublicImage";
 import type { Metadata } from "next";
 import { cache } from "react";
 import Link from "next/link";
@@ -318,7 +319,7 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
               style={heroLayerStyle(design.layer_config, "photo")}
             >
               {player.photo_url ? (
-                <img className="profilePhoto" src={player.photo_url} alt={fullName} />
+                <PublicImage className="profilePhoto" src={player.photo_url} alt={fullName} width={750} height={920} sizes="(max-width: 780px) 90vw, (max-width: 1200px) 40vw, 500px" eager />
               ) : (
                 <div className="profilePhoto profilePhotoPlaceholder">{text.photo}</div>
               )}

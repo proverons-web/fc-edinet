@@ -1,0 +1,15 @@
+FC Edineț v2.29.1 — Performance and responsive image delivery
+
+- Homepage and news archive exclude unused full article bodies from public list payloads.
+- Homepage player query fetches four display players and only fields actually rendered.
+- Homepage removes duplicate last-finished-match request by reusing recent-match feed.
+- Homepage partners/albums/videos only fetch fields used by public cards.
+- Known Supabase public storage images can use Next.js responsive image optimization, with native fallback for external assets.
+- Portraits and news images provide width/height hints and sizes; brand and team logos remain unchanged.
+- Release image optimization is restricted to the exact Supabase host and public-storage pathname.
+- Added guarded performance QA and CI integration to prevent reintroducing full article bodies into list pages.
+- No new DB migrations. Mobile visual baseline is preserved.
+- Global public design configs use a short 30s tagged cache; publishing via admin invalidates it immediately.
+- Added docs/PERFORMANCE-v2.29.1.md and updated production checklist.
+- Do not include .env.local or any server secrets in the FULL package.
+- Production build is not verified in the authoring environment when npm registry is unreachable.

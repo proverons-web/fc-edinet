@@ -1,15 +1,18 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { createPublicClient } from "@/lib/supabase/public";
 
 type GlobalDesignKey = "header" | "footer" | "design_system";
 type GlobalDesignConfigs = Partial<Record<GlobalDesignKey, unknown>>;
 
 /**
- * Loads the public global design configs in one database round-trip.
- * React cache() deduplicates calls made by RootLayout, SiteHeader and
- * SiteFooter during the same server render.
+ * Loads shared public visual configuration in one database round-trip.
+ * React cache deduplicates RootLayout/Header/Footer reads within a render;
+ * Next's tagged data cache avoids the same fetch across nearby page requests.
+ * The publish Server Action immediately invalidates the tag, so the editor
+ * sees a newly published design without waiting for the 30-second TTL.
  */
-export const getGlobalDesignConfigs = cache(async (): Promise<GlobalDesignConfigs> => {
+const loadGlobalDesignConfigs = unstable_cache(async (): Promise<GlobalDesignConfigs> => {
   const supabase = createPublicClient();
   const { data } = await supabase
     .from("site_global_designs")
@@ -24,4 +27,6 @@ export const getGlobalDesignConfigs = cache(async (): Promise<GlobalDesignConfig
     }
   }
   return configs;
-});
+}, ["fce-public-global-designs-v1"], { revalidate: 30, tags: ["fce-public-global-designs"] });
+
+export const getGlobalDesignConfigs = cache(loadGlobalDesignConfigs);

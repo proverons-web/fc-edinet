@@ -64,6 +64,9 @@ export type NewsArticle = {
   updated_at?: string;
 };
 
+/** List/card representation: full article bodies are loaded only on /news/[slug]. */
+export type NewsListArticle = Omit<NewsArticle, "content" | "content_ro">;
+
 export const positionLabels: Record<string, string> = {
   goalkeeper: 'Вратарь',
   defender: 'Защитник',

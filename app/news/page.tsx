@@ -1,10 +1,11 @@
 import Link from "next/link";
+import PublicImage from "@/app/components/PublicImage";
 import NewsCard, { formatNewsDate } from "@/app/components/NewsCard";
 import NewsArchiveSearch from "@/app/components/NewsArchiveSearch";
 import PageHeroShell from "@/app/components/PageHeroShell";
 import { PublicMessageState } from "@/app/components/PublicRouteState";
 import { createPublicClient } from "@/lib/supabase/public";
-import type { NewsArticle, NewsCategory, SitePageDesignSnapshot } from "@/lib/types";
+import type { NewsListArticle, NewsCategory, SitePageDesignSnapshot } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { publicSectionMetadata } from "@/lib/seo";
 import { localized, publicText, type Locale } from "@/lib/i18n";
@@ -36,7 +37,7 @@ export default async function NewsPage({ searchParams }: PageProps) {
   const selectedCategory = categories.find((item) => item.slug === selectedSlug);
 
   let query = supabase.from("news").select(`
-      id,title,title_ro,slug,excerpt,excerpt_ro,content,content_ro,cover_image_url,cover_position_x,cover_position_y,cover_zoom,author_name,status,
+      id,title,title_ro,slug,excerpt,excerpt_ro,cover_image_url,cover_position_x,cover_position_y,cover_zoom,author_name,status,
       published_at,views,is_featured,category_id,
       category:news_categories(id,name,name_ro,slug)
     `).eq("status", "published").lte("published_at", new Date().toISOString())
@@ -45,7 +46,7 @@ export default async function NewsPage({ searchParams }: PageProps) {
   if (selectedSlug && !selectedCategory) return renderInvalid(categories, selectedSlug, locale, design);
   if (selectedCategory) query = query.eq("category_id", selectedCategory.id);
   const { data, error } = await query;
-  const articles = (data ?? []) as unknown as NewsArticle[];
+  const articles = (data ?? []) as unknown as NewsListArticle[];
   const hero = resolvePageHeroText(design, locale, { eyebrow: "FC EDINEȚ", title: text.title, description: text.description });
 
   const lead = articles[0];
@@ -77,14 +78,14 @@ export default async function NewsPage({ searchParams }: PageProps) {
   </main>;
 }
 
-function LeadStory({ article, locale }: { article: NewsArticle; locale: Locale }) {
+function LeadStory({ article, locale }: { article: NewsListArticle; locale: Locale }) {
   const text = publicText[locale].news;
   const title = localized(article.title, article.title_ro, locale);
   const excerpt = localized(article.excerpt, article.excerpt_ro, locale);
   const category = localized(article.category?.name, article.category?.name_ro, locale) || text.defaultCategory;
   return <article className="newsLeadStory">
     <Link className="newsLeadMedia" href={`/news/${article.slug}`}>
-      {article.cover_image_url ? <img className="newsCoverManaged" src={article.cover_image_url} alt={title} style={newsCoverStyle(article)} /> : <span>FC EDINEȚ</span>}
+      {article.cover_image_url ? <PublicImage className="newsCoverManaged" src={article.cover_image_url} alt={title} style={newsCoverStyle(article)} width={1100} height={720} sizes="(max-width: 767px) 100vw, (max-width: 1100px) 55vw, 680px" /> : <span>FC EDINEȚ</span>}
       <div className="newsLeadShade"></div>
       {article.is_featured && <b className="newsLeadFlag">{text.featured}</b>}
     </Link>
@@ -97,13 +98,13 @@ function LeadStory({ article, locale }: { article: NewsArticle; locale: Locale }
   </article>;
 }
 
-function SecondaryStory({ article, locale }: { article: NewsArticle; locale: Locale }) {
+function SecondaryStory({ article, locale }: { article: NewsListArticle; locale: Locale }) {
   const text = publicText[locale].news;
   const title = localized(article.title, article.title_ro, locale);
   const category = localized(article.category?.name, article.category?.name_ro, locale) || text.defaultCategory;
   return <article className="newsSecondaryStory">
     <Link className="newsSecondaryMedia" href={`/news/${article.slug}`}>
-      {article.cover_image_url ? <img className="newsCoverManaged" src={article.cover_image_url} alt={title} style={newsCoverStyle(article)} /> : <span>FC EDINEȚ</span>}
+      {article.cover_image_url ? <PublicImage className="newsCoverManaged" src={article.cover_image_url} alt={title} style={newsCoverStyle(article)} width={1100} height={720} sizes="(max-width: 767px) 100vw, (max-width: 1100px) 55vw, 680px" /> : <span>FC EDINEȚ</span>}
     </Link>
     <div className="newsSecondaryBody"><div className="newsSecondaryMeta"><span>{category}</span><time>{formatNewsDate(article.published_at, locale)}</time></div><h3><Link href={`/news/${article.slug}`}>{title}</Link></h3><Link className="newsSecondaryRead" href={`/news/${article.slug}`}>{text.read}</Link></div>
   </article>;
