@@ -38,6 +38,11 @@ echo Local release: v%VERSION%
 echo Expected API version after Vercel deployment: v%VERSION%
 echo.
 
+echo [0/8] Checking local Supabase settings...
+node scripts/prepare-local-env.mjs
+if errorlevel 1 goto :fail
+
+echo.
 echo [1/8] Installing dependencies...
 call npm install
 if errorlevel 1 goto :fail
@@ -92,6 +97,12 @@ git check-ignore -q node_modules
 if errorlevel 1 (
     echo [ERROR] node_modules is not ignored.
     echo Check .gitignore before deploying.
+    goto :fail
+)
+
+git check-ignore -q .env.local
+if errorlevel 1 (
+    echo [ERROR] .env.local is not ignored. Do not push secrets to GitHub.
     goto :fail
 )
 

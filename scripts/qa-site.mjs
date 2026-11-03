@@ -122,8 +122,8 @@ ok("next match VS circle replaced", homeCss.includes('Modern VS separator') && h
 ok("results rail frame and rounding removed", homeCss.includes('.fcV215ResultsSection .fcV215MatchRailWide{') && homeCss.includes('.fcV215ResultsSection .fcRefRecentMatchCard,') && homeCss.includes('border:0!important;') && homeCss.includes('border-radius:0!important;'));
 ok("homepage news rounding removed", homeCss.includes('.fcRefLeadColumn,\n.fcRefLatestColumn{') && homeCss.includes('.fcRefNewsRow>div{\n  border-radius:0!important;'));
 const releaseSource = read("lib/release.ts");
-ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.28.22"'));
-ok("release version", JSON.parse(read("package.json")).version === "2.28.22");
+ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.28.23"'));
+ok("release version", JSON.parse(read("package.json")).version === "2.28.23");
 
 ok("v2.28.8 next-match footprint restored", homeCss.includes("FC EDINEȚ v2.28.8 — LARGE CRESTS WITHOUT TALLER MATCH CARD") && homeCss.includes("min-height:168px!important") && homeCss.includes("height:168px!important"));
 ok("v2.28.8 crests enlarge without layout growth", homeCss.includes("transform:scale(1.58) translateY(-7px)!important"));
@@ -133,7 +133,7 @@ ok("v2.28.10 recent match crest alignment fixed", homeCss.includes("FC EDINEȚ v
 ok("v2.28.11 recent match crest stage added", homepageSource.includes('className="fcRefRecentMatchCrest"') && homeCss.includes("FC EDINEȚ v2.28.11 — RECENT MATCHES HORIZONTAL CREST LINE"));
 ok("recent match crests aligned", homeCss.includes("object-position:center center!important") && homepageSource.includes('className="fcRefRecentMatchLogoBox"'));
 const legacyTxt = fs.readdirSync(root).filter((name)=>/^(STEP-|DEPLOY-|FIX-).*\.txt$/.test(name));
-ok("v2.28.22 legacy step/deploy/fix txt pruned", legacyTxt.length === 1 && legacyTxt[0] === 'STEP-2.28.22.txt', legacyTxt.join(', '));
+ok("v2.28.23 legacy step/deploy/fix txt pruned", legacyTxt.length === 1 && legacyTxt[0] === 'STEP-2.28.23.txt', legacyTxt.join(', '));
 ok("v2.28.12 recent match side padding restored", homeCss.includes("FC EDINEȚ v2.28.12 — RECENT MATCH SIDE PADDING FIX"));
 ok("v2.28.13 recent match logo boxes added", homepageSource.includes('className="fcRefRecentMatchLogoBox"') && homeCss.includes("FC EDINEȚ v2.28.13 — RECENT MATCH LOGO BOXES"));
 ok("v2.28.14 recent match card compacted", homeCss.includes("FC EDINEȚ v2.28.14 — RECENT MATCH CARD COMPACTION"));
@@ -165,6 +165,8 @@ ok("v2.28.22 mobile home standings no team wraps", mobileStyles.includes(".stand
 ok("v2.28.22 mobile team media headings compact", mobileStyles.includes(".fcRefTeamSection .fcRefTeamHead h2") && mobileStyles.includes(".fcV215MediaSection .fcV215SectionHead h2"));
 ok("v2.28.22 mobile timeline all events without scrolling", timelineSource.includes('className="mobileMatchTimeline"') && timelineSource.includes('function MobileMatchTimelineEvent(') && timelineSource.includes('firstMobile.map') && timelineSource.includes('secondMobile.map') && mobileStyles.includes(".premiumTimelinePanel .horizontalTimelineViewport{display:none!important") && mobileStyles.includes(".premiumTimelinePanel .mobileMatchTimeline{display:block!important"));
 ok("v2.28.22 mobile lineup badges after names", mobileStyles.includes(".premiumLineupsPanel .premiumLineupRow{") && mobileStyles.includes("display:flex!important") && mobileStyles.includes(".premiumLineupRow>.premiumLineupBadges"));
+ok("v2.28.23 deploy restores local env before dependency install", read("DEPLOY_FC_EDINET.bat").includes("[0/8] Checking local Supabase settings") && read("DEPLOY_FC_EDINET.bat").includes("node scripts/prepare-local-env.mjs"));
+ok("v2.28.23 no secret file overwrite and git protection", exists("scripts/prepare-local-env.mjs") && read("scripts/prepare-local-env.mjs").includes("COPYFILE_EXCL") && read("DEPLOY_FC_EDINET.bat").includes("git check-ignore -q .env.local") && read(".gitignore").includes(".env.local"));
 const failed = checks.filter((x) => !x.ok);
 for (const check of checks) console.log(`${check.ok ? "PASS" : "FAIL"}  ${check.name}${check.detail ? ` — ${check.detail}` : ""}`);
 console.log(`\n${checks.length - failed.length}/${checks.length} checks passed.`);
