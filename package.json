@@ -1,24 +1,25 @@
 {
   "name": "fc-edinet",
-  "version": "2.29.5",
+  "version": "2.29.6",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "deploy:check": "node scripts/qa-site.mjs && node scripts/qa-css-audit.mjs && node scripts/qa-security.mjs && node scripts/qa-editorial.mjs && node --experimental-strip-types scripts/qa-admin-ops.mjs && node --experimental-strip-types scripts/qa-admin-attention.mjs && node scripts/qa-performance.mjs && node scripts/qa-responsive.mjs --skip-if-missing && node scripts/check-deploy.mjs && next build",
+    "deploy:check": "node scripts/qa-site.mjs && node scripts/qa-css-audit.mjs && node scripts/qa-security.mjs && node scripts/qa-editorial.mjs && node --experimental-strip-types scripts/qa-admin-ops.mjs && node --experimental-strip-types scripts/qa-admin-attention.mjs && node scripts/qa-match-workflow.mjs && node scripts/qa-performance.mjs && node scripts/qa-responsive.mjs --skip-if-missing && node scripts/check-deploy.mjs && next build",
     "qa:site": "node scripts/qa-site.mjs",
     "qa:css": "node scripts/qa-css-audit.mjs",
     "qa:css:baseline": "node scripts/qa-css-audit.mjs --update-baseline",
     "qa:responsive": "node scripts/qa-responsive.mjs",
     "qa:responsive:shots": "node scripts/qa-responsive.mjs --screenshots",
-    "qa:all": "npm run qa:site && npm run qa:css && npm run qa:security && npm run qa:editorial && npm run qa:performance && npm run qa:responsive && npm run qa:admin-ops && npm run qa:admin-attention",
+    "qa:all": "npm run qa:site && npm run qa:css && npm run qa:security && npm run qa:editorial && npm run qa:performance && npm run qa:responsive && npm run qa:admin-ops && npm run qa:admin-attention && npm run qa:match-workflow",
     "qa:performance": "node scripts/qa-performance.mjs",
     "qa:editorial": "node scripts/qa-editorial.mjs",
     "qa:responsive:baseline": "node scripts/qa-responsive.mjs --update-mobile-baseline",
     "qa:security": "node scripts/qa-security.mjs",
     "qa:admin-ops": "node --experimental-strip-types scripts/qa-admin-ops.mjs",
-    "qa:admin-attention": "node --experimental-strip-types scripts/qa-admin-attention.mjs"
+    "qa:admin-attention": "node --experimental-strip-types scripts/qa-admin-attention.mjs",
+    "qa:match-workflow": "node scripts/qa-match-workflow.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.4",

@@ -35,3 +35,26 @@
 .adminAppShell .adminMediaOverview strong{font-size:22px;color:#0d5bbd;font-variant-numeric:tabular-nums}
 .adminAppShell .adminMediaOverview span{font-size:11px;color:#526e89}
 @media(max-width:600px){.adminAppShell .adminMediaOverview{grid-template-columns:1fr}.adminAppShell .adminMediaOverview>div{padding:9px 12px}.adminAppShell .adminAttentionFilters a{flex-grow:1;justify-content:center}}
+
+
+/* FC Edineț v2.29.6 — match center: action checklist + unsaved changes */
+.adminAppShell .mc29Worklist{display:grid;gap:11px;padding:17px 19px;border:1px solid #dce5ee;background:#fff;box-shadow:0 8px 22px rgba(9,37,72,.04)}
+.adminAppShell .mc29WorklistHeading{display:flex;gap:14px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.adminAppShell .mc29WorklistHeading strong{font-size:15px;color:#0a2c52;font-weight:900}
+.adminAppShell .mc29WorklistHeading span{font-size:11px;color:#71859b;font-weight:750}
+.adminAppShell .mc29WorklistItems{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.adminAppShell .mc29WorklistItems a{display:grid;grid-template-columns:23px minmax(0,1fr) auto;align-items:center;gap:8px;padding:10px;border:1px solid #e0e9f3;background:#f8fbfe;color:#234465;text-decoration:none;font-size:12px;font-weight:780;line-height:1.35;min-height:42px}
+.adminAppShell .mc29WorklistItems a.required{border-color:#edced6;background:#fff8f9}
+.adminAppShell .mc29WorklistItems a>span{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#e3edf9;color:#1b64b2;font-size:12px;font-weight:900}
+.adminAppShell .mc29WorklistItems a.required>span{background:#fbe4e7;color:#b02a44}
+.adminAppShell .mc29WorklistItems a>b{color:#7d91a7;font-size:13px}
+.adminAppShell .mc29WorklistItems a:hover,.adminAppShell .mc29WorklistItems a:focus-visible{border-color:#8caed2;background:#f0f6fc;outline:2px solid transparent}
+.adminAppShell .mc29Worklist>p{margin:0;color:#71859b;font-size:10px;line-height:1.5}
+.adminAppShell .mc29UnsavedNotice{position:fixed;bottom:20px;right:24px;z-index:130;display:grid;gap:3px;max-width:min(460px,calc(100vw - 28px));padding:13px 16px;border:1px solid #e7b965;border-left:5px solid #e0a019;background:#fffbf1;color:#6a4617;box-shadow:0 16px 40px rgba(10,34,64,.2);font-size:12px;line-height:1.45;pointer-events:none}
+.adminAppShell .mc29UnsavedNotice strong{font-size:13px;color:#644012}
+.adminAppShell details.mc29UnsavedSection{outline:2px solid #e5b04d;outline-offset:-2px}
+.adminAppShell .mc29UnsavedForm{border-left:3px solid #daa23c}
+@media(max-width:800px){
+  .adminAppShell .mc29WorklistItems{grid-template-columns:1fr}
+  .adminAppShell .mc29UnsavedNotice{bottom:12px;right:12px;left:12px;max-width:none}
+}

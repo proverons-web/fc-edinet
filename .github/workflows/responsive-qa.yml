@@ -27,6 +27,8 @@ jobs:
         run: node --experimental-strip-types scripts/qa-admin-ops.mjs
       - name: Check administrator attention filters and media operations
         run: node --experimental-strip-types scripts/qa-admin-attention.mjs
+      - name: Check match center workflow and unsaved form protection
+        run: node scripts/qa-match-workflow.mjs
       - name: Check performance and image delivery contracts
         run: node scripts/qa-performance.mjs
       - name: Check responsive layout in Chrome

@@ -297,6 +297,7 @@ export async function publishMatchProtocol(formData: FormData) {
     .maybeSingle();
   if (matchError || !match) go(matchId, { error: "Матч не найден." });
   if (match.status !== "finished") go(matchId, { error: "Публичный протокол можно опубликовать только после завершения матча." });
+  if (match.home_score == null || match.away_score == null) go(matchId, { error: "Перед публикацией укажи окончательный счёт обеих команд." });
 
   const { data: events, error: eventsError } = await supabase
     .from("match_events")

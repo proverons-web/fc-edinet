@@ -29,6 +29,7 @@ import SelectOnFocus from "./SelectOnFocus";
 import MatchCenterFeedback from "./MatchCenterFeedback";
 import MatchCenterSubmitButton from "./MatchCenterSubmitButton";
 import MatchTeamStatsEditor from "./MatchTeamStatsEditor";
+import MatchCenterWorkflowGuard from "./MatchCenterWorkflowGuard";
 
 export const metadata = { title: "Матч-центр — Админ" };
 export const dynamic = "force-dynamic";
@@ -291,7 +292,26 @@ export default async function MatchCenterMatchPage({
   const lineupsReady = homeStarters === 11 && awayStarters === 11;
   const playerStatsReady = progress?.player_stats_status === "complete";
   const reportReady = reportHasMetadata;
-  const publicationReady = match.status === "finished" && timelineMatchesScore;
+  const hasFinalScore = match.home_score != null && match.away_score != null;
+  const publicationReady = match.status === "finished" && hasFinalScore && timelineMatchesScore;
+  const workItems: Array<{ href: string; label: string; required: boolean }> = [];
+  if (match.status === "finished" && !hasFinalScore) workItems.push({ href: "#basics", label: "Указать окончательный счёт", required: true });
+  if (match.status === "finished" && hasFinalScore && !timelineMatchesScore) workItems.push({ href: "#events", label: "Сверить голы с итоговым счётом", required: true });
+  if (match.status === "finished" && !lineupsReady) workItems.push({ href: "#lineups", label: `Заполнить составы (${homeStarters}/11 • ${awayStarters}/11)`, required: false });
+  if (match.status === "finished" && clubSide && !playerStatsReady) workItems.push({ href: "#lineups", label: "Проверить статистику игроков FC Edineț", required: false });
+  if (match.status === "finished" && !teamStatsFilled) workItems.push({ href: "#team-stats", label: "Добавить известную командную статистику", required: false });
+  if (match.status === "finished" && !reportReady) workItems.push({ href: "#report", label: "Заполнить отчёт / MVP", required: false });
+  if (match.status === "finished" && !report?.is_published) workItems.push({ href: "#publish", label: "Опубликовать протокол после проверки", required: false });
+  // A successful Server Action refreshes the server data while Next.js may
+  // retain a client component. Remount the dirty-form observer against the
+  // new field values instead of carrying stale form snapshots forward.
+  const workflowRevision = [
+    saved ?? "", errorMessage ?? "", match.updated_at ?? "", report?.updated_at ?? "",
+    ...events.map((row) => row.updated_at ?? String(row.id)),
+    ...lineupEntries.map((row) => row.updated_at ?? String(row.id)),
+    ...lineupSettings.map((row) => row.updated_at ?? String(row.id)),
+    ...teamStats.map((row) => row.updated_at ?? String(row.id)),
+  ].join("|");
   const openEvents = Boolean(saved?.startsWith("event"));
   const openTeamStats = saved === "team-stats";
   const openReport = saved === "report";
@@ -332,14 +352,33 @@ export default async function MatchCenterMatchPage({
               </div>
             )}
 
+            <MatchCenterWorkflowGuard key={workflowRevision} />
+
             <section className="mc26StatusBoard" aria-label="Состояние матча">
               <ProgressCard label="Матч" value={match.status === "finished" ? "Завершён" : match.status === "live" ? "Идёт" : match.status === "scheduled" ? "Запланирован" : match.status === "postponed" ? "Перенесён" : "Отменён"} tone={match.status === "finished" ? "ready" : "draft"} detail={`${match.home_score ?? "—"}:${match.away_score ?? "—"}`} />
               <ProgressCard label="Составы" value={`${homeStarters}/11 • ${awayStarters}/11`} tone={lineupsReady ? "ready" : lineupEntries.length > 0 ? "draft" : "empty"} detail="HOME • AWAY" />
               <ProgressCard label="События" value={String(events.length)} tone={events.length > 0 && timelineMatchesScore ? "ready" : events.length > 0 ? "draft" : "empty"} detail={timelineMatchesScore ? "Голы сверены" : "Проверь голы"} />
               <ProgressCard label="Игроки FC Edineț" value={stateLabel(progress?.player_stats_status ?? "empty")} tone={playerStatsReady ? "ready" : progress?.player_stats_status === "draft" ? "draft" : "empty"} detail={`${playerStats.length} записей`} />
               <ProgressCard label="Статистика команд" value={teamStatsFilled ? "Заполнена" : "Пусто"} tone={teamStatsFilled ? "ready" : "empty"} detail="Только реальные показатели" />
-              <ProgressCard label="Протокол" value={report?.is_published ? "Опубликован" : reportReady ? "Черновик" : "Пусто"} tone={report?.is_published ? "ready" : reportReady ? "draft" : "empty"} detail={publicationReady ? "Можно публиковать" : "Есть незавершённые шаги"} />
+              <ProgressCard label="Протокол" value={report?.is_published ? "Опубликован" : reportReady ? "Черновик" : "Пусто"} tone={report?.is_published ? "ready" : reportReady ? "draft" : "empty"} detail={publicationReady ? "Можно публиковать" : "Проверь обязательные условия"} />
             </section>
+
+            {workItems.length > 0 ? (
+              <section className="mc29Worklist" aria-label="Следующие действия">
+                <div className="mc29WorklistHeading">
+                  <strong>Что осталось сделать</strong>
+                  <span>{workItems.filter((item) => item.required).length} обязательно · {workItems.filter((item) => !item.required).length} рекомендовано</span>
+                </div>
+                <div className="mc29WorklistItems">
+                  {workItems.map((item) => (
+                    <a href={item.href} key={`${item.href}:${item.label}`} className={item.required ? "required" : "recommended"}>
+                      <span aria-hidden="true">{item.required ? "!" : "○"}</span>{item.label}<b aria-hidden="true">↗</b>
+                    </a>
+                  ))}
+                </div>
+                <p>Рекомендованные пункты не блокируют публикацию. Обязательные условия проверяются сервером.</p>
+              </section>
+            ) : null}
 
             <nav className="mc26WorkbenchNav" aria-label="Этапы матч-центра">
               <a href="#basics"><span>1</span>Основное</a>
@@ -444,6 +483,7 @@ export default async function MatchCenterMatchPage({
                   <div className="statisticsPanelHead"><div><p className="eyebrow blue">ФИНАЛЬНЫЙ ШАГ</p><h2>{report?.is_published ? "Протокол опубликован" : "Проверка перед публикацией"}</h2><p>Публичная страница показывает только реальные заполненные данные.</p></div></div>
                   <div className="mc26ReadinessGrid">
                     <ReadinessItem label="Матч завершён" ready={match.status === "finished"} value={match.status === "finished" ? "Да" : "Нет"} />
+                    <ReadinessItem label="Итоговый счёт указан" ready={hasFinalScore} value={hasFinalScore ? `${match.home_score}:${match.away_score}` : "— : —"} />
                     <ReadinessItem label="Голы совпадают со счётом" ready={timelineMatchesScore} value={`${homeGoalsFromTimeline}:${awayGoalsFromTimeline}`} />
                     <ReadinessItem label="Составы 11 + 11" ready={lineupsReady} value={`${homeStarters} + ${awayStarters}`} />
                     <ReadinessItem label="Статистика FC Edineț" ready={playerStatsReady} value={stateLabel(progress?.player_stats_status ?? "empty")} optional />
