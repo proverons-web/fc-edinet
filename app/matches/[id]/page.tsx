@@ -5,11 +5,14 @@ import { cache } from "react";
 import PublicBreadcrumbs from "@/app/components/PublicBreadcrumbs";
 import PublicBackLink from "@/app/components/PublicBackLink";
 import LineupSubstitutionBadge from "./LineupSubstitutionBadge";
+import MobileTimelineFilter from "./MobileTimelineFilter";
+import "./match-report-v2298.css";
 import JsonLd from "@/app/components/JsonLd";
 import { notFound } from "next/navigation";
 import { createPublicClient } from "@/lib/supabase/public";
 import { getLocale } from "@/lib/locale";
 import { secondYellowEventIds } from "@/lib/match-discipline";
+import { compareMatchStat } from "@/lib/match-stat-visualization";
 import { publicText } from "@/lib/i18n";
 import { publicMetadata, sportsEventJsonLd } from "@/lib/seo";
 import type { ClubMatch, MatchEvent, MatchLineupEntry, MatchLineupSetting, MatchReport, MatchTeamStatistic } from "@/lib/types";
@@ -319,6 +322,11 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
   const homeTeamStats = teamStatistics.find((row) => row.side === "home") ?? null;
   const awayTeamStats = teamStatistics.find((row) => row.side === "away") ?? null;
   const hasTeamStatistics = hasAnyTeamStatistics(homeTeamStats) || hasAnyTeamStatistics(awayTeamStats);
+  const mobileEventCounts = {
+    goals: events.filter(eventCountsAsGoal).length,
+    cards: events.filter((event) => event.event_type === "yellow_card" || event.event_type === "red_card").length,
+    substitutions: events.filter((event) => event.event_type === "substitution").length,
+  };
 
   return (
     <>
@@ -411,6 +419,7 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
                       scoreAfterEvent={scoreAfterEvent}
                       secondYellowIds={secondYellowIds}
                       halfTimeScore={halfTimeScore}
+                      mobileEventCounts={mobileEventCounts}
                     />
                   )}
                 </section>
@@ -532,30 +541,34 @@ function MatchStatisticsPanel({
   ].filter((row) => row.home !== null || row.away !== null);
 
   if (rows.length === 0) return null;
+  const hasIncompleteRows = rows.some((row) => row.home == null || row.away == null);
 
   return (
-    <div className="matchStatsBoard">
+    <div className="matchStatsBoard matchStatsBoardV2298">
       <div className="matchStatsTeams" aria-hidden="true">
         <strong>{homeName}</strong><span>{locale === "ro" ? "MECI" : "МАТЧ"}</span><strong>{awayName}</strong>
       </div>
       <div className="matchStatsRows">
         {rows.map((row) => {
-          const homeValue = row.home ?? 0;
-          const awayValue = row.away ?? 0;
-          const total = Math.max(homeValue + awayValue, 1);
-          const homeShare = (homeValue / total) * 100;
-          const awayShare = (awayValue / total) * 100;
+          // Presentation-only calculation: missing values are not zeros.
+          const { comparable, homePercent: homeShare, awayPercent: awayShare } = compareMatchStat(row.home, row.away);
+          const homeText = row.displayHome ?? (row.home ?? "—");
+          const awayText = row.displayAway ?? (row.away ?? "—");
           return (
-            <div className="matchStatRow" key={row.key}>
-              <div className="matchStatValues"><b>{row.displayHome ?? (row.home ?? "—")}</b><span>{row.label}</span><b>{row.displayAway ?? (row.away ?? "—")}</b></div>
+            <div className={`matchStatRow${comparable ? "" : " is-incomplete"}`} key={row.key}
+              role="group" aria-label={`${row.label}: ${homeName} ${homeText}; ${awayName} ${awayText}`}>
+              <div className="matchStatValues"><b>{homeText}</b><span>{row.label}</span><b>{awayText}</b></div>
               <div className="matchStatBars" aria-hidden="true">
-                <i className="is-home"><span style={{ width: `${homeShare}%` }} /></i>
-                <i className="is-away"><span style={{ width: `${awayShare}%` }} /></i>
+                <i className="is-home"><span className={row.home === 0 || !comparable ? "is-zero" : undefined} style={{ width: `${homeShare}%` }} /></i>
+                <i className="is-away"><span className={row.away === 0 || !comparable ? "is-zero" : undefined} style={{ width: `${awayShare}%` }} /></i>
               </div>
             </div>
           );
         })}
       </div>
+      {hasIncompleteRows ? <p className="matchStatsIncompleteNote">{locale === "ro"
+        ? "— înseamnă date lipsă. Barele apar doar când sunt completate ambele echipe."
+        : "— означает отсутствие данных. Полосы сравнения показываются только при наличии показателей обеих команд."}</p> : null}
     </div>
   );
 }
@@ -656,13 +669,14 @@ function buildTimelineLanes(events: MatchEvent[], match: ClubMatch, half: "first
   });
 }
 
-function HorizontalMatchTimeline({ events, match, locale, scoreAfterEvent, secondYellowIds, halfTimeScore }: {
+function HorizontalMatchTimeline({ events, match, locale, scoreAfterEvent, secondYellowIds, halfTimeScore, mobileEventCounts }: {
   events: MatchEvent[];
   match: ClubMatch;
   locale: Locale;
   scoreAfterEvent: Map<string, { home: number; away: number }>;
   secondYellowIds: Set<string>;
   halfTimeScore: { home: number; away: number };
+  mobileEventCounts: { goals: number; cards: number; substitutions: number };
 }) {
   const first = buildTimelineLanes(events.filter((event) => Number(event.minute) <= 45), match, "first");
   const second = buildTimelineLanes(events.filter((event) => Number(event.minute) > 45), match, "second");
@@ -699,6 +713,7 @@ function HorizontalMatchTimeline({ events, match, locale, scoreAfterEvent, secon
         </div>
       </div>
     </div>
+    <MobileTimelineFilter locale={locale} counts={mobileEventCounts}>
     <div className="mobileMatchTimeline" aria-label={locale === "ro" ? "Cronologia completă a meciului" : "Полная хронология матча"}>
       <div className="mobileTimelineLegend">
         <span>{match.home?.short_name || match.home?.name || (locale === "ro" ? "Gazde" : "Хозяева")}</span>
@@ -714,6 +729,7 @@ function HorizontalMatchTimeline({ events, match, locale, scoreAfterEvent, secon
         <MobileMatchTimelineEvent key={String(event.id)} event={event} side={side} match={match} locale={locale} scoreAfterEvent={scoreAfterEvent} secondYellowIds={secondYellowIds}/>
       ))}
     </div>
+    </MobileTimelineFilter>
   </>);
 }
 
@@ -730,8 +746,11 @@ function MobileMatchTimelineEvent({ event, side, match, locale, scoreAfterEvent,
   const score = scoreAfterEvent.get(String(event.id));
   const team = String(event.team_id) === String(match.home_team_id) ? match.home : match.away;
   const person = event.event_type === "substitution" ? `${event.player_name || "—"} → ${event.related_player_name || "—"}` : eventPerson(event);
+  const category = eventCountsAsGoal(event) ? "goals" :
+    event.event_type === "yellow_card" || event.event_type === "red_card" ? "cards" :
+    event.event_type === "substitution" ? "substitutions" : "other";
   return (
-    <div className={`mobileTimelineEvent is-${side}`} role="group" aria-label={`${eventMinute(event)} ${label}`}>
+    <div className={`mobileTimelineEvent is-${side}`} data-event-category={category} role="group" aria-label={`${eventMinute(event)} ${label}`}>
       <span className="mobileTimelineMinute">{eventMinute(event)}</span>
       <EventGlyph event={event} secondYellow={secondYellow} />
       <div className="mobileTimelineEventText">

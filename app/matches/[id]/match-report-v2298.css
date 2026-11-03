@@ -1,0 +1,44 @@
+/* FC Edineț v2.29.8 — isolated public match-report polish. */
+.premiumStatisticsPanel .matchStatsBoardV2298 .matchStatsTeams strong {
+  min-width:0;overflow-wrap:break-word;line-height:1.25;
+}
+.premiumStatisticsPanel .matchStatsBoardV2298 .matchStatValues span {
+  overflow-wrap:break-word;hyphens:auto;
+}
+.premiumStatisticsPanel .matchStatsBoardV2298 .matchStatBars span.is-zero { min-width:0; }
+.premiumStatisticsPanel .matchStatsBoardV2298 .matchStatRow.is-incomplete .matchStatBars {
+  opacity:.35;
+}
+.premiumStatisticsPanel .matchStatsIncompleteNote {
+  margin:0;padding:10px 18px 13px;border-top:1px solid #e8eef5;
+  color:#5a718d;font-size:11px;line-height:1.55;
+}
+/* The event filter is strictly mobile; the desktop horizontal timeline is unchanged. */
+.premiumTimelinePanel .mobileTimelineFilterWrap { display:none; }
+@media(max-width:767px){
+  .premiumTimelinePanel .mobileTimelineFilterWrap {display:block;min-width:0;max-width:100%;}
+  .premiumTimelinePanel .mobileTimelineFilters {
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:0 0 14px;
+  }
+  .premiumTimelinePanel .mobileTimelineFilters button {
+    min-width:0;border:1px solid #d7e4f1;background:#f3f7fc;
+    color:#0b315b;padding:10px 2px;border-radius:3px;
+    font-size:10px;font-weight:850;line-height:1.25;white-space:normal;cursor:pointer;
+  }
+  .premiumTimelinePanel .mobileTimelineFilters button.is-active {
+    color:#fff;background:#104e92;border-color:#104e92;
+  }
+  .premiumTimelinePanel .mobileTimelineFilters button:focus-visible {
+    outline:2px solid #ffce22;outline-offset:2px;
+  }
+  .premiumTimelinePanel .mobileTimelineFilterEmpty {
+    font-size:11px;padding:10px 12px;background:#f3f7fc;color:#49627d;
+  }
+  .premiumTimelinePanel .mobileTimelineFilterWrap[data-filter="goals"] .mobileTimelineEvent:not([data-event-category="goals"]),
+  .premiumTimelinePanel .mobileTimelineFilterWrap[data-filter="cards"] .mobileTimelineEvent:not([data-event-category="cards"]),
+  .premiumTimelinePanel .mobileTimelineFilterWrap[data-filter="substitutions"] .mobileTimelineEvent:not([data-event-category="substitutions"]) {
+    display:none!important;
+  }
+  .premiumStatisticsPanel .matchStatsIncompleteNote {padding:9px 12px;font-size:10px;}
+  .premiumStatisticsPanel .matchStatsBoardV2298 .matchStatsTeams strong {font-size:10px;}
+}

@@ -83,3 +83,7 @@
   .adminAppShell .mc297PublicationReview{padding:14px}
   .adminAppShell .mc297PublishConfirmation{width:100%}
 }
+
+/* FC Edineț v2.29.8 — search-result feedback in event editor */
+.adminAppShell .mc298SearchCount{display:block;margin:3px 0 5px;color:#55738e;font-size:11px;font-weight:750;}
+.adminAppShell .mc298ParticipantWarning{display:block;margin:4px 0;color:#aa1e22;font-size:11px;font-weight:750;}

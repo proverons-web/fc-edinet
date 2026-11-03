@@ -141,6 +141,9 @@ export default function EventFields({
           onChange={(event) => setPlayerSearch(event.target.value)}
           autoComplete="off"
         />}
+        {quickSearch && playerSearch.trim() && <small className="mc298SearchCount" role="status">
+          Найдено: {available.filter((item) => item.label.toLocaleLowerCase("ru-RU").includes(playerSearch.trim().toLocaleLowerCase("ru-RU"))).length}
+        </small>}
         <select name="player_ref" aria-label={primaryLabel} value={playerRef} onChange={(event) => { setPlayerRef(event.target.value); setPlayerSearch(""); }}>
           <option value="">— не выбран —</option>
           {!hasCurrentPlayer && playerRef && <option value={playerRef}>Сохранённый игрок</option>}
@@ -159,6 +162,10 @@ export default function EventFields({
           onChange={(event) => setRelatedSearch(event.target.value)}
           autoComplete="off"
         />}
+        {quickSearch && relatedNeeded && relatedSearch.trim() && <small className="mc298SearchCount" role="status">
+          Найдено: {relatedAvailable.filter((item) => item.ref !== playerRef && item.label.toLocaleLowerCase("ru-RU").includes(relatedSearch.trim().toLocaleLowerCase("ru-RU"))).length}
+        </small>}
+        {eventType === "substitution" && Boolean(playerRef) && playerRef === relatedRef ? <small className="mc298ParticipantWarning" role="alert">Выбери другого игрока: нельзя заменить футболиста самим собой.</small> : null}
         <select name="related_player_ref" aria-label={relatedLabel} value={relatedRef} onChange={(event) => { setRelatedRef(event.target.value); setRelatedSearch(""); }}>
           <option value="">— не выбран —</option>
           {!hasCurrentRelated && relatedRef && <option value={relatedRef}>Сохранённый игрок</option>}

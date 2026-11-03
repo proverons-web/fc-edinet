@@ -172,6 +172,15 @@ async function buildEventPayload(
     });
   }
 
+  // A player cannot substitute themselves. Check canonical IDs where available,
+  // otherwise compare normalized names for manually entered guest players.
+  if (eventType === "substitution" && player.name && relatedPlayer.name && (
+    (player.id && relatedPlayer.id && player.id === relatedPlayer.id) ||
+    (!player.id || !relatedPlayer.id) && player.name.trim().toLocaleLowerCase("ru-RU") === relatedPlayer.name.trim().toLocaleLowerCase("ru-RU")
+  )) {
+    go(matchId, { error: "При замене уходящий и выходящий игрок должны отличаться." });
+  }
+
   return {
     match_id: matchId,
     team_id: teamId,

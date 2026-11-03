@@ -31,6 +31,8 @@ jobs:
         run: node scripts/qa-match-workflow.mjs
       - name: Match entry QA
         run: node scripts/qa-match-entry.mjs
+      - name: Public match stats and mobile timeline QA
+        run: node --experimental-strip-types scripts/qa-public-match-v2298.mjs
       - name: Check performance and image delivery contracts
         run: node scripts/qa-performance.mjs
       - name: Check responsive layout in Chrome
