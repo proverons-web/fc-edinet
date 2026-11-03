@@ -58,3 +58,28 @@
   .adminAppShell .mc29WorklistItems{grid-template-columns:1fr}
   .adminAppShell .mc29UnsavedNotice{bottom:12px;right:12px;left:12px;max-width:none}
 }
+
+/* FC Edineț v2.29.7 — efficient match center entry and publication review */
+.adminAppShell .mc297PlayerSearch{width:100%;min-width:0;margin:0 0 8px;box-sizing:border-box}
+.adminAppShell .mc297EventSaveBar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.adminAppShell .mc297EventSaveBar p{flex:1 1 260px;margin:0}
+.adminAppShell .mc297EventSaveButtons{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end}
+.adminAppShell .mc297PublicationReview{padding:18px 20px;margin-bottom:18px;background:#f3f7fc;border:1px solid #d8e2ef}
+.adminAppShell .mc297PublicationReviewHead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#0b2d56}
+.adminAppShell .mc297PublicationReviewHead span{font-size:12px;color:#5a7490}
+.adminAppShell .mc297PublicationReviewList{display:flex;flex-direction:column;gap:7px;margin-top:12px}
+.adminAppShell .mc297PublicationReviewList a{display:flex;align-items:center;gap:10px;padding:9px 11px;background:#fff;border:1px solid #e2eaf4;color:#12345b;text-decoration:none;font-size:13px;font-weight:700}
+.adminAppShell .mc297PublicationReviewList a:hover{border-color:#3675ba}
+.adminAppShell .mc297PublicationReviewList a b{color:#b43e36}
+.adminAppShell .mc297PublicationAdvisories{margin-top:12px;color:#173c65}
+.adminAppShell .mc297PublicationAdvisories>summary{cursor:pointer;font-size:13px;font-weight:700}
+.adminAppShell .mc297PublishConfirmation{display:flex;flex-direction:column;gap:12px;min-width:min(100%,340px)}
+.adminAppShell .mc297PublishConfirmation label{display:flex;gap:9px;align-items:flex-start;font-size:12px;line-height:1.5;color:#244665;cursor:pointer}
+.adminAppShell .mc297PublishConfirmation label input{flex:none;align-self:flex-start;margin:3px 0 0}
+.adminAppShell .mc297PublishConfirmation .primaryButton:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:767px){
+  .adminAppShell .mc297EventSaveBar,.adminAppShell .mc297EventSaveButtons{align-items:stretch;flex-direction:column;width:100%}
+  .adminAppShell .mc297EventSaveButtons button{width:100%;justify-content:center}
+  .adminAppShell .mc297PublicationReview{padding:14px}
+  .adminAppShell .mc297PublishConfirmation{width:100%}
+}

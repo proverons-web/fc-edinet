@@ -289,6 +289,9 @@ export async function publishMatchProtocol(formData: FormData) {
   const { supabase, userId } = await requireEditor();
   const matchId = text(formData, "match_id");
   if (!/^\d+$/.test(matchId)) redirect("/admin/match-center");
+  if (text(formData, "review_confirmed") !== "yes") {
+    go(matchId, { error: "Перед публикацией подтверди проверку протокола." });
+  }
 
   const { data: match, error: matchError } = await supabase
     .from("matches")
@@ -405,7 +408,18 @@ export async function createMatchEvent(formData: FormData) {
   revalidateMatchCenter(matchId);
   revalidatePath("/admin/statistics");
   revalidatePath("/statistics");
-  go(matchId, { saved: "event" });
+  // Keep only the non-personal event context for fast consecutive entry.
+  // Player and related-player references must be selected anew to avoid duplicates.
+  if (text(formData, "after_save") === "continue") {
+    go(matchId, {
+      saved: "event",
+      next_type: String(payload.event_type),
+      next_team: String(payload.team_id),
+      next_minute: String(payload.minute),
+      next_stoppage: String(payload.stoppage_minute),
+    });
+  }
+  go(matchId, { saved: "event-done" });
 }
 
 export async function updateMatchEvent(formData: FormData) {

@@ -1,0 +1,36 @@
+import fs from "node:fs";
+import path from "node:path";
+import assert from "node:assert/strict";
+const root = path.resolve(import.meta.dirname,"..");
+const read = p => fs.readFileSync(path.join(root,p),"utf8");
+const page=read("app/admin/match-center/[matchId]/page.tsx");
+const fields=read("app/admin/match-center/[matchId]/EventFields.tsx");
+const actions=read("app/admin/match-center/[matchId]/actions.ts");
+const confirm=read("app/admin/match-center/[matchId]/MatchPublishConfirmation.tsx");
+const guard=read("app/admin/match-center/[matchId]/MatchCenterWorkflowGuard.tsx");
+const css=read("app/admin-workflow-v2294.css");
+const tests=[];
+function test(label,fn){try{fn();tests.push(true);console.log("PASS "+label)}catch(e){tests.push(false);console.error("FAIL "+label+": "+e.message)}}
+test("continuation has two explicit submit actions",()=>{assert.match(page,/name="after_save" value="continue"/);assert.match(page,/name="after_save" value="done"/)});
+test("server continuation only after successful event insert",()=>{const start=actions.indexOf("export async function createMatchEvent");const end=actions.indexOf("export async function updateMatchEvent");const part=actions.slice(start,end);assert.ok(part.indexOf(".insert({")<part.indexOf('text(formData, "after_save")'));assert.match(part,/revalidateMatchCenter/)});
+test("finish action closes event editor",()=>{assert.match(actions,/go\(matchId, \{ saved: "event-done" \}\)/);assert.match(page,/saved !== "event-done"/)});
+test("server redirects carry event context but never participant IDs",()=>{
+  const marker='if (text(formData, "after_save") === "continue")';
+  const start=actions.indexOf(marker);
+  const end=actions.indexOf('go(matchId, { saved: "event-done" });',start);
+  const part=actions.slice(start,end);
+  assert.ok(start>0 && end>start);
+  assert.match(part,/next_type/);assert.match(part,/next_team/);assert.match(part,/next_minute/);
+  assert.doesNotMatch(part,/player_ref|related_player_ref/);
+});
+test("continuation values validated on render",()=>{assert.match(page,/validNextEventTypes\.has/);assert.match(page,/nextEventTeam === String\(match\.away_team_id\)/);assert.match(page,/Number\.isInteger\(nextEventMinute\)/)});
+test("search field explicitly enabled only for add form",()=>{assert.match(page,/defaults=\{nextEventDefaults\} quickSearch/);assert.match(fields,/quickSearch = false/)});
+test("filtered player searches are client-only",()=>{assert.match(fields,/type="search"/);assert.match(fields,/toLocaleLowerCase/);assert.doesNotMatch(fields,/fetch\(|supabase/)});
+test("search fields are unnamed and not submitted",()=>{assert.match(fields,/aria-label="Поиск игрока для события"/);assert.match(fields,/aria-label="Поиск второго игрока"/);assert.ok(![...fields.matchAll(/<input[^>]*type="search"[^>]*>/g)].some(([tag])=>/name=/.test(tag)))});
+test("changing team resets selected players",()=>{assert.match(fields,/setPlayerRef\(""\)/);assert.match(fields,/setRelatedRef\(""\)/)});
+test("publication review has blocking and advisory tasks",()=>{assert.match(page,/publicationBlockers/);assert.match(page,/publicationAdvisories/);assert.match(page,/mc297PublicationReviewList/)});
+test("publication requires explicit confirmation on server",()=>{const part=actions.slice(actions.indexOf("export async function publishMatchProtocol"),actions.indexOf("export async function unpublishMatchProtocol"));assert.match(part,/text\(formData, "review_confirmed"\) !== "yes"/)});
+test("publish button gated by confirmed checkbox and readiness",()=>{assert.match(confirm,/disabled=\{!available \|\| !confirmed\}/);assert.match(confirm,/name="review_confirmed" value="yes"/)});
+test("ephemeral approval does not trigger dirty warning",()=>{assert.match(guard,/target\.closest\("\[data-mc-confirmation\]"\)/)});
+test("style stays in admin layer and no new global-important rules",()=>{assert.match(css,/FC Edineț v2\.29\.7/);assert.match(css,/\.adminAppShell \.mc297EventSaveBar/);assert.doesNotMatch(css.split("FC Edineț v2.29.7")[1],/!important/)});
+const done=tests.filter(Boolean).length;console.log(`\n${done}/${tests.length} match entry checks passed.`);if(done!==tests.length)process.exitCode=1;

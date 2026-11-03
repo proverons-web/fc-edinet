@@ -31,6 +31,7 @@ export default function EventFields({
   participants,
   defaults,
   compact = false,
+  quickSearch = false,
 }: {
   homeTeamId: string;
   awayTeamId: string;
@@ -50,6 +51,7 @@ export default function EventFields({
     sort_order?: number;
   };
   compact?: boolean;
+  quickSearch?: boolean;
 }) {
   const [eventType, setEventType] = useState<MatchEventType>(defaults.event_type ?? "goal");
   const [teamId, setTeamId] = useState(String(defaults.team_id ?? homeTeamId));
@@ -57,6 +59,8 @@ export default function EventFields({
   const initialRelatedRef = defaults.related_player_id ? `db:${defaults.related_player_id}` : defaults.related_player_name ? `manual:${defaults.related_player_name}` : "";
   const [playerRef, setPlayerRef] = useState(initialPlayerRef);
   const [relatedRef, setRelatedRef] = useState(initialRelatedRef);
+  const [playerSearch, setPlayerSearch] = useState("");
+  const [relatedSearch, setRelatedSearch] = useState("");
 
   const teamParticipants = useMemo(() => participants.filter((item) => item.teamId === teamId), [participants, teamId]);
   const cardEvent = eventType === "yellow_card" || eventType === "red_card";
@@ -65,6 +69,12 @@ export default function EventFields({
     [teamParticipants, cardEvent],
   );
   const relatedAvailable = useMemo(() => teamParticipants.filter((item) => item.kind !== "coach"), [teamParticipants]);
+  const matchingPrimary = useMemo(() => available.filter((item) =>
+    item.ref === playerRef || item.label.toLocaleLowerCase("ru-RU").includes(playerSearch.trim().toLocaleLowerCase("ru-RU")),
+  ), [available, playerSearch, playerRef]);
+  const matchingRelated = useMemo(() => relatedAvailable.filter((item) =>
+    (item.ref === relatedRef || item.label.toLocaleLowerCase("ru-RU").includes(relatedSearch.trim().toLocaleLowerCase("ru-RU"))) && item.ref !== playerRef,
+  ), [relatedAvailable, relatedSearch, relatedRef, playerRef]);
   const hasCurrentPlayer = playerRef && available.some((item) => item.ref === playerRef);
   const hasCurrentRelated = relatedRef && relatedAvailable.some((item) => item.ref === relatedRef);
 
@@ -104,6 +114,8 @@ export default function EventFields({
             setTeamId(event.target.value);
             setPlayerRef("");
             setRelatedRef("");
+            setPlayerSearch("");
+            setRelatedSearch("");
           }}
         >
           <option value={homeTeamId}>Хозяева · {homeTeamName}</option>
@@ -118,23 +130,41 @@ export default function EventFields({
         <span>+ время</span>
         <input name="stoppage_minute" type="number" min={0} max={30} step={1} defaultValue={defaults.stoppage_minute ?? 0} placeholder="0" data-select-on-click="true" />
       </label>
-      <label className="fieldGroup matchEventParticipantField">
+      <div className="fieldGroup matchEventParticipantField">
         <span>{primaryLabel}</span>
-        <select name="player_ref" value={playerRef} onChange={(event) => setPlayerRef(event.target.value)}>
+        {quickSearch && available.length > 0 && <input
+          type="search"
+          className="mc297PlayerSearch"
+          aria-label="Поиск игрока для события"
+          placeholder="Поиск по фамилии или номеру"
+          value={playerSearch}
+          onChange={(event) => setPlayerSearch(event.target.value)}
+          autoComplete="off"
+        />}
+        <select name="player_ref" aria-label={primaryLabel} value={playerRef} onChange={(event) => { setPlayerRef(event.target.value); setPlayerSearch(""); }}>
           <option value="">— не выбран —</option>
           {!hasCurrentPlayer && playerRef && <option value={playerRef}>Сохранённый игрок</option>}
-          {available.map((item) => <option value={item.ref} key={`${item.teamId}-${item.ref}`}>{item.label}</option>)}
+          {(quickSearch ? matchingPrimary : available).map((item) => <option value={item.ref} key={`${item.teamId}-${item.ref}`}>{item.label}</option>)}
         </select>
         {available.length === 0 && <small>Сначала сохрани состав этой команды.</small>}
-      </label>
-      <label className={`fieldGroup matchEventParticipantField ${relatedNeeded ? "active" : ""}`}>
+      </div>
+      <div className={`fieldGroup matchEventParticipantField ${relatedNeeded ? "active" : ""}`}>
         <span>{relatedLabel}</span>
-        <select name="related_player_ref" value={relatedRef} onChange={(event) => setRelatedRef(event.target.value)}>
+        {quickSearch && relatedNeeded && relatedAvailable.length > 0 && <input
+          type="search"
+          className="mc297PlayerSearch"
+          aria-label="Поиск второго игрока"
+          placeholder="Поиск второго игрока"
+          value={relatedSearch}
+          onChange={(event) => setRelatedSearch(event.target.value)}
+          autoComplete="off"
+        />}
+        <select name="related_player_ref" aria-label={relatedLabel} value={relatedRef} onChange={(event) => { setRelatedRef(event.target.value); setRelatedSearch(""); }}>
           <option value="">— не выбран —</option>
           {!hasCurrentRelated && relatedRef && <option value={relatedRef}>Сохранённый игрок</option>}
-          {relatedAvailable.filter((item) => item.ref !== playerRef).map((item) => <option value={item.ref} key={`${item.teamId}-${item.ref}`}>{item.label}</option>)}
+          {(quickSearch ? matchingRelated : relatedAvailable.filter((item) => item.ref !== playerRef)).map((item) => <option value={item.ref} key={`${item.teamId}-${item.ref}`}>{item.label}</option>)}
         </select>
-      </label>
+      </div>
       <label className="fieldGroup matchEventDescription">
         <span>Комментарий</span>
         <input name="description" maxLength={500} defaultValue={defaults.description ?? ""} placeholder="Необязательно" />

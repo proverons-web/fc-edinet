@@ -30,6 +30,7 @@ import MatchCenterFeedback from "./MatchCenterFeedback";
 import MatchCenterSubmitButton from "./MatchCenterSubmitButton";
 import MatchTeamStatsEditor from "./MatchTeamStatsEditor";
 import MatchCenterWorkflowGuard from "./MatchCenterWorkflowGuard";
+import MatchPublishConfirmation from "./MatchPublishConfirmation";
 
 export const metadata = { title: "Матч-центр — Админ" };
 export const dynamic = "force-dynamic";
@@ -121,7 +122,11 @@ export default async function MatchCenterMatchPage({
   searchParams,
 }: {
   params: Promise<{ matchId: string }>;
-  searchParams: Promise<{ saved?: string | string[]; error?: string | string[] }>;
+  searchParams: Promise<{
+    saved?: string | string[]; error?: string | string[];
+    next_type?: string | string[]; next_team?: string | string[];
+    next_minute?: string | string[]; next_stoppage?: string | string[];
+  }>;
 }) {
   const { supabase } = await requireEditor();
   const { matchId } = await params;
@@ -131,7 +136,8 @@ export default async function MatchCenterMatchPage({
   const savedMessages: Record<string, string> = {
     basics: "Основные данные матча сохранены.",
     report: "Отчёт и MVP сохранены.",
-    event: "Событие добавлено в таймлайн.",
+    event: "Событие добавлено в таймлайн. Можно добавить следующее.",
+    "event-done": "Событие сохранено. Ввод завершён.",
     "event-updated": "Событие изменено.",
     "event-deleted": "Событие удалено.",
     "lineup-home": "Состав хозяев сохранён.",
@@ -312,7 +318,30 @@ export default async function MatchCenterMatchPage({
     ...lineupSettings.map((row) => row.updated_at ?? String(row.id)),
     ...teamStats.map((row) => row.updated_at ?? String(row.id)),
   ].join("|");
-  const openEvents = Boolean(saved?.startsWith("event"));
+  const nextEventType = one(query.next_type);
+  const validNextEventTypes = new Set<MatchEventType>(Object.keys(EVENT_LABELS) as MatchEventType[]);
+  const nextEventTeam = one(query.next_team);
+  const nextEventMinute = Number(one(query.next_minute));
+  const nextEventStoppage = Number(one(query.next_stoppage));
+  const nextEventDefaults = {
+    event_type: nextEventType && validNextEventTypes.has(nextEventType as MatchEventType) ? nextEventType as MatchEventType : "goal" as MatchEventType,
+    team_id: nextEventTeam === String(match.away_team_id) ? String(match.away_team_id) : String(match.home_team_id),
+    minute: Number.isInteger(nextEventMinute) && nextEventMinute >= 0 && nextEventMinute <= 130 ? nextEventMinute : 0,
+    stoppage_minute: Number.isInteger(nextEventStoppage) && nextEventStoppage >= 0 && nextEventStoppage <= 30 ? nextEventStoppage : 0,
+    sort_order: 0,
+  };
+  const publicationBlockers = [
+    ...(match.status !== "finished" ? [{ label: "Завершить матч", href: "#basics" }] : []),
+    ...(!hasFinalScore ? [{ label: "Указать счёт", href: "#basics" }] : []),
+    ...(hasFinalScore && !timelineMatchesScore ? [{ label: "Исправить голы в событиях", href: "#events" }] : []),
+  ];
+  const publicationAdvisories = [
+    ...(!lineupsReady ? [{ label: `Проверить стартовые составы (${homeStarters}/11 и ${awayStarters}/11)`, href: "#lineups" }] : []),
+    ...(clubSide && !playerStatsReady ? [{ label: "Проверить статистику игроков", href: "#lineups" }] : []),
+    ...(!teamStatsFilled ? [{ label: "Заполнить известную статистику команд", href: "#team-stats" }] : []),
+    ...(!reportReady ? [{ label: "Добавить отчёт или MVP", href: "#report" }] : []),
+  ];
+  const openEvents = Boolean(saved?.startsWith("event") && saved !== "event-done");
   const openTeamStats = saved === "team-stats";
   const openReport = saved === "report";
   const openPublish = saved === "published" || saved === "unpublished";
@@ -441,8 +470,14 @@ export default async function MatchCenterMatchPage({
                   <div className="statisticsPanelHead"><div><p className="eyebrow blue">НОВОЕ СОБЫТИЕ</p><h2>Добавить эпизод</h2><p>Игроки выбираются из сохранённых составов. Голы, карточки и замены автоматически синхронизируют статистику FC Edineț.</p></div><span className="matchCenterVersionBadge">{events.length}</span></div>
                   <form action={createMatchEvent} className="matchEventForm">
                     <input type="hidden" name="match_id" value={String(match.id)} />
-                    <EventFields homeTeamId={String(match.home_team_id)} awayTeamId={String(match.away_team_id)} homeTeamName={match.home?.name ?? "Хозяева"} awayTeamName={match.away?.name ?? "Гости"} participants={eventParticipants} defaults={{ event_type: "goal", minute: 0, stoppage_minute: 0, sort_order: 0 }} />
-                    <div className="matchEventFormFooter"><p>Для автогола выбирай команду игрока, забившего в свои ворота. Система сама засчитает мяч сопернику.</p><MatchCenterSubmitButton className="primaryButton" pendingText="Добавление…">+ Добавить событие</MatchCenterSubmitButton></div>
+                    <EventFields key={`new-event-${events.length}-${nextEventDefaults.minute}-${nextEventDefaults.team_id}-${nextEventDefaults.event_type}`} homeTeamId={String(match.home_team_id)} awayTeamId={String(match.away_team_id)} homeTeamName={match.home?.name ?? "Хозяева"} awayTeamName={match.away?.name ?? "Гости"} participants={eventParticipants} defaults={nextEventDefaults} quickSearch />
+                    <div className="matchEventFormFooter mc297EventSaveBar">
+                      <p>После сохранения можно сразу добавить следующий эпизод. Игроки очищаются, а тип, команда и минута сохраняются. Для автогола выбирай команду игрока.</p>
+                      <div className="mc297EventSaveButtons">
+                        <MatchCenterSubmitButton name="after_save" value="continue" className="primaryButton" pendingText="Сохранение…">+ Сохранить и добавить ещё</MatchCenterSubmitButton>
+                        <MatchCenterSubmitButton name="after_save" value="done" className="rowAction muted" pendingText="Сохранение…">Сохранить и закончить</MatchCenterSubmitButton>
+                      </div>
+                    </div>
                   </form>
                 </section>
                 <section className="statisticsPanel matchTimelinePanel">
@@ -481,6 +516,20 @@ export default async function MatchCenterMatchPage({
               <div className="mc26WorkBody">
                 <section className="statisticsPanel mc26PublishPanel">
                   <div className="statisticsPanelHead"><div><p className="eyebrow blue">ФИНАЛЬНЫЙ ШАГ</p><h2>{report?.is_published ? "Протокол опубликован" : "Проверка перед публикацией"}</h2><p>Публичная страница показывает только реальные заполненные данные.</p></div></div>
+                  <div className="mc297PublicationReview" role="status">
+                    <div className="mc297PublicationReviewHead">
+                      <strong>{publicationBlockers.length === 0 ? "Обязательные проверки пройдены" : `Осталось обязательных проверок: ${publicationBlockers.length}`}</strong>
+                      <span>{publicationAdvisories.length} рекомендаций</span>
+                    </div>
+                    {publicationBlockers.length > 0 && <div className="mc297PublicationReviewList">
+                      {publicationBlockers.map((item) => <a href={item.href} key={item.label}><b aria-hidden="true">!</b>{item.label}</a>)}
+                    </div>}
+                    {publicationAdvisories.length > 0 && <details className="mc297PublicationAdvisories"><summary>Необязательные улучшения ({publicationAdvisories.length})</summary>
+                      <div className="mc297PublicationReviewList">
+                        {publicationAdvisories.map((item) => <a href={item.href} key={item.label}><span aria-hidden="true">○</span>{item.label}</a>)}
+                      </div>
+                    </details>}
+                  </div>
                   <div className="mc26ReadinessGrid">
                     <ReadinessItem label="Матч завершён" ready={match.status === "finished"} value={match.status === "finished" ? "Да" : "Нет"} />
                     <ReadinessItem label="Итоговый счёт указан" ready={hasFinalScore} value={hasFinalScore ? `${match.home_score}:${match.away_score}` : "— : —"} />
@@ -491,7 +540,7 @@ export default async function MatchCenterMatchPage({
                     <ReadinessItem label="Отчёт / MVP" ready={reportReady} value={reportReady ? "Есть" : "Нет"} optional />
                   </div>
                   <div className="mc26PublishActions">
-                    {report?.is_published ? <><Link className="primaryButton" href={`/matches/${match.id}`} target="_blank">Открыть протокол ↗</Link><form action={unpublishMatchProtocol}><input type="hidden" name="match_id" value={String(match.id)} /><MatchCenterSubmitButton className="rowAction muted" pendingText="Снятие…">Снять с публикации</MatchCenterSubmitButton></form></> : <form action={publishMatchProtocol}><input type="hidden" name="match_id" value={String(match.id)} /><MatchCenterSubmitButton className="primaryButton" pendingText="Публикация…" disabled={!publicationReady}>Опубликовать протокол</MatchCenterSubmitButton></form>}
+                    {report?.is_published ? <><Link className="primaryButton" href={`/matches/${match.id}`} target="_blank">Открыть протокол ↗</Link><form action={unpublishMatchProtocol}><input type="hidden" name="match_id" value={String(match.id)} /><MatchCenterSubmitButton className="rowAction muted" pendingText="Снятие…">Снять с публикации</MatchCenterSubmitButton></form></> : <form action={publishMatchProtocol}><input type="hidden" name="match_id" value={String(match.id)} /><MatchPublishConfirmation key={workflowRevision} available={publicationReady} /></form>}
                     <Link href={`/matches/${match.id}`} target="_blank" className="rowAction muted">Предпросмотр публичной страницы ↗</Link>
                   </div>
                 </section>

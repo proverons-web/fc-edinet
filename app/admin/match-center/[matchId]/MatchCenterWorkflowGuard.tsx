@@ -41,6 +41,7 @@ export default function MatchCenterWorkflowGuard() {
       const target = event.target;
       if (!(target instanceof Element)) return;
       const form = target.closest<HTMLFormElement>("form");
+      if (target.closest("[data-mc-confirmation]")) return;
       if (!form || !baseline.has(form)) return;
       if (serialize(form) === baseline.get(form)) dirty.delete(form);
       else dirty.add(form);
