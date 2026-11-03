@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "release": "2.29.0",
+  "imports": [
+    "globals.css",
+    "visual-polish.css",
+    "home-v215.css",
+    "mobile.css"
+  ],
+  "css": {
+    "app/globals.css": {
+      "bytes": 506137,
+      "important": 497,
+      "mediaQueries": 187,
+      "ruleOpeners": 5663
+    },
+    "app/visual-polish.css": {
+      "bytes": 270467,
+      "important": 2343,
+      "mediaQueries": 88,
+      "ruleOpeners": 2541
+    },
+    "app/home-v215.css": {
+      "bytes": 82644,
+      "important": 1070,
+      "mediaQueries": 50,
+      "ruleOpeners": 786
+    },
+    "app/mobile.css": {
+      "bytes": 24282,
+      "important": 328,
+      "mediaQueries": 3,
+      "ruleOpeners": 139
+    }
+  }
+}

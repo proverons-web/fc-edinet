@@ -1,0 +1,16 @@
+FC Edineț v2.29.0 — Foundation & Responsive Stabilization
+
+Based on canonical v2.28.25.
+
+- Consolidated mobile overrides from three versioned files into app/mobile.css, preserving cascade order.
+- Added regression checks for 320/360/390/430/767/768/1280/1920px layouts and scroll-offset mobile menu.
+- Added reproducible CSS inventory and controlled baseline for future refactoring.
+- No database schema changes and no design redesign.
+
+QA commands:
+  npm run qa:site
+  npm run qa:css
+  npm run qa:responsive
+  npm run qa:all
+
+Use DEPLOY_FC_EDINET.bat for Windows deployment. Never include .env.local in the ZIP.

@@ -1,0 +1,544 @@
+/* FC Edineț v2.29.0 — mobile-only baseline (<= 767 px).
+   Preserves declaration order from the v2.28.25 responsive release.
+   Add new overrides here and test with npm run qa:responsive. */
+
+/* FC Edineț v2.28.22 — Mobile-only public layout.
+   Desktop/tablet >= 768px retain their existing presentation. */
+.mobileMatchTimeline{display:none}
+
+@media (max-width:767px){
+  /* 1 — Form dashboard: 4 stats over 2 stats (the match count is available
+     elsewhere; it is omitted here to keep the requested six-item summary). */
+  .fcV215DashboardForm .fcV215DashboardKpisFull{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:0!important;
+    text-align:center!important;
+  }
+  .fcV215DashboardForm .fcV215DashboardKpisFull>span{
+    min-width:0!important;
+    min-height:62px!important;
+    padding:11px 3px 10px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    border-top:1px solid #dfe9f4!important;
+    border-right:1px solid #dfe9f4!important;
+    text-align:center!important;
+  }
+  .fcV215DashboardForm .fcV215DashboardKpisFull>span:nth-child(2){display:none!important}
+  .fcV215DashboardForm .fcV215DashboardKpisFull>span:nth-child(5){border-right:0!important}
+  .fcV215DashboardForm .fcV215DashboardKpisFull>span:nth-child(6),
+  .fcV215DashboardForm .fcV215DashboardKpisFull>span:nth-child(7){
+    grid-column:span 2!important;
+    min-height:62px!important;
+  }
+  .fcV215DashboardForm .fcV215DashboardKpisFull>span:nth-child(7){border-right:0!important}
+  .fcV215DashboardForm .fcV215DashboardKpisFull small{
+    font-size:clamp(6px,1.6vw,8px)!important;
+    line-height:1.15!important;
+    white-space:nowrap!important;
+    letter-spacing:0!important;
+  }
+  .fcV215DashboardForm .fcV215DashboardKpisFull strong{
+    font-size:clamp(18px,5vw,22px)!important;
+    line-height:1.05!important;
+    margin-top:4px!important;
+  }
+
+  /* 2 — One complete recent match per swipe; arrows stay outside the track. */
+  .fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchesRail{
+    padding:0 0 46px!important;
+    width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+  }
+  .fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchesArrow{
+    top:auto!important;bottom:0!important;transform:none!important;
+    width:34px!important;height:34px!important;
+  }
+  .fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchesArrow.is-prev{
+    left:calc(50% - 42px)!important;
+  }
+  .fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchesArrow.is-next{
+    right:calc(50% - 42px)!important;
+  }
+  .fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchesArrow:hover:not(:disabled){
+    transform:none!important;
+  }
+  .fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchesGrid{
+    display:grid!important;
+    grid-auto-flow:column!important;
+    grid-template-columns:none!important;
+    grid-auto-columns:100%!important;
+    gap:10px!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    overflow-x:auto!important;
+    scroll-snap-type:x mandatory!important;
+    scroll-padding-inline:0!important;
+    padding:2px 0 8px!important;
+  }
+  .fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchCard{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+    scroll-snap-align:start!important;
+    overflow:hidden!important;
+  }
+  .fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchBody{
+    grid-template-columns:minmax(0,1fr) minmax(62px,auto) minmax(0,1fr)!important;
+    justify-content:stretch!important;
+    column-gap:4px!important;
+    padding:4px 6px 6px!important;
+  }
+  .fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchTeam{
+    width:100%!important;min-width:0!important;max-width:none!important;
+    justify-items:center!important;
+  }
+  .fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchLogoBox{
+    width:100%!important;
+  }
+  .fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchTeam strong{
+    width:100%!important;min-width:0!important;max-width:100%!important;
+    font-size:9px!important;
+    overflow-wrap:anywhere!important;
+  }
+  .fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchScore{
+    width:auto!important;min-width:62px!important;max-width:100%!important;
+  }
+
+  /* 3 — Compact homepage standings: never wrap team names on the phone. */
+  .fcRefTableColumn .standingsTableWrap.compact{overflow:hidden!important;max-width:100%!important}
+  .fcRefTableColumn .standingsTableWrap.compact .standingsTable{
+    width:100%!important;min-width:0!important;table-layout:fixed!important;
+    font-size:clamp(9px,2.35vw,11px)!important;
+  }
+  .fcRefTableColumn .standingsTable th,
+  .fcRefTableColumn .standingsTable td{
+    padding:10px 3px!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    font-size:clamp(9px,2.35vw,11px)!important;
+  }
+  .fcRefTableColumn .standingsTable th:nth-child(1),
+  .fcRefTableColumn .standingsTable td:nth-child(1){width:23px!important}
+  .fcRefTableColumn .standingsTable th:nth-child(2),
+  .fcRefTableColumn .standingsTable td:nth-child(2){width:auto!important}
+  .fcRefTableColumn .standingsTable th:nth-child(3),
+  .fcRefTableColumn .standingsTable td:nth-child(3){width:26px!important}
+  .fcRefTableColumn .standingsTable th:nth-child(7),
+  .fcRefTableColumn .standingsTable td:nth-child(7){width:33px!important}
+  .fcRefTableColumn .standingsTable th:nth-child(8),
+  .fcRefTableColumn .standingsTable td:nth-child(8){width:33px!important}
+  .fcRefTableColumn .standingsTable .standingTeam{
+    display:flex!important;align-items:center!important;
+    width:100%!important;min-width:0!important;gap:5px!important;
+  }
+  .fcRefTableColumn .standingsTable .standingTeam strong{
+    display:block!important;min-width:0!important;max-width:100%!important;
+    font-size:clamp(9px,2.4vw,11px)!important;
+    line-height:1.15!important;white-space:nowrap!important;
+    overflow:hidden!important;text-overflow:ellipsis!important;
+  }
+  .fcRefTableColumn .standingLogo,.fcRefTableColumn .standingLogoFallback{
+    width:19px!important;height:19px!important;flex:0 0 19px!important;
+  }
+  .fcRefTableColumn .standingsTable .standingPoints{
+    font-size:clamp(13px,3.8vw,17px)!important;
+  }
+
+  /* 4 — Keep НАША / КОМАНДА tight; subtitle belongs to that heading. */
+  .fcRefTeamSection .fcRefTeamHead{
+    display:flex!important;flex-direction:column!important;align-items:flex-start!important;
+    justify-content:flex-start!important;gap:14px!important;
+    margin-bottom:20px!important;
+  }
+  .fcRefTeamSection .fcRefTeamHead>div{display:flex!important;flex-direction:column!important;gap:12px!important}
+  .fcRefTeamSection .fcRefTeamHead h2{
+    margin:0!important;
+    line-height:.92!important;
+    letter-spacing:-.04em!important;
+  }
+  .fcRefTeamSection .fcRefTeamHead p{
+    margin:0!important;
+    line-height:1.35!important;
+  }
+  .fcRefTeamSection .fcRefTeamHead .fcOutlineButton{margin:0!important}
+
+  /* 5 — Media eyebrow/title/action should be one compact heading unit. */
+  .fcV215MediaSection .fcV215SectionHead{
+    display:flex!important;flex-direction:column!important;align-items:flex-start!important;
+    gap:12px!important;margin:0 0 18px!important;
+  }
+  .fcV215MediaSection .fcV215SectionHead>div{display:flex!important;flex-direction:column!important;gap:9px!important}
+  .fcV215MediaSection .fcV215SectionHead small{
+    display:block!important;margin:0!important;line-height:1.25!important;
+  }
+  .fcV215MediaSection .fcV215SectionHead h2{
+    margin:0!important;
+    font-size:clamp(27px,8.3vw,35px)!important;
+    line-height:1.06!important;
+    letter-spacing:-.025em!important;
+  }
+  .fcV215MediaSection .fcV215SectionHead>a{margin:0!important;line-height:1.35!important}
+
+  /* 6 — An independent vertical, complete match chronology on mobile. */
+  .premiumTimelinePanel .horizontalTimelineViewport{display:none!important}
+  .premiumTimelinePanel .mobileMatchTimeline{display:block!important;width:100%!important;min-width:0!important}
+  .mobileTimelineLegend{
+    display:flex;justify-content:space-between;gap:10px;margin-bottom:12px;
+    font-size:10px;font-weight:800;color:#5c7490;
+  }
+  .mobileTimelineHalfTitle{
+    margin:16px 0 10px;padding:8px 10px;border-bottom:1px solid #dce6f0;
+    color:#0b3970;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;
+  }
+  .mobileTimelineEvent{
+    position:relative;display:grid!important;
+    grid-template-columns:40px 28px minmax(0,1fr)!important;
+    align-items:start;gap:8px;padding:10px 0;
+    border-bottom:1px solid #e5ebf3;min-width:0!important;
+  }
+  .mobileTimelineMinute{font-size:13px;font-weight:900;line-height:30px;color:#11395f;text-align:center}
+  .mobileTimelineEvent .horizontalEventGlyph{display:grid;place-items:center;width:26px;height:26px;margin:2px 0}
+  .mobileTimelineEvent .horizontalEventGlyph.is-yellow-card,
+  .mobileTimelineEvent .horizontalEventGlyph.is-red-card,
+  .mobileTimelineEvent .horizontalEventGlyph.is-second-yellow{width:17px;height:17px;margin:6px auto}
+  .mobileTimelineEventText{min-width:0}
+  .mobileTimelineEventText small{display:block;color:#6b8097;font-size:9px;font-weight:850;line-height:1.4}
+  .mobileTimelineEventText strong{display:block;margin:3px 0;color:#0b3059;font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+  .mobileTimelineEventText em{display:block;color:#677c90;font-size:10px;font-style:normal;line-height:1.45;overflow-wrap:anywhere}
+  .mobileTimelineEvent.is-home .mobileTimelineEventText{border-left:3px solid #0c65c8;padding-left:9px}
+  .mobileTimelineEvent.is-away .mobileTimelineEventText{border-left:3px solid #d69a2c;padding-left:9px}
+  .mobileTimelineBreak{
+    display:flex;align-items:center;justify-content:center;gap:12px;
+    padding:12px 8px;margin:10px 0;border:1px solid #dce6f0;
+    color:#678097;font-size:10px;font-weight:900;text-transform:uppercase;
+  }
+  .mobileTimelineBreak strong{font-size:19px;color:#0b325d}
+
+  /* 7 — Event badges (goal/cards/substitutions/captain) follow the player's
+     full name inline instead of appearing on a separate row below it. */
+  .premiumLineupsPanel .premiumLineupRow{
+    display:flex!important;align-items:center!important;justify-content:flex-start!important;
+    flex-wrap:wrap!important;column-gap:7px!important;row-gap:4px!important;
+    min-width:0!important;padding:8px!important;
+  }
+  .premiumLineupsPanel .premiumLineupRow>.premiumLineupPlayerLink{
+    display:flex!important;align-items:center!important;
+    grid-column:auto!important;grid-row:auto!important;
+    flex:0 1 auto!important;width:auto!important;max-width:100%!important;
+    min-width:0!important;gap:7px!important;
+  }
+  .premiumLineupsPanel .premiumLineupRow>.premiumLineupPlayerLink>b,
+  .premiumLineupsPanel .premiumLineupRow>b{flex:0 0 24px!important;text-align:center!important}
+  .premiumLineupsPanel .premiumLineupRow .premiumLineupName{
+    display:flex!important;flex-direction:column!important;align-items:flex-start!important;
+    gap:2px!important;min-width:0!important;max-width:100%!important;
+    font-size:clamp(11px,3vw,13px)!important;
+    line-height:1.25!important;
+    white-space:normal!important;
+  }
+  .premiumLineupsPanel .premiumLineupRow>.premiumLineupBadges{
+    display:inline-flex!important;align-items:center!important;justify-content:flex-start!important;
+    flex:0 0 auto!important;flex-wrap:wrap!important;grid-column:auto!important;
+    grid-row:auto!important;margin:0!important;gap:4px!important;
+  }
+  .premiumLineupsPanel .premiumLineupRow>.premiumLineupBadges i{
+    width:auto;min-width:21px!important;height:23px!important;
+    display:inline-flex;align-items:center;justify-content:center;
+  }
+  .premiumLineupsPanel .premiumLineupRow>.premiumLineupBadges i.goal{min-width:27px!important;height:27px!important}
+}
+
+
+/* FC Edineț v2.28.24 — additional MOBILE-ONLY layout improvements.
+   No changes to desktop/tablet CSS. */
+.teamStatisticsMobile,.dashboardGamesMobileLabel{display:none}
+@media (max-width:767px){
+  .fcV215DashboardForm .dashboardGamesDesktopLabel{display:none!important}
+  .fcV215DashboardForm .dashboardGamesMobileLabel{display:inline!important}
+  /* Homepage: 4 in first row (games/wins/draws/losses), 3 in second
+     (position/goal difference/points), with equal-width cells per row. */
+  .fcV215DashboardForm .fcV215DashboardKpisFull{
+    grid-template-columns:repeat(12,minmax(0,1fr))!important;
+  }
+  .fcV215DashboardForm .fcV215DashboardKpisFull>span{
+    display:flex!important;
+    min-width:0!important;
+    min-height:62px!important;
+    grid-column:span 3!important;
+    border-right:1px solid #dfe9f4!important;
+  }
+  .fcV215DashboardForm .fcV215DashboardKpisFull>span:nth-child(1){order:5;grid-column:span 4!important}
+  .fcV215DashboardForm .fcV215DashboardKpisFull>span:nth-child(2){display:flex!important;order:1;grid-column:span 3!important}
+  .fcV215DashboardForm .fcV215DashboardKpisFull>span:nth-child(3){order:2}
+  .fcV215DashboardForm .fcV215DashboardKpisFull>span:nth-child(4){order:3}
+  .fcV215DashboardForm .fcV215DashboardKpisFull>span:nth-child(5){order:4;border-right:0!important}
+  .fcV215DashboardForm .fcV215DashboardKpisFull>span:nth-child(6){order:6;grid-column:span 4!important}
+  .fcV215DashboardForm .fcV215DashboardKpisFull>span:nth-child(7){order:7;grid-column:span 4!important;border-right:0!important}
+  /* Match result — equal team zones and one centered score; names may wrap. */
+  .premiumOverviewHead .premiumOverviewResultTitle{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;
+    gap:7px!important;
+    align-items:center!important;
+    width:100%!important;
+    margin:9px 0 0!important;
+    font-size:clamp(15px,4.8vw,19px)!important;
+    line-height:1.07!important;
+    text-align:center!important;
+    letter-spacing:-.012em!important;
+  }
+  .premiumOverviewHead .premiumOverviewResultTitle .premiumOverviewTeam{
+    display:block!important;
+    margin:0!important;
+    min-width:0!important;
+    max-width:100%!important;
+    color:#0a315b!important;
+    font-size:inherit!important;
+    line-height:1.1!important;
+    white-space:normal!important;
+    overflow-wrap:normal!important;
+    word-break:normal!important;
+    text-wrap:balance;
+  }
+  .premiumOverviewHead .premiumOverviewResultTitle .premiumOverviewScore{
+    display:block!important;
+    margin:0!important;
+    white-space:nowrap!important;
+    color:#0a63c9!important;
+    font-size:clamp(22px,6vw,28px)!important;
+    line-height:1!important;
+    font-variant-numeric:tabular-nums;
+  }
+  .premiumOverviewHead{padding:14px 11px 16px!important}
+  /* Season stats: full-width player cards in place of desktop's 11-col table. */
+  .teamStatisticsTableSection>.teamStatisticsTableWrap{display:none!important}
+  .teamStatisticsMobile{display:block!important;min-width:0;width:100%}
+  .teamStatisticsMobileSort{margin:0 0 12px;border:1px solid #dbe5ef;background:#fff}
+  .teamStatisticsMobileSort summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;list-style:none;cursor:pointer;font-size:12px;font-weight:850;color:#0b3769}
+  .teamStatisticsMobileSort summary::-webkit-details-marker{display:none}
+  .teamStatisticsMobileSort[open] summary{border-bottom:1px solid #dbe5ef}
+  .teamStatisticsMobileSort nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:10px}
+  .teamStatisticsMobileSort nav a{display:flex;justify-content:center;align-items:center;min-height:36px;padding:6px 3px;border:1px solid #dce6f1;background:#f6f9fd;color:#1b4d82;font-size:10px;font-weight:800;text-align:center;overflow-wrap:anywhere}
+  .teamStatisticsMobileSort nav a.active{background:#095bb4;color:#fff;border-color:#095bb4}
+  .teamStatisticsMobileCards{display:grid;gap:11px;min-width:0}
+  .teamStatisticsMobileCard{min-width:0;overflow:hidden;border:1px solid #dbe5f0;background:#fff}
+  .teamStatisticsMobileIdentity{display:grid;grid-template-columns:22px minmax(0,1fr) 24px;gap:8px;align-items:center;padding:11px 10px}
+  .teamStatisticsMobileRank{font-size:11px;font-weight:900;text-align:center;color:#7890a9}
+  .teamStatisticsMobilePlayer{display:grid;grid-template-columns:48px minmax(0,1fr);align-items:center;gap:9px;min-width:0;text-decoration:none}
+  .teamStatisticsMobilePlayer img,.teamStatisticsMobileAvatar{width:48px;height:54px;object-fit:cover;object-position:center top;border-radius:2px;background:#e8f1fa}
+  .teamStatisticsMobileAvatar{display:grid;place-items:center;color:#27527e;font-size:11px;font-weight:900}
+  .teamStatisticsMobilePlayerName{display:flex;min-width:0;flex-direction:column;gap:5px}
+  .teamStatisticsMobilePlayerName strong{display:block;min-width:0;font-size:clamp(13px,3.7vw,16px);font-weight:900;line-height:1.18;color:#092b54;overflow-wrap:break-word;white-space:normal}
+  .teamStatisticsMobilePlayerName small{font-size:10px;line-height:1.25;color:#617c98;white-space:normal}
+  .teamStatisticsMobileOpen{font-size:19px;color:#0d61c7;align-self:center;justify-self:center}
+  .teamStatisticsMobileMetrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;margin:0;padding:1px 0 0;background:#dae4ef;border-top:1px solid #dae4ef}
+  .teamStatisticsMobileMetrics>div{display:flex;flex-direction:column;gap:5px;align-items:center;justify-content:center;min-width:0;min-height:61px;padding:8px 2px;background:#fafcff;text-align:center}
+  .teamStatisticsMobileMetrics dt{color:#7d90a4;font-size:clamp(7px,2vw,9px);font-weight:850;line-height:1.15;text-transform:uppercase;letter-spacing:0;white-space:normal}
+  .teamStatisticsMobileMetrics dd{margin:0;color:#103d70;font-size:18px;font-weight:950;line-height:1.1;font-variant-numeric:tabular-nums}
+  .teamStatisticsMobileMetrics>div:nth-child(4) dd,.teamStatisticsMobileMetrics>div:nth-child(5) dd,.teamStatisticsMobileMetrics>div:nth-child(6) dd{color:#0b65c5}
+}
+
+
+/* FC Edineț 2.28.25 — isolated mobile fixes (desktop unaffected). */
+@media (max-width:767px) {
+  /* The dashboard previously stretched match rows to fill the parent height.
+     Keep every content row intrinsic instead of leaving empty bands. */
+  .fcV215MatchDashboardSection .fcV215MatchDashboard {
+    align-items:start!important;
+    grid-auto-rows:max-content!important;
+  }
+  .fcV215MatchDashboardSection .fcV215DashboardLeft {
+    grid-template-rows:repeat(2,max-content)!important;
+    align-content:start!important;
+    align-items:start!important;
+  }
+  .fcV215MatchDashboardSection .fcV215NextMatchDashboard.fcRefNextMatch {
+    height:auto!important;
+    min-height:0!important;
+    align-self:start!important;
+  }
+  .fcV215MatchDashboardSection .fcV215NextMatchDashboard .fcRefMatchBody {
+    flex:0 0 auto!important;
+    padding:7px 14px 5px!important;
+    gap:0!important;
+  }
+  .fcV215MatchDashboardSection .fcV215NextMatchDashboard .fcRefMatchTeams {
+    flex:0 0 auto!important;
+    align-content:center!important;
+    align-items:center!important;
+    padding:0!important;
+    margin:0!important;
+    min-height:0!important;
+  }
+  .fcV215MatchDashboardSection .fcV215NextMatchDashboard .fcRefTeamBadge {
+    min-height:126px!important;
+    height:126px!important;
+    align-content:center!important;
+  }
+  .fcV215MatchDashboardSection .fcV215NextMatchDashboard .fcRefMatchFacts {
+    margin:5px 0 0!important;
+    padding:10px 0 0!important;
+    border-top:1px solid rgba(255,255,255,.15)!important;
+    gap:7px!important;
+  }
+  .fcV215MatchDashboardSection .fcV215NextMatchDashboard .fcRefMatchButton {
+    margin-top:8px!important;
+  }
+  .fcV215MatchDashboardSection .fcV215DashboardLastMatch {
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:flex-start!important;
+    height:auto!important;
+    min-height:0!important;
+    align-self:start!important;
+    padding:9px 13px 0!important;
+  }
+  .fcV215MatchDashboardSection .fcV215DashboardLastMatch .fcV215LastMatchHead {
+    min-height:0!important;
+    height:auto!important;
+    justify-content:flex-start!important;
+    text-align:left!important;
+    padding:0!important;
+  }
+  .fcV215MatchDashboardSection .fcV215DashboardLastMatch .fcV215LastMatchHead>span {
+    display:block!important;
+    margin:0!important;
+    font-size:8px!important;
+    line-height:1.3!important;
+  }
+  .fcV215MatchDashboardSection .fcV215DashboardLastMatch .fcV215LastMatchTeams {
+    margin:5px 0 3px!important;
+    align-items:center!important;
+    gap:7px!important;
+  }
+  .fcV215MatchDashboardSection .fcV215DashboardLastMatch .fcV215LastMatchFooter {
+    min-height:30px!important;
+    margin:5px -13px 0!important;
+    padding:6px 13px!important;
+    align-items:center!important;
+  }
+  /* One recent match at a time; its three rows must not stretch vertically. */
+  .fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchCard {
+    display:grid!important;
+    grid-template-rows:max-content max-content max-content!important;
+    align-content:start!important;
+    align-items:start!important;
+    row-gap:5px!important;
+    height:auto!important;
+    min-height:0!important;
+    padding:10px 11px 8px!important;
+  }
+  .fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchMeta {
+    margin:0!important;
+    padding:0 1px!important;
+    min-height:0!important;
+  }
+  .fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchBody {
+    margin:0!important;
+    padding:0 2px!important;
+    min-height:0!important;
+    align-items:center!important;
+  }
+  .fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchTeam {
+    grid-template-rows:90px 24px!important;
+    min-height:0!important;
+    gap:2px!important;
+  }
+  .fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchLogoBox {
+    height:90px!important;
+  }
+  .fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchFooter {
+    margin:0!important;
+    padding:7px 2px 0!important;
+    min-height:22px!important;
+    border-top:1px solid #e1e9f1!important;
+  }
+
+  /* Footer: identity first, three equal link groups on one row. */
+  .globalFooter .globalFooterGrid {
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    column-gap:12px!important;
+    row-gap:24px!important;
+    align-items:start!important;
+  }
+  .globalFooter .globalFooterBrand {
+    grid-column:1 / -1!important;
+    min-width:0!important;
+  }
+  .globalFooter .globalFooterColumn,
+  .globalFooter .globalFooterColumn:last-child {
+    grid-column:auto!important;
+    min-width:0!important;
+    gap:9px!important;
+    padding-top:12px!important;
+  }
+  .globalFooter .globalFooterColumn strong {
+    font-size:clamp(10px,3vw,12px)!important;
+    line-height:1.2!important;
+    letter-spacing:.02em!important;
+  }
+  .globalFooter .globalFooterColumn a {
+    font-size:clamp(10px,2.8vw,12px)!important;
+    line-height:1.35!important;
+    overflow-wrap:break-word!important;
+    word-break:normal!important;
+    max-width:100%!important;
+  }
+  .globalFooter .footerBottom {margin-top:26px!important;}
+}
+
+/* Mobile navigation is rendered into document.body, independent of the
+   header's sticky/non-sticky position and the page scroll offset. */
+.mobileMenuOverlay {
+  position:fixed!important;
+  inset:0!important;
+  z-index:10000!important;
+  display:flex!important;
+  flex-direction:column!important;
+  background:#061b3b!important;
+  color:#fff;
+}
+.mobileMenuOverlay .mobileMenuFixed {
+  display:flex!important;
+  flex-direction:column!important;
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+  padding-bottom:env(safe-area-inset-bottom, 0px);
+  background:linear-gradient(180deg,#061b3b 0%,#03132c 100%)!important;
+}
+.mobileMenuPanelHeading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex:0 0 auto;
+  min-height:68px;
+  padding:12px max(16px,env(safe-area-inset-left));
+  border-bottom:2px solid #ffd328;
+  color:#fff;
+}
+.mobileMenuPanelHeading strong {font-size:18px;font-weight:900;letter-spacing:.08em}
+.mobileMenuPanelClose {
+  width:42px;height:42px;display:grid;place-items:center;
+  border:1px solid rgba(255,255,255,.28);
+  background:rgba(255,255,255,.05);color:#fff;
+  cursor:pointer;font-size:19px;border-radius:0;
+}
+.mobileMenuOverlay .mobileMenuInner {
+  width:min(calc(100% - 32px),560px)!important;
+  margin:0 auto!important;
+  padding:10px 0 28px!important;
+}
+.mobileMenuOverlay .mobileMenuInner a,
+.mobileMenuOverlay .mobileMenuInner button {min-height:42px}
+

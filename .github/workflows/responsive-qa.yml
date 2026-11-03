@@ -1,0 +1,32 @@
+name: FC Edinet Responsive QA
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  responsive:
+    name: Public UI regression checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify public routes and release contracts
+        run: node scripts/qa-site.mjs
+      - name: Check CSS cascade budget
+        run: node scripts/qa-css-audit.mjs
+      - name: Check responsive layout in Chrome
+        run: node scripts/qa-responsive.mjs --screenshots
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+      - name: Keep QA screenshots after failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: responsive-qa-screenshots
+          path: qa-artifacts/
+          if-no-files-found: ignore

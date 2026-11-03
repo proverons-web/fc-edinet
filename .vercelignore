@@ -4,3 +4,5 @@ FIX-*.txt
 PRODUCTION-CHECKLIST.txt
 DEPLOY-VERCEL.md
 DEPLOY-V1.6.md
+
+qa-artifacts/

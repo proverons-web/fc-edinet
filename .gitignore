@@ -40,3 +40,6 @@ desktop.ini
 *.zip
 *.tmp
 *.temp
+
+# QA generated screenshots (local only)
+qa-artifacts/

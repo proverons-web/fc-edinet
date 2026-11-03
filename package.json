@@ -1,13 +1,19 @@
 {
   "name": "fc-edinet",
-  "version": "2.28.25",
+  "version": "2.29.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "deploy:check": "node scripts/check-deploy.mjs && next build",
-    "qa:site": "node scripts/qa-site.mjs"
+    "deploy:check": "node scripts/qa-site.mjs && node scripts/qa-css-audit.mjs && node scripts/qa-responsive.mjs --skip-if-missing && node scripts/check-deploy.mjs && next build",
+    "qa:site": "node scripts/qa-site.mjs",
+    "qa:css": "node scripts/qa-css-audit.mjs",
+    "qa:css:baseline": "node scripts/qa-css-audit.mjs --update-baseline",
+    "qa:responsive": "node scripts/qa-responsive.mjs",
+    "qa:responsive:shots": "node scripts/qa-responsive.mjs --screenshots",
+    "qa:all": "npm run qa:site && npm run qa:css && npm run qa:responsive",
+    "qa:responsive:baseline": "node scripts/qa-responsive.mjs --update-mobile-baseline"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.4",

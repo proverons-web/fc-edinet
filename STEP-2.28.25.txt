@@ -1,7 +1,0 @@
-FC Edineț v2.28.25 — Mobile layout cleanup
-
-- Mobile match cards no longer stretch empty rows: next match, last match, recent match carousel.
-- Mobile menu opens as a fixed, full-screen body portal at the currently viewed scroll position, with its own close button; links and Escape close it.
-- Footer club/team/media link columns share one row below the brand on mobile.
-- Desktop rules and database unchanged.
-- No secret files included.
