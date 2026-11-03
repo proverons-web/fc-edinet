@@ -259,7 +259,14 @@ export default function HeaderNavClient({
         <button className="menuToggle" type="button" onClick={() => setMenuOpen(!menuOpen)} aria-label={labels.openMenu} aria-expanded={menuOpen} aria-controls="mobile-site-menu">{menuOpen ? "✕" : "☰"}</button>
       </div>
 
-      {menuOpen && <div className="mobileMenu mobileMenuAbsolute" id="mobile-site-menu" role="dialog" aria-modal="true" aria-label={labels.openMenu}><div className="container mobileMenuInner">
+      {menuOpen && typeof document !== "undefined" && createPortal(
+        <div className="mobileMenuOverlay">
+          <div className="mobileMenu mobileMenuFixed" id="mobile-site-menu" role="dialog" aria-modal="true" aria-label={labels.openMenu}>
+            <div className="mobileMenuPanelHeading">
+              <strong>{locale === "ro" ? "MENIU" : "МЕНЮ"}</strong>
+              <button type="button" className="mobileMenuPanelClose" onClick={() => setMenuOpen(false)} aria-label={locale === "ro" ? "Închide meniul" : "Закрыть меню"}>✕</button>
+            </div>
+            <div className="container mobileMenuInner">
         {useManagedMenu ? topManaged.map((item) => {
           const children = childMap.get(item.id) ?? [];
           const groupActive = isActive(item.href) || children.some((child) => isActive(child.href));
@@ -279,7 +286,11 @@ export default function HeaderNavClient({
           <Link href="/account/settings" onClick={() => setMenuOpen(false)}>{labels.settings}</Link>
           <form action={logout}><button className="mobileLogoutButton" type="submit">{labels.logout}</button></form>
         </> : <Link href="/login" onClick={() => setMenuOpen(false)}>{labels.login}</Link>)}
-      </div></div>}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </>
   );
 }
