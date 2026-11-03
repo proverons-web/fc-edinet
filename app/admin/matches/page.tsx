@@ -2,12 +2,14 @@ import Link from "next/link";
 import { requireEditor } from "@/lib/editorial";
 import type { ClubMatch } from "@/lib/types";
 import { matchStatusLabels } from "@/lib/types";
+import AdminListSearch from "@/app/components/AdminListSearch";
+import { adminListHref, adminTextMatches, parseAdminQuery } from "@/lib/admin-list-search";
 
 export const metadata = { title: "Матчи — Админ" };
 export const dynamic = "force-dynamic";
 
 type PageProps = {
-  searchParams: Promise<{ status?: string | string[] }>;
+  searchParams: Promise<{ status?: string | string[]; q?: string | string[] }>;
 };
 
 export default async function AdminMatchesPage({
@@ -15,6 +17,7 @@ export default async function AdminMatchesPage({
 }: PageProps) {
   const { supabase, profile } = await requireEditor();
   const params = await searchParams;
+  const search = parseAdminQuery(params.q);
   const raw = Array.isArray(params.status) ? params.status[0] : params.status;
   const status =
     raw === "upcoming" || raw === "finished" ? raw : "all";
@@ -39,7 +42,10 @@ export default async function AdminMatchesPage({
   }
 
   const { data, error } = await query;
-  const matches = (data ?? []) as unknown as ClubMatch[];
+  const matches = ((data ?? []) as unknown as ClubMatch[]).filter((match) =>
+    adminTextMatches(search, match.home?.name, match.away?.name, match.home?.short_name,
+      match.away?.short_name, match.competition?.name, match.round, match.stadium)
+  );
 
   return (
     <main className="adminPage">
@@ -66,26 +72,28 @@ export default async function AdminMatchesPage({
       <section className="section adminSurface">
         <div className="container">
           <nav className="adminFilters">
-            <Filter href="/admin/matches" active={status === "all"}>Все</Filter>
+            <Filter href={adminListHref("/admin/matches", { q: search })} active={status === "all"}>Все</Filter>
             <Filter
-              href="/admin/matches?status=upcoming"
+              href={adminListHref("/admin/matches", { status: "upcoming", q: search })}
               active={status === "upcoming"}
             >
               Предстоящие
             </Filter>
             <Filter
-              href="/admin/matches?status=finished"
+              href={adminListHref("/admin/matches", { status: "finished", q: search })}
               active={status === "finished"}
             >
               Завершённые
             </Filter>
           </nav>
 
+          <AdminListSearch path="/admin/matches" query={search} status={status} label="Поиск матчей" placeholder="Соперник, турнир, тур, стадион…" count={matches.length} />
+
           {error ? (
             <div className="adminEmpty">Ошибка загрузки: {error.message}</div>
           ) : matches.length === 0 ? (
             <div className="adminEmpty">
-              Матчей пока нет. Сначала добавь соперника в «Команды», затем создай матч.
+              {search ? "Матчи по запросу не найдены." : "Матчей пока нет. Сначала добавь соперника в «Команды», затем создай матч."}
             </div>
           ) : (
             <div className="adminMatchList">

@@ -1,0 +1,23 @@
+/* FC Edineț v2.29.4 — scoped administrative worklist and reusable list search */
+.adminAppShell .adminListSearch{display:flex;flex-wrap:wrap;align-items:end;column-gap:16px;row-gap:8px;margin:14px 0 18px;padding:14px 16px;background:#f6f9fd;border:1px solid #dce6f0;border-radius:6px}
+.adminAppShell .adminListSearchLabel{display:block;width:100%;font-size:11px;font-weight:800;color:#314c69}
+.adminAppShell .adminListSearchControls{display:flex;flex:1;align-items:center;gap:8px;min-width:200px}
+.adminAppShell .adminListSearchControls input[type=search]{flex:1;min-width:0;height:40px;padding:0 12px;border:1px solid #bfcfdf;border-radius:4px;background:white;color:#203b56;font-size:13px}
+.adminAppShell .adminListSearchControls input[type=search]:focus-visible{outline:2px solid #176ec9;outline-offset:2px}
+.adminAppShell .adminListSearchControls button{height:40px;padding:0 16px;border:0;border-radius:4px;background:#0d5bbd;color:white;font-size:12px;font-weight:800;cursor:pointer}
+.adminAppShell .adminListSearchReset{display:inline-flex;align-items:center;height:40px;padding:0 10px;font-size:11px;font-weight:700;color:#345472}
+.adminAppShell .adminListSearch output{font-size:11px;color:#71869a;white-space:nowrap}
+.adminAppShell .adminOperations{margin:26px 0 30px}
+.adminAppShell .adminOperationsGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.adminAppShell .adminOperationCard{display:flex;align-items:center;gap:16px;min-height:86px;padding:15px 16px;background:#fff;border:1px solid #dce5ee;border-radius:6px;color:#203b56;text-decoration:none;transition:border-color .15s ease}
+.adminAppShell .adminOperationCard:hover{border-color:#0d5bbd}
+.adminAppShell .adminOperationCard>strong{min-width:40px;font-family:var(--font-fce-display);font-size:35px;color:#0d5bbd;line-height:1}
+.adminAppShell .adminOperationCard>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.adminAppShell .adminOperationCard b{font-size:11px}
+.adminAppShell .adminOperationCard div span{font-size:10px;color:#71869a;line-height:1.4}
+.adminAppShell .adminOperationCard>span{font-size:17px;color:#0d5bbd}
+.adminAppShell .adminOperationsLinks{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.adminAppShell .adminOperationsLinks a{display:inline-flex;align-items:center;min-height:34px;padding:8px 12px;background:#ebf3fd;color:#0959ab;border:1px solid #d3e3f5;border-radius:4px;font-size:11px;font-weight:700;text-decoration:none}
+.adminAppShell .adminOperationsNotice{font-size:12px;color:#975c16}
+@media(max-width:900px){.adminAppShell .adminOperationsGrid{grid-template-columns:1fr}}
+@media(max-width:520px){.adminAppShell .adminListSearch{padding:12px}.adminAppShell .adminListSearchControls{width:100%;flex-wrap:wrap}.adminAppShell .adminListSearchControls input[type=search]{flex-basis:100%}.adminAppShell .adminListSearch output{margin-left:auto}}

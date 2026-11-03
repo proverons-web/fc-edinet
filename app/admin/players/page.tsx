@@ -2,12 +2,14 @@ import Link from "next/link";
 import { requireEditor } from "@/lib/editorial";
 import type { Player } from "@/lib/types";
 import { positionLabels } from "@/lib/types";
+import AdminListSearch from "@/app/components/AdminListSearch";
+import { adminListHref, adminTextMatches, parseAdminQuery } from "@/lib/admin-list-search";
 
 export const metadata = { title: "Игроки — Админ" };
 export const dynamic = "force-dynamic";
 
 type PageProps = {
-  searchParams: Promise<{ status?: string | string[]; sort?: string | string[] }>;
+  searchParams: Promise<{ status?: string | string[]; sort?: string | string[]; q?: string | string[] }>;
 };
 
 export default async function AdminPlayersPage({
@@ -23,6 +25,7 @@ export default async function AdminPlayersPage({
     rawStatus === "active" || rawStatus === "inactive"
       ? rawStatus
       : "all";
+  const search = parseAdminQuery(params.q);
   const rawSort = Array.isArray(params.sort) ? params.sort[0] : params.sort;
   const sort = rawSort === "first" || rawSort === "last" || rawSort === "position" ? rawSort : "number";
 
@@ -45,7 +48,10 @@ export default async function AdminPlayersPage({
   const { data, error } = await query;
   const collator = new Intl.Collator("ru", { sensitivity: "base" });
   const positionRank: Record<string, number> = { goalkeeper: 0, defender: 1, midfielder: 2, forward: 3 };
-  const players = ((data ?? []) as Player[]).sort((a, b) => {
+  const players = ((data ?? []) as Player[]).filter((player) =>
+    adminTextMatches(search, player.first_name, player.last_name, `${player.first_name} ${player.last_name}`,
+      `${player.last_name} ${player.first_name}`, player.shirt_number, player.nationality, positionLabels[player.position])
+  ).sort((a, b) => {
     if (sort === "first") return collator.compare(a.first_name || "", b.first_name || "") || collator.compare(a.last_name || "", b.last_name || "");
     if (sort === "last") return collator.compare(a.last_name || "", b.last_name || "") || collator.compare(a.first_name || "", b.first_name || "");
     if (sort === "position") return (positionRank[a.position] ?? 99) - (positionRank[b.position] ?? 99) || (a.shirt_number ?? 999) - (b.shirt_number ?? 999);
@@ -78,17 +84,17 @@ export default async function AdminPlayersPage({
       <section className="section adminSurface">
         <div className="container">
           <nav className="adminFilters">
-            <Filter href={playerListHref("all", sort)} active={status === "all"}>
+            <Filter href={adminListHref("/admin/players", { status: "all", sort, q: search })} active={status === "all"}>
               Все
             </Filter>
             <Filter
-              href={playerListHref("active", sort)}
+              href={adminListHref("/admin/players", { status: "active", sort, q: search })}
               active={status === "active"}
             >
               Текущий состав
             </Filter>
             <Filter
-              href={playerListHref("inactive", sort)}
+              href={adminListHref("/admin/players", { status: "inactive", sort, q: search })}
               active={status === "inactive"}
             >
               Архив
@@ -97,11 +103,13 @@ export default async function AdminPlayersPage({
 
           <nav className="adminFilters adminSortFilters" aria-label="Сортировка игроков">
             <span className="adminFilterLabel">Сортировка:</span>
-            <Filter href={playerListHref(status, "number")} active={sort === "number"}>По номеру</Filter>
-            <Filter href={playerListHref(status, "first")} active={sort === "first"}>По имени</Filter>
-            <Filter href={playerListHref(status, "last")} active={sort === "last"}>По фамилии</Filter>
-            <Filter href={playerListHref(status, "position")} active={sort === "position"}>По позиции</Filter>
+            <Filter href={adminListHref("/admin/players", { status, sort: "number", q: search })} active={sort === "number"}>По номеру</Filter>
+            <Filter href={adminListHref("/admin/players", { status, sort: "first", q: search })} active={sort === "first"}>По имени</Filter>
+            <Filter href={adminListHref("/admin/players", { status, sort: "last", q: search })} active={sort === "last"}>По фамилии</Filter>
+            <Filter href={adminListHref("/admin/players", { status, sort: "position", q: search })} active={sort === "position"}>По позиции</Filter>
           </nav>
+
+          <AdminListSearch path="/admin/players" query={search} status={status} sort={sort} label="Поиск игроков" placeholder="Имя, фамилия, номер, позиция…" count={players.length} />
 
           {error ? (
             <div className="adminEmpty">
@@ -109,7 +117,7 @@ export default async function AdminPlayersPage({
             </div>
           ) : players.length === 0 ? (
             <div className="adminEmpty">
-              Здесь пока нет игроков.
+              {search ? "Игроки по запросу не найдены." : "Здесь пока нет игроков."}
             </div>
           ) : (
             <div className="adminPlayerList">
@@ -205,11 +213,4 @@ function Filter({
       {children}
     </Link>
   );
-}
-
-function playerListHref(status: string, sort: string) {
-  const params = new URLSearchParams();
-  if (status !== "all") params.set("status", status);
-  params.set("sort", sort);
-  return `/admin/players?${params.toString()}`;
 }

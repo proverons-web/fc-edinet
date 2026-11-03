@@ -13,12 +13,28 @@ export default async function AdminPage() {
   const canEdit = profile.role === "editor" || profile.role === "admin";
   const isAdmin = profile.role === "admin";
 
-  const [playersResult, publishedResult, draftsResult, reviewResult] = await Promise.all([
+  const [playersResult, publishedResult, draftsResult, reviewResult, photoResult, finishedResult, reportsResult] = await Promise.all([
     supabase.from("players").select("id", { count: "exact", head: true }).eq("is_active", true),
     supabase.from("news").select("id", { count: "exact", head: true }).eq("status", "published"),
     supabase.from("news").select("id", { count: "exact", head: true }).eq("status", "draft"),
     supabase.from("news").select("id", { count: "exact", head: true }).eq("status", "review"),
+    canEdit
+      ? supabase.from("players").select("id,first_name,last_name,photo_url").eq("is_active", true)
+      : Promise.resolve({ data: [], error: null }),
+    canEdit
+      ? supabase.from("matches").select("id,kickoff").eq("status", "finished").order("kickoff", { ascending: false }).limit(50)
+      : Promise.resolve({ data: [], error: null }),
+    canEdit
+      ? supabase.from("match_reports").select("match_id,is_published").eq("is_published", true)
+      : Promise.resolve({ data: [], error: null }),
   ]);
+
+  const missingPhotos = ((photoResult.data ?? []) as { id: number; first_name: string; last_name: string; photo_url: string | null }[])
+    .filter((player) => !player.photo_url?.trim());
+  const publishedMatchIds = new Set((reportsResult.data ?? []).map((row) => String(row.match_id)));
+  const unpublishedReports = ((finishedResult.data ?? []) as { id: number; kickoff: string }[])
+    .filter((match) => !publishedMatchIds.has(String(match.id)));
+  const operationsAvailable = canEdit && !draftsResult.error && !photoResult.error && !finishedResult.error && !reportsResult.error;
 
   return (
     <main className="adminPage adminDashboardV2">
@@ -41,6 +57,28 @@ export default async function AdminPage() {
         <Stat label="Черновики" value={draftsResult.count} hint="ещё не опубликованы" />
         <Stat label="На проверке" value={reviewResult.count} hint="ждут решения" accent={Boolean(reviewResult.count)} />
       </section>
+
+      {canEdit && (
+        <section className="adminOperations">
+          <header className="adminDashboardSectionHead">
+            <div><p className="eyebrow blue">ЕЖЕДНЕВНЫЕ ЗАДАЧИ</p><h2>Требует внимания</h2>
+              <span>Проверка реальных данных клуба. Никаких автоматических изменений и публикаций.</span></div>
+          </header>
+          {!operationsAvailable ? <p className="adminOperationsNotice">Не удалось загрузить все задачи. Проверь подключение Supabase.</p> : (
+            <div className="adminOperationsGrid">
+              <OperationCard title="Черновики новостей" value={draftsResult.count ?? 0} detail="Подготовить и опубликовать" href="/admin/news?status=draft" />
+              <OperationCard title="Без фотографии" value={missingPhotos.length} detail="Активные игроки без фото" href="/admin/players?status=active" />
+              <OperationCard title="Без опубликованного протокола" value={unpublishedReports.length} detail="Среди последних 50 завершённых матчей" href="/admin/match-center?status=finished" />
+            </div>
+          )}
+          {operationsAvailable && (unpublishedReports.length > 0 || missingPhotos.length > 0) && (
+            <div className="adminOperationsLinks" aria-label="Быстрые задачи">
+              {unpublishedReports.slice(0, 3).map((match) => <Link key={match.id} href={`/admin/match-center/${match.id}`}>Протокол: {new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Chisinau", dateStyle: "medium" }).format(new Date(match.kickoff))} →</Link>)}
+              {missingPhotos.slice(0, 3).map((player) => <Link key={player.id} href={`/admin/players/${player.id}/edit`}>Добавить фото: {player.first_name} {player.last_name} →</Link>)}
+            </div>
+          )}
+        </section>
+      )}
 
       <DashboardSection eyebrow="РЕДАКЦИЯ" title="Контент и публикации" text="Новости, медиа и работа с аудиторией." modules={[
         { title: "Новости", text: "Создание, редактура, черновики и публикация материалов.", href: "/admin/news", icon: "N", kicker: "Редакция" },
@@ -82,6 +120,10 @@ export default async function AdminPage() {
 
 function Stat({ label, value, hint, accent = false }: { label: string; value: number | null; hint: string; accent?: boolean }) {
   return <article className={`adminDashStat${accent ? " isAccent" : ""}`}><strong>{value ?? 0}</strong><div><b>{label}</b><span>{hint}</span></div></article>;
+}
+
+function OperationCard({ title, value, detail, href }: { title: string; value: number; detail: string; href: string }) {
+  return <Link href={href} className="adminOperationCard"><strong>{value}</strong><div><b>{title}</b><span>{detail}</span></div><span aria-hidden="true">→</span></Link>;
 }
 
 function DashboardSection({ eyebrow, title, text, modules }: { eyebrow: string; title: string; text: string; modules: Module[] }) {

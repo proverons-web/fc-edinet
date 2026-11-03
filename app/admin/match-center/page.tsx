@@ -2,6 +2,8 @@ import Link from "next/link";
 import { requireEditor } from "@/lib/editorial";
 import type { ClubMatch, MatchCenterProgress } from "@/lib/types";
 import { matchStatusLabels } from "@/lib/types";
+import AdminListSearch from "@/app/components/AdminListSearch";
+import { adminListHref, adminTextMatches, parseAdminQuery } from "@/lib/admin-list-search";
 
 export const metadata = { title: "Матч-центр — Админ" };
 export const dynamic = "force-dynamic";
@@ -10,6 +12,7 @@ type PageProps = {
   searchParams: Promise<{
     status?: string | string[];
     error?: string | string[];
+    q?: string | string[];
   }>;
 };
 
@@ -43,6 +46,7 @@ function workflowLabel(value: string) {
 export default async function MatchCenterPage({ searchParams }: PageProps) {
   const { supabase } = await requireEditor();
   const params = await searchParams;
+  const search = parseAdminQuery(params.q);
   const rawStatus = one(params.status);
   const status = rawStatus === "finished" || rawStatus === "upcoming" ? rawStatus : "all";
 
@@ -73,7 +77,10 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
     return <MatchCenterMigrationRequired message={progressResult.error.message} />;
   }
 
-  const matches = (matchesResult.data ?? []) as unknown as ClubMatch[];
+  const matches = ((matchesResult.data ?? []) as unknown as ClubMatch[]).filter((match) =>
+    adminTextMatches(search, match.home?.name, match.away?.name, match.home?.short_name,
+      match.away?.short_name, match.competition?.name, match.round, match.stadium)
+  );
   const progressRows = (progressResult.data ?? []) as MatchCenterProgress[];
   const progressByMatch = new Map(progressRows.map((row) => [String(row.match_id), row]));
   const publishedByMatch = new Map((reportsResult.data ?? []).map((row) => [String(row.match_id), Boolean(row.is_published)]));
@@ -123,15 +130,17 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
           </section>
 
           <nav className="adminFilters matchCenterFilters">
-            <Filter href="/admin/match-center" active={status === "all"}>Все</Filter>
-            <Filter href="/admin/match-center?status=finished" active={status === "finished"}>Завершённые</Filter>
-            <Filter href="/admin/match-center?status=upcoming" active={status === "upcoming"}>Предстоящие</Filter>
+            <Filter href={adminListHref("/admin/match-center", { q: search })} active={status === "all"}>Все</Filter>
+            <Filter href={adminListHref("/admin/match-center", { status: "finished", q: search })} active={status === "finished"}>Завершённые</Filter>
+            <Filter href={adminListHref("/admin/match-center", { status: "upcoming", q: search })} active={status === "upcoming"}>Предстоящие</Filter>
           </nav>
+
+          <AdminListSearch path="/admin/match-center" query={search} status={status} label="Поиск протоколов" placeholder="Соперник, турнир, стадия…" count={matches.length} />
 
           {matchesResult.error ? (
             <div className="adminEmpty">Ошибка загрузки матчей: {matchesResult.error.message}</div>
           ) : matches.length === 0 ? (
-            <div className="adminEmpty">Матчей в этом фильтре пока нет.</div>
+            <div className="adminEmpty">{search ? "Протоколы по запросу не найдены." : "Матчей в этом фильтре пока нет."}</div>
           ) : (
             <div className="matchCenterList">
               {matches.map((match) => {

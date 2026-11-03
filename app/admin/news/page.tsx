@@ -2,12 +2,14 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { requireStaff, isEditor } from "@/lib/editorial";
 import type { NewsArticle } from "@/lib/types";
+import AdminListSearch from "@/app/components/AdminListSearch";
+import { adminListHref, adminTextMatches, parseAdminQuery } from "@/lib/admin-list-search";
 
 export const metadata = { title: "Новости — Админ" };
 export const dynamic = "force-dynamic";
 
 type PageProps = {
-  searchParams: Promise<{ status?: string | string[] }>;
+  searchParams: Promise<{ status?: string | string[]; q?: string | string[] }>;
 };
 
 const validStatuses = new Set([
@@ -24,6 +26,7 @@ export default async function AdminNewsPage({
   const rawStatus = Array.isArray(params.status)
     ? params.status[0]
     : params.status;
+  const search = parseAdminQuery(params.q);
   const status = rawStatus && validStatuses.has(rawStatus)
     ? rawStatus
     : undefined;
@@ -31,7 +34,7 @@ export default async function AdminNewsPage({
   let query = supabase
     .from("news")
     .select(`
-      id,title,slug,excerpt,content,cover_image_url,author_name,status,
+      id,title,slug,cover_image_url,author_name,status,
       published_at,views,is_featured,category_id,created_by,submitted_at,
       published_by,editor_note,created_at,updated_at,
       category:news_categories(id,name,slug)
@@ -43,7 +46,9 @@ export default async function AdminNewsPage({
   }
 
   const { data, error } = await query;
-  const articles = (data ?? []) as unknown as NewsArticle[];
+  const articles = ((data ?? []) as unknown as NewsArticle[]).filter((article) =>
+    adminTextMatches(search, article.title, article.slug, article.author_name, article.category?.name)
+  );
   const editor = isEditor(profile);
 
   return (
@@ -74,28 +79,30 @@ export default async function AdminNewsPage({
       <section className="section adminSurface">
         <div className="container">
           <nav className="adminFilters">
-            <Filter href="/admin/news" active={!status}>
+            <Filter href={adminListHref("/admin/news", { q: search })} active={!status}>
               Все
             </Filter>
             <Filter
-              href="/admin/news?status=draft"
+              href={adminListHref("/admin/news", { status: "draft", q: search })}
               active={status === "draft"}
             >
               Черновики
             </Filter>
             <Filter
-              href="/admin/news?status=review"
+              href={adminListHref("/admin/news", { status: "review", q: search })}
               active={status === "review"}
             >
               На проверке
             </Filter>
             <Filter
-              href="/admin/news?status=published"
+              href={adminListHref("/admin/news", { status: "published", q: search })}
               active={status === "published"}
             >
               Опубликованные
             </Filter>
           </nav>
+
+          <AdminListSearch path="/admin/news" query={search} status={status} label="Поиск новостей" placeholder="Заголовок, категория, автор…" count={articles.length} />
 
           {error ? (
             <div className="adminEmpty">
@@ -103,7 +110,7 @@ export default async function AdminNewsPage({
             </div>
           ) : articles.length === 0 ? (
             <div className="adminEmpty">
-              В этом разделе пока нет материалов.
+              {search ? "По запросу ничего не найдено. Измени поиск или сбрось фильтр." : "В этом разделе пока нет материалов."}
             </div>
           ) : (
             <div className="adminNewsList">
