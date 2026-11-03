@@ -33,6 +33,12 @@ jobs:
         run: node scripts/qa-match-entry.mjs
       - name: Public match stats and mobile timeline QA
         run: node --experimental-strip-types scripts/qa-public-match-v2298.mjs
+      - name: Public player match statistics and identity QA
+        run: node --experimental-strip-types scripts/qa-public-player-v2299.mjs
+      - name: Public player lineup responsive geometry
+        run: node scripts/qa-public-player-layout.mjs
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
       - name: Check performance and image delivery contracts
         run: node scripts/qa-performance.mjs
       - name: Check responsive layout in Chrome
