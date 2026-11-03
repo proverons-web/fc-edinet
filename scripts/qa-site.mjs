@@ -122,8 +122,8 @@ ok("next match VS circle replaced", homeCss.includes('Modern VS separator') && h
 ok("results rail frame and rounding removed", homeCss.includes('.fcV215ResultsSection .fcV215MatchRailWide{') && homeCss.includes('.fcV215ResultsSection .fcRefRecentMatchCard,') && homeCss.includes('border:0!important;') && homeCss.includes('border-radius:0!important;'));
 ok("homepage news rounding removed", homeCss.includes('.fcRefLeadColumn,\n.fcRefLatestColumn{') && homeCss.includes('.fcRefNewsRow>div{\n  border-radius:0!important;'));
 const releaseSource = read("lib/release.ts");
-ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.28.21"'));
-ok("release version", JSON.parse(read("package.json")).version === "2.28.21");
+ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.28.22"'));
+ok("release version", JSON.parse(read("package.json")).version === "2.28.22");
 
 ok("v2.28.8 next-match footprint restored", homeCss.includes("FC EDINEȚ v2.28.8 — LARGE CRESTS WITHOUT TALLER MATCH CARD") && homeCss.includes("min-height:168px!important") && homeCss.includes("height:168px!important"));
 ok("v2.28.8 crests enlarge without layout growth", homeCss.includes("transform:scale(1.58) translateY(-7px)!important"));
@@ -133,7 +133,7 @@ ok("v2.28.10 recent match crest alignment fixed", homeCss.includes("FC EDINEȚ v
 ok("v2.28.11 recent match crest stage added", homepageSource.includes('className="fcRefRecentMatchCrest"') && homeCss.includes("FC EDINEȚ v2.28.11 — RECENT MATCHES HORIZONTAL CREST LINE"));
 ok("recent match crests aligned", homeCss.includes("object-position:center center!important") && homepageSource.includes('className="fcRefRecentMatchLogoBox"'));
 const legacyTxt = fs.readdirSync(root).filter((name)=>/^(STEP-|DEPLOY-|FIX-).*\.txt$/.test(name));
-ok("v2.28.21 legacy step/deploy/fix txt pruned", legacyTxt.length === 1 && legacyTxt[0] === 'STEP-2.28.21.txt', legacyTxt.join(', '));
+ok("v2.28.22 legacy step/deploy/fix txt pruned", legacyTxt.length === 1 && legacyTxt[0] === 'STEP-2.28.22.txt', legacyTxt.join(', '));
 ok("v2.28.12 recent match side padding restored", homeCss.includes("FC EDINEȚ v2.28.12 — RECENT MATCH SIDE PADDING FIX"));
 ok("v2.28.13 recent match logo boxes added", homepageSource.includes('className="fcRefRecentMatchLogoBox"') && homeCss.includes("FC EDINEȚ v2.28.13 — RECENT MATCH LOGO BOXES"));
 ok("v2.28.14 recent match card compacted", homeCss.includes("FC EDINEȚ v2.28.14 — RECENT MATCH CARD COMPACTION"));
@@ -155,6 +155,16 @@ ok("v2.28.21 generic hero flex excludes player profile grid", read("app/globals.
 ok("v2.28.21 player profile desktop grid restored", read("app/visual-polish.css").includes("FC EDINEȚ v2.28.21 — PLAYER PROFILE HERO GRID RESTORE") && read("app/visual-polish.css").includes("display:grid!important") && read("app/visual-polish.css").includes("grid-template-columns:minmax(330px,.78fr) minmax(0,1.22fr)!important") && read("app/visual-polish.css").includes("grid-column:1!important") && read("app/visual-polish.css").includes("grid-column:2!important"));
 ok("v2.28.21 player profile hero aligned", read("app/visual-polish.css").includes("FC EDINEȚ v2.28.21 — PLAYER PROFILE HERO ALIGNMENT POLISH") && read("app/visual-polish.css").includes("min-height:auto!important") && read("app/visual-polish.css").includes("padding-top:52px!important") && read("app/visual-polish.css").includes("publicBackLink") && read("app/visual-polish.css").includes("breadcrumbsOnDark"));
 ok("v2.28.21 player navigation above portrait and photo bottom locked", read("app/team/[slug]/page.tsx").includes('className="playerProfileNavigation"') && read("app/visual-polish.css").includes("FC EDINEȚ v2.28.21 — PLAYER NAV ABOVE PORTRAIT + BOTTOM LOCK") && read("app/visual-polish.css").includes("grid-template-rows:auto 1fr!important") && read("app/visual-polish.css").includes("padding-bottom:0!important") && read("app/visual-polish.css").includes("grid-row:2!important"));
+const mobileStyles = read("app/mobile-v2.28.22.css");
+const timelineSource = read("app/matches/[id]/page.tsx");
+ok("v2.28.22 mobile stylesheet loaded last", read("app/layout.tsx").includes('import "./home-v215.css";\nimport "./mobile-v2.28.22.css";'));
+ok("v2.28.22 mobile styles width isolated", mobileStyles.includes("@media (max-width:767px){") && !mobileStyles.includes("@media (min-width:768px){"));
+ok("v2.28.22 mobile form six stats in 4+2 grid", mobileStyles.includes("grid-template-columns:repeat(4,minmax(0,1fr))!important") && mobileStyles.includes("span:nth-child(2){display:none!important") && mobileStyles.includes("span:nth-child(6),") && mobileStyles.includes("grid-column:span 2!important"));
+ok("v2.28.22 mobile recent matches one full card", mobileStyles.includes(".fcV215MatchRailWide .fcRefRecentMatchesGrid") && mobileStyles.includes("grid-auto-columns:100%!important"));
+ok("v2.28.22 mobile home standings no team wraps", mobileStyles.includes(".standingTeam strong") && mobileStyles.includes("text-overflow:ellipsis!important"));
+ok("v2.28.22 mobile team media headings compact", mobileStyles.includes(".fcRefTeamSection .fcRefTeamHead h2") && mobileStyles.includes(".fcV215MediaSection .fcV215SectionHead h2"));
+ok("v2.28.22 mobile timeline all events without scrolling", timelineSource.includes('className="mobileMatchTimeline"') && timelineSource.includes('function MobileMatchTimelineEvent(') && timelineSource.includes('firstMobile.map') && timelineSource.includes('secondMobile.map') && mobileStyles.includes(".premiumTimelinePanel .horizontalTimelineViewport{display:none!important") && mobileStyles.includes(".premiumTimelinePanel .mobileMatchTimeline{display:block!important"));
+ok("v2.28.22 mobile lineup badges after names", mobileStyles.includes(".premiumLineupsPanel .premiumLineupRow{") && mobileStyles.includes("display:flex!important") && mobileStyles.includes(".premiumLineupRow>.premiumLineupBadges"));
 const failed = checks.filter((x) => !x.ok);
 for (const check of checks) console.log(`${check.ok ? "PASS" : "FAIL"}  ${check.name}${check.detail ? ` — ${check.detail}` : ""}`);
 console.log(`\n${checks.length - failed.length}/${checks.length} checks passed.`);

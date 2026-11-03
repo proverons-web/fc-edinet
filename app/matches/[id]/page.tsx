@@ -666,7 +666,9 @@ function HorizontalMatchTimeline({ events, match, locale, scoreAfterEvent, secon
 }) {
   const first = buildTimelineLanes(events.filter((event) => Number(event.minute) <= 45), match, "first");
   const second = buildTimelineLanes(events.filter((event) => Number(event.minute) > 45), match, "second");
-  return (
+  const firstMobile = [...first].sort((a,b) => Number(a.event.minute) - Number(b.event.minute));
+  const secondMobile = [...second].sort((a,b) => Number(a.event.minute) - Number(b.event.minute));
+  return (<>
     <div className="horizontalTimelineViewport" role="region" aria-label={locale === "ro" ? "Cronologia meciului" : "Хронология матча"} tabIndex={0}>
       <div className="horizontalTimelineCanvas">
         <div className="horizontalTimelineTeamLegend" aria-hidden="true">
@@ -695,6 +697,47 @@ function HorizontalMatchTimeline({ events, match, locale, scoreAfterEvent, secon
             secondYellowIds={secondYellowIds}
           />
         </div>
+      </div>
+    </div>
+    <div className="mobileMatchTimeline" aria-label={locale === "ro" ? "Cronologia completă a meciului" : "Полная хронология матча"}>
+      <div className="mobileTimelineLegend">
+        <span>{match.home?.short_name || match.home?.name || (locale === "ro" ? "Gazde" : "Хозяева")}</span>
+        <span>{match.away?.short_name || match.away?.name || (locale === "ro" ? "Oaspeți" : "Гости")}</span>
+      </div>
+      <div className="mobileTimelineHalfTitle">{locale === "ro" ? "Prima repriză" : "Первый тайм"}</div>
+      {firstMobile.map(({event,side}) => (
+        <MobileMatchTimelineEvent key={String(event.id)} event={event} side={side} match={match} locale={locale} scoreAfterEvent={scoreAfterEvent} secondYellowIds={secondYellowIds}/>
+      ))}
+      <div className="mobileTimelineBreak"><span>{locale === "ro" ? "Pauză" : "Перерыв"}</span><strong>{halfTimeScore.home}:{halfTimeScore.away}</strong></div>
+      <div className="mobileTimelineHalfTitle">{locale === "ro" ? "Repriza a doua" : "Второй тайм"}</div>
+      {secondMobile.map(({event,side}) => (
+        <MobileMatchTimelineEvent key={String(event.id)} event={event} side={side} match={match} locale={locale} scoreAfterEvent={scoreAfterEvent} secondYellowIds={secondYellowIds}/>
+      ))}
+    </div>
+  </>);
+}
+
+function MobileMatchTimelineEvent({ event, side, match, locale, scoreAfterEvent, secondYellowIds }: {
+  event: MatchEvent;
+  side: string;
+  match: ClubMatch;
+  locale: Locale;
+  scoreAfterEvent: Map<string, { home: number; away: number }>;
+  secondYellowIds: Set<string>;
+}) {
+  const secondYellow = event.event_type === "yellow_card" && secondYellowIds.has(String(event.id));
+  const label = secondYellow ? (locale === "ro" ? "Al doilea galben / roșu" : "Вторая жёлтая / красная") : (eventLabels[locale][event.event_type] ?? event.event_type);
+  const score = scoreAfterEvent.get(String(event.id));
+  const team = String(event.team_id) === String(match.home_team_id) ? match.home : match.away;
+  const person = event.event_type === "substitution" ? `${event.player_name || "—"} → ${event.related_player_name || "—"}` : eventPerson(event);
+  return (
+    <div className={`mobileTimelineEvent is-${side}`} role="group" aria-label={`${eventMinute(event)} ${label}`}>
+      <span className="mobileTimelineMinute">{eventMinute(event)}</span>
+      <EventGlyph event={event} secondYellow={secondYellow} />
+      <div className="mobileTimelineEventText">
+        <small>{team?.short_name || team?.name || "—"} · {label}{score ? ` · ${score.home}:${score.away}` : ""}</small>
+        <strong>{person}</strong>
+        {event.description && event.description !== event.player_name ? <em>{event.description}</em> : null}
       </div>
     </div>
   );
