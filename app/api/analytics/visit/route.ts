@@ -46,10 +46,12 @@ function deviceType(width: number | null, userAgent: string) {
 }
 
 function clientIp(request: Request) {
-  const raw = request.headers.get("x-vercel-forwarded-for")
-    || request.headers.get("x-forwarded-for")
-    || request.headers.get("x-real-ip")
-    || "";
+  // On Vercel use only the edge-controlled header, not a client-supplied
+  // X-Forwarded-For fallback. Local development can use a test proxy header.
+  const runningOnVercel = Boolean(process.env.VERCEL_ENV || process.env.VERCEL);
+  const raw = runningOnVercel
+    ? request.headers.get("x-vercel-forwarded-for") || ""
+    : request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "";
   const ip = raw.split(",")[0]?.trim() || "";
   return isIP(ip) ? ip : null;
 }
@@ -60,6 +62,27 @@ export async function POST(request: Request) {
 
   const fetchSite = request.headers.get("sec-fetch-site");
   if (fetchSite === "cross-site") return new NextResponse(null, { status: 403 });
+
+  // Browser POSTs are same-origin. Validate Origin when present, including
+  // scripted requests that omit Sec-Fetch-Site. Do not trust Origin as a bot
+  // detector: the real visitor identity still comes from Vercel's edge.
+  const origin = request.headers.get("origin");
+  if (origin) {
+    try {
+      const parsed = new URL(origin);
+      const expected = new URL(request.url);
+      if (parsed.origin !== expected.origin) return new NextResponse(null, { status: 403 });
+    } catch {
+      return new NextResponse(null, { status: 403 });
+    }
+  }
+
+  // An analytics hit is a small JSON object. Reject oversized submissions
+  // before parsing to avoid unnecessary work from malformed/bulk requests.
+  const contentType = request.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase();
+  if (contentType !== "application/json") return new NextResponse(null, { status: 415 });
+  const statedLength = Number(request.headers.get("content-length") || "0");
+  if (statedLength > 2048) return new NextResponse(null, { status: 413 });
 
   const userAgent = request.headers.get("user-agent") || "";
   if (!userAgent || BOT_RE.test(userAgent)) return new NextResponse(null, { status: 204 });
@@ -72,7 +95,10 @@ export async function POST(request: Request) {
     locale?: unknown;
   };
   try {
-    body = await request.json();
+    const payload = await request.text();
+    if (payload.length > 2048) return new NextResponse(null, { status: 413 });
+    body = JSON.parse(payload);
+    if (!body || typeof body !== "object" || Array.isArray(body)) throw new Error("Invalid object");
   } catch {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }

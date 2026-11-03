@@ -1,25 +1,26 @@
 {
   "name": "fc-edinet",
-  "version": "2.29.1",
+  "version": "2.29.2",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "deploy:check": "node scripts/qa-site.mjs && node scripts/qa-css-audit.mjs && node scripts/qa-performance.mjs && node scripts/qa-responsive.mjs --skip-if-missing && node scripts/check-deploy.mjs && next build",
+    "deploy:check": "node scripts/qa-site.mjs && node scripts/qa-css-audit.mjs && node scripts/qa-security.mjs && node scripts/qa-performance.mjs && node scripts/qa-responsive.mjs --skip-if-missing && node scripts/check-deploy.mjs && next build",
     "qa:site": "node scripts/qa-site.mjs",
     "qa:css": "node scripts/qa-css-audit.mjs",
     "qa:css:baseline": "node scripts/qa-css-audit.mjs --update-baseline",
     "qa:responsive": "node scripts/qa-responsive.mjs",
     "qa:responsive:shots": "node scripts/qa-responsive.mjs --screenshots",
-    "qa:all": "npm run qa:site && npm run qa:css && npm run qa:performance && npm run qa:responsive",
+    "qa:all": "npm run qa:site && npm run qa:css && npm run qa:security && npm run qa:performance && npm run qa:responsive",
     "qa:performance": "node scripts/qa-performance.mjs",
-    "qa:responsive:baseline": "node scripts/qa-responsive.mjs --update-mobile-baseline"
+    "qa:responsive:baseline": "node scripts/qa-responsive.mjs --update-mobile-baseline",
+    "qa:security": "node scripts/qa-security.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.4",
     "@supabase/supabase-js": "2.112.3",
-    "next": "16.3.2",
+    "next": "16.4.4",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-easy-crop": "6.2.3"
