@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useMemo, useRef, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import NewsWorkflowPanel from "@/app/components/NewsWorkflowPanel";
 import {
   saveNews,
   type NewsFormState,
@@ -22,6 +23,16 @@ export default function NewsEditorForm({
   const [title, setTitle] = useState(article?.title ?? "");
   const [slug, setSlug] = useState(article?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(Boolean(article?.slug));
+  const [excerpt, setExcerpt] = useState(article?.excerpt ?? "");
+  const [content, setContent] = useState(article?.content ?? "");
+  const [titleRo, setTitleRo] = useState(article?.title_ro ?? "");
+  const [excerptRo, setExcerptRo] = useState(article?.excerpt_ro ?? "");
+  const [contentRo, setContentRo] = useState(article?.content_ro ?? "");
+  const [roLocked, setRoLocked] = useState(article?.ro_translation_locked ?? false);
+  const [categoryId, setCategoryId] = useState(article?.category_id ? String(article.category_id) : "");
+  const [clearCover, setClearCover] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(false);
+  const [dirty, setDirty] = useState(false);
   const [preview, setPreview] = useState(article?.cover_image_url ?? "");
   const [coverX, setCoverX] = useState(article?.cover_position_x ?? 50);
   const [coverY, setCoverY] = useState(article?.cover_position_y ?? 50);
@@ -29,6 +40,49 @@ export default function NewsEditorForm({
   const objectUrlRef = useRef<string | null>(null);
 
   const editor = role === "editor" || role === "admin";
+  const visibleCover = clearCover && !selectedFile ? "" : preview;
+  const categoryName = categories.find((item) => String(item.id) === categoryId)?.name ?? "";
+  const readyForReview = title.trim().length >= 5 && title.trim().length <= 180
+    && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)
+    && slug.length >= 3 && slug.length <= 180
+    && Boolean(categoryId) && content.trim().length >= 20;
+
+  useEffect(() => {
+    if (!dirty) return;
+    const warnOnLeave = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warnOnLeave);
+    return () => window.removeEventListener("beforeunload", warnOnLeave);
+  }, [dirty]);
+
+  useEffect(() => () => {
+    if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+  }, []);
+
+  useEffect(() => {
+    if (state.error) setDirty(true);
+  }, [state]);
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+    const intent = submitter?.value;
+    if (intent === "publish" || (article?.status === "published" && intent === "save")) {
+      const missing: string[] = [];
+      if (!visibleCover) missing.push("нет обложки");
+      if (!titleRo.trim() || !contentRo.trim()) missing.push("неполный ручной RO-перевод");
+      const notice = intent === "publish"
+        ? "Материал будет доступен всем посетителям."
+        : "Сохранение сразу изменит опубликованную новость.";
+      const message = `${notice}${missing.length ? `\n\nПредупреждения: ${missing.join(", ")}.` : ""}\n\nПродолжить?`;
+      if (!window.confirm(message)) {
+        event.preventDefault();
+        return;
+      }
+    }
+    setDirty(false);
+  }
   const isAuthorLocked =
     role === "author" && Boolean(article) && article?.status !== "draft";
 
@@ -53,10 +107,12 @@ export default function NewsEditorForm({
     }
 
     if (!file) {
+      setSelectedFile(false);
       setPreview(article?.cover_image_url ?? "");
       return;
     }
 
+    setSelectedFile(true);
     const url = URL.createObjectURL(file);
     objectUrlRef.current = url;
     setPreview(url);
@@ -84,15 +140,13 @@ export default function NewsEditorForm({
   }
 
   return (
-    <form action={action} className="newsEditorForm">
+    <form action={action} className="newsEditorForm" onChange={() => setDirty(true)} onSubmit={handleSubmit}>
       {article && (
-        <input type="hidden" name="article_id" value={String(article.id)} />
+        <>
+          <input type="hidden" name="article_id" value={String(article.id)} />
+          <input type="hidden" name="article_updated_at" value={article.updated_at ?? ""} />
+        </>
       )}
-      <input
-        type="hidden"
-        name="existing_cover_url"
-        value={article?.cover_image_url ?? ""}
-      />
 
       <div className="editorTopline">
         <div>
@@ -103,12 +157,28 @@ export default function NewsEditorForm({
             <small>Автор: {article.author_name}</small>
           )}
         </div>
-        {article?.updated_at && (
-          <small>
-            Обновлено: {new Date(article.updated_at).toLocaleString("ru-RU")}
-          </small>
-        )}
+        <div className="newsWorkflowEditStatus">
+          <small>{dirty ? "Есть несохранённые изменения" : "Изменений пока нет"}</small>
+          {article?.updated_at && <small>Обновлено: {new Date(article.updated_at).toLocaleString("ru-RU")}</small>}
+        </div>
       </div>
+
+      <NewsWorkflowPanel
+        title={title}
+        slug={slug}
+        excerpt={excerpt}
+        content={content}
+        titleRo={titleRo}
+        excerptRo={excerptRo}
+        contentRo={contentRo}
+        roLocked={roLocked}
+        categoryId={categoryId}
+        categoryName={categoryName}
+        coverUrl={visibleCover}
+        coverX={coverX}
+        coverY={coverY}
+        coverZoom={coverZoom}
+      />
 
       <div className="editorGrid">
         <section className="editorMain">
@@ -150,7 +220,8 @@ export default function NewsEditorForm({
               name="excerpt"
               rows={3}
               maxLength={420}
-              defaultValue={article?.excerpt ?? ""}
+              value={excerpt}
+              onChange={(event) => setExcerpt(event.target.value)}
               placeholder="Короткий анонс для карточки новости."
             />
           </div>
@@ -161,7 +232,8 @@ export default function NewsEditorForm({
               id="content"
               name="content"
               rows={18}
-              defaultValue={article?.content ?? ""}
+              value={content}
+              onChange={(event) => setContent(event.target.value)}
               placeholder={"Первый абзац.\n\nВторой абзац.\n\nТретий абзац."}
               required
             />
@@ -174,20 +246,21 @@ export default function NewsEditorForm({
             <legend>Română / RO</legend>
             <div className="fieldGroup">
               <label htmlFor="title_ro">Titlu</label>
-              <input id="title_ro" name="title_ro" defaultValue={article?.title_ro ?? ""} maxLength={180} placeholder="Titlul știrii în limba română" />
+              <input id="title_ro" name="title_ro" value={titleRo} onChange={(event) => setTitleRo(event.target.value)} maxLength={180} placeholder="Titlul știrii în limba română" />
             </div>
             <div className="fieldGroup">
               <label htmlFor="excerpt_ro">Descriere scurtă</label>
-              <textarea id="excerpt_ro" name="excerpt_ro" rows={3} maxLength={420} defaultValue={article?.excerpt_ro ?? ""} />
+              <textarea id="excerpt_ro" name="excerpt_ro" rows={3} maxLength={420} value={excerptRo} onChange={(event) => setExcerptRo(event.target.value)} />
             </div>
             <div className="fieldGroup">
               <label htmlFor="content_ro">Text complet</label>
-              <textarea id="content_ro" name="content_ro" rows={14} defaultValue={article?.content_ro ?? ""} />
+              <textarea id="content_ro" name="content_ro" rows={14} value={contentRo} onChange={(event) => setContentRo(event.target.value)} />
               <label className="checkRow compact autoTranslationLock">
                 <input
                   type="checkbox"
                   name="ro_translation_locked"
-                  defaultChecked={article?.ro_translation_locked ?? false}
+                  checked={roLocked}
+                  onChange={(event) => setRoLocked(event.target.checked)}
                 />
                 <span>
                   <strong>Зафиксировать ручной RO</strong>
@@ -228,11 +301,8 @@ export default function NewsEditorForm({
               <select
                 id="category_id"
                 name="category_id"
-                defaultValue={
-                  article?.category_id
-                    ? String(article.category_id)
-                    : ""
-                }
+                value={categoryId}
+                onChange={(event) => setCategoryId(event.target.value)}
                 required
               >
                 <option value="" disabled>
@@ -267,8 +337,8 @@ export default function NewsEditorForm({
             <h3>Обложка</h3>
 
             <div className="coverPreview newsCoverEditorPreview">
-              {preview ? (
-                <img className="newsCoverManaged" src={preview} alt="" style={{objectPosition:`${coverX}% ${coverY}%`,transform:`scale(${coverZoom/100})`,transformOrigin:`${coverX}% ${coverY}%`}} />
+              {visibleCover ? (
+                <img className="newsCoverManaged" src={visibleCover} alt="" style={{objectPosition:`${coverX}% ${coverY}%`,transform:`scale(${coverZoom/100})`,transformOrigin:`${coverX}% ${coverY}%`}} />
               ) : (
                 <span>ОБЛОЖКА НОВОСТИ</span>
               )}
@@ -299,7 +369,7 @@ export default function NewsEditorForm({
 
             {article?.cover_image_url && (
               <label className="checkRow compact">
-                <input type="checkbox" name="clear_cover" />
+                <input type="checkbox" name="clear_cover" checked={clearCover} onChange={(event) => setClearCover(event.target.checked)} />
                 <span>Удалить обложку из новости</span>
               </label>
             )}
@@ -328,7 +398,8 @@ export default function NewsEditorForm({
                 name="intent"
                 value="submit_review"
                 type="submit"
-                disabled={pending}
+                disabled={pending || !readyForReview}
+                title={!readyForReview ? "Сначала заполни обязательные поля" : undefined}
               >
                 Отправить на проверку
               </button>
@@ -341,7 +412,8 @@ export default function NewsEditorForm({
                   name="intent"
                   value="publish"
                   type="submit"
-                  disabled={pending}
+                  disabled={pending || !readyForReview}
+                  title={!readyForReview ? "Сначала заполни обязательные поля" : undefined}
                 >
                   Опубликовать
                 </button>

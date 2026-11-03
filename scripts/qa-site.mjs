@@ -122,8 +122,8 @@ ok("next match VS circle replaced", homeCss.includes('Modern VS separator') && h
 ok("results rail frame and rounding removed", homeCss.includes('.fcV215ResultsSection .fcV215MatchRailWide{') && homeCss.includes('.fcV215ResultsSection .fcRefRecentMatchCard,') && homeCss.includes('border:0!important;') && homeCss.includes('border-radius:0!important;'));
 ok("homepage news rounding removed", homeCss.includes('.fcRefLeadColumn,\n.fcRefLatestColumn{') && homeCss.includes('.fcRefNewsRow>div{\n  border-radius:0!important;'));
 const releaseSource = read("lib/release.ts");
-ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.29.2"'));
-ok("release version", JSON.parse(read("package.json")).version === "2.29.2");
+ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.29.3"'));
+ok("release version", JSON.parse(read("package.json")).version === "2.29.3");
 
 ok("v2.28.8 next-match footprint restored", homeCss.includes("FC EDINEȚ v2.28.8 — LARGE CRESTS WITHOUT TALLER MATCH CARD") && homeCss.includes("min-height:168px!important") && homeCss.includes("height:168px!important"));
 ok("v2.28.8 crests enlarge without layout growth", homeCss.includes("transform:scale(1.58) translateY(-7px)!important"));
@@ -133,7 +133,7 @@ ok("v2.28.10 recent match crest alignment fixed", homeCss.includes("FC EDINEȚ v
 ok("v2.28.11 recent match crest stage added", homepageSource.includes('className="fcRefRecentMatchCrest"') && homeCss.includes("FC EDINEȚ v2.28.11 — RECENT MATCHES HORIZONTAL CREST LINE"));
 ok("recent match crests aligned", homeCss.includes("object-position:center center!important") && homepageSource.includes('className="fcRefRecentMatchLogoBox"'));
 const legacyTxt = fs.readdirSync(root).filter((name)=>/^(STEP-|DEPLOY-|FIX-).*\.txt$/.test(name));
-ok("v2.28.24 legacy step/deploy/fix txt pruned", legacyTxt.length === 1 && legacyTxt[0] === 'STEP-2.29.2.txt', legacyTxt.join(', '));
+ok("v2.28.24 legacy step/deploy/fix txt pruned", legacyTxt.length === 1 && legacyTxt[0] === 'STEP-2.29.3.txt', legacyTxt.join(', '));
 ok("v2.28.12 recent match side padding restored", homeCss.includes("FC EDINEȚ v2.28.12 — RECENT MATCH SIDE PADDING FIX"));
 ok("v2.28.13 recent match logo boxes added", homepageSource.includes('className="fcRefRecentMatchLogoBox"') && homeCss.includes("FC EDINEȚ v2.28.13 — RECENT MATCH LOGO BOXES"));
 ok("v2.28.14 recent match card compacted", homeCss.includes("FC EDINEȚ v2.28.14 — RECENT MATCH CARD COMPACTION"));
@@ -191,6 +191,9 @@ ok("v2.29.1 optimized media with safe external fallback", read("app/components/P
 ok("v2.29.1 public global design cache invalidated on publish", read("lib/site-global-designs.ts").includes("fce-public-global-designs") && read("app/admin/design/global-actions.ts").includes('updateTag("fce-public-global-designs")'));
 ok("v2.29.2 patched Next version pinned", JSON.parse(read("package.json")).dependencies.next === "16.4.4");
 ok("v2.29.2 security QA and migration added", exists("scripts/qa-security.mjs") && exists("database/067_restrict_trigger_helper_execute.sql"));
+ok("v2.29.3 admin news local preview added", exists("app/components/NewsWorkflowPanel.tsx") && read("app/components/NewsEditorForm.tsx").includes("<NewsWorkflowPanel"));
+ok("v2.29.3 admin publishing guards active", read("app/admin/news/actions.ts").includes('.eq("updated_at", originalUpdatedAt)') && read("app/admin/news/actions.ts").includes('.eq("is_active", true)'));
+ok("v2.29.3 editorial QA wired", exists("scripts/qa-editorial.mjs") && read("package.json").includes("qa:editorial") && read(".github/workflows/responsive-qa.yml").includes("qa-editorial.mjs"));
 const failed = checks.filter((x) => !x.ok);
 for (const check of checks) console.log(`${check.ok ? "PASS" : "FAIL"}  ${check.name}${check.detail ? ` — ${check.detail}` : ""}`);
 console.log(`\n${checks.length - failed.length}/${checks.length} checks passed.`);

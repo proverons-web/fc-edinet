@@ -33,6 +33,10 @@ export async function saveNews(
 
   const rawId = String(formData.get("article_id") ?? "").trim();
   const articleId = rawId ? Number(rawId) : null;
+  const originalUpdatedAt = String(formData.get("article_updated_at") ?? "").trim();
+  if (rawId && (!Number.isSafeInteger(articleId) || Number(articleId) <= 0)) {
+    return { error: "Некорректный идентификатор материала." };
+  }
 
   const title = String(formData.get("title") ?? "").trim();
   const slug = normalizeSlug(String(formData.get("slug") ?? ""));
@@ -45,9 +49,6 @@ export async function saveNews(
   const categoryId = categoryRaw ? Number(categoryRaw) : null;
   const intent = String(formData.get("intent") ?? "save") as Intent;
   const clearCover = formData.get("clear_cover") === "on";
-  const existingCover = String(
-    formData.get("existing_cover_url") ?? ""
-  ).trim();
   const editorNoteInput = String(
     formData.get("editor_note") ?? ""
   ).trim();
@@ -107,6 +108,11 @@ export async function saveNews(
 
     existing = data as unknown as NewsArticle;
 
+    // Detect stale editor tabs before any irreversible upload or change.
+    if (!originalUpdatedAt || originalUpdatedAt !== existing.updated_at) {
+      return { error: "Новость была изменена после открытия редактора. Скопируй свои правки и обнови страницу, прежде чем сохранять." };
+    }
+
     if (
       profile.role === "author" &&
       (
@@ -128,7 +134,20 @@ export async function saveNews(
     return { error: "Для этого действия нужны права редактора." };
   }
 
-  let coverImageUrl = clearCover ? null : ((existing?.cover_image_url ?? existingCover) || null);
+  // Re-check the category server-side; a forged form must not publish a news
+  // item into an inactive or deleted category.
+  const { data: validCategory, error: categoryError } = await supabase
+    .from("news_categories")
+    .select("id")
+    .eq("id", categoryId)
+    .eq("is_active", true)
+    .maybeSingle();
+  if (categoryError || !validCategory) {
+    return { error: "Категория недоступна. Обнови редактор и выбери активную категорию." };
+  }
+
+  // The URL submitted from a hidden form field must never override DB data.
+  let coverImageUrl = clearCover ? null : (existing?.cover_image_url ?? null);
 
   const fileValue = formData.get("cover_file");
   if (fileValue instanceof File && fileValue.size > 0) {
@@ -264,11 +283,15 @@ export async function saveNews(
       .from("news")
       .update(payload)
       .eq("id", articleId)
+      .eq("updated_at", originalUpdatedAt)
       .select("id")
-      .single();
+      .maybeSingle();
 
-    if (error || !data) {
-      return { error: humanizeDatabaseError(error?.message) };
+    if (error) {
+      return { error: humanizeDatabaseError(error.message) };
+    }
+    if (!data) {
+      return { error: "Новость уже изменена в другой вкладке или другим редактором. Скопируй свои правки и обнови страницу." };
     }
 
     savedId = Number(data.id);

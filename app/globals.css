@@ -3886,3 +3886,54 @@ body:has(.adminEmbedded){background:#f3f6fa}
   .managedPageHero:not(.playerProfileHero):not(.articleHeader):not(.mediaAlbumHero) .pageHeroContent{padding-top:26px!important;padding-bottom:26px!important}
   .proManagedHeroInner{padding-top:26px;padding-bottom:26px}
 }
+
+/* ================================================================
+   FC EDINEȚ v2.29.3 — EDITORIAL WORKFLOW AND SAFE LOCAL PREVIEW
+   Scoped to admin news forms; public news/hero styles are untouched.
+   ================================================================ */
+.newsWorkflowEditStatus{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.newsWorkflowPanel{padding:20px 24px;border:1px solid #cad9e8;background:#fff;color:#123354}
+.newsWorkflowHeading{display:flex;align-items:center;justify-content:space-between;gap:18px}
+.newsWorkflowHeading h2{margin:0 0 5px;font-size:21px;line-height:1.2}
+.newsWorkflowHeading p{margin:0;color:#59748e;font-size:12px;line-height:1.5}
+.newsWorkflowHeading>strong{flex:0 0 auto;padding:8px 12px;font-size:11px;letter-spacing:.025em}
+.newsWorkflowHeading>strong.isReady{background:#e3f6eb;color:#167041}
+.newsWorkflowHeading>strong.isIncomplete{background:#fff1d8;color:#8c6015}
+.newsWorkflowChecks{display:flex;flex-wrap:wrap;gap:8px;margin-top:17px}
+.newsWorkflowChecks span{display:inline-flex;align-items:center;gap:6px;padding:7px 9px;font-size:11px;font-weight:800;border:1px solid #d5e2ec}
+.newsWorkflowChecks span.isReady{color:#177048;background:#f0faf4;border-color:#cdebd6}
+.newsWorkflowChecks span.isMissing{color:#90561e;background:#fff8eb;border-color:#f2e0b7}
+.newsWorkflowChecks span>span{border:0;padding:0;background:transparent;font-size:12px}
+.newsWorkflowHints{margin:11px 0 0;display:grid;gap:5px}
+.newsWorkflowHints p{margin:0;font-size:11px;line-height:1.5;color:#6a7c8f}
+.newsWorkflowPreviewToggle{margin-top:16px;min-height:40px;padding:9px 14px;border:1px solid #0b579c;background:#0a4a91;color:#fff;font:inherit;font-size:12px;font-weight:850;cursor:pointer}
+.newsWorkflowPreviewToggle:hover{background:#08366c}
+.newsWorkflowPreviewToggle:focus-visible,.newsWorkflowSegment button:focus-visible{outline:3px solid #ffd328;outline-offset:2px}
+.newsWorkflowPreview{display:grid;gap:12px;padding-top:18px;margin-top:16px;border-top:1px solid #dce5ee}
+.newsWorkflowPreviewControls{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+.newsWorkflowSegment{display:flex;gap:5px;padding:4px;background:#ebf1f8}
+.newsWorkflowSegment button{min-width:54px;padding:6px 12px;border:0;background:transparent;font:inherit;font-size:11px;font-weight:850;color:#45617f;cursor:pointer}
+.newsWorkflowSegment button.isSelected{background:#0a4a91;color:#fff}
+.newsWorkflowFallback{margin:0;padding:10px 12px;background:#fff5e1;color:#745217;font-size:11px;line-height:1.5}
+.newsWorkflowPreviewSurface{width:100%;max-width:740px;margin:0 auto;border:1px solid #ccd8e4;background:#fff;color:#142e4d;overflow:hidden}
+.newsWorkflowPreviewSurface.is-mobile{max-width:360px}
+.newsWorkflowPreviewLabel{padding:20px 24px 0;font-size:10px;color:#1563b7;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.newsWorkflowPreviewSurface h3{margin:0;padding:10px 24px 0;font-size:clamp(25px,3.7vw,38px);line-height:1.08;font-weight:950;text-transform:uppercase;overflow-wrap:anywhere}
+.newsWorkflowPreviewSurface.is-mobile h3{font-size:27px}
+.newsWorkflowPreviewExcerpt{margin:0;padding:12px 24px 20px;color:#607993;font-size:13px;line-height:1.55}
+.newsWorkflowPreviewCover{position:relative;height:260px;display:grid;place-items:center;overflow:hidden;background:linear-gradient(110deg,#061b39,#0c468a);color:#d7e5f7;font-weight:900;font-size:12px}
+.newsWorkflowPreviewCover img{display:block;width:100%;height:100%;object-fit:cover}
+.newsWorkflowPreviewSurface.is-mobile .newsWorkflowPreviewCover{height:185px}
+.newsWorkflowPreviewText{padding:20px 24px;max-height:340px;overflow-y:auto}
+.newsWorkflowPreviewText p{margin:0 0 14px;font-size:14px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+.newsWorkflowPreviewText p:last-child{margin:0}
+.newsWorkflowPreview>small{font-size:11px;line-height:1.5;color:#6f8395}
+@media(max-width:680px){
+  .newsWorkflowPanel{padding:16px}
+  .newsWorkflowHeading{align-items:flex-start;flex-direction:column;gap:10px}
+  .newsWorkflowEditStatus{align-items:flex-start}
+  .newsWorkflowPreviewLabel{padding:16px 15px 0}
+  .newsWorkflowPreviewSurface h3{padding:8px 15px 0;font-size:27px}
+  .newsWorkflowPreviewExcerpt{padding:10px 15px 16px}
+  .newsWorkflowPreviewText{padding:15px}
+}

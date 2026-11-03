@@ -21,6 +21,8 @@ jobs:
         run: node scripts/qa-css-audit.mjs
       - name: Check dependency and database security contracts
         run: node scripts/qa-security.mjs
+      - name: Check editorial workflow and publishing protections
+        run: node scripts/qa-editorial.mjs
       - name: Check performance and image delivery contracts
         run: node scripts/qa-performance.mjs
       - name: Check responsive layout in Chrome
