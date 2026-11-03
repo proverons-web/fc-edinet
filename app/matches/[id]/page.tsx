@@ -375,7 +375,7 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
               <div className="premiumMatchContent">
                 <section className="premiumOverview" id="overview">
                   <div className="premiumOverviewHead">
-                    <div><p className="eyebrow blue">{locale === "ro" ? "REZUMAT" : "ИТОГ МАТЧА"}</p><h2>{match.home?.name ?? "—"} <span>{match.home_score ?? 0}:{match.away_score ?? 0}</span> {match.away?.name ?? "—"}</h2></div>
+                    <div><p className="eyebrow blue">{locale === "ro" ? "REZUMAT" : "ИТОГ МАТЧА"}</p><h2 className="premiumOverviewResultTitle"><span className="premiumOverviewTeam is-home">{match.home?.name ?? "—"}</span> <span className="premiumOverviewScore">{match.home_score ?? 0}:{match.away_score ?? 0}</span> <span className="premiumOverviewTeam is-away">{match.away?.name ?? "—"}</span></h2></div>
                   </div>
                   <div className="premiumOverviewMetrics">
                     <MatchMetric label={locale === "ro" ? "Goluri" : "Голы"} home={match.home_score ?? 0} away={match.away_score ?? 0} />

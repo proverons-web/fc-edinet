@@ -1,0 +1,6 @@
+FC Edineț v2.28.24 — Mobile statistics and match summary polishing
+
+Mobile-only: Home 5-match overview shows Games/Wins/Draws/Losses first; Position/Goals/Points second.
+Mobile-only: Match result heading uses balanced home/score/away columns, with team names wrapping onto at most 2 lines.
+Mobile-only: Season player statistics renders independent player cards (portrait, full name, role and 8 key metrics) with a wrap-safe sort menu; the existing desktop table is unchanged.
+Desktop layout >=768px stays unchanged; existing deploy auto-env setup is retained.

@@ -122,8 +122,8 @@ ok("next match VS circle replaced", homeCss.includes('Modern VS separator') && h
 ok("results rail frame and rounding removed", homeCss.includes('.fcV215ResultsSection .fcV215MatchRailWide{') && homeCss.includes('.fcV215ResultsSection .fcRefRecentMatchCard,') && homeCss.includes('border:0!important;') && homeCss.includes('border-radius:0!important;'));
 ok("homepage news rounding removed", homeCss.includes('.fcRefLeadColumn,\n.fcRefLatestColumn{') && homeCss.includes('.fcRefNewsRow>div{\n  border-radius:0!important;'));
 const releaseSource = read("lib/release.ts");
-ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.28.23"'));
-ok("release version", JSON.parse(read("package.json")).version === "2.28.23");
+ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.28.24"'));
+ok("release version", JSON.parse(read("package.json")).version === "2.28.24");
 
 ok("v2.28.8 next-match footprint restored", homeCss.includes("FC EDINEȚ v2.28.8 — LARGE CRESTS WITHOUT TALLER MATCH CARD") && homeCss.includes("min-height:168px!important") && homeCss.includes("height:168px!important"));
 ok("v2.28.8 crests enlarge without layout growth", homeCss.includes("transform:scale(1.58) translateY(-7px)!important"));
@@ -133,7 +133,7 @@ ok("v2.28.10 recent match crest alignment fixed", homeCss.includes("FC EDINEȚ v
 ok("v2.28.11 recent match crest stage added", homepageSource.includes('className="fcRefRecentMatchCrest"') && homeCss.includes("FC EDINEȚ v2.28.11 — RECENT MATCHES HORIZONTAL CREST LINE"));
 ok("recent match crests aligned", homeCss.includes("object-position:center center!important") && homepageSource.includes('className="fcRefRecentMatchLogoBox"'));
 const legacyTxt = fs.readdirSync(root).filter((name)=>/^(STEP-|DEPLOY-|FIX-).*\.txt$/.test(name));
-ok("v2.28.23 legacy step/deploy/fix txt pruned", legacyTxt.length === 1 && legacyTxt[0] === 'STEP-2.28.23.txt', legacyTxt.join(', '));
+ok("v2.28.24 legacy step/deploy/fix txt pruned", legacyTxt.length === 1 && legacyTxt[0] === 'STEP-2.28.24.txt', legacyTxt.join(', '));
 ok("v2.28.12 recent match side padding restored", homeCss.includes("FC EDINEȚ v2.28.12 — RECENT MATCH SIDE PADDING FIX"));
 ok("v2.28.13 recent match logo boxes added", homepageSource.includes('className="fcRefRecentMatchLogoBox"') && homeCss.includes("FC EDINEȚ v2.28.13 — RECENT MATCH LOGO BOXES"));
 ok("v2.28.14 recent match card compacted", homeCss.includes("FC EDINEȚ v2.28.14 — RECENT MATCH CARD COMPACTION"));
@@ -167,6 +167,14 @@ ok("v2.28.22 mobile timeline all events without scrolling", timelineSource.inclu
 ok("v2.28.22 mobile lineup badges after names", mobileStyles.includes(".premiumLineupsPanel .premiumLineupRow{") && mobileStyles.includes("display:flex!important") && mobileStyles.includes(".premiumLineupRow>.premiumLineupBadges"));
 ok("v2.28.23 deploy restores local env before dependency install", read("DEPLOY_FC_EDINET.bat").includes("[0/8] Checking local Supabase settings") && read("DEPLOY_FC_EDINET.bat").includes("node scripts/prepare-local-env.mjs"));
 ok("v2.28.23 no secret file overwrite and git protection", exists("scripts/prepare-local-env.mjs") && read("scripts/prepare-local-env.mjs").includes("COPYFILE_EXCL") && read("DEPLOY_FC_EDINET.bat").includes("git check-ignore -q .env.local") && read(".gitignore").includes(".env.local"));
+const mobile24 = read("app/mobile-v2.28.24.css");
+ok("v2.28.24 mobile-only stylesheet last", read("app/layout.tsx").includes('import "./mobile-v2.28.22.css";\nimport "./mobile-v2.28.24.css";') && mobile24.includes("@media (max-width:767px){") && !mobile24.includes("@media (min-width:768px){"));
+ok("v2.28.24 last-five stats Games first and Place second", homepageSource.includes('className="dashboardGamesMobileLabel"') && homepageSource.includes('"ИГРЫ"') && mobile24.includes("span:nth-child(1){order:5;grid-column:span 4") && mobile24.includes("span:nth-child(2){display:flex!important;order:1;grid-column:span 3") && mobile24.includes("span:nth-child(7){order:7;grid-column:span 4") && mobile24.includes("grid-template-columns:repeat(12,minmax(0,1fr))"));
+ok("v2.28.24 match teams and score separate nodes", timelineSource.includes('className="premiumOverviewResultTitle"') && timelineSource.includes('className="premiumOverviewTeam is-home"') && timelineSource.includes('className="premiumOverviewScore"') && timelineSource.includes('className="premiumOverviewTeam is-away"') && mobile24.includes("grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important"));
+const stats24 = read("app/statistics/page.tsx");
+ok("v2.28.24 mobile season stats full readable player cards", stats24.includes('className="teamStatisticsMobileCards"') && stats24.includes('className="teamStatisticsMobilePlayerName"') && stats24.includes('className="teamStatisticsMobileMetrics"') && mobile24.includes(".teamStatisticsTableSection>.teamStatisticsTableWrap{display:none!important}") && mobile24.includes(".teamStatisticsMobile{display:block!important"));
+ok("v2.28.24 all 8 key player stats retained", ["row.appearances","row.starts","row.minutes_played","row.goals","row.assists","contribution(row)","row.yellow_cards","row.red_cards"].every(x=>stats24.includes(x)) && mobile24.includes("grid-template-columns:repeat(4,minmax(0,1fr))"));
+ok("v2.28.24 mobile sorting without horizontal scroll", stats24.includes('className="teamStatisticsMobileSort"') && stats24.includes('scroll={false}') && mobile24.includes(".teamStatisticsMobileSort nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))"));
 const failed = checks.filter((x) => !x.ok);
 for (const check of checks) console.log(`${check.ok ? "PASS" : "FAIL"}  ${check.name}${check.detail ? ` — ${check.detail}` : ""}`);
 console.log(`\n${checks.length - failed.length}/${checks.length} checks passed.`);

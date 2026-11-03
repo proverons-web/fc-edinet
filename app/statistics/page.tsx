@@ -757,6 +757,55 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
                     </tbody>
                   </table>
                 </div>
+
+                {/* Mobile-only alternative to the 11-column desktop table. */}
+                <div className="teamStatisticsMobile" aria-label={locale === "ro" ? "Statistica jucătorilor" : "Статистика игроков"}>
+                  <details className="teamStatisticsMobileSort">
+                    <summary>{text.sort}: {sortLabels[sort][locale]} <span aria-hidden="true">⌄</span></summary>
+                    <nav aria-label={text.sort}>
+                      {(["position", "appearances", "starts", "minutes", "goals", "assists", "contributions", "yellow_cards", "red_cards"] as SortKey[]).map((sortKey) => (
+                        <Link
+                          key={sortKey}
+                          href={statHref(selectedSeasonId, selectedCompetitionId, sortKey)}
+                          scroll={false}
+                          aria-current={sort === sortKey ? "page" : undefined}
+                          className={sort === sortKey ? "active" : undefined}
+                        >{sortLabels[sortKey][locale]}</Link>
+                      ))}
+                    </nav>
+                  </details>
+                  <div className="teamStatisticsMobileCards">
+                    {sortedSummaries.map((row, index) => (
+                      <article className="teamStatisticsMobileCard" key={row.player.id}>
+                        <div className="teamStatisticsMobileIdentity">
+                          <span className="teamStatisticsMobileRank">{index + 1}</span>
+                          <Link className="teamStatisticsMobilePlayer" href={`/team/${row.player.slug}`}>
+                            {row.player.photo_url ? (
+                              <img src={row.player.photo_url} alt="" />
+                            ) : (
+                              <span className="teamStatisticsMobileAvatar">{row.player.shirt_number ?? "FCE"}</span>
+                            )}
+                            <span className="teamStatisticsMobilePlayerName">
+                              <strong>{row.player.first_name} {row.player.last_name}</strong>
+                              <small>#{row.player.shirt_number ?? "—"} · {positionLabelsI18n[locale][row.player.position] ?? row.player.position}</small>
+                            </span>
+                          </Link>
+                          <Link className="teamStatisticsMobileOpen" href={`/team/${row.player.slug}`} aria-label={`${text.playerProfile}: ${row.player.first_name} ${row.player.last_name}`}>→</Link>
+                        </div>
+                        <dl className="teamStatisticsMobileMetrics">
+                          <div><dt>{text.matches}</dt><dd>{row.appearances}</dd></div>
+                          <div><dt>{text.starts}</dt><dd>{row.starts}</dd></div>
+                          <div><dt>{text.minutes}</dt><dd>{row.minutes_played}</dd></div>
+                          <div><dt>{text.goals}</dt><dd>{row.goals}</dd></div>
+                          <div><dt>{text.assistants}</dt><dd>{row.assists}</dd></div>
+                          <div><dt>{text.contribution}</dt><dd>{contribution(row)}</dd></div>
+                          <div><dt>{text.yellow}</dt><dd>{row.yellow_cards}</dd></div>
+                          <div><dt>{text.red}</dt><dd>{row.red_cards}</dd></div>
+                        </dl>
+                      </article>
+                    ))}
+                  </div>
+                </div>
               </section>
             </>
           )}

@@ -310,7 +310,7 @@ export default async function Home() {
               </div>
               <div className="fcV215DashboardKpis fcV215DashboardKpisFull">
                 <span><small>{locale === "ro" ? "POZIȚIE" : "МЕСТО"}</small><strong>{clubStandingPosition ? `#${clubStandingPosition}` : "—"}</strong></span>
-                <span><small>{locale === "ro" ? "MECIURI" : "МАТЧИ"}</small><strong>{seasonPulse.played}</strong></span>
+                <span><small><span className="dashboardGamesDesktopLabel">{locale === "ro" ? "MECIURI" : "МАТЧИ"}</span><span className="dashboardGamesMobileLabel">{locale === "ro" ? "JOCURI" : "ИГРЫ"}</span></small><strong>{seasonPulse.played}</strong></span>
                 <span><small>{locale === "ro" ? "VICTORII" : "ПОБЕДЫ"}</small><strong>{seasonPulse.wins}</strong></span>
                 <span><small>{locale === "ro" ? "EGALURI" : "НИЧЬИ"}</small><strong>{seasonPulse.draws}</strong></span>
                 <span><small>{locale === "ro" ? "ÎNFRÂNGERI" : "ПОРАЖЕНИЯ"}</small><strong>{seasonPulse.losses}</strong></span>

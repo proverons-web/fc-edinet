@@ -2584,3 +2584,6 @@ main:not(.adminPage) :where(.container,.pageHeroContent,.proSectionInner,.newsEd
     align-self:end!important;
   }
 }
+
+/* v2.28.24: keep desktop match heading appearance after semantic span wrappers. */
+.premiumOverviewHead h2 .premiumOverviewTeam{display:inline;color:inherit;margin:0}

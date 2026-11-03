@@ -4,6 +4,7 @@ import "./globals.css";
 import "./visual-polish.css";
 import "./home-v215.css";
 import "./mobile-v2.28.22.css";
+import "./mobile-v2.28.24.css";
 import SiteHeader from "./components/SiteHeader";
 import SiteFooter from "./components/SiteFooter";
 import JsonLd from "./components/JsonLd";
