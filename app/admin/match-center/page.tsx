@@ -4,6 +4,7 @@ import type { ClubMatch, MatchCenterProgress } from "@/lib/types";
 import { matchStatusLabels } from "@/lib/types";
 import AdminListSearch from "@/app/components/AdminListSearch";
 import { adminListHref, adminTextMatches, parseAdminQuery } from "@/lib/admin-list-search";
+import { matchNeedsLineups, matchNeedsReport, parseAttentionFocus } from "@/lib/admin-attention";
 
 export const metadata = { title: "Матч-центр — Админ" };
 export const dynamic = "force-dynamic";
@@ -13,6 +14,7 @@ type PageProps = {
     status?: string | string[];
     error?: string | string[];
     q?: string | string[];
+    focus?: string | string[];
   }>;
 };
 
@@ -47,6 +49,7 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
   const { supabase } = await requireEditor();
   const params = await searchParams;
   const search = parseAdminQuery(params.q);
+  const focus = parseAttentionFocus(params.focus, ["all", "unpublished", "lineups"]);
   const rawStatus = one(params.status);
   const status = rawStatus === "finished" || rawStatus === "upcoming" ? rawStatus : "all";
 
@@ -77,13 +80,21 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
     return <MatchCenterMigrationRequired message={progressResult.error.message} />;
   }
 
-  const matches = ((matchesResult.data ?? []) as unknown as ClubMatch[]).filter((match) =>
-    adminTextMatches(search, match.home?.name, match.away?.name, match.home?.short_name,
-      match.away?.short_name, match.competition?.name, match.round, match.stadium)
-  );
   const progressRows = (progressResult.data ?? []) as MatchCenterProgress[];
   const progressByMatch = new Map(progressRows.map((row) => [String(row.match_id), row]));
   const publishedByMatch = new Map((reportsResult.data ?? []).map((row) => [String(row.match_id), Boolean(row.is_published)]));
+  const candidates = (matchesResult.data ?? []) as unknown as ClubMatch[];
+  const unpublishedCount = reportsResult.error ? null : candidates.filter((match) => matchNeedsReport(match, Boolean(publishedByMatch.get(String(match.id))))).length;
+  const incompleteLineupsCount = candidates.filter((match) => matchNeedsLineups(match, progressByMatch.get(String(match.id)))).length;
+  const matches = candidates.filter((match) => {
+    const isPublished = Boolean(publishedByMatch.get(String(match.id)));
+    const progress = progressByMatch.get(String(match.id));
+    const focusMatches = focus === "all" ||
+      (focus === "unpublished" && !reportsResult.error && matchNeedsReport(match, isPublished)) ||
+      (focus === "lineups" && matchNeedsLineups(match, progress));
+    return focusMatches && adminTextMatches(search, match.home?.name, match.away?.name, match.home?.short_name,
+      match.away?.short_name, match.competition?.name, match.round, match.stadium);
+  });
 
   const total = matches.length;
   const finished = matches.filter((match) => match.status === "finished").length;
@@ -130,17 +141,24 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
           </section>
 
           <nav className="adminFilters matchCenterFilters">
-            <Filter href={adminListHref("/admin/match-center", { q: search })} active={status === "all"}>Все</Filter>
-            <Filter href={adminListHref("/admin/match-center", { status: "finished", q: search })} active={status === "finished"}>Завершённые</Filter>
-            <Filter href={adminListHref("/admin/match-center", { status: "upcoming", q: search })} active={status === "upcoming"}>Предстоящие</Filter>
+            <Filter href={adminListHref("/admin/match-center", { focus, q: search })} active={status === "all"}>Все</Filter>
+            <Filter href={adminListHref("/admin/match-center", { status: "finished", focus, q: search })} active={status === "finished"}>Завершённые</Filter>
+            <Filter href={adminListHref("/admin/match-center", { status: "upcoming", focus, q: search })} active={status === "upcoming"}>Предстоящие</Filter>
           </nav>
 
-          <AdminListSearch path="/admin/match-center" query={search} status={status} label="Поиск протоколов" placeholder="Соперник, турнир, стадия…" count={matches.length} />
+          <nav className="adminAttentionFilters" aria-label="Подготовка протоколов">
+            <Link href={adminListHref("/admin/match-center", { status, q: search })} aria-current={focus === "all" ? "page" : undefined} className={focus === "all" ? "active" : ""}>Все протоколы</Link>
+            <Link href={adminListHref("/admin/match-center", { status, focus: "unpublished", q: search })} aria-current={focus === "unpublished" ? "page" : undefined} className={focus === "unpublished" ? "active" : ""}>Не опубликованы <span>{unpublishedCount ?? "—"}</span></Link>
+            <Link href={adminListHref("/admin/match-center", { status, focus: "lineups", q: search })} aria-current={focus === "lineups" ? "page" : undefined} className={focus === "lineups" ? "active" : ""}>Неполные составы <span>{incompleteLineupsCount}</span></Link>
+          </nav>
+          {reportsResult.error && <p className="adminAttentionError" role="alert">Не удалось загрузить публикации протоколов: {reportsResult.error.message}. Фильтр неопубликованных недоступен.</p>}
+
+          <AdminListSearch path="/admin/match-center" query={search} status={status} focus={focus} label="Поиск протоколов" placeholder="Соперник, турнир, стадия…" count={matches.length} />
 
           {matchesResult.error ? (
             <div className="adminEmpty">Ошибка загрузки матчей: {matchesResult.error.message}</div>
           ) : matches.length === 0 ? (
-            <div className="adminEmpty">{search ? "Протоколы по запросу не найдены." : "Матчей в этом фильтре пока нет."}</div>
+            <div className="adminEmpty">{search || focus !== "all" ? "Протоколов по выбранным условиям не найдено." : "Матчей в этом фильтре пока нет."}</div>
           ) : (
             <div className="matchCenterList">
               {matches.map((match) => {

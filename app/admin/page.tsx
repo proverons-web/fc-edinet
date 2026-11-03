@@ -67,8 +67,8 @@ export default async function AdminPage() {
           {!operationsAvailable ? <p className="adminOperationsNotice">Не удалось загрузить все задачи. Проверь подключение Supabase.</p> : (
             <div className="adminOperationsGrid">
               <OperationCard title="Черновики новостей" value={draftsResult.count ?? 0} detail="Подготовить и опубликовать" href="/admin/news?status=draft" />
-              <OperationCard title="Без фотографии" value={missingPhotos.length} detail="Активные игроки без фото" href="/admin/players?status=active" />
-              <OperationCard title="Без опубликованного протокола" value={unpublishedReports.length} detail="Среди последних 50 завершённых матчей" href="/admin/match-center?status=finished" />
+              <OperationCard title="Без фотографии" value={missingPhotos.length} detail="Активные игроки без фото" href="/admin/players?status=active&focus=missing_photo" />
+              <OperationCard title="Без опубликованного протокола" value={unpublishedReports.length} detail="Среди последних 50 завершённых матчей" href="/admin/match-center?status=finished&focus=unpublished" />
             </div>
           )}
           {operationsAvailable && (unpublishedReports.length > 0 || missingPhotos.length > 0) && (

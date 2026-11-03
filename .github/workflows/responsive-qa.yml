@@ -25,6 +25,8 @@ jobs:
         run: node scripts/qa-editorial.mjs
       - name: Check admin search and daily operations
         run: node --experimental-strip-types scripts/qa-admin-ops.mjs
+      - name: Check administrator attention filters and media operations
+        run: node --experimental-strip-types scripts/qa-admin-attention.mjs
       - name: Check performance and image delivery contracts
         run: node scripts/qa-performance.mjs
       - name: Check responsive layout in Chrome

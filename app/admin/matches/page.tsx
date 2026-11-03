@@ -4,12 +4,13 @@ import type { ClubMatch } from "@/lib/types";
 import { matchStatusLabels } from "@/lib/types";
 import AdminListSearch from "@/app/components/AdminListSearch";
 import { adminListHref, adminTextMatches, parseAdminQuery } from "@/lib/admin-list-search";
+import { matchNeedsScore, matchNeedsStadium, parseAttentionFocus } from "@/lib/admin-attention";
 
 export const metadata = { title: "Матчи — Админ" };
 export const dynamic = "force-dynamic";
 
 type PageProps = {
-  searchParams: Promise<{ status?: string | string[]; q?: string | string[] }>;
+  searchParams: Promise<{ status?: string | string[]; focus?: string | string[]; q?: string | string[] }>;
 };
 
 export default async function AdminMatchesPage({
@@ -18,6 +19,7 @@ export default async function AdminMatchesPage({
   const { supabase, profile } = await requireEditor();
   const params = await searchParams;
   const search = parseAdminQuery(params.q);
+  const focus = parseAttentionFocus(params.focus, ["all", "needs_stadium", "missing_score"]);
   const raw = Array.isArray(params.status) ? params.status[0] : params.status;
   const status =
     raw === "upcoming" || raw === "finished" ? raw : "all";
@@ -42,7 +44,11 @@ export default async function AdminMatchesPage({
   }
 
   const { data, error } = await query;
-  const matches = ((data ?? []) as unknown as ClubMatch[]).filter((match) =>
+  const candidates = (data ?? []) as unknown as ClubMatch[];
+  const missingStadiumCount = candidates.filter(matchNeedsStadium).length;
+  const missingScoreCount = candidates.filter(matchNeedsScore).length;
+  const matches = candidates.filter((match) =>
+    (focus === "all" || (focus === "needs_stadium" && matchNeedsStadium(match)) || (focus === "missing_score" && matchNeedsScore(match))) &&
     adminTextMatches(search, match.home?.name, match.away?.name, match.home?.short_name,
       match.away?.short_name, match.competition?.name, match.round, match.stadium)
   );
@@ -72,28 +78,34 @@ export default async function AdminMatchesPage({
       <section className="section adminSurface">
         <div className="container">
           <nav className="adminFilters">
-            <Filter href={adminListHref("/admin/matches", { q: search })} active={status === "all"}>Все</Filter>
+            <Filter href={adminListHref("/admin/matches", { focus, q: search })} active={status === "all"}>Все</Filter>
             <Filter
-              href={adminListHref("/admin/matches", { status: "upcoming", q: search })}
+              href={adminListHref("/admin/matches", { status: "upcoming", focus, q: search })}
               active={status === "upcoming"}
             >
               Предстоящие
             </Filter>
             <Filter
-              href={adminListHref("/admin/matches", { status: "finished", q: search })}
+              href={adminListHref("/admin/matches", { status: "finished", focus, q: search })}
               active={status === "finished"}
             >
               Завершённые
             </Filter>
           </nav>
 
-          <AdminListSearch path="/admin/matches" query={search} status={status} label="Поиск матчей" placeholder="Соперник, турнир, тур, стадион…" count={matches.length} />
+          <nav className="adminAttentionFilters" aria-label="Проверка данных матчей">
+            <Link href={adminListHref("/admin/matches", { status, q: search })} aria-current={focus === "all" ? "page" : undefined} className={focus === "all" ? "active" : ""}>Все матчи</Link>
+            <Link href={adminListHref("/admin/matches", { status, focus: "needs_stadium", q: search })} aria-current={focus === "needs_stadium" ? "page" : undefined} className={focus === "needs_stadium" ? "active" : ""}>Без стадиона <span>{missingStadiumCount}</span></Link>
+            <Link href={adminListHref("/admin/matches", { status, focus: "missing_score", q: search })} aria-current={focus === "missing_score" ? "page" : undefined} className={focus === "missing_score" ? "active" : ""}>Без счёта <span>{missingScoreCount}</span></Link>
+          </nav>
+
+          <AdminListSearch path="/admin/matches" query={search} status={status} focus={focus} label="Поиск матчей" placeholder="Соперник, турнир, тур, стадион…" count={matches.length} />
 
           {error ? (
             <div className="adminEmpty">Ошибка загрузки: {error.message}</div>
           ) : matches.length === 0 ? (
             <div className="adminEmpty">
-              {search ? "Матчи по запросу не найдены." : "Матчей пока нет. Сначала добавь соперника в «Команды», затем создай матч."}
+              {search || focus !== "all" ? "Матчей по выбранным условиям не найдено." : "Матчей пока нет. Сначала добавь соперника в «Команды», затем создай матч."}
             </div>
           ) : (
             <div className="adminMatchList">
@@ -123,12 +135,14 @@ export default async function AdminMatchesPage({
                       </span>
                       <span>{match.competition?.name ?? "Матч"}</span>
                       {match.round && <span>{match.round}</span>}
+                      {matchNeedsStadium(match) && <span className="adminAttentionTag">Без стадиона</span>}
+                      {matchNeedsScore(match) && <span className="adminAttentionTag">Счёт не заполнен</span>}
                     </div>
                     <h2>
                       {match.home?.name ?? "—"}{" "}
                       <b>
                         {match.status === "finished" || match.status === "live"
-                          ? `${match.home_score ?? 0} : ${match.away_score ?? 0}`
+                          ? `${match.home_score ?? "—"} : ${match.away_score ?? "—"}`
                           : "VS"}
                       </b>{" "}
                       {match.away?.name ?? "—"}

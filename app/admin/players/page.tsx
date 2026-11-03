@@ -4,12 +4,13 @@ import type { Player } from "@/lib/types";
 import { positionLabels } from "@/lib/types";
 import AdminListSearch from "@/app/components/AdminListSearch";
 import { adminListHref, adminTextMatches, parseAdminQuery } from "@/lib/admin-list-search";
+import { parseAttentionFocus, playerNeedsPhoto } from "@/lib/admin-attention";
 
 export const metadata = { title: "Игроки — Админ" };
 export const dynamic = "force-dynamic";
 
 type PageProps = {
-  searchParams: Promise<{ status?: string | string[]; sort?: string | string[]; q?: string | string[] }>;
+  searchParams: Promise<{ status?: string | string[]; sort?: string | string[]; focus?: string | string[]; q?: string | string[] }>;
 };
 
 export default async function AdminPlayersPage({
@@ -26,6 +27,7 @@ export default async function AdminPlayersPage({
       ? rawStatus
       : "all";
   const search = parseAdminQuery(params.q);
+  const focus = parseAttentionFocus(params.focus, ["all", "missing_photo"]);
   const rawSort = Array.isArray(params.sort) ? params.sort[0] : params.sort;
   const sort = rawSort === "first" || rawSort === "last" || rawSort === "position" ? rawSort : "number";
 
@@ -48,7 +50,10 @@ export default async function AdminPlayersPage({
   const { data, error } = await query;
   const collator = new Intl.Collator("ru", { sensitivity: "base" });
   const positionRank: Record<string, number> = { goalkeeper: 0, defender: 1, midfielder: 2, forward: 3 };
-  const players = ((data ?? []) as Player[]).filter((player) =>
+  const candidates = (data ?? []) as Player[];
+  const noPhotoCount = candidates.filter(playerNeedsPhoto).length;
+  const players = candidates.filter((player) =>
+    (focus !== "missing_photo" || playerNeedsPhoto(player)) &&
     adminTextMatches(search, player.first_name, player.last_name, `${player.first_name} ${player.last_name}`,
       `${player.last_name} ${player.first_name}`, player.shirt_number, player.nationality, positionLabels[player.position])
   ).sort((a, b) => {
@@ -84,17 +89,17 @@ export default async function AdminPlayersPage({
       <section className="section adminSurface">
         <div className="container">
           <nav className="adminFilters">
-            <Filter href={adminListHref("/admin/players", { status: "all", sort, q: search })} active={status === "all"}>
+            <Filter href={adminListHref("/admin/players", { status: "all", sort, focus, q: search })} active={status === "all"}>
               Все
             </Filter>
             <Filter
-              href={adminListHref("/admin/players", { status: "active", sort, q: search })}
+              href={adminListHref("/admin/players", { status: "active", sort, focus, q: search })}
               active={status === "active"}
             >
               Текущий состав
             </Filter>
             <Filter
-              href={adminListHref("/admin/players", { status: "inactive", sort, q: search })}
+              href={adminListHref("/admin/players", { status: "inactive", sort, focus, q: search })}
               active={status === "inactive"}
             >
               Архив
@@ -103,13 +108,18 @@ export default async function AdminPlayersPage({
 
           <nav className="adminFilters adminSortFilters" aria-label="Сортировка игроков">
             <span className="adminFilterLabel">Сортировка:</span>
-            <Filter href={adminListHref("/admin/players", { status, sort: "number", q: search })} active={sort === "number"}>По номеру</Filter>
-            <Filter href={adminListHref("/admin/players", { status, sort: "first", q: search })} active={sort === "first"}>По имени</Filter>
-            <Filter href={adminListHref("/admin/players", { status, sort: "last", q: search })} active={sort === "last"}>По фамилии</Filter>
-            <Filter href={adminListHref("/admin/players", { status, sort: "position", q: search })} active={sort === "position"}>По позиции</Filter>
+            <Filter href={adminListHref("/admin/players", { status, sort: "number", focus, q: search })} active={sort === "number"}>По номеру</Filter>
+            <Filter href={adminListHref("/admin/players", { status, sort: "first", focus, q: search })} active={sort === "first"}>По имени</Filter>
+            <Filter href={adminListHref("/admin/players", { status, sort: "last", focus, q: search })} active={sort === "last"}>По фамилии</Filter>
+            <Filter href={adminListHref("/admin/players", { status, sort: "position", focus, q: search })} active={sort === "position"}>По позиции</Filter>
           </nav>
 
-          <AdminListSearch path="/admin/players" query={search} status={status} sort={sort} label="Поиск игроков" placeholder="Имя, фамилия, номер, позиция…" count={players.length} />
+          <nav className="adminAttentionFilters" aria-label="Проверка профилей игроков">
+            <Link href={adminListHref("/admin/players", { status, sort, q: search })} aria-current={focus === "all" ? "page" : undefined} className={focus === "all" ? "active" : ""}>Все профили</Link>
+            <Link href={adminListHref("/admin/players", { status, sort, focus: "missing_photo", q: search })} aria-current={focus === "missing_photo" ? "page" : undefined} className={focus === "missing_photo" ? "active" : ""}>Без фотографии <span>{noPhotoCount}</span></Link>
+          </nav>
+
+          <AdminListSearch path="/admin/players" query={search} status={status} sort={sort} focus={focus} label="Поиск игроков" placeholder="Имя, фамилия, номер, позиция…" count={players.length} />
 
           {error ? (
             <div className="adminEmpty">
@@ -117,7 +127,7 @@ export default async function AdminPlayersPage({
             </div>
           ) : players.length === 0 ? (
             <div className="adminEmpty">
-              {search ? "Игроки по запросу не найдены." : "Здесь пока нет игроков."}
+              {search || focus !== "all" ? "Игроков по выбранным условиям не найдено." : "Здесь пока нет игроков."}
             </div>
           ) : (
             <div className="adminPlayerList">
@@ -149,9 +159,8 @@ export default async function AdminPlayersPage({
                       >
                         {player.is_active ? "В составе" : "Архив"}
                       </span>
-                      <span>
-                        {positionLabels[player.position] ?? player.position}
-                      </span>
+                      <span>{positionLabels[player.position] ?? player.position}</span>
+                      {playerNeedsPhoto(player) && <span className="adminAttentionTag">Нет фото</span>}
                     </div>
 
                     <h2>

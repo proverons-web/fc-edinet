@@ -7,6 +7,9 @@ import {
   deleteVideo,
 } from "@/app/admin/media/actions";
 import { requireEditor } from "@/lib/editorial";
+import AdminListSearch from "@/app/components/AdminListSearch";
+import { adminListHref, adminTextMatches, parseAdminQuery } from "@/lib/admin-list-search";
+import { mediaMatchesPublication } from "@/lib/admin-attention";
 import type {
   MediaAlbum,
   MediaVideo,
@@ -15,10 +18,16 @@ import type {
 export const metadata = { title: "Медиа — Админ" };
 export const dynamic = "force-dynamic";
 
-export default async function AdminMediaPage() {
-  const { supabase, profile } = await requireEditor();
+type PageProps = { searchParams: Promise<{ q?: string | string[]; status?: string | string[] }> };
 
-  const [{ data: albumsData }, { data: videosData }] =
+export default async function AdminMediaPage({ searchParams }: PageProps) {
+  const { supabase, profile } = await requireEditor();
+  const params = await searchParams;
+  const search = parseAdminQuery(params.q);
+  const rawStatus = Array.isArray(params.status) ? params.status[0] : params.status;
+  const status: "all" | "published" | "draft" = rawStatus === "published" || rawStatus === "draft" ? rawStatus : "all";
+
+  const [{ data: albumsData, error: albumsError }, { data: videosData, error: videosError }] =
     await Promise.all([
       supabase
         .from("media_albums")
@@ -33,8 +42,13 @@ export default async function AdminMediaPage() {
         .order("published_at", { ascending: false }),
     ]);
 
-  const albums = (albumsData ?? []) as MediaAlbum[];
-  const videos = (videosData ?? []) as MediaVideo[];
+  const rawAlbums = (albumsData ?? []) as MediaAlbum[];
+  const rawVideos = (videosData ?? []) as MediaVideo[];
+  const albumCountWithoutCover = rawAlbums.filter((album) => !album.cover_image_url?.trim()).length;
+  const albums = rawAlbums.filter((album) => mediaMatchesPublication(status, album.is_published) &&
+    adminTextMatches(search, album.title, album.location, album.description, album.event_date));
+  const videos = rawVideos.filter((video) => mediaMatchesPublication(status, video.is_published) &&
+    adminTextMatches(search, video.title, video.description, video.youtube_id));
 
   return (
     <main className="adminPage">
@@ -62,6 +76,20 @@ export default async function AdminMediaPage() {
 
       <section className="section adminSurface">
         <div className="container">
+          <div className="adminMediaOverview" aria-label="Сводка медиатеки">
+            <div><strong>{rawAlbums.length}</strong><span>Альбомов</span></div>
+            <div><strong>{rawVideos.length}</strong><span>Видео</span></div>
+            <div><strong>{albumCountWithoutCover}</strong><span>Альбомов без обложки</span></div>
+          </div>
+
+          <nav className="adminAttentionFilters" aria-label="Статус публикации медиа">
+            <Link href={adminListHref("/admin/media", { q: search })} className={status === "all" ? "active" : ""} aria-current={status === "all" ? "page" : undefined}>Все</Link>
+            <Link href={adminListHref("/admin/media", { status: "published", q: search })} className={status === "published" ? "active" : ""} aria-current={status === "published" ? "page" : undefined}>Опубликовано</Link>
+            <Link href={adminListHref("/admin/media", { status: "draft", q: search })} className={status === "draft" ? "active" : ""} aria-current={status === "draft" ? "page" : undefined}>Черновики / скрыто</Link>
+          </nav>
+          <AdminListSearch path="/admin/media" query={search} status={status} label="Поиск в медиатеке" placeholder="Название, место, описание, YouTube ID…" count={albums.length + videos.length} />
+          {(albumsError || videosError) && <p role="alert" className="adminAttentionError">Не удалось загрузить медиатеку: {albumsError?.message || videosError?.message}</p>}
+
           <div className="mediaAdminTwoColumns">
             <MediaAlbumCreateForm />
             <MediaVideoForm />
@@ -101,6 +129,7 @@ export default async function AdminMediaPage() {
                       >
                         {album.is_published ? "Опубликован" : "Черновик"}
                       </span>
+                      {!album.cover_image_url?.trim() && <span className="adminAttentionTag">Без обложки</span>}
                       <h3>{album.title}</h3>
                       <p>
                         {album.event_date || "Без даты"}
@@ -114,7 +143,7 @@ export default async function AdminMediaPage() {
               </div>
             ) : (
               <div className="adminEmpty">
-                Создай первый фотоальбом.
+                {search || status !== "all" ? "Альбомов по выбранным условиям нет." : "Создай первый фотоальбом."}
               </div>
             )}
           </section>
@@ -160,7 +189,7 @@ export default async function AdminMediaPage() {
                 ))}
               </div>
             ) : (
-              <div className="adminEmpty">Видео пока не добавлены.</div>
+              <div className="adminEmpty">{search || status !== "all" ? "Видео по выбранным условиям не найдены." : "Видео пока не добавлены."}</div>
             )}
           </section>
         </div>
