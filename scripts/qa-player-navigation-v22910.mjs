@@ -23,8 +23,11 @@ check("valid UUID season or lineup supported",()=>{const uuid="123e4567-e89b-12d
 check("match fetch selects competition season ID",()=>assert.match(m,/competition:competitions![^`\n]+\(id,name,slug,season,season_id,is_active\)/));
 check("club roster passes match and season context to each row",()=>{assert.equal((m.match(/matchId=\{match\.id\} seasonId=\{match\.competition\?\.season_id\}/g)||[]).length,2)});
 check("club player name opens contextual profile",()=>assert.match(m,/href=\{profileHref\}/));
-check("club season action goes directly to the season section",()=>{assert.match(m,/section: "season"/);assert.match(m,/href=\{seasonHref\}/)});
-check("guests cannot get club profile links",()=>assert.match(m,/const seasonHref = isClub && profileSlug \?/));
+check("season context lives in the player profile link, not a separate roster link",()=>{
+  assert.match(m,/playerProfileHref\(profileSlug, \{ seasonId, fromMatchId: matchId, fromLineupId: row.id \}\)/);
+  assert.doesNotMatch(m,/matchPlayerSeasonLink|seasonHref/);
+});
+check("guests cannot get club profile links",()=>assert.match(m,/const profileHref = isClub && profileSlug \?/));
 check("lineup target exists for every roster row",()=>assert.match(m,/id=\{lineupAnchor\(row\.id\)\}/));
 check("player profile parses and validates match context",()=>{assert.match(p,/validMatchId\(one\(query\.fromMatch\)\)/);assert.match(p,/matchReturnHref\(fromMatchId, fromLineupId\)/)});
 check("player profile renders a return link only with a valid source",()=>assert.match(p,/\{returnToMatchHref && \(/));
@@ -35,7 +38,7 @@ check("favorite action returns to same profile and match",()=>assert.match(p,/co
 check("profile anchors are attached to actual sections",()=>{for(const k of Object.keys(PLAYER_ANCHORS))assert.match(p,new RegExp(`id=\\{PLAYER_ANCHORS\\.${k}\\}`))});
 check("season match cards open the lineup, not top of match",()=>assert.match(p,/href=\{`\/matches\/\$\{match\.id\}#lineups`\}/));
 check("styles are route scoped and remain free of important overrides",()=>{assert.match(p,/import "\.\/player-navigation-v22910\.css"/);assert.match(m,/import "\.\/match-player-navigation-v22910\.css"/);assert.doesNotMatch(pc+mc,/!important/);assert.match(mc,/:target\{/)});
-check("mobile navigation wraps without changing desktop styles",()=>{assert.match(pc,/@media\(max-width:767px\)/);assert.match(mc,/@media\(max-width:767px\)/)});
+check("profile navigation is responsive and lineup targets remain route-local",()=>{assert.match(pc,/@media\(max-width:767px\)/);assert.match(mc,/premiumLineupRow\[id\]/);assert.doesNotMatch(mc,/matchPlayerSeasonLink/)});
 const successes=checks.filter(Boolean).length;
 console.log(`\n${successes}/${checks.length} player navigation QA passed.`);
 if(successes!==checks.length)process.exitCode=1;

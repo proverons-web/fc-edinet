@@ -1,0 +1,19 @@
+/* v2.29.12 — compact public lineup at 320–420px (Chrome/Edge font variance).
+   Preserve usable width, keep the avatar at 30px, and let long names wrap
+   without forcing event badges beyond the roster card. Desktop unchanged. */
+@media (max-width:420px){
+  .premiumMatchContent .premiumLineupsPanel,
+  .publicMatchDetailPage .premiumLineupsPanel.premiumLineupsPanel{padding:12px!important}
+  .premiumLineupsPanel .premiumLineupTeam{padding-left:8px!important;padding-right:8px!important}
+  .premiumLineupsPanel .premiumLineupRow{min-width:0;max-width:100%;}
+  .premiumLineupsPanel .premiumLineupRow>.premiumLineupPlayerLink .premiumLineupAvatar,
+  .premiumLineupsPanel .premiumLineupRow>.premiumLineupAvatar{
+    flex:0 0 30px!important;width:30px!important;min-width:30px!important;
+  }
+  .premiumLineupsPanel .premiumLineupRow .premiumLineupName{
+    overflow-wrap:anywhere;word-break:normal;min-width:0;
+  }
+  .premiumLineupsPanel .premiumLineupRow>.premiumLineupBadges{
+    max-width:100%!important;min-width:0!important;
+  }
+}

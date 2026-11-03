@@ -6,7 +6,7 @@ import { lineupEventParticipant, lineupEventsForPlayer, publicPlayerMatchFacts }
 const root = path.resolve(import.meta.dirname, "..");
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 const page = read("app/matches/[id]/page.tsx");
-const css = read("app/matches/[id]/match-player-stats-v2299.css");
+const css = read("app/matches/[id]/match-player-navigation-v22910.css");
 const results = [];
 function check(name, action) {
   try { action(); console.log("PASS", name); results.push(true); }
@@ -41,24 +41,26 @@ check("invalid numeric stats become missing rather than misleading values", () =
   const facts = publicPlayerMatchFacts(row(),[],{...full,minutes_played:-1,assists:Number.NaN},new Set());
   assert.equal(facts.minutes,null); assert.equal(facts.assists,null);
 });
-check("private rows are only queried after protocol publication", () => {
-  assert.match(page,/if \(published\) \{[\s\S]*?from\("player_match_stats"\)/);
-  assert.match(page,/player_match_stats"\)\.select\("player_id,team_id,appearance,minutes_played,goals,assists,yellow_cards,red_cards"\)/);
+check("public protocol does not query per-player match statistics", () => {
+  assert.doesNotMatch(page, /from\("player_match_stats"\)/);
+  assert.doesNotMatch(page, /PublicPlayerMatchStat/);
 });
-check("lineup renders completed stats in both home and away", () => assert.equal((page.match(/playerStats=\{playerStats\}/g)||[]).length,2));
-check("each roster row includes five compact player indicators", () => {
-  for (const k of ["minutes","goals","assists","yellow","red"]) assert.ok(page.includes(`"${k}"`));
-  assert.match(page,/className="matchPlayerStatStrip"/);
-  assert.match(page,/value === null \? "—" : value/);
+check("lineup rows remain compact and show identity plus event badges", () => {
+  assert.match(page, /className="publicLineupRow premiumLineupRow"/);
+  assert.match(page, /className="premiumLineupBadges"/);
+  assert.match(page, /premiumLineupAvatar/);
+  assert.match(page, /premiumLineupName/);
+  assert.doesNotMatch(page, /PlayerMatchStatStrip|matchPlayerStatStrip|matchPlayerStatLegend/);
 });
-check("data source and missing values explained in RU and RO", () => {
-  assert.match(page,/данные ещё не подтверждены/); assert.match(page,/date neconfirmate/);
+check("profile navigation remains available on player name", () => {
+  assert.match(page, /href={profileHref}/);
+  assert.match(page, /playerProfileHref\(profileSlug, \{ seasonId, fromMatchId: matchId, fromLineupId: row.id \}\)/);
+  assert.doesNotMatch(page, /matchPlayerSeasonLink|seasonHref/);
 });
-check("match styles are scoped, leave global/mobile css untouched", () => {
-  assert.match(page,/import "\.\/match-player-stats-v2299\.css"/);
-  assert.match(css, /\.premiumLineupsPanel \.premiumLineupRow \.matchPlayerStatStrip/);
-  assert.match(css, /@media\(max-width:767px\)/);
-  assert.doesNotMatch(css, /!important/);
+check("retired statistics stylesheet cannot affect roster", () => {
+  assert.doesNotMatch(page, /match-player-stats-v2299\.css/);
+  assert.doesNotMatch(css, /matchPlayerStatStrip|matchPlayerSeasonLink/);
+  assert.ok(!fs.existsSync(path.join(root,"app/matches/[id]/match-player-stats-v2299.css")));
 });
 const passed=results.filter(Boolean).length;
 console.log(`\n${passed}/${results.length} public player stats QA passed.`);
