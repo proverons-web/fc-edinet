@@ -8,6 +8,7 @@ import LineupSubstitutionBadge from "./LineupSubstitutionBadge";
 import MobileTimelineFilter from "./MobileTimelineFilter";
 import "./match-report-v2298.css";
 import "./match-player-stats-v2299.css";
+import "./match-player-navigation-v22910.css";
 import JsonLd from "@/app/components/JsonLd";
 import { notFound } from "next/navigation";
 import { createPublicClient } from "@/lib/supabase/public";
@@ -17,6 +18,7 @@ import { compareMatchStat } from "@/lib/match-stat-visualization";
 import { lineupEventParticipant, lineupEventsForPlayer, publicPlayerMatchFacts, type PublicPlayerMatchStat } from "@/lib/public-match-player-stats";
 import { publicText } from "@/lib/i18n";
 import { publicMetadata, sportsEventJsonLd } from "@/lib/seo";
+import { lineupAnchor, playerProfileHref } from "@/lib/player-navigation";
 import type { ClubMatch, MatchEvent, MatchLineupEntry, MatchLineupSetting, MatchReport, MatchTeamStatistic } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -189,7 +191,7 @@ function matchSelect() {
   return `id,competition_id,home_team_id,away_team_id,kickoff,stadium,round,status,home_score,away_score,notes,created_at,updated_at,
   home:teams!matches_home_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
   away:teams!matches_away_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
-  competition:competitions!matches_competition_id_fkey(id,name,slug,season,is_active)`;
+  competition:competitions!matches_competition_id_fkey(id,name,slug,season,season_id,is_active)`;
 }
 
 const getMatch = cache(async (id: string): Promise<ClubMatch | null> => {
@@ -842,8 +844,8 @@ function PublicLineup({ side, team, settings, entries, events, secondYellowIds, 
       {starters.length === 0 && substitutes.length === 0 ? <div className="adminEmpty">{t.noLineup}</div> : (
         <>
           <h4>{t.starters}</h4>
-          <div className="publicLineupRows">{starters.map((row) => <LineupRow row={row} t={t} locale={locale} events={events} secondYellowIds={secondYellowIds} photo={row.player_id ? playerPhotos.get(String(row.player_id)) : undefined} profileSlug={row.player_id ? playerSlugs.get(String(row.player_id)) : undefined} isClub={Boolean(team?.is_club)} teamName={teamName} scoreAfterEvent={scoreAfterEvent} completedStats={row.player_id ? playerStats.get(String(row.player_id)) : undefined} key={String(row.id)} />)}</div>
-          {substitutes.length > 0 ? <><h4>{t.substitutes}</h4><div className="publicLineupRows substitutes">{substitutes.map((row) => <LineupRow row={row} t={t} locale={locale} events={events} secondYellowIds={secondYellowIds} photo={row.player_id ? playerPhotos.get(String(row.player_id)) : undefined} profileSlug={row.player_id ? playerSlugs.get(String(row.player_id)) : undefined} isClub={Boolean(team?.is_club)} teamName={teamName} scoreAfterEvent={scoreAfterEvent} completedStats={row.player_id ? playerStats.get(String(row.player_id)) : undefined} key={String(row.id)} />)}</div></> : null}
+          <div className="publicLineupRows">{starters.map((row) => <LineupRow row={row} t={t} locale={locale} events={events} secondYellowIds={secondYellowIds} photo={row.player_id ? playerPhotos.get(String(row.player_id)) : undefined} profileSlug={row.player_id ? playerSlugs.get(String(row.player_id)) : undefined} isClub={Boolean(team?.is_club)} teamName={teamName} scoreAfterEvent={scoreAfterEvent} completedStats={row.player_id ? playerStats.get(String(row.player_id)) : undefined} matchId={match.id} seasonId={match.competition?.season_id} key={String(row.id)} />)}</div>
+          {substitutes.length > 0 ? <><h4>{t.substitutes}</h4><div className="publicLineupRows substitutes">{substitutes.map((row) => <LineupRow row={row} t={t} locale={locale} events={events} secondYellowIds={secondYellowIds} photo={row.player_id ? playerPhotos.get(String(row.player_id)) : undefined} profileSlug={row.player_id ? playerSlugs.get(String(row.player_id)) : undefined} isClub={Boolean(team?.is_club)} teamName={teamName} scoreAfterEvent={scoreAfterEvent} completedStats={row.player_id ? playerStats.get(String(row.player_id)) : undefined} matchId={match.id} seasonId={match.competition?.season_id} key={String(row.id)} />)}</div></> : null}
         </>
       )}
       <p className="matchPlayerStatLegend">{locale === "ro" ? "— = date neconfirmate. Minutele și pasele decisive apar după finalizarea statisticii." : "— = данные ещё не подтверждены. Минуты и ассисты появляются после завершения статистики."}</p>
@@ -851,7 +853,7 @@ function PublicLineup({ side, team, settings, entries, events, secondYellowIds, 
   );
 }
 
-function LineupRow({ row, t, locale, events, secondYellowIds, photo, profileSlug, isClub, teamName, scoreAfterEvent, completedStats }: {
+function LineupRow({ row, t, locale, events, secondYellowIds, photo, profileSlug, isClub, teamName, scoreAfterEvent, completedStats, matchId, seasonId }: {
   row: MatchLineupEntry;
   t: Copy;
   locale: Locale;
@@ -863,6 +865,8 @@ function LineupRow({ row, t, locale, events, secondYellowIds, photo, profileSlug
   teamName: string;
   scoreAfterEvent: Map<string, { home: number; away: number }>;
   completedStats?: PublicPlayerMatchStat;
+  matchId: string | number;
+  seasonId?: string | number | null;
 }) {
   const name = (row.player_name || "").trim().toLocaleLowerCase();
   const playerEvents = lineupEventsForPlayer(events, row);
@@ -875,6 +879,8 @@ function LineupRow({ row, t, locale, events, secondYellowIds, photo, profileSlug
   const substitutions = playerEvents.filter((event) => event.event_type === "substitution");
   const localizedPosition = positionLabels[locale][String(row.position || "").toLowerCase()] || row.position || "";
   const playerName = <span className="premiumLineupName">{row.player_name || "—"}<small>{localizedPosition}</small></span>;
+  const profileHref = isClub && profileSlug ? playerProfileHref(profileSlug, { seasonId, fromMatchId: matchId, fromLineupId: row.id }) : null;
+  const seasonHref = isClub && profileSlug ? playerProfileHref(profileSlug, { seasonId, fromMatchId: matchId, fromLineupId: row.id, section: "season" }) : null;
 
   const goalTooltip = goalEvents.map((event) => {
     const score = scoreAfterEvent.get(String(event.id));
@@ -889,9 +895,9 @@ function LineupRow({ row, t, locale, events, secondYellowIds, photo, profileSlug
   const redTooltip = redEvents.map((event) => `${eventMinute(event)} · ${secondYellowIds.has(String(event.id)) ? (locale === "ro" ? "Al doilea galben / roșu" : "Вторая жёлтая / красная") : (locale === "ro" ? "Cartonaș roșu" : "Красная карточка")} · ${event.player_name || "—"} · ${teamName}`).join("\n");
 
   return (
-    <div className="publicLineupRow premiumLineupRow" data-player-name={name}>
-      {isClub && profileSlug ? (
-        <Link className="premiumLineupPlayerLink" href={`/team/${profileSlug}`} aria-label={`${row.player_name || "—"} — ${locale === "ro" ? "profil" : "профиль"}`}>
+    <div className="publicLineupRow premiumLineupRow" id={lineupAnchor(row.id)} data-player-name={name}>
+      {profileHref ? (
+        <Link prefetch={false} className="premiumLineupPlayerLink" href={profileHref} aria-label={`${row.player_name || "—"} — ${locale === "ro" ? "profil" : "профиль"}`}>
           <div className={`premiumLineupAvatar${photo ? " has-photo" : ""}`}>
             {photo ? <><img className="premiumLineupAvatarThumb" src={photo} alt="" /><img className="premiumLineupAvatarPreview" src={photo} alt="" /></> : <span>{row.shirt_number ?? "—"}</span>}
           </div>
@@ -916,6 +922,11 @@ function LineupRow({ row, t, locale, events, secondYellowIds, photo, profileSlug
         {substitutions.map((event) => <LineupSubstitutionBadge key={`sub-${String(event.id)}`} outgoing={event.player_name || ""} incoming={event.related_player_name || ""} tooltip={`${eventMinute(event)} · ${locale === "ro" ? "Schimbare" : "Замена"} · ${event.player_name || "—"} → ${event.related_player_name || "—"} · ${teamName}`} />)}
       </div>
       <PlayerMatchStatStrip facts={playerFacts} locale={locale} />
+      {seasonHref && (
+        <Link prefetch={false} className="matchPlayerSeasonLink" href={seasonHref} aria-label={locale === "ro" ? `Statisticile sezoniere ale lui ${row.player_name || "jucător"}` : `Сезонная статистика: ${row.player_name || "игрок"}`}>
+          {locale === "ro" ? "Statistici sezon" : "Статистика сезона"}<span aria-hidden="true">↗</span>
+        </Link>
+      )}
     </div>
   );
 }

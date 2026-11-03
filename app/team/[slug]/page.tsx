@@ -25,12 +25,14 @@ import { dateLocale, footLabelsI18n, localized, positionLabelsI18n, publicText }
 import { getPublishedSitePageDesign } from "@/lib/page-design";
 import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
 import { playerPersonJsonLd, publicMetadata } from "@/lib/seo";
+import { PLAYER_ANCHORS, matchReturnHref, playerProfileHref, validLineupId, validMatchId } from "@/lib/player-navigation";
+import "./player-navigation-v22910.css";
 
 export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ season?: string | string[] }>;
+  searchParams: Promise<{ season?: string | string[]; fromMatch?: string | string[]; fromLineup?: string | string[] }>;
 };
 
 type CompetitionSummary = PlayerSeasonStatistics & {
@@ -87,6 +89,9 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
   const account = accountText[locale];
   const { slug } = await params;
   const query = await searchParams;
+  const fromMatchId = validMatchId(one(query.fromMatch));
+  const fromLineupId = fromMatchId ? validLineupId(one(query.fromLineup)) : null;
+  const returnToMatchHref = matchReturnHref(fromMatchId, fromLineupId);
   const player = await getPlayer(slug);
   if (!player) notFound();
 
@@ -277,9 +282,9 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
   const foot = player.preferred_foot
     ? footLabelsI18n[locale][player.preferred_foot]
     : null;
-  const currentPath = selectedSeason
-    ? `/team/${slug}?season=${selectedSeason.id}`
-    : `/team/${slug}`;
+  const currentPath = playerProfileHref(slug, {
+    seasonId: selectedSeason?.id, fromMatchId, fromLineupId,
+  });
   const playerBio = localized(player.bio, player.bio_ro, locale) || null;
   const personJsonLd = playerPersonJsonLd({
     slug: player.slug,
@@ -393,6 +398,22 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
         </>
       </PageHeroShell>
 
+      <nav className="playerProfileQuickNav" aria-label={locale === "ro" ? "Navigare în profil" : "Навигация по профилю"}>
+        <div className="container playerProfileQuickNavInner">
+          {returnToMatchHref && (
+            <Link className="playerReturnToMatch" href={returnToMatchHref}>
+              <span aria-hidden="true">←</span>{locale === "ro" ? "Înapoi la jucător în raport" : "К игроку в протоколе матча"}
+            </Link>
+          )}
+          <div className="playerProfileQuickLinks">
+            <a href={`#${PLAYER_ANCHORS.season}`}>{locale === "ro" ? "Sezon" : "Сезон"}</a>
+            {recentMatches.length > 0 && <a href={`#${PLAYER_ANCHORS.matches}`}>{locale === "ro" ? "Meciuri" : "Матчи"}</a>}
+            <a href={`#${PLAYER_ANCHORS.career}`}>{locale === "ro" ? "Carieră" : "Карьера"}</a>
+            <a href={`#${PLAYER_ANCHORS.about}`}>{locale === "ro" ? "Despre jucător" : "Об игроке"}</a>
+          </div>
+        </div>
+      </nav>
+
       <PlayerStatisticsSection
         player={player}
         seasons={seasons}
@@ -403,6 +424,8 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
         error={statisticsError}
         locale={locale}
         slug={slug}
+        fromMatchId={fromMatchId}
+        fromLineupId={fromLineupId}
       />
 
       <PlayerCareerSection
@@ -412,9 +435,11 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
         error={careerError}
         locale={locale}
         slug={slug}
+        fromMatchId={fromMatchId}
+        fromLineupId={fromLineupId}
       />
 
-      <section className="section profileSection">
+      <section id={PLAYER_ANCHORS.about} className="section profileSection">
         <div className="container profileContentGrid">
           <article className="bioCard">
             <p className="eyebrow blue">{text.aboutEyebrow}</p>
@@ -498,6 +523,8 @@ function PlayerCareerSection({
   error,
   locale,
   slug,
+  fromMatchId,
+  fromLineupId,
 }: {
   player: Player;
   career: PlayerCareerTotal | null;
@@ -505,13 +532,15 @@ function PlayerCareerSection({
   error: string | null;
   locale: "ru" | "ro";
   slug: string;
+  fromMatchId: string | null;
+  fromLineupId: string | null;
 }) {
   const text = careerTextByLocale[locale];
   const hasCareer = Boolean(career && numberValue(career.appearances) > 0);
   const contribution = career ? numberValue(career.goals) + numberValue(career.assists) : 0;
 
   return (
-    <section className="section playerCareerSection">
+    <section id={PLAYER_ANCHORS.career} className="section playerCareerSection">
       <div className="container playerCareerContainer">
         <header className="playerCareerHeader">
           <div>
@@ -579,7 +608,7 @@ function PlayerCareerSection({
                         <tr key={String(row.season_id ?? row.season?.id ?? row.season?.name ?? "season")}>
                           <td>
                             {row.season ? (
-                              <Link className="playerCareerSeasonLink" href={`/team/${slug}?season=${row.season.id}`}>
+                              <Link className="playerCareerSeasonLink" href={playerProfileHref(slug, { seasonId: row.season.id, fromMatchId, fromLineupId, section: "season" })}>
                                 <strong>{row.season.name}</strong>
                                 <small>{text.openSeason} →</small>
                               </Link>
@@ -618,6 +647,8 @@ function PlayerStatisticsSection({
   error,
   locale,
   slug,
+  fromMatchId,
+  fromLineupId,
 }: {
   player: Player;
   seasons: Season[];
@@ -628,6 +659,8 @@ function PlayerStatisticsSection({
   error: string | null;
   locale: "ru" | "ro";
   slug: string;
+  fromMatchId: string | null;
+  fromLineupId: string | null;
 }) {
   const text = publicText[locale].team;
   const isGoalkeeper = player.position === "goalkeeper";
@@ -702,7 +735,7 @@ function PlayerStatisticsSection({
   const hideAllLabel = locale === "ro" ? "Restrânge lista" : "Свернуть список";
 
   return (
-    <section className="section playerStatsSection">
+    <section id={PLAYER_ANCHORS.season} className="section playerStatsSection">
       <div className="container playerStatsContainer">
         <header className="playerStatsHeader">
           <div>
@@ -717,7 +750,7 @@ function PlayerStatisticsSection({
               {seasons.map((season) => (
                 <Link
                   key={String(season.id)}
-                  href={`/team/${slug}?season=${season.id}`}
+                  href={playerProfileHref(slug, { seasonId: season.id, fromMatchId, fromLineupId, section: "season" })}
                   className={String(selectedSeason?.id ?? "") === String(season.id) ? "active" : ""}
                 >
                   {season.name}
@@ -812,7 +845,7 @@ function PlayerStatisticsSection({
             )}
 
             {recentMatches.length > 0 && (
-              <section className="playerStatsBlock playerSeasonMatchesBlock">
+              <section id={PLAYER_ANCHORS.matches} className="playerStatsBlock playerSeasonMatchesBlock">
                 <div className="playerStatsBlockHead">
                   <h3>{text.statsRecent}</h3>
                   <span>{recentMatches.length}</span>
@@ -851,7 +884,7 @@ function PlayerRecentMatchRow({ item, locale, text }: { item: RecentPlayerMatch;
   const resultLabel = locale === "ro" ? (result.className === "w" ? "V" : result.className === "d" ? "E" : "Î") : (result.className === "w" ? "В" : result.className === "d" ? "Н" : "П");
   const clubIsHome = Boolean(match.home?.is_club);
   return (
-    <Link className="playerRecentMatch" href={`/matches/${match.id}`}>
+    <Link className="playerRecentMatch" href={`/matches/${match.id}#lineups`}>
       <div className="playerRecentDate">
         <strong>{formatShortDate(match.kickoff, locale)}</strong>
         <span>{match.competition?.name ?? text.statsTournamentEmpty}</span>

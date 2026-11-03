@@ -1,0 +1,18 @@
+/* v2.29.10 — contextual player navigation, scoped to profile only. */
+.playerProfileQuickNav{background:#f7faff;border-bottom:1px solid #dbe6f2}
+.playerProfileQuickNavInner{display:flex;align-items:center;justify-content:space-between;gap:14px 22px;padding-top:13px;padding-bottom:13px;min-width:0;flex-wrap:wrap}
+.playerReturnToMatch{display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:#0d4c90;font-size:12px;font-weight:850;line-height:1.4;padding:7px 0}
+.playerReturnToMatch span{font-size:18px;line-height:1}
+.playerReturnToMatch:hover{text-decoration:underline}
+.playerProfileQuickLinks{display:flex;align-items:center;gap:5px 18px;flex-wrap:wrap;min-width:0}
+.playerProfileQuickLinks a{display:inline-flex;align-items:center;min-height:35px;color:#294b70;font-size:11px;font-weight:800;text-decoration:none;white-space:nowrap;border-bottom:2px solid transparent}
+.playerProfileQuickLinks a:hover{color:#0756a4;border-color:#0756a4}
+.playerProfileQuickNav a:focus-visible{outline:2px solid #1768bd;outline-offset:3px}
+#player-season-stats,#player-season-matches,#player-career,#player-about{scroll-margin-top:100px}
+@media(max-width:767px){
+  .playerProfileQuickNavInner{align-items:stretch;flex-direction:column;gap:6px;padding-top:9px;padding-bottom:10px}
+  .playerReturnToMatch{font-size:11px;padding:6px 0}
+  .playerProfileQuickLinks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;width:100%}
+  .playerProfileQuickLinks a{justify-content:center;text-align:center;white-space:normal;line-height:1.2;font-size:10px;min-width:0;min-height:38px;padding:3px 1px}
+}
+@media(max-width:340px){.playerProfileQuickLinks a{font-size:9px}}

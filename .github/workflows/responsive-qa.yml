@@ -45,6 +45,10 @@ jobs:
         run: node scripts/qa-responsive.mjs --screenshots
         env:
           CHROME_PATH: /usr/bin/google-chrome
+      - name: Player profile navigation contracts
+        run: node --experimental-strip-types scripts/qa-player-navigation-v22910.mjs
+      - name: Player profile navigation layout
+        run: node scripts/qa-player-navigation-layout.mjs
       - name: Keep QA screenshots after failure
         if: failure()
         uses: actions/upload-artifact@v4
