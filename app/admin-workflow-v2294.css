@@ -87,3 +87,30 @@
 /* FC Edineț v2.29.8 — search-result feedback in event editor */
 .adminAppShell .mc298SearchCount{display:block;margin:3px 0 5px;color:#55738e;font-size:11px;font-weight:750;}
 .adminAppShell .mc298ParticipantWarning{display:block;margin:4px 0;color:#aa1e22;font-size:11px;font-weight:750;}
+
+/* FC EDINEȚ v2.29.15 — staff-only integrity audit */
+.adminIntegrityPage{max-width:1280px;margin:0 auto;padding:clamp(20px,3vw,44px)}
+.adminIntegrityHeading{display:flex;justify-content:space-between;align-items:start;gap:24px;margin-bottom:28px}
+.adminIntegrityHeading h1{margin:4px 0 8px;font-size:clamp(26px,3vw,40px)}
+.adminIntegrityHeading p{max-width:720px;color:#65758b}
+.adminIntegritySummary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:22px}
+.adminIntegritySummary>div{display:flex;flex-direction:column;background:#fff;border:1px solid #dce5f0;padding:22px}
+.adminIntegritySummary strong{font-size:30px;color:#082d5d}
+.adminIntegritySummary span{font-size:12px;font-weight:700;color:#65758b}
+.adminIntegrityFilters{display:flex;gap:8px;margin:0 0 18px}
+.adminIntegrityFilters a{padding:10px 14px;background:#fff;border:1px solid #dce5f0;text-decoration:none;color:#16345c;font-weight:800;font-size:12px}
+.adminIntegrityFilters a[aria-current=page]{background:#082d5d;color:#fff}
+.adminIntegrityList{display:grid;gap:12px}
+.adminIntegrityCard{background:#fff;border:1px solid #dce5f0;padding:20px}
+.adminIntegrityCardHead{display:flex;justify-content:space-between;align-items:start;gap:14px}
+.adminIntegrityCardHead small{font-weight:800;color:#5277a6}
+.adminIntegrityCardHead h2{font-size:18px;margin:6px 0}
+.adminIntegrityCardHead p{font-size:13px;color:#536780;margin:0}
+.adminIntegrityOpen{font-size:12px;font-weight:800;white-space:nowrap;color:#0a61bf}
+.adminIntegrityIssues{list-style:none;padding:0;margin:15px 0 0;display:grid;gap:6px}
+.adminIntegrityIssues li{display:flex;gap:12px;align-items:baseline;padding:10px 12px;background:#f5f8fc;border-left:3px solid #d7a23b;font-size:13px;color:#213751}
+.adminIntegrityIssues li[data-severity=critical]{border-color:#db4351}
+.adminIntegrityIssues span{font-size:10px;font-weight:900;text-transform:uppercase;min-width:65px;color:#7a5b15}
+.adminIntegrityIssues li[data-severity=critical] span{color:#a12636}
+.adminIntegrityOk,.adminIntegrityEmpty{color:#28794a;font-weight:700;font-size:13px}
+@media(max-width:640px){.adminIntegrityHeading,.adminIntegrityCardHead{flex-direction:column}.adminIntegritySummary>div{padding:12px}.adminIntegritySummary strong{font-size:25px}.adminIntegritySummary span{font-size:10px}.adminIntegrityCard{padding:14px}.adminIntegrityOpen{white-space:normal}}

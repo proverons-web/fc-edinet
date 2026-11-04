@@ -1,0 +1,45 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import { auditMatchData } from "../lib/match-data-integrity.ts";
+const read = (path) => fs.readFileSync(path, "utf8");
+let passed = 0;
+const check = (label, fn) => {
+  try { fn(); passed++; console.log(`PASS ${label}`); }
+  catch (error) { console.error(`FAIL ${label}: ${error.message}`); process.exitCode = 1; }
+};
+const base = {id:16,status:"finished",home_team_id:1,away_team_id:2,home_score:2,away_score:1,kickoff:"2026-10-25T12:00:00Z"};
+const report = {match_id:16,status:"complete",is_published:true};
+const goal = (team_id,event_type) => ({match_id:16,team_id,event_type});
+const side = (name, team_id) => Array.from({length:11},(_,i)=>({match_id:16,team_id,side:name,lineup_role:"starter",position:i===0?"goalkeeper":"defender",is_captain:i===1,player_id:`${name}-${i}`}));
+const lineups = [...side("home",1),...side("away",2)];
+const events = [goal(1,"goal"),goal(1,"penalty_goal"),goal(2,"goal")];
+const stats = [{match_id:16,team_id:1,player_id:"home-1"}];
+const audit = (m=base,r=[report],e=events,l=lineups,s=[{match_id:16,status:"complete"}],ps=stats,clubs=new Set(["1"]))=>auditMatchData([m],r,e,l,s,ps,clubs)[0];
+check("matched published score is clean",()=>assert.equal(audit().issues.length,0));
+check("own goal is credited to the opposite side",()=>assert.equal(audit({...base,home_score:3},[report],[...events,goal(2,"own_goal")]).homeGoals,3));
+check("missing own goal flags scoring mismatch",()=>assert.ok(audit({...base,home_score:3}).issues.some(i=>i.code==="score_events_mismatch")));
+check("missing score cannot appear as a real 0:0",()=>assert.ok(audit({...base,away_score:null}).issues.some(i=>i.code==="published_missing_score")));
+check("published unfinished match is critical",()=>assert.ok(audit({...base,status:"live"}).issues.some(i=>i.code==="published_not_finished")));
+check("unpublished completed match is actionable",()=>assert.ok(audit(base,[]).issues.some(i=>i.code==="finished_unpublished")));
+check("unpublished draft does not create hard blockers",()=>assert.ok(audit(base,[]).issues.every(i=>i.severity==="warning")));
+check("published incomplete lineups are flagged",()=>assert.ok(audit(base,[report],events,lineups.slice(0,21)).issues.some(i=>i.code==="published_incomplete_lineups")));
+check("captain mismatch is a warning",()=>assert.ok(audit(base,[report],events,lineups.map(l=>({...l,is_captain:false}))).issues.some(i=>i.code==="captain_count"&&i.severity==="warning")));
+check("complete statistics without player rows are flagged",()=>assert.ok(audit(base,[report],events,lineups,[{match_id:16,status:"complete"}],[]).issues.some(i=>i.code==="complete_without_player_stats")));
+check("GK not labeled for opponent does not block",()=>assert.ok(!audit(base,[report],events,lineups.map(l=>l.side==="away"?{...l,position:null}:l)).issues.some(i=>i.code==="club_goalkeeper_missing")));
+check("missing own-team goalkeeper is a warning",()=>assert.ok(audit(base,[report],events,lineups.map(l=>l.side==="home"?{...l,position:null}:l)).issues.some(i=>i.code==="club_goalkeeper_missing")));
+check("duplicate player ID is flagged",()=>assert.ok(audit(base,[report],events,[...lineups.slice(0,10),{...lineups[9]},...lineups.slice(11)]).issues.some(i=>i.code==="duplicate_lineup_player")));
+check("goal from alien team is flagged",()=>assert.ok(audit(base,[report],[...events,goal(999,"goal")]).issues.some(i=>i.code==="event_team_outside_match")));
+check("no published flag hides publication blockers",()=>assert.ok(!audit(base,[],events,lineups).issues.some(i=>i.severity==="critical")));
+const actions=read("app/admin/match-center/[matchId]/actions.ts");
+const page=read("app/admin/data-integrity/page.tsx");
+check("server sync surfaces failed data writes",()=>assert.ok(actions.includes("if (upsertError) go(matchId") && actions.includes("if (staleError) go(matchId")));
+check("write happens before stale-row deletion",()=>assert.ok(actions.indexOf('const { error: upsertError }')<actions.indexOf('const { error: staleError }')));
+check("statistics sync is scoped to club team",()=>assert.ok(actions.includes('.eq("team_id", clubTeamId).in("player_id", staleIds)')));
+check("publication checks club lineup only",()=>assert.ok(actions.includes('.eq("team_id", matchClubId)')&&actions.includes('if (statusError) go(matchId')));
+check("audit page is staff protected and read-only",()=>assert.ok(page.includes("requireEditor()")&&!page.includes('.insert(')&&!page.includes('.update(')&&!page.includes('.delete(')));
+check("audit linked from dashboard",()=>assert.ok(read("app/admin/page.tsx").includes('href: "/admin/data-integrity"')));
+check("audit failure is not silently reported as zero",()=>assert.ok(page.includes("if (errors.length)")&&page.includes('role="alert"')));
+check("large event and lineup lists are paginated",()=>assert.ok(page.includes("readAllAuditRows<IntegrityEvent>")&&page.includes("readAllAuditRows<IntegrityLineup>")&&page.includes(".range(start, end)")));
+check("past player statistics are restricted by club team",()=>assert.ok(actions.includes('.select("*").eq("match_id", matchId).eq("team_id", clubTeamId)')));
+console.log(`${passed}/24 data-integrity checks passed.`);
+if (passed!==24) process.exitCode=1;

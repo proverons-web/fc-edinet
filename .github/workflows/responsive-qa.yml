@@ -27,6 +27,8 @@ jobs:
         run: node --experimental-strip-types scripts/qa-admin-ops.mjs
       - name: Check administrator attention filters and media operations
         run: node --experimental-strip-types scripts/qa-admin-attention.mjs
+      - name: Verify match data integrity and error propagation
+        run: node --experimental-strip-types scripts/qa-data-integrity.mjs
       - name: Check match center workflow and unsaved form protection
         run: node scripts/qa-match-workflow.mjs
       - name: Match entry QA

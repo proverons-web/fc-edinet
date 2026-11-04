@@ -336,21 +336,29 @@ export async function publishMatchProtocol(formData: FormData) {
   // Keep match statistics in sync before publication. This is intentionally
   // independent from the navigation label “Календарь” and the /matches route.
   await syncClubPlayerStatsFromEvents(supabase, userId, matchId);
-  const { data: clubLineup } = await supabase
+  const { data: clubTeams, error: clubTeamsError } = await supabase.from("teams").select("id").eq("is_club", true);
+  if (clubTeamsError) go(matchId, { error: `Не удалось проверить команду клуба: ${clubTeamsError.message}` });
+  const clubTeamIds = new Set((clubTeams ?? []).map((team) => String(team.id)));
+  const matchClubId = [match.home_team_id, match.away_team_id].map(String).find((teamId) => clubTeamIds.has(teamId));
+  if (!matchClubId) go(matchId, { error: "Не удалось определить команду FC Edineț в матче." });
+  const { data: clubLineup, error: clubLineupError } = await supabase
     .from("match_lineup_entries")
     .select("lineup_role,position")
     .eq("match_id", matchId)
+    .eq("team_id", matchClubId)
     .not("player_id", "is", null);
+  if (clubLineupError) go(matchId, { error: `Не удалось проверить клубный состав: ${clubLineupError.message}` });
   const starters = (clubLineup ?? []).filter((row) => row.lineup_role === "starter");
   const hasGoalkeeper = starters.some((row) => row.position === "goalkeeper");
   if (starters.length === 11 && hasGoalkeeper) {
-    await supabase.from("match_statistics_status").upsert({
+    const { error: statusError } = await supabase.from("match_statistics_status").upsert({
       match_id: matchId,
       status: "complete",
       completed_at: new Date().toISOString(),
       completed_by: userId,
       updated_by: userId,
     }, { onConflict: "match_id" });
+    if (statusError) go(matchId, { error: `Не удалось завершить статус статистики: ${statusError.message}` });
   }
 
   const now = new Date().toISOString();
@@ -789,7 +797,7 @@ async function syncClubPlayerStatsFromEvents(
     `)
     .eq("id", matchId)
     .maybeSingle();
-  if (matchError || !match) return;
+  if (matchError || !match) go(matchId, { error: `Не удалось пересчитать статистику: ${matchError?.message || "матч не найден"}. Данные события или состава могли сохраниться.` });
 
   const home = Array.isArray(match.home) ? match.home[0] : match.home;
   const away = Array.isArray(match.away) ? match.away[0] : match.away;
@@ -811,10 +819,12 @@ async function syncClubPlayerStatsFromEvents(
       .order("minute", { ascending: true })
       .order("stoppage_minute", { ascending: true })
       .order("sort_order", { ascending: true }),
-    supabase.from("player_match_stats").select("*").eq("match_id", matchId),
+    supabase.from("player_match_stats").select("*").eq("match_id", matchId).eq("team_id", clubTeamId),
   ]);
 
-  if (lineupResult.error || eventsResult.error || existingResult.error) return;
+  if (lineupResult.error || eventsResult.error || existingResult.error) {
+    go(matchId, { error: `Событие или состав могли сохраниться, но пересчёт статистики не завершился: ${lineupResult.error?.message || eventsResult.error?.message || existingResult.error?.message}.` });
+  }
 
   const lineup = (lineupResult.data ?? []).filter((row) => row.player_id);
   const events = eventsResult.data ?? [];
@@ -930,6 +940,7 @@ async function syncClubPlayerStatsFromEvents(
     };
     statsRows.push({
       match_id: matchId,
+      team_id: clubTeamId,
       player_id: player.playerId,
       appearance: player.appearance,
       position: player.position,
@@ -965,11 +976,15 @@ async function syncClubPlayerStatsFromEvents(
 
   const selectedIds = new Set(statsRows.map((row) => String(row.player_id)));
   const staleIds = [...existingByPlayer.keys()].filter((id) => !selectedIds.has(id));
-  if (staleIds.length > 0) {
-    await supabase.from("player_match_stats").delete().eq("match_id", matchId).in("player_id", staleIds);
-  }
+  // Persist current rows first. Never delete older statistics before a new
+  // upsert succeeds: a failed write must not erase the previous snapshot.
   if (statsRows.length > 0) {
-    await supabase.from("player_match_stats").upsert(statsRows, { onConflict: "match_id,player_id" });
+    const { error: upsertError } = await supabase.from("player_match_stats").upsert(statsRows, { onConflict: "match_id,player_id" });
+    if (upsertError) go(matchId, { error: `Пересчёт статистики не завершён: ${upsertError.message}. Сохранённое событие или состав проверь повторно.` });
+  }
+  if (staleIds.length > 0) {
+    const { error: staleError } = await supabase.from("player_match_stats").delete().eq("match_id", matchId).eq("team_id", clubTeamId).in("player_id", staleIds);
+    if (staleError) go(matchId, { error: `Не удалось очистить устаревшую статистику: ${staleError.message}. Требуется повторная проверка.` });
   }
 }
 

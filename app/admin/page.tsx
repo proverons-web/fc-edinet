@@ -98,6 +98,7 @@ export default async function AdminPage() {
         <DashboardSection eyebrow="МАТЧИ И ТУРНИР" title="Спортивные данные" text="Календарь, турнир и статистика. Единый матч-центр объединяет составы, события, статистику, отчёт и публикацию." modules={[
           { title: "Календарь", text: "Матчи, результаты, соперники и команды.", href: "/admin/matches", icon: "M", kicker: "Матчи" },
           { title: "Протокол матча", text: "События, составы и подробности созданных матчей.", href: "/admin/match-center", icon: "MC", kicker: "Матч-центр" },
+          { title: "Целостность данных", text: "Проверка счёта, голов, составов и опубликованных протоколов.", href: "/admin/data-integrity", icon: "QA", kicker: "Контроль" },
           { title: "Таблица", text: "Турниры, положение команд и очки.", href: "/admin/standings", icon: "T", kicker: "Турнир" },
           { title: "Статистика", text: "Статистика игроков, сезонов и матчей.", href: "/admin/statistics", icon: "S", kicker: "Данные" },
         ]} />

@@ -113,6 +113,7 @@ export default async function MatchCenterPage({ searchParams }: PageProps) {
           <div className="adminHeroActions">
             <Link href="/admin" className="adminBack">← Админка</Link>
             <Link href="/admin/matches" className="rowAction muted">Открыть календарь</Link>
+            <Link href="/admin/data-integrity" className="rowAction muted">Контроль данных</Link>
           </div>
         </div>
       </section>

@@ -1,0 +1,5 @@
+FC Edinet v2.29.15 FULL
+1. Extract next to previous version folders.
+2. Run DEPLOY_FC_EDINET.bat.
+3. Check npm run qa:data-integrity and npm run qa:live.
+4. Review /admin/data-integrity after deployment.
