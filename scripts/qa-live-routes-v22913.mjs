@@ -1,6 +1,11 @@
 /** Run on a computer with network access AFTER a successful Vercel deployment.
  * This is a non-authenticated, read-only smoke test; it cannot validate admin routes.
  */
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+const projectRoot=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const expectedVersion=JSON.parse(fs.readFileSync(path.join(projectRoot,'package.json'),'utf8')).version;
 const base = (process.env.FC_EDINET_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://fc-edinet.vercel.app').replace(/\/+$/,'');
 const routes = [ '/', '/news', '/team', '/staff', '/matches', '/standings', '/statistics', '/media', '/club/about', '/api/version', '/sitemap.xml', '/robots.txt' ];
 const results = [];
@@ -9,14 +14,14 @@ for (const pathname of routes) {
     const response = await fetch(`${base}${pathname}`, {
       signal: AbortSignal.timeout(15000),
       redirect: 'follow',
-      headers: { 'user-agent': 'FC-Edinet-Production-Audit/2.29.13' },
+      headers: { 'user-agent': `FC-Edinet-Production-Audit/${expectedVersion}` },
     });
     const type=response.headers.get('content-type')||'';
     let ok = response.ok;
     let detail = `${response.status} ${type}`;
     if (ok && pathname === '/api/version') {
       const data = await response.json();
-      ok = data?.version === '2.29.13';
+      ok = data?.version === expectedVersion;
       detail += ` version=${String(data?.version ?? '?')}`;
     } else if (ok && pathname === '/sitemap.xml') {
       const body=await response.text();

@@ -122,8 +122,8 @@ ok("next match VS circle replaced", homeCss.includes('Modern VS separator') && h
 ok("results rail frame and rounding removed", homeCss.includes('.fcV215ResultsSection .fcV215MatchRailWide{') && homeCss.includes('.fcV215ResultsSection .fcRefRecentMatchCard,') && homeCss.includes('border:0!important;') && homeCss.includes('border-radius:0!important;'));
 ok("homepage news rounding removed", homeCss.includes('.fcRefLeadColumn,\n.fcRefLatestColumn{') && homeCss.includes('.fcRefNewsRow>div{\n  border-radius:0!important;'));
 const releaseSource = read("lib/release.ts");
-ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.29.13"'));
-ok("release version", JSON.parse(read("package.json")).version === "2.29.13");
+ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.29.14"'));
+ok("release version", JSON.parse(read("package.json")).version === "2.29.14");
 
 ok("v2.28.8 next-match footprint restored", homeCss.includes("FC EDINEȚ v2.28.8 — LARGE CRESTS WITHOUT TALLER MATCH CARD") && homeCss.includes("min-height:168px!important") && homeCss.includes("height:168px!important"));
 ok("v2.28.8 crests enlarge without layout growth", homeCss.includes("transform:scale(1.58) translateY(-7px)!important"));
@@ -133,7 +133,7 @@ ok("v2.28.10 recent match crest alignment fixed", homeCss.includes("FC EDINEȚ v
 ok("v2.28.11 recent match crest stage added", homepageSource.includes('className="fcRefRecentMatchCrest"') && homeCss.includes("FC EDINEȚ v2.28.11 — RECENT MATCHES HORIZONTAL CREST LINE"));
 ok("recent match crests aligned", homeCss.includes("object-position:center center!important") && homepageSource.includes('className="fcRefRecentMatchLogoBox"'));
 const legacyTxt = fs.readdirSync(root).filter((name)=>/^(STEP-|DEPLOY-|FIX-).*\.txt$/.test(name));
-ok("v2.28.24 legacy step/deploy/fix txt pruned", legacyTxt.length === 1 && legacyTxt[0] === 'STEP-2.29.13.txt', legacyTxt.join(', '));
+ok("v2.28.24 legacy step/deploy/fix txt pruned", legacyTxt.length === 1 && legacyTxt[0] === 'STEP-2.29.14.txt', legacyTxt.join(', '));
 ok("v2.28.12 recent match side padding restored", homeCss.includes("FC EDINEȚ v2.28.12 — RECENT MATCH SIDE PADDING FIX"));
 ok("v2.28.13 recent match logo boxes added", homepageSource.includes('className="fcRefRecentMatchLogoBox"') && homeCss.includes("FC EDINEȚ v2.28.13 — RECENT MATCH LOGO BOXES"));
 ok("v2.28.14 recent match card compacted", homeCss.includes("FC EDINEȚ v2.28.14 — RECENT MATCH CARD COMPACTION"));
@@ -185,6 +185,8 @@ ok("v2.29.0 only one mobile stylesheet imported", (read("app/layout.tsx").match(
 ok("v2.29.0 mobile timeline still guarded by viewport", mobileStyles.includes("@media (max-width:767px){") && mobileStyles.includes(".premiumTimelinePanel .mobileMatchTimeline{display:block!important"));
 ok("v2.29.0 test fixture exists", exists("qa/fixtures/home-mobile.html") && exists("scripts/qa-responsive.mjs"));
 ok("v2.29.0 CSS guard exists", exists("scripts/qa-css-audit.mjs") && exists("qa/css-baseline.json"));
+ok("v2.29.14 visual consistency regression guard", exists("scripts/qa-ui-consistency.mjs") && exists("qa/baselines/ui-v2.29.13-css.json.gz") && exists("qa/fixtures/profile-hero.html") && JSON.parse(read("package.json")).scripts["qa:ui"]?.includes("qa-ui-consistency.mjs"));
+ok("v2.29.14 approved CSS override count reduced", (read("app/globals.css")+read("app/visual-polish.css")+read("app/home-v215.css")+read("app/mobile.css")).match(/!important/g)?.length <= 4080);
 ok("v2.29.0 screenshot reference and CI present", exists("qa/baselines/mobile.css") && exists(".github/workflows/responsive-qa.yml") && exists("docs/FOUNDATION-QA-v2.29.0.md"));
 ok("v2.29.1 performance QA wired into deploy and CI", read("package.json").includes("scripts/qa-performance.mjs") && exists("scripts/qa-performance.mjs") && read(".github/workflows/responsive-qa.yml").includes("scripts/qa-performance.mjs"));
 ok("v2.29.1 optimized media with safe external fallback", read("app/components/PublicImage.tsx").includes("isOptimizablePublicImage") && read("next.config.ts").includes("trustedSupabaseImageHost"));

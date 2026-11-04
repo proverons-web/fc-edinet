@@ -1,0 +1,219 @@
+{
+  "version": "2.29.14",
+  "method": "Remove earlier identical declarations having identical selector, at-rule scope, priority and value later in same stylesheet",
+  "files": {
+    "globals.css": {
+      "declarations_removed": 45,
+      "bytes_removed": 850,
+      "important_removed": 1,
+      "examples": [
+        {
+          "selector": ".header",
+          "property": "position",
+          "value": "sticky"
+        },
+        {
+          "selector": ".heroTeams",
+          "property": "align-items",
+          "value": "center"
+        },
+        {
+          "selector": ".heroTeams>div",
+          "property": "display",
+          "value": "grid"
+        },
+        {
+          "selector": ".heroTeams>div",
+          "property": "justify-items",
+          "value": "center"
+        },
+        {
+          "selector": ".heroTeams>div",
+          "property": "text-align",
+          "value": "center"
+        },
+        {
+          "selector": ".formSuccess",
+          "property": "padding",
+          "value": "12px 14px"
+        },
+        {
+          "selector": ".formSuccess",
+          "property": "font-weight",
+          "value": "800"
+        },
+        {
+          "selector": ".homeStripTeam",
+          "property": "display",
+          "value": "grid"
+        },
+        {
+          "selector": ".homeStripTeam",
+          "property": "justify-items",
+          "value": "center"
+        },
+        {
+          "selector": ".homeStripTeam",
+          "property": "text-align",
+          "value": "center"
+        },
+        {
+          "selector": ".homeStripTeam",
+          "property": "justify-items",
+          "value": "center"
+        },
+        {
+          "selector": ".homeStripTeam",
+          "property": "text-align",
+          "value": "center"
+        }
+      ]
+    },
+    "visual-polish.css": {
+      "declarations_removed": 66,
+      "bytes_removed": 1886,
+      "important_removed": 55,
+      "examples": [
+        {
+          "selector": "html,body",
+          "property": "max-width",
+          "value": "100%"
+        },
+        {
+          "selector": ".mediaPhotoTile",
+          "property": "margin-bottom",
+          "value": "12px"
+        },
+        {
+          "selector": ".mediaMasonry",
+          "property": "column-gap",
+          "value": "12px"
+        },
+        {
+          "selector": ".publicMatchCard",
+          "property": "position",
+          "value": "relative"
+        },
+        {
+          "selector": ".publicMatchCard",
+          "property": "overflow",
+          "value": "hidden"
+        },
+        {
+          "selector": ".profileContentGrid",
+          "property": "gap",
+          "value": "24px"
+        },
+        {
+          "selector": ".fcRefNextMatch",
+          "property": "overflow",
+          "value": "hidden"
+        },
+        {
+          "selector": ".teamGroupHeading",
+          "property": "position",
+          "value": "relative"
+        },
+        {
+          "selector": ".profilePhoto",
+          "property": "border-radius",
+          "value": "0"
+        },
+        {
+          "selector": ".playerProfileHero .playerProfileGrid",
+          "property": "grid-template-columns",
+          "value": "1fr"
+        },
+        {
+          "selector": ".playerProfileHero .playerProfileGrid",
+          "property": "gap",
+          "value": "0"
+        },
+        {
+          "selector": ".profileIntro",
+          "property": "grid-row",
+          "value": "1"
+        }
+      ]
+    },
+    "home-v215.css": {
+      "declarations_removed": 103,
+      "bytes_removed": 2754,
+      "important_removed": 101,
+      "examples": [
+        {
+          "selector": ".fcV215PulseSection",
+          "property": "border-bottom",
+          "value": "1px solid #dce5ef"
+        },
+        {
+          "selector": ".fcV215NextMatchDashboard .fcRefMatchFacts strong",
+          "property": "font-size",
+          "value": "13px"
+        },
+        {
+          "selector": ".fcV215NextMatchDashboard .fcRefTeamBadge strong",
+          "property": "font-size",
+          "value": "11px"
+        },
+        {
+          "selector": ".fcV215MatchDashboard",
+          "property": "gap",
+          "value": "16px"
+        },
+        {
+          "selector": ".fcV215DashboardKpisFull strong",
+          "property": "font-size",
+          "value": "18px"
+        },
+        {
+          "selector": ".fcV215DashboardVideoBody span",
+          "property": "color",
+          "value": "#ffd028"
+        },
+        {
+          "selector": ".fcV215ResultsSection .fcV215MatchRailWide",
+          "property": "box-shadow",
+          "value": "none"
+        },
+        {
+          "selector": ".fcV215DashboardKpisFull",
+          "property": "grid-template-columns",
+          "value": "repeat(2,minmax(0,1fr))"
+        },
+        {
+          "selector": ".fcV215MatchDashboard",
+          "property": "gap",
+          "value": "16px"
+        },
+        {
+          "selector": ".fcV215DashboardForm .fcV215FormHead",
+          "property": "justify-content",
+          "value": "center"
+        },
+        {
+          "selector": ".fcV215DashboardForm .fcV215FormDots",
+          "property": "justify-content",
+          "value": "center"
+        },
+        {
+          "selector": ".fcV215NextMatchDashboard .fcRefTeamBadge strong",
+          "property": "line-height",
+          "value": "1.08"
+        }
+      ]
+    },
+    "mobile.css": {
+      "declarations_removed": 1,
+      "bytes_removed": 22,
+      "important_removed": 1,
+      "examples": [
+        {
+          "selector": ".fcV215DashboardForm .fcV215DashboardKpisFull>span",
+          "property": "min-width",
+          "value": "0"
+        }
+      ]
+    }
+  }
+}

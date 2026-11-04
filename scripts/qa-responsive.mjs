@@ -106,7 +106,7 @@ function makeCdp(url) {
 function buildFixture(mobileOverride=null) {
   let html=fs.readFileSync(path.join(root,"qa/fixtures/home-mobile.html"),"utf8");
   const sources=["globals.css","visual-polish.css","home-v215.css","mobile.css"];
-  const styles=sources.map((name)=>`<style data-source="${name}">${name==="mobile.css" && mobileOverride!==null ? mobileOverride : fs.readFileSync(path.join(root,"app",name),"utf8")}</style>`).join("\n");
+  const styles=sources.map((name)=>`<style data-source="${name}">${name==="mobile.css" && mobileOverride!==null ? mobileOverride : fs.readFileSync(path.join(root,"app",name),"utf8")}</style>`).join("\n")+"<style>html{scroll-behavior:auto!important}*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}</style>";
   const crest=fs.readFileSync(path.join(root,"public/brand/fc-edinet-crest.png")).toString("base64");
   html=html.replace("<!-- Styles injected by scripts/qa-responsive.mjs -->",styles);
   html=html.replaceAll("{{CREST_DATA_URI}}",`data:image/png;base64,${crest}`);
@@ -191,7 +191,7 @@ try {
       verify(`${width}px desktop chronology preserved`,x.desktopTimelineDisplay!=="none" && x.mobileTimelineDisplay==="none");
     }
     if(saveScreenshots || [320,390,767,768,1280].includes(width)) {
-      await cdp.send("Runtime.evaluate",{expression:"scrollTo(0,0)"});
+      await cdp.send("Runtime.evaluate",{expression:"scrollTo({top:0,behavior:'instant'})"});
       await stableFrame();
       const current=await cdp.send("Page.captureScreenshot",{format:"png",captureBeyondViewport:true});
       if(saveScreenshots && [390,768,1280].includes(width)) {

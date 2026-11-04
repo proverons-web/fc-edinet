@@ -1,18 +1,18 @@
 {
   "name": "fc-edinet",
-  "version": "2.29.13",
+  "version": "2.29.14",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "deploy:check": "node scripts/qa-site.mjs && node scripts/qa-css-audit.mjs && node scripts/qa-security.mjs && node scripts/qa-editorial.mjs && node --experimental-strip-types scripts/qa-admin-ops.mjs && node --experimental-strip-types scripts/qa-admin-attention.mjs && node scripts/qa-match-workflow.mjs && node scripts/qa-match-entry.mjs && node scripts/qa-performance.mjs && node scripts/qa-responsive.mjs --skip-if-missing && node --experimental-strip-types scripts/qa-public-match-v2298.mjs && node --experimental-strip-types scripts/qa-public-player-v2299.mjs && node scripts/qa-public-player-layout.mjs --skip-if-missing && node --experimental-strip-types scripts/qa-player-navigation-v22910.mjs && node scripts/qa-player-navigation-layout.mjs --skip-if-missing && node scripts/qa-lineup-compact-v22911.mjs && node --experimental-strip-types scripts/qa-public-integrity-v22913.mjs && node scripts/qa-public-routes-v22913.mjs && node scripts/check-deploy.mjs && next build",
+    "deploy:check": "node scripts/qa-site.mjs && node scripts/qa-css-audit.mjs && node scripts/qa-security.mjs && node scripts/qa-editorial.mjs && node --experimental-strip-types scripts/qa-admin-ops.mjs && node --experimental-strip-types scripts/qa-admin-attention.mjs && node scripts/qa-match-workflow.mjs && node scripts/qa-match-entry.mjs && node scripts/qa-performance.mjs && node scripts/qa-responsive.mjs --skip-if-missing && node --experimental-strip-types scripts/qa-public-match-v2298.mjs && node --experimental-strip-types scripts/qa-public-player-v2299.mjs && node scripts/qa-public-player-layout.mjs --skip-if-missing && node --experimental-strip-types scripts/qa-player-navigation-v22910.mjs && node scripts/qa-player-navigation-layout.mjs --skip-if-missing && node scripts/qa-lineup-compact-v22911.mjs && node --experimental-strip-types scripts/qa-public-integrity-v22913.mjs && node scripts/qa-public-routes-v22913.mjs && node scripts/qa-ui-consistency.mjs && node scripts/check-deploy.mjs && next build",
     "qa:site": "node scripts/qa-site.mjs",
     "qa:css": "node scripts/qa-css-audit.mjs",
     "qa:css:baseline": "node scripts/qa-css-audit.mjs --update-baseline",
     "qa:responsive": "node scripts/qa-responsive.mjs",
     "qa:responsive:shots": "node scripts/qa-responsive.mjs --screenshots",
-    "qa:all": "npm run qa:site && npm run qa:css && npm run qa:security && npm run qa:editorial && npm run qa:performance && npm run qa:responsive && npm run qa:admin-ops && npm run qa:admin-attention && npm run qa:match-workflow && npm run qa:match-entry && npm run qa:public-match && npm run qa:public-players && npm run qa:player-layout && npm run qa:player-nav && npm run qa:player-nav-layout && npm run qa:lineup-compact && npm run qa:public-integrity && npm run qa:routes",
+    "qa:all": "npm run qa:site && npm run qa:css && npm run qa:security && npm run qa:editorial && npm run qa:performance && npm run qa:responsive && npm run qa:admin-ops && npm run qa:admin-attention && npm run qa:match-workflow && npm run qa:match-entry && npm run qa:public-match && npm run qa:public-players && npm run qa:player-layout && npm run qa:player-nav && npm run qa:player-nav-layout && npm run qa:lineup-compact && npm run qa:public-integrity && npm run qa:routes && npm run qa:ui",
     "qa:performance": "node scripts/qa-performance.mjs",
     "qa:editorial": "node scripts/qa-editorial.mjs",
     "qa:responsive:baseline": "node scripts/qa-responsive.mjs --update-mobile-baseline",
@@ -29,7 +29,9 @@
     "qa:lineup-compact": "node scripts/qa-lineup-compact-v22911.mjs",
     "qa:public-integrity": "node --experimental-strip-types scripts/qa-public-integrity-v22913.mjs",
     "qa:live": "node scripts/qa-live-routes-v22913.mjs",
-    "qa:routes": "node scripts/qa-public-routes-v22913.mjs"
+    "qa:routes": "node scripts/qa-public-routes-v22913.mjs",
+    "qa:ui": "node scripts/qa-ui-consistency.mjs",
+    "qa:ui:baseline": "node scripts/qa-ui-consistency.mjs --update-baseline"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.4",

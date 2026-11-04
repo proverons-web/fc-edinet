@@ -37,7 +37,7 @@ if (!mobile.includes("@media (max-width:767px)")) errors.push("Mobile styles hav
 if (/@media\s*\(\s*min-width\s*:\s*(?:768|769|[89]\d\d|\d{4,})px/.test(mobile)) errors.push("Mobile stylesheet now includes tablet/desktop rules.");
 if (update) {
   if (errors.length) { errors.forEach((x)=>console.error(`FAIL  ${x}`)); process.exit(1); }
-  fs.writeFileSync(baselinePath, JSON.stringify({schema:1, release:"2.29.0", imports:activeImports, css:actual},null,2)+"\n");
+  fs.writeFileSync(baselinePath, JSON.stringify({schema:1, release:JSON.parse(fs.readFileSync(path.join(root,"package.json"),"utf8")).version, imports:activeImports, css:actual},null,2)+"\n");
   console.log(`Updated CSS baseline: ${path.relative(root,baselinePath)}`);
 } else {
   if (!fs.existsSync(baselinePath)) errors.push("CSS baseline missing; run npm run qa:css:baseline after review.");

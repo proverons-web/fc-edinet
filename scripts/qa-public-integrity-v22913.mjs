@@ -90,9 +90,10 @@ check('match result integrity does not modify lineup event calculations', () => 
   assert.ok(read('app/matches/[id]/page.tsx').includes('publicRunningScoreByEvent(events, match)'));
   assert.ok(read('app/matches/[id]/page.tsx').includes('lineupEventsForPlayer'));
 });
-check('release metadata matches 2.29.13', () => {
-  assert.equal(JSON.parse(read('package.json')).version,'2.29.13');
-  assert.ok(read('lib/release.ts').includes('2.29.13'));
+check('release metadata matches package.json', () => {
+  const expected = JSON.parse(read('package.json')).version;
+  assert.match(expected, /^\d+\.\d+\.\d+$/);
+  assert.ok(read('lib/release.ts').includes(`RELEASE_VERSION = \"${expected}\"`));
 });
 
 console.log(`Public Integrity QA: ${passed}/19 checks passed.`);

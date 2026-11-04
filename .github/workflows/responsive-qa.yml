@@ -45,6 +45,10 @@ jobs:
         run: node scripts/qa-public-routes-v22913.mjs
       - name: Check performance and image delivery contracts
         run: node scripts/qa-performance.mjs
+      - name: UI visual consistency against approved baseline
+        run: node scripts/qa-ui-consistency.mjs
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
       - name: Check responsive layout in Chrome
         run: node scripts/qa-responsive.mjs --screenshots
         env:
