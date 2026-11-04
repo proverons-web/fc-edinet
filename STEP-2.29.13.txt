@@ -1,0 +1,10 @@
+FC EDINEȚ v2.29.13 — FULL PUBLIC AUDIT & DATA INTEGRITY
+
+1. Unpack beside v2.29.12.
+2. Run DEPLOY_FC_EDINET.bat (the script checks and builds before deploy).
+3. Check /api/version -> 2.29.13.
+4. Run npm run qa:live from a PC with internet access to validate live public routes after deploy.
+5. Check the public match calendar, match #16, player pages, news and mobile menu on a phone.
+
+New audit safeguards: live matches remain visible after kickoff; missing score is never replaced by 0:0; explicit stadium overrides home default; back-button fallback stays on the site.
+This release has no database migration. Do not commit .env.local.

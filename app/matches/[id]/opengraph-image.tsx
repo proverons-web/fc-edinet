@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og";
 import { createClient } from "@supabase/supabase-js";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { matchScoreText } from "@/lib/public-match-integrity";
 
 export const runtime = "nodejs";
 export const alt = "FC Edineț — meci";
@@ -37,8 +38,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   const competition = Array.isArray(match?.competition) ? match.competition[0] : match?.competition;
   const homeName = home?.name || "FC Edineț";
   const awayName = away?.name || "—";
-  const hasScore = match?.status === "finished" || match?.status === "live";
-  const score = hasScore ? `${match?.home_score ?? 0} : ${match?.away_score ?? 0}` : "VS";
+  const score = matchScoreText(match || {});
   const date = match?.kickoff
     ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Chisinau" }).format(new Date(match.kickoff))
     : "FC EDINEȚ";
@@ -51,7 +51,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
         <div style={{ position: "absolute", right: -80, top: -110, width: 470, height: 470, border: "74px solid rgba(255,211,40,.08)", borderRadius: 999 }} />
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", zIndex: 2 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-            <img src={crest} width="72" height="88" style={{ objectFit: "contain" }} />
+            <img alt="FC Edineț" src={crest} width="72" height="88" style={{ objectFit: "contain" }} />
             <div style={{ display: "flex", flexDirection: "column" }}>
               <div style={{ fontSize: 23, fontWeight: 800, letterSpacing: 2 }}>FC EDINEȚ</div>
               <div style={{ fontSize: 16, color: "#ffd328", marginTop: 4 }}>{competition?.name || "FC EDINEȚ"}</div>
@@ -83,7 +83,7 @@ function TeamBlock({ name, logo, fallback }: { name: string; logo?: string | nul
   return (
     <div style={{ width: 350, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
       {logo ? (
-        <img src={logo} width="122" height="122" style={{ objectFit: "contain" }} />
+        <img alt={name} src={logo} width="122" height="122" style={{ objectFit: "contain" }} />
       ) : (
         <div style={{ width: 122, height: 122, borderRadius: 999, background: "rgba(255,255,255,.10)", border: "3px solid rgba(255,255,255,.20)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 34, fontWeight: 900 }}>
           {(fallback || name).slice(0, 3).toUpperCase()}

@@ -6,6 +6,7 @@ import { accountText } from "@/lib/account-i18n";
 import { getLocale } from "@/lib/locale";
 import { dateLocale, matchStatusLabelsI18n, positionLabelsI18n } from "@/lib/i18n";
 import type { ClubMatch, Player } from "@/lib/types";
+import { matchScoreText } from "@/lib/public-match-integrity";
 
 export const dynamic = "force-dynamic";
 
@@ -41,5 +42,5 @@ export default async function AccountFavoritesPage() {
 function FavoriteMatchCard({ match, locale }: { match: ClubMatch; locale: "ru" | "ro" }) {
   const text = accountText[locale];
   const date = new Intl.DateTimeFormat(dateLocale(locale), { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Chisinau" }).format(new Date(match.kickoff));
-  return <article className="favoriteMatchCard"><div><span>{match.competition?.name || text.matches}</span><strong>{match.home?.name || "—"} <b>{match.status === "finished" || match.status === "live" ? `${match.home_score ?? 0}:${match.away_score ?? 0}` : "VS"}</b> {match.away?.name || "—"}</strong><small>{date} · {matchStatusLabelsI18n[locale][match.status]}</small></div><form action={toggleFavoriteMatch.bind(null, String(match.id), "/account/favorites")}><button className="favoriteActiveButton" type="submit">{text.removeMatch}</button></form></article>;
+  return <article className="favoriteMatchCard"><div><span>{match.competition?.name || text.matches}</span><strong>{match.home?.name || "—"} <b>{matchScoreText(match, ":")}</b> {match.away?.name || "—"}</strong><small>{date} · {matchStatusLabelsI18n[locale][match.status]}</small></div><form action={toggleFavoriteMatch.bind(null, String(match.id), "/account/favorites")}><button className="favoriteActiveButton" type="submit">{text.removeMatch}</button></form></article>;
 }

@@ -19,8 +19,13 @@ export default function PublicBackLink({
 
   function goBack() {
     if (typeof window !== "undefined" && window.history.length > 1) {
-      router.back();
-      return;
+      // Never send visitors back to an unrelated external site from a public back button.
+      try {
+        if (document.referrer && new URL(document.referrer).origin === window.location.origin) {
+          router.back();
+          return;
+        }
+      } catch { /* Invalid referrer: use the canonical route. */ }
     }
     router.push(fallbackHref);
   }

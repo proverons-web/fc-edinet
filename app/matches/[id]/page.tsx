@@ -20,6 +20,7 @@ import { publicText } from "@/lib/i18n";
 import { publicMetadata, sportsEventJsonLd } from "@/lib/seo";
 import { lineupAnchor, playerProfileHref } from "@/lib/player-navigation";
 import type { ClubMatch, MatchEvent, MatchLineupEntry, MatchLineupSetting, MatchReport, MatchTeamStatistic } from "@/lib/types";
+import { hasRecordedScore, matchScoreText, matchVenue } from "@/lib/public-match-integrity";
 
 export const dynamic = "force-dynamic";
 
@@ -214,7 +215,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const home = match.home?.name ?? "—";
   const away = match.away?.name ?? "—";
   const title = `${home} — ${away}`;
-  const score = match.home_score !== null && match.away_score !== null
+  const score = hasRecordedScore(match)
     ? `${match.home_score}:${match.away_score}`
     : null;
   const description = locale === "ro"
@@ -321,7 +322,7 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
   const awayRed = events.filter((event) => (event.event_type === "red_card" || secondYellowIds.has(String(event.id))) && String(event.team_id) === String(match.away_team_id)).length;
   const homeSubs = events.filter((event) => event.event_type === "substitution" && String(event.team_id) === String(match.home_team_id)).length;
   const awaySubs = events.filter((event) => event.event_type === "substitution" && String(event.team_id) === String(match.away_team_id)).length;
-  const matchStadium = match.home?.home_stadium || match.stadium || null;
+  const matchStadium = matchVenue(match);
   const hasInfo = Boolean(matchStadium || report?.referee || report?.attendance != null || report?.weather || report?.pitch_condition || mvpName);
   const homeTeamStats = teamStatistics.find((row) => row.side === "home") ?? null;
   const awayTeamStats = teamStatistics.find((row) => row.side === "away") ?? null;
@@ -349,7 +350,7 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
             <div className="publicMatchScoreBoard premiumScoreBoard">
               <PublicTeam team={match.home} />
               <div className="publicMatchBigScore premiumBigScore">
-                <b>{statusHasScore ? `${match.home_score ?? 0} : ${match.away_score ?? 0}` : "VS"}</b>
+                <b>{statusHasScore ? matchScoreText(match) : "VS"}</b>
                 <span>{match.status === "finished" ? (locale === "ro" ? "MECI ÎNCHEIAT" : "МАТЧ ЗАВЕРШЁН") : t.protocol}</span>
               </div>
               <PublicTeam team={match.away} />
@@ -387,10 +388,10 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
               <div className="premiumMatchContent">
                 <section className="premiumOverview" id="overview">
                   <div className="premiumOverviewHead">
-                    <div><p className="eyebrow blue">{locale === "ro" ? "REZUMAT" : "ИТОГ МАТЧА"}</p><h2 className="premiumOverviewResultTitle"><span className="premiumOverviewTeam is-home">{match.home?.name ?? "—"}</span> <span className="premiumOverviewScore">{match.home_score ?? 0}:{match.away_score ?? 0}</span> <span className="premiumOverviewTeam is-away">{match.away?.name ?? "—"}</span></h2></div>
+                    <div><p className="eyebrow blue">{locale === "ro" ? "REZUMAT" : "ИТОГ МАТЧА"}</p><h2 className="premiumOverviewResultTitle"><span className="premiumOverviewTeam is-home">{match.home?.name ?? "—"}</span> <span className="premiumOverviewScore">{matchScoreText(match, ":")}</span> <span className="premiumOverviewTeam is-away">{match.away?.name ?? "—"}</span></h2></div>
                   </div>
                   <div className="premiumOverviewMetrics">
-                    <MatchMetric label={locale === "ro" ? "Goluri" : "Голы"} home={match.home_score ?? 0} away={match.away_score ?? 0} />
+                    <MatchMetric label={locale === "ro" ? "Goluri" : "Голы"} home={match.home_score} away={match.away_score} />
                     <MatchMetric label={locale === "ro" ? "Cartonașe galbene" : "Жёлтые карточки"} home={homeYellow} away={awayYellow} />
                     <MatchMetric label={locale === "ro" ? "Cartonașe roșii" : "Красные карточки"} home={homeRed} away={awayRed} />
                     <MatchMetric label={locale === "ro" ? "Schimbări" : "Замены"} home={homeSubs} away={awaySubs} />
@@ -577,8 +578,8 @@ function MatchStatisticsPanel({
   );
 }
 
-function MatchMetric({ label, home, away }: { label: string; home: number; away: number }) {
-  return <article className="premiumMatchMetric"><span>{label}</span><div><strong>{home}</strong><i>—</i><strong>{away}</strong></div></article>;
+function MatchMetric({ label, home, away }: { label: string; home: number | null; away: number | null }) {
+  return <article className="premiumMatchMetric"><span>{label}</span><div><strong>{home ?? "—"}</strong><i>—</i><strong>{away ?? "—"}</strong></div></article>;
 }
 
 function scoreAtEnd(events: MatchEvent[], match: ClubMatch) {
