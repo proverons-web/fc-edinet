@@ -1,1 +1,155 @@
-import ClubSectionShell from "@/app/components/ClubSectionShell";import {getLocale}from"@/lib/locale";import{publicMetadata}from"@/lib/seo";import{createPublicClient}from"@/lib/supabase/public";import type{ClubProfile,ClubHallOfFameEntry}from"@/lib/types";export const dynamic="force-dynamic";const labels:any={player:["Игроки","Jucători"],coach:["Тренеры","Antrenori"],leader:["Люди клуба","Oamenii clubului"],squad:["Исторические составы","Loturi istorice"]};export async function generateMetadata(){const locale=await getLocale();return publicMetadata({title:locale==="ro"?"Galeria de onoare":"Зал славы",description:locale==="ro"?"Loturi istorice și oameni importanți ai FC Edineț.":"Исторические составы и люди, оставившие след в истории FC Edineț.",path:"/club/hall-of-fame",locale});}export default async function Page(){const locale=await getLocale();const s=createPublicClient();const[{data:p},{data:e}]=await Promise.all([s.from("club_profile").select("hero_image_url").eq("id",1).maybeSingle(),s.from("club_hall_of_fame").select("*").eq("is_active",true).order("display_order")]);const entries=(e??[])as ClubHallOfFameEntry[];return <ClubSectionShell locale={locale} active="hall-of-fame" title={locale==="ro"?"Galeria de onoare":"Зал славы"} eyebrow={locale==="ro"?"OAMENI ȘI GENERAȚII":"ЛЮДИ И ПОКОЛЕНИЯ"} description={locale==="ro"?"Loturi istorice, jucători și oameni care au lăsat o urmă în istoria clubului.":"Исторические составы, игроки и люди, оставившие заметный след в истории клуба."} imageUrl={(p as Pick<ClubProfile,"hero_image_url">|null)?.hero_image_url}><section className="section clubHallPage"><div className="container">{(["player","coach","leader","squad"]as const).map(cat=>{const rows=entries.filter(x=>x.category===cat);if(!rows.length)return null;return <section className="clubHallGroup" key={cat}><div className="sectionHeading"><div><p className="eyebrow blue">FC EDINEȚ</p><h2>{labels[cat][locale==="ro"?1:0]}</h2></div></div><div className={cat==="squad"?"clubHallSquads":"clubHallGrid"}>{rows.map(x=>x.entry_type==="squad"?<article className="clubHallSquad" key={x.id}><div className="clubHallSquadBadge"><img src={x.photo_url||"/brand/fc-edinet-crest.png"} alt=""/></div><div>{x.is_placeholder&&<span className="clubPlaceholder">{locale==="ro"?"MODEL":"ЗАГЛУШКА"}</span>}<small>{(locale==="ro"?x.era_label_ro:x.era_label)||x.era_label}</small><h3>{(locale==="ro"?x.title_ro:x.title)||x.title}</h3><p>{(locale==="ro"?x.description_ro:x.description)||x.description}</p>{x.roster_text&&<pre>{(locale==="ro"?x.roster_text_ro:x.roster_text)||x.roster_text}</pre>}</div></article>:<article className="clubHallPerson" key={x.id}><div className="clubHallPersonPhoto"><img src={x.photo_url||"/brand/fc-edinet-crest.png"} alt="" className={!x.photo_url?"isCrest":""}/>{x.is_placeholder&&<span>{locale==="ro"?"MODEL":"ЗАГЛУШКА"}</span>}</div><div><small>{(locale==="ro"?x.era_label_ro:x.era_label)||x.era_label}</small><h3>{x.first_name} {x.last_name}</h3><b>{(locale==="ro"?x.title_ro:x.title)||x.title}</b><p>{(locale==="ro"?x.description_ro:x.description)||x.description}</p></div></article>)}</div></section>})}</div></section></ClubSectionShell>}
+import Link from "next/link";
+import ClubSectionShell from "@/app/components/ClubSectionShell";
+import { getLocale } from "@/lib/locale";
+import { publicMetadata } from "@/lib/seo";
+import { createPublicClient } from "@/lib/supabase/public";
+import type { ClubHallOfFameEntry } from "@/lib/types";
+import {
+  HALL_CATEGORIES, HALL_COPY, HALL_PAGE_SIZE,
+  hallCategory, hallFilterBySearch, hallHref, hallLocalized, hallName, hallPage, hallQuery,
+} from "@/lib/hall-of-fame";
+import "./hall-of-fame.css";
+
+export const dynamic = "force-dynamic";
+
+type SearchParams = Promise<{ category?: string; q?: string; page?: string }>;
+
+type HallCardEntry = Pick<ClubHallOfFameEntry,
+  "id" | "entry_type" | "category" | "first_name" | "last_name" | "title" | "title_ro" |
+  "era_label" | "era_label_ro" | "photo_url">
+;
+
+export async function generateMetadata() {
+  const locale = await getLocale();
+  return publicMetadata({
+    title: locale === "ro" ? "Galeria de onoare" : "Зал славы",
+    description: locale === "ro"
+      ? "Fotbaliști, antrenori și oameni care au scris istoria FC Edineț."
+      : "Игроки, тренеры и люди, оставившие след в истории FC Edineț.",
+    path: "/club/hall-of-fame", locale,
+  });
+}
+
+export default async function HallOfFamePage({ searchParams }: { searchParams: SearchParams }) {
+  const locale = await getLocale();
+  const copy = HALL_COPY[locale];
+  const params = await searchParams;
+  const category = hallCategory(params.category);
+  const q = hallQuery(params.q);
+  const page = hallPage(params.page);
+  const db = createPublicClient();
+
+  // Each page fetches only 12 lightweight records. Long biographies and roster
+  // text are fetched on the individual profile page, not in this gallery.
+  let listing = db.from("club_hall_of_fame")
+    .select("id,entry_type,category,first_name,last_name,title,title_ro,era_label,era_label_ro,photo_url", { count: "exact" })
+    .eq("is_active", true).eq("is_placeholder", false);
+  if (category !== "all") listing = listing.eq("category", category);
+  listing = hallFilterBySearch(listing, q);
+
+  const [{ data, count, error }, { count: allCount }] = await Promise.all([
+    listing.order("display_order", { ascending: true }).order("id", { ascending: true })
+      .range((page - 1) * HALL_PAGE_SIZE, page * HALL_PAGE_SIZE - 1),
+    db.from("club_hall_of_fame").select("id", { count: "exact", head: true })
+      .eq("is_active", true).eq("is_placeholder", false),
+  ]);
+  const entries = (data ?? []) as HallCardEntry[];
+  const total = count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / HALL_PAGE_SIZE));
+  const navigation = { category, q, page };
+
+  return (
+    <ClubSectionShell locale={locale} active="hall-of-fame" title={copy.heading}>
+      <section className="hallV2" aria-label={copy.heading}>
+        <header className="hallV2Hero">
+          <div className="container hallV2HeroInner">
+            <div className="hallV2HeroText">
+              <p className="hallV2Kicker"><span />{copy.eyebrow}</p>
+              <h1>{copy.heading}</h1>
+              <h2>{copy.tagline}</h2>
+              <p>{copy.intro}</p>
+            </div>
+            <div className="hallV2Count" aria-label={`${copy.participants}: ${allCount ?? 0}`}>
+              <strong>{allCount ?? 0}</strong><span>{copy.participants}</span>
+            </div>
+          </div>
+        </header>
+
+        <div className="container hallV2Content">
+          <nav className="hallV2Tabs" aria-label={locale === "ro" ? "Categorii" : "Категории"}>
+            {HALL_CATEGORIES.map((item) => (
+              <Link key={item} href={hallHref({ category: item, q })}
+                className={item === category ? "hallV2Tab isActive" : "hallV2Tab"}
+                aria-current={item === category ? "page" : undefined}>
+                {copy[item]}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="hallV2Toolbar">
+            <form action="/club/hall-of-fame" method="get" role="search" className="hallV2Search">
+              {category !== "all" && <input type="hidden" name="category" value={category} />}
+              <label className="hallV2SearchInput">
+                <svg aria-hidden="true" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 5 5"/></svg>
+                <span className="sr-only">{copy.search}</span>
+                <input type="search" name="q" maxLength={80} defaultValue={q} placeholder={copy.search} />
+              </label>
+              <button type="submit">{copy.searchButton}</button>
+            </form>
+            {(q || category !== "all") && <Link href="/club/hall-of-fame" className="hallV2Reset">{copy.reset}</Link>}
+          </div>
+
+          <div className="hallV2ListHead" aria-live="polite">
+            <span>{copy.results}: <strong>{error ? "—" : total}</strong></span>
+            {totalPages > 1 && <span>{copy.page} {Math.min(page, totalPages)} / {totalPages}</span>}
+          </div>
+
+          {error ? (
+            <div className="hallV2Empty" role="alert">{locale === "ro" ? "Datele nu au putut fi încărcate. Încercați din nou." : "Не удалось загрузить данные. Попробуйте ещё раз."}</div>
+          ) : entries.length ? (
+            <div className="hallV2Grid">
+              {entries.map((entry) => {
+                const name = hallName(entry, locale);
+                const role = hallLocalized(entry.title, entry.title_ro, locale);
+                const era = hallLocalized(entry.era_label, entry.era_label_ro, locale);
+                return (
+                  <Link key={entry.id} className={`hallV2Card${entry.entry_type === "squad" ? " isSquad" : ""}`}
+                    href={`/club/hall-of-fame/${entry.id}?${new URLSearchParams({ from: hallHref(navigation) }).toString()}`}
+                    aria-label={`${copy.readMore}: ${name}`}>
+                    <div className="hallV2Portrait">
+                      {entry.photo_url ? (
+                        <img src={entry.photo_url} alt="" loading="lazy" decoding="async" />
+                      ) : (
+                        <img src="/brand/fc-edinet-crest.png" className="hallV2Crest" alt="" loading="lazy" />
+                      )}
+                      <span className="hallV2Category">{copy[entry.category]}</span>
+                    </div>
+                    <div className="hallV2CardBody">
+                      {era && <small className="hallV2Era">{era}</small>}
+                      <h3>{name}</h3>
+                      {role && role !== name && <p>{role}</p>}
+                      <span className="hallV2Open">{copy.details} <span aria-hidden="true">↗</span></span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="hallV2Empty">
+              <p>{q ? copy.noResults : copy.empty}</p>
+              {(q || category !== "all") && <Link href="/club/hall-of-fame">{copy.reset}</Link>}
+            </div>
+          )}
+
+          {!error && totalPages > 1 && (
+            <nav className="hallV2Pagination" aria-label={locale === "ro" ? "Paginare" : "Страницы"}>
+              {page > 1 ? <Link href={hallHref({ category, q, page: page - 1 })}>← {copy.prev}</Link> : <span aria-disabled="true">← {copy.prev}</span>}
+              <span>{copy.page} {page} / {totalPages}</span>
+              {page < totalPages ? <Link href={hallHref({ category, q, page: page + 1 })}>{copy.next} →</Link> : <span aria-disabled="true">{copy.next} →</span>}
+            </nav>
+          )}
+        </div>
+      </section>
+    </ClubSectionShell>
+  );
+}

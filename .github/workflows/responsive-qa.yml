@@ -47,6 +47,10 @@ jobs:
         run: node --experimental-strip-types scripts/qa-public-integrity-v22913.mjs
       - name: Check all literal internal routes resolve
         run: node scripts/qa-public-routes-v22913.mjs
+      - name: Check hall of fame catalogue and profile contracts
+        run: node --experimental-strip-types scripts/qa-hall-of-fame.mjs
+      - name: Check hall of fame responsive card geometry
+        run: node scripts/qa-hall-layout.mjs
       - name: Check performance and image delivery contracts
         run: node scripts/qa-performance.mjs
       - name: UI visual consistency against approved baseline

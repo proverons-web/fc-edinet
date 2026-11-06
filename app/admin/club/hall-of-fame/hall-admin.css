@@ -1,0 +1,27 @@
+/* FC Edineț v2.29.17 — admin hall of fame editor only */
+.hallAdminV2{display:grid;gap:22px}
+.hallAdminCreate{position:static;min-width:0;padding:0;overflow:hidden}
+.hallAdminCreate>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:22px 25px;color:#0a3468}
+.hallAdminCreate>summary::-webkit-details-marker{display:none}
+.hallAdminCreate>summary span:first-child{display:grid;gap:7px}
+.hallAdminCreate>summary b{font-size:19px;font-weight:900}
+.hallAdminCreate>summary small{font-size:12px;color:#6d8096}
+.hallAdminCreate[open]>summary{border-bottom:1px solid #dae5f0}
+.hallAdminCreate>.staffAdminForm{padding:25px}
+.hallAdminListing{min-width:0}
+.hallAdminTitle{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:20px}
+.hallAdminTitle h2{font-size:25px;margin:5px 0 0}
+.hallAdminTitle>strong{background:#0a356c;color:white;display:grid;place-items:center;min-width:45px;height:40px;padding:0 10px;font-size:20px}
+.hallAdminFilters{display:flex;flex-wrap:wrap;gap:9px;align-items:center;padding:18px;background:#fff;border:1px solid #d9e4ee;margin-bottom:20px}
+.hallAdminFilters input{flex:2 1 240px;min-width:0}
+.hallAdminFilters select{flex:1 1 165px;min-width:145px}
+.hallAdminFilters input,.hallAdminFilters select{height:42px;border:1px solid #cbd9e7;padding:8px 12px;color:#092d59;background:#fff;font:500 13px Arial,sans-serif}
+.hallAdminFilters button{height:42px;padding:0 23px;color:#06264a;background:#ffcf1b;border:0;font-size:12px;font-weight:900;cursor:pointer}
+.hallAdminFilters a{color:#2363a0;font-size:12px;font-weight:800;padding:10px}
+.hallAdminRecord>summary{min-width:0}.hallAdminRecord .staffAdminIdentity{min-width:0}
+.hallAdminRecord .staffAdminIdentity strong{overflow-wrap:anywhere}
+.hallAdminBadge{padding:5px 8px;flex:none;background:#e6edf4;color:#496a89;font-size:9px;font-weight:950}
+.hallAdminPager{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:20px;font-size:12px;color:#526b84}
+.hallAdminPager a{padding:11px 14px;color:#0b4d91;border:1px solid #cbdbe9;background:#fff;text-decoration:none;font-weight:800}
+.hallAdminEmpty{padding:35px;background:white;border:1px dashed #cbdbe9;text-align:center;color:#67809b}
+@media(max-width:600px){.hallAdminCreate>summary{padding:16px}.hallAdminCreate>.staffAdminForm{padding:14px}.hallAdminTitle h2{font-size:21px}.hallAdminFilters{padding:12px}.hallAdminFilters input{flex-basis:100%}.hallAdminFilters select{flex:1 1 100%}}

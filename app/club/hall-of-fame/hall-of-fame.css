@@ -1,0 +1,93 @@
+/* FC Edineț v2.29.17 — Hall of Fame catalogue. Route-scoped; other club pages unchanged. */
+.hallV2{background:#f1f5fa;min-height:62vh;padding:0 0 90px;color:#0a2546}
+.hallV2Hero{position:relative;overflow:hidden;background:radial-gradient(ellipse at 85% 35%,#14569a 0%,#092e59 52%,#031b37 100%);color:white}
+.hallV2Hero::after{content:"";pointer-events:none;position:absolute;right:4%;top:8%;width:320px;height:320px;max-width:45vw;background:url('/brand/fc-edinet-crest.png') center / contain no-repeat;opacity:.055;filter:grayscale(1)}
+.hallV2HeroInner{position:relative;z-index:1;display:flex;align-items:flex-end;justify-content:space-between;gap:34px;padding-top:65px;padding-bottom:64px}
+.hallV2HeroText{min-width:0;max-width:740px}
+.hallV2Kicker{display:flex;align-items:center;gap:10px;margin:0 0 22px;color:#98b8da;font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
+.hallV2Kicker>span{width:24px;height:3px;flex:none;background:#ffcf1b}
+.hallV2Hero h1{font-family:'Arial Narrow','Arial Black',Arial,sans-serif;font-size:clamp(47px,6.2vw,91px);font-stretch:condensed;font-weight:950;line-height:.96;letter-spacing:-.055em;text-transform:uppercase;margin:0 0 14px;color:#fff;overflow-wrap:anywhere}
+.hallV2Hero h2{font-size:clamp(18px,2.1vw,28px);line-height:1.25;font-weight:750;color:#fdd42c;margin:0 0 16px}
+.hallV2HeroText>p:last-child{font-size:15px;line-height:1.7;color:#bed3e7;max-width:580px;margin:0}
+.hallV2Count{align-self:flex-end;display:flex;flex-direction:column;align-items:flex-end;min-width:120px;border-left:1px solid rgba(255,255,255,.19);padding-left:25px}
+.hallV2Count strong{font-weight:950;font-size:clamp(38px,5vw,66px);line-height:1;letter-spacing:-.05em;color:#ffcf1b}
+.hallV2Count span{margin-top:7px;font-size:10px;text-transform:uppercase;letter-spacing:.14em;font-weight:900;color:#bed3e7;white-space:nowrap}
+.hallV2Content{padding-top:32px}
+.hallV2Tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 26px;max-width:100%}
+.hallV2Tab{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:10px 18px;border:1px solid #d5e2ef;background:#fff;color:#37526e;font-weight:800;font-size:12px;text-decoration:none;transition:background .15s,border-color .15s,color .15s}
+.hallV2Tab:hover,.hallV2Tab:focus-visible{border-color:#0f5199;color:#0f5199}
+.hallV2Tab.isActive{background:#0a3265;color:#fff;border-color:#0a3265}
+.hallV2Toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:18px;margin-bottom:27px}
+.hallV2Search{display:flex;align-items:stretch;width:min(660px,100%);gap:0}
+.hallV2SearchInput{display:flex;flex:1;align-items:center;min-width:0;gap:10px;background:#fff;border:1px solid #cddce9;padding:0 14px;color:#7187a0}
+.hallV2SearchInput:focus-within{outline:2px solid #357cc6;outline-offset:1px}
+.hallV2SearchInput input{font:500 14px Arial,sans-serif;min-height:46px;width:100%;min-width:0;padding:9px 0;border:0;outline:0;background:transparent;color:#0a2546}
+.hallV2SearchInput input::placeholder{color:#8597aa}
+.hallV2Search button{flex:none;border:0;padding:0 22px;background:#ffcf1b;color:#062a53;font-size:12px;font-weight:950;text-transform:uppercase;cursor:pointer}
+.hallV2Search button:hover{background:#ffe05a}
+.hallV2Reset{font-size:12px;color:#2f65a2;font-weight:850;text-decoration:underline;text-underline-offset:3px}
+.hallV2ListHead{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid #d4e0eb;padding:0 0 12px;margin-bottom:20px;color:#5f7691;font-size:12px;font-weight:750;letter-spacing:.02em}
+.hallV2ListHead strong{color:#0b3467}
+.hallV2Grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.hallV2Card{display:flex;min-width:0;flex-direction:column;overflow:hidden;border:1px solid #d5e0ec;background:#fff;color:inherit;text-decoration:none;transition:transform .18s,box-shadow .18s,border-color .18s;box-shadow:0 12px 28px rgba(5,33,69,.035)}
+.hallV2Card:hover,.hallV2Card:focus-visible{transform:translateY(-4px);border-color:#a8c3dc;box-shadow:0 18px 30px rgba(5,33,69,.12)}
+.hallV2Portrait{position:relative;aspect-ratio:4 / 4.5;overflow:hidden;display:grid;place-items:center;background:radial-gradient(circle at 60% 25%,#195999,#082c56 65%,#061d38 100%)}
+.hallV2Portrait>img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 22%;transition:transform .28s}
+.hallV2Card:hover .hallV2Portrait>img:not(.hallV2Crest){transform:scale(1.035)}
+.hallV2Portrait>img.hallV2Crest{width:48%;height:48%;object-fit:contain;opacity:.78}
+.hallV2Card.isSquad .hallV2Portrait>img:not(.hallV2Crest){object-fit:contain;object-position:center;background:rgba(0,0,0,.14)}
+.hallV2Category{position:absolute;left:12px;bottom:12px;max-width:calc(100% - 24px);padding:8px 10px;background:#ffcf1b;color:#042852;font-size:10px;line-height:1.2;font-weight:950;letter-spacing:.045em;text-transform:uppercase}
+.hallV2CardBody{display:flex;flex:1;flex-direction:column;min-width:0;padding:20px 19px 17px}
+.hallV2Era{font-size:10px;font-weight:850;color:#597997;letter-spacing:.065em;text-transform:uppercase;min-height:16px;overflow-wrap:anywhere}
+.hallV2CardBody h3{font-family:'Arial Narrow','Arial Black',Arial,sans-serif;font-stretch:condensed;font-size:clamp(20px,2vw,28px);font-weight:950;line-height:1.08;letter-spacing:-.028em;text-transform:uppercase;color:#082d60;margin:6px 0 7px;overflow-wrap:anywhere}
+.hallV2CardBody>p{color:#657e99;font-size:12px;font-weight:650;line-height:1.4;margin:0 0 18px;overflow-wrap:anywhere}
+.hallV2Open{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #e4ebf2;margin-top:auto;padding-top:14px;color:#0b5baf;font-size:11px;font-weight:900;letter-spacing:.02em}
+.hallV2Open>span{font-size:19px;color:#d5a500}
+.hallV2Empty{display:grid;justify-items:center;gap:16px;padding:60px 24px;background:#fff;border:1px dashed #c6d6e5;color:#5c7691;text-align:center;line-height:1.5}
+.hallV2Empty p{margin:0}.hallV2Empty a{font-weight:800;color:#155ca5}
+.hallV2Pagination{display:flex;align-items:center;justify-content:center;gap:22px;margin-top:35px;font-size:12px;font-weight:850;color:#597491}
+.hallV2Pagination a,.hallV2Pagination>span[aria-disabled]{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:8px 19px;border:1px solid #ccdbe9;background:#fff;color:#083566;text-decoration:none}
+.hallV2Pagination>span[aria-disabled]{color:#a4b4c4;background:transparent}
+.hallV2Pagination a:hover{border-color:#175ba0}
+.hallV2Detail{background:#f1f5fa;min-height:65vh;padding:34px 0 90px}
+.hallV2Back{display:inline-flex;align-items:center;gap:8px;color:#14589b;font-size:13px;font-weight:850;text-decoration:none;margin-bottom:25px}
+.hallV2Back:hover{text-decoration:underline;text-underline-offset:4px}
+.hallV2DetailContainer{max-width:1150px}
+.hallV2DetailContainer>article{border:1px solid #d4e0eb;background:#fff}
+.hallV2DetailHero{display:grid;grid-template-columns:minmax(0,38%) minmax(0,62%);background:#06254b;color:white;min-height:390px;overflow:hidden}
+.hallV2DetailPortrait{display:grid;place-items:center;min-height:390px;max-height:550px;background:linear-gradient(145deg,#0f528d,#041d3b)}
+.hallV2DetailPortrait>img{width:100%;height:100%;object-fit:cover;object-position:center 25%;min-height:390px;max-height:550px}
+.hallV2DetailPortrait>img.hallV2Crest{width:53%;height:53%;min-height:0;object-fit:contain;opacity:.75}
+.hallV2DetailPortrait.isSquad>img:not(.hallV2Crest){object-fit:contain;background:#041d3b}
+.hallV2DetailIntro{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;min-width:0;padding:clamp(28px,5vw,70px)}
+.hallV2DetailIntro h1{margin:0 0 18px;color:#fff;font-family:'Arial Narrow','Arial Black',Arial,sans-serif;font-size:clamp(32px,4.5vw,68px);font-weight:950;line-height:1;letter-spacing:-.035em;text-transform:uppercase;overflow-wrap:anywhere}
+.hallV2DetailRole{margin:0 0 28px;color:#fdd127;font-size:clamp(17px,2vw,23px);line-height:1.35;font-weight:800}
+.hallV2DetailPeriod{display:grid;gap:8px;padding-top:23px;border-top:1px solid rgba(255,255,255,.18);max-width:100%}
+.hallV2DetailPeriod small{color:#a5bdd5;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:900}
+.hallV2DetailPeriod strong{font-size:17px;font-weight:750;overflow-wrap:anywhere}
+.hallV2DetailBody{max-width:900px;margin:0 auto;padding:clamp(30px,5vw,62px) clamp(20px,5vw,76px)}
+.hallV2Story h2,.hallV2Roster h2{margin:0 0 24px;color:#082f60;font-family:'Arial Narrow','Arial Black',Arial,sans-serif;font-size:clamp(25px,3vw,34px);font-weight:950;text-transform:uppercase;letter-spacing:-.025em}
+.hallV2Story p{font-size:16px;line-height:1.9;color:#3b526c;margin:0 0 19px;overflow-wrap:break-word;white-space:pre-line}
+.hallV2Roster{margin-top:42px;padding-top:34px;border-top:1px solid #d9e2ed}
+.hallV2Roster ul{padding:0;margin:0;display:grid;gap:6px;list-style:none}
+.hallV2Roster li{padding:11px 16px;border-left:3px solid #ffcf1b;background:#f2f6fa;font-size:14px;color:#25425f;line-height:1.45;overflow-wrap:anywhere}
+.hallV2BottomBack{margin:40px 0 0}
+@media(max-width:1150px){.hallV2Grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:850px){.hallV2Grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hallV2HeroInner{padding-top:48px;padding-bottom:50px}.hallV2DetailHero{grid-template-columns:40% 60%}}
+@media(max-width:590px){
+ .hallV2{padding-bottom:52px}.hallV2HeroInner{align-items:flex-start;flex-direction:column;gap:24px;padding-top:36px;padding-bottom:36px}
+ .hallV2Hero h1{font-size:clamp(37px,9vw,50px)}.hallV2Hero h2{font-size:18px}.hallV2HeroText>p:last-child{font-size:13px}
+ .hallV2Count{align-self:flex-start;align-items:flex-start;border-left:0;border-top:1px solid rgba(255,255,255,.18);padding:12px 0 0;min-width:0}
+ .hallV2Count strong{font-size:33px}.hallV2Count span{font-size:9px}
+ .hallV2Content{padding-top:20px}.hallV2Tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;margin-bottom:18px;padding-bottom:7px}
+ .hallV2Tab{white-space:nowrap;min-height:39px;padding:8px 12px;font-size:11px;flex:none}
+ .hallV2Search{width:100%}.hallV2Search button{padding:0 13px;font-size:11px}.hallV2SearchInput input{font-size:13px}
+ .hallV2Grid{gap:12px}.hallV2CardBody{padding:12px 12px 13px}.hallV2CardBody h3{font-size:clamp(17px,4.65vw,22px)}
+ .hallV2CardBody>p{font-size:11px}.hallV2Category{bottom:8px;left:8px;max-width:calc(100% - 16px);font-size:8px;padding:6px 7px}
+ .hallV2Open{font-size:10px;padding-top:10px}.hallV2Era{font-size:9px}
+ .hallV2Detail{padding:20px 0 48px}.hallV2DetailHero{grid-template-columns:1fr}.hallV2DetailPortrait{max-height:370px;min-height:260px}
+ .hallV2DetailPortrait>img{max-height:370px;min-height:260px}.hallV2DetailIntro{padding:30px 22px 36px}.hallV2DetailIntro h1{font-size:clamp(31px,8vw,46px)}
+ .hallV2DetailBody{padding:30px 20px}.hallV2Story p{font-size:15px;line-height:1.75}
+}
+@media(max-width:340px){.hallV2Grid{grid-template-columns:1fr}.hallV2Portrait{aspect-ratio:4/3}.hallV2CardBody h3{font-size:23px}}
+@media(prefers-reduced-motion:reduce){.hallV2Card,.hallV2Portrait>img{transition:none}.hallV2Card:hover,.hallV2Card:focus-visible{transform:none}}

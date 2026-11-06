@@ -7,7 +7,7 @@ import path from 'node:path';
 const projectRoot=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const expectedVersion=JSON.parse(fs.readFileSync(path.join(projectRoot,'package.json'),'utf8')).version;
 const base = (process.env.FC_EDINET_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://fc-edinet.vercel.app').replace(/\/+$/,'');
-const routes = [ '/', '/news', '/team', '/staff', '/matches', '/standings', '/statistics', '/media', '/club/about', '/api/version', '/sitemap.xml', '/robots.txt' ];
+const routes = [ '/', '/news', '/team', '/staff', '/matches', '/standings', '/statistics', '/media', '/club/about', '/club/hall-of-fame', '/api/version', '/sitemap.xml', '/robots.txt' ];
 const results = [];
 for (const pathname of routes) {
   try {
@@ -41,6 +41,27 @@ for (const pathname of routes) {
     results.push({route:pathname,ok:false,detail:String(error?.message||error)});
     console.error(`FAIL ${pathname}: ${error?.message||error}`);
   }
+}
+// The sitemap contains profile links only when real, non-placeholder records exist.
+try {
+  const sitemapResponse = await fetch(`${base}/sitemap.xml`, { signal: AbortSignal.timeout(15000) });
+  if (sitemapResponse.ok) {
+    const xml = await sitemapResponse.text();
+    const detail = xml.match(/<loc>([^<]*\/club\/hall-of-fame\/\d+)<\/loc>/);
+    if (detail) {
+      const url = detail[1].replaceAll('&amp;', '&');
+      const response = await fetch(url, { signal: AbortSignal.timeout(15000), redirect: 'follow' });
+      const body = await response.text();
+      const ok = response.ok && response.headers.get('content-type')?.includes('text/html') && body.includes('FC Edine');
+      results.push({route:'/club/hall-of-fame/[id]',ok,detail:`${response.status} published profile`});
+      console.log(`${ok?'PASS':'FAIL'} /club/hall-of-fame/[id] ${response.status} published profile`);
+    } else {
+      console.log('SKIP /club/hall-of-fame/[id] — no published profiles in sitemap');
+    }
+  }
+} catch (error) {
+  results.push({route:'/club/hall-of-fame/[id]',ok:false,detail:String(error?.message||error)});
+  console.error('FAIL /club/hall-of-fame/[id]:',String(error?.message||error));
 }
 const failed=results.filter(x=>!x.ok);
 console.log(`Live public routes: ${results.length - failed.length}/${results.length} passed at ${base}`);

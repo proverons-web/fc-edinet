@@ -1,5 +1,0 @@
-FC EDINET v2.29.16 — Atomic Lineup Save
-1. Apply database/068_atomic_match_lineup_save.sql to Supabase once BEFORE deploying this release.
-2. Extract alongside earlier releases; keep .env.local safe.
-3. Run DEPLOY_FC_EDINET.bat; then npm run qa:live.
-4. In Match Center, save a team lineup, import club lineup, and verify no partial edits on failed save.
