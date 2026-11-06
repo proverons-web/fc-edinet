@@ -1,3 +1,3 @@
-export const RELEASE_VERSION = "2.29.17";
+export const RELEASE_VERSION = "2.29.18";
 export const RELEASE_API_VERSION = `v${RELEASE_VERSION}`;
 export const RELEASE_NAME = `FC Edineț v${RELEASE_VERSION}`;

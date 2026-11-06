@@ -1,4 +1,4 @@
-/* FC Edineț v2.29.17 — admin hall of fame editor only */
+/* FC Edineț v2.29.18 — admin hall of fame editor only */
 .hallAdminV2{display:grid;gap:22px}
 .hallAdminCreate{position:static;min-width:0;padding:0;overflow:hidden}
 .hallAdminCreate>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:22px 25px;color:#0a3468}

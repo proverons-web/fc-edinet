@@ -122,8 +122,8 @@ ok("next match VS circle replaced", homeCss.includes('Modern VS separator') && h
 ok("results rail frame and rounding removed", homeCss.includes('.fcV215ResultsSection .fcV215MatchRailWide{') && homeCss.includes('.fcV215ResultsSection .fcRefRecentMatchCard,') && homeCss.includes('border:0!important;') && homeCss.includes('border-radius:0!important;'));
 ok("homepage news rounding removed", homeCss.includes('.fcRefLeadColumn,\n.fcRefLatestColumn{') && homeCss.includes('.fcRefNewsRow>div{\n  border-radius:0!important;'));
 const releaseSource = read("lib/release.ts");
-ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.29.17"'));
-ok("release version", JSON.parse(read("package.json")).version === "2.29.17");
+ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.29.18"'));
+ok("release version", JSON.parse(read("package.json")).version === "2.29.18");
 
 ok("v2.28.8 next-match footprint restored", homeCss.includes("FC EDINEȚ v2.28.8 — LARGE CRESTS WITHOUT TALLER MATCH CARD") && homeCss.includes("min-height:168px!important") && homeCss.includes("height:168px!important"));
 ok("v2.28.8 crests enlarge without layout growth", homeCss.includes("transform:scale(1.58) translateY(-7px)!important"));
