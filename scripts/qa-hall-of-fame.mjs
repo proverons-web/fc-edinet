@@ -6,6 +6,7 @@ import { HALL_CATEGORIES, HALL_COPY, HALL_PAGE_SIZE, hallCategory, hallFilterByS
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 const listing=read('app/club/hall-of-fame/page.tsx');
+const launcher=read('app/club/hall-of-fame/HallSearchLauncher.tsx');
 const detail=read('app/club/hall-of-fame/[id]/page.tsx');
 const admin=read('app/admin/club/hall-of-fame/page.tsx');
 const actions=read('app/admin/club/hall-of-fame/actions.ts');
@@ -26,7 +27,7 @@ check('server paginates and excludes unpublished placeholders',()=>{assert.match
 check('detail profile has correct privacy constraints',()=>{assert.match(detail,/\.eq\("is_active", true\)\.eq\("is_placeholder", false\)/);assert.match(detail,/notFound\(\)/);assert.match(detail,/^\s*if \(!\/\^\[1-9\]/m)});
 check('detail has safe in-gallery return target',()=>{assert.match(detail,/search\.from\.startsWith\("\/club\/hall-of-fame\?"\)/);assert.match(detail,/hallV2Back/)});
 check('historical squad and ordinary people use separate layouts',()=>{assert.match(listing,/entry\.entry_type === "squad"/);assert.match(detail,/entry\.entry_type === "squad" && roster/)});
-check('accessible search and keyboard navigation',()=>{assert.match(listing,/role="search"/);assert.match(listing,/aria-current=/);assert.match(listing,/aria-live="polite"/);assert.match(css,/:focus-visible/)});
+check('accessible search and keyboard navigation',()=>{assert.match(launcher,/role="search"/);assert.match(launcher,/aria-current=/);assert.match(listing,/aria-live="polite"/);assert.match(css,/:focus-visible/)});
 check('responsive 4 to 3 to 2 to 1 columns',()=>{assert.match(css,/grid-template-columns:repeat\(4/);assert.match(css,/grid-template-columns:repeat\(3/);assert.match(css,/grid-template-columns:repeat\(2/);assert.match(css,/@media\(max-width:340px\)/)});
 check('new CSS is route-scoped, no global cascade changes',()=>{assert.match(listing,/import "\.\/hall-of-fame.css"/);assert.match(detail,/import "\.\.\/hall-of-fame.css"/);assert.equal(read('app/globals.css'),read('app/globals.css'))});
 check('sitemap includes only active non-placeholder profiles',()=>{assert.match(sitemap,/club_hall_of_fame/);assert.match(sitemap,/hallEntries/);assert.match(sitemap,/\.eq\("is_placeholder", false\)/)});

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { roleLabels, staffRoles, type Profile } from "@/lib/types";
 import AdminShellClient from "@/app/components/AdminShellClient";
+import AdminUniversalPhotoEditor from "@/app/components/AdminUniversalPhotoEditor";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false, noarchive: true },
@@ -26,6 +27,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!profile || !staffRoles.includes(profile.role)) redirect("/account");
 
   return (
+    <>
     <AdminShellClient
       role={profile.role}
       displayName={profile.display_name || profile.full_name || profile.email || "FC Edineț"}
@@ -33,5 +35,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     >
       {children}
     </AdminShellClient>
+    <AdminUniversalPhotoEditor />
+    </>
   );
 }

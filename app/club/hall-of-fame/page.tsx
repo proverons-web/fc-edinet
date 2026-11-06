@@ -5,9 +5,10 @@ import { publicMetadata } from "@/lib/seo";
 import { createPublicClient } from "@/lib/supabase/public";
 import type { ClubHallOfFameEntry } from "@/lib/types";
 import {
-  HALL_CATEGORIES, HALL_COPY, HALL_PAGE_SIZE,
+  HALL_COPY, HALL_PAGE_SIZE,
   hallCategory, hallFilterBySearch, hallHref, hallLocalized, hallName, hallPage, hallQuery,
 } from "@/lib/hall-of-fame";
+import HallSearchLauncher from "./HallSearchLauncher";
 import "./hall-of-fame.css";
 
 export const dynamic = "force-dynamic";
@@ -75,39 +76,12 @@ export default async function HallOfFamePage({ searchParams }: { searchParams: S
         </header>
 
         <div className="container hallV2Content">
-          <section className="hallV2Filters" aria-label={locale === "ro" ? "Filtre și căutare" : "Поиск и фильтры"}>
-            <div className="hallV2FiltersTop">
-              <div className="hallV2FiltersCopy">
-                <small>{locale === "ro" ? "Căutare" : "Поиск"}</small>
-                <strong>{locale === "ro" ? "Găsiți rapid persoana dorită" : "Быстрый поиск по участникам"}</strong>
-              </div>
-
-              <form action="/club/hall-of-fame" method="get" role="search" className="hallV2Search">
-                {category !== "all" && <input type="hidden" name="category" value={category} />}
-                <label className="hallV2SearchInput">
-                  <svg aria-hidden="true" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 5 5"/></svg>
-                  <span className="sr-only">{copy.search}</span>
-                  <input type="search" name="q" maxLength={80} defaultValue={q} placeholder={copy.search} />
-                </label>
-                <button type="submit">{copy.searchButton}</button>
-                {hasFilters && <Link href="/club/hall-of-fame" className="hallV2Reset">{copy.reset}</Link>}
-              </form>
-            </div>
-
-            <nav className="hallV2Tabs" aria-label={locale === "ro" ? "Categorii" : "Категории"}>
-              {HALL_CATEGORIES.map((item) => (
-                <Link key={item} href={hallHref({ category: item, q })}
-                  className={item === category ? "hallV2Tab isActive" : "hallV2Tab"}
-                  aria-current={item === category ? "page" : undefined}>
-                  <span className="hallV2TabLabel">{copy[item]}</span>
-                </Link>
-              ))}
-            </nav>
-          </section>
-
           <div className="hallV2ListHead" aria-live="polite">
-            <span>{copy.results}: <strong>{error ? "—" : total}</strong></span>
-            {totalPages > 1 && <span>{copy.page} {Math.min(page, totalPages)} / {totalPages}</span>}
+            <div className="hallV2ListSummary">
+              <span>{copy.results}: <strong>{error ? "—" : total}</strong></span>
+              {totalPages > 1 && <span>{copy.page} {Math.min(page, totalPages)} / {totalPages}</span>}
+            </div>
+            <HallSearchLauncher locale={locale} category={category} q={q} />
           </div>
 
           {error ? (

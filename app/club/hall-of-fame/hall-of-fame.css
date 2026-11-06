@@ -1,4 +1,4 @@
-/* FC Edineț v2.29.18 — Hall of Fame catalogue. Route-scoped; other club pages unchanged. */
+/* FC Edineț v2.29.19 — Hall of Fame catalogue. Route-scoped; other club pages unchanged. */
 .hallV2{background:#f1f5fa;min-height:62vh;padding:0 0 90px;color:#0a2546}
 .hallV2Hero{position:relative;overflow:hidden;background:radial-gradient(ellipse at 85% 35%,#14569a 0%,#092e59 52%,#031b37 100%);color:white}
 .hallV2Hero::after{content:"";pointer-events:none;position:absolute;right:4%;top:8%;width:320px;height:320px;max-width:45vw;background:url('/brand/fc-edinet-crest.png') center / contain no-repeat;opacity:.055;filter:grayscale(1)}
@@ -13,25 +13,6 @@
 .hallV2Count strong{font-weight:950;font-size:clamp(38px,5vw,66px);line-height:1;letter-spacing:-.05em;color:#ffcf1b}
 .hallV2Count span{margin-top:7px;font-size:10px;text-transform:uppercase;letter-spacing:.14em;font-weight:900;color:#bed3e7;white-space:nowrap}
 .hallV2Content{padding-top:32px}
-.hallV2Filters{display:grid;gap:18px;margin:0 0 24px;padding:22px 24px 24px;border:1px solid #d5e0ec;background:#fff;box-shadow:0 12px 28px rgba(5,33,69,.035)}
-.hallV2FiltersTop{display:grid;grid-template-columns:minmax(0,250px) minmax(0,1fr);gap:20px;align-items:center}
-.hallV2FiltersCopy{display:grid;gap:6px;align-content:start;min-width:0}
-.hallV2FiltersCopy small{font-size:10px;line-height:1.2;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#6d87a2}
-.hallV2FiltersCopy strong{font-family:'Arial Narrow','Arial Black',Arial,sans-serif;font-size:clamp(24px,2.2vw,34px);font-stretch:condensed;font-weight:950;line-height:1.02;letter-spacing:-.03em;text-transform:uppercase;color:#082d60}
-.hallV2Tabs{display:flex;flex-wrap:wrap;gap:10px;margin:0;max-width:100%}
-.hallV2Tab{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:11px 18px;border:1px solid #d5e2ef;background:#f6f9fc;color:#37526e;font-weight:850;font-size:12px;line-height:1.2;text-decoration:none;transition:background .15s,border-color .15s,color .15s,transform .15s;box-shadow:inset 0 -2px 0 rgba(8,45,96,.03)}
-.hallV2Tab:hover,.hallV2Tab:focus-visible{border-color:#0f5199;color:#0f5199;background:#fff;transform:translateY(-1px)}
-.hallV2Tab.isActive{background:#0a3265;color:#fff;border-color:#0a3265;box-shadow:inset 0 -3px 0 #ffcf1b}
-.hallV2TabLabel{display:block;white-space:nowrap}
-.hallV2Search{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:stretch;width:100%;gap:10px}
-.hallV2SearchInput{display:flex;align-items:center;min-width:0;gap:10px;background:#fff;border:1px solid #cddce9;padding:0 14px;color:#7187a0;box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
-.hallV2SearchInput:focus-within{outline:2px solid #357cc6;outline-offset:1px;border-color:#357cc6}
-.hallV2SearchInput input{font:500 14px Arial,sans-serif;min-height:48px;width:100%;min-width:0;padding:9px 0;border:0;outline:0;background:transparent;color:#0a2546}
-.hallV2SearchInput input::placeholder{color:#8597aa}
-.hallV2Search button,.hallV2Reset{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 22px;border:1px solid transparent;background:#ffcf1b;color:#062a53;font-size:12px;font-weight:950;text-transform:uppercase;text-decoration:none;cursor:pointer;white-space:nowrap}
-.hallV2Search button:hover{background:#ffe05a}
-.hallV2Reset{border-color:#d5e2ef;background:#fff;color:#275c96}
-.hallV2Reset:hover{border-color:#0f5199;color:#0f5199;background:#f8fbff}
 .hallV2ListHead{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid #d4e0eb;padding:0 0 12px;margin-bottom:20px;color:#5f7691;font-size:12px;font-weight:750;letter-spacing:.02em}
 .hallV2ListHead strong{color:#0b3467}
 .hallV2Grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
@@ -79,21 +60,13 @@
 .hallV2Roster li{padding:11px 16px;border-left:3px solid #ffcf1b;background:#f2f6fa;font-size:14px;color:#25425f;line-height:1.45;overflow-wrap:anywhere}
 .hallV2BottomBack{margin:40px 0 0}
 @media(max-width:1150px){.hallV2Grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:850px){.hallV2Grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hallV2HeroInner{padding-top:48px;padding-bottom:50px}.hallV2FiltersTop{grid-template-columns:1fr}.hallV2DetailHero{grid-template-columns:40% 60%}}
+@media(max-width:850px){.hallV2Grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hallV2HeroInner{padding-top:48px;padding-bottom:50px}.hallV2DetailHero{grid-template-columns:40% 60%}}
 @media(max-width:590px){
  .hallV2{padding-bottom:52px}.hallV2HeroInner{align-items:flex-start;flex-direction:column;gap:24px;padding-top:36px;padding-bottom:36px}
  .hallV2Hero h1{font-size:clamp(37px,9vw,50px)}.hallV2Hero h2{font-size:18px}.hallV2HeroText>p:last-child{font-size:13px}
  .hallV2Count{align-self:flex-start;align-items:flex-start;border-left:0;border-top:1px solid rgba(255,255,255,.18);padding:12px 0 0;min-width:0}
  .hallV2Count strong{font-size:33px}.hallV2Count span{font-size:9px}
- .hallV2Content{padding-top:20px}.hallV2Filters{gap:14px;margin-bottom:18px;padding:16px}
- .hallV2FiltersTop{grid-template-columns:1fr;gap:14px}
- .hallV2FiltersCopy strong{font-size:24px}
- .hallV2Tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;padding-bottom:6px}
- .hallV2Tab{white-space:nowrap;min-height:39px;padding:8px 12px;font-size:11px;flex:none}
- .hallV2Search{grid-template-columns:minmax(0,1fr) auto;width:100%}
- .hallV2Search button{padding:0 13px;font-size:11px}
- .hallV2Reset{grid-column:1 / -1;min-height:40px;font-size:11px;padding:0 14px;justify-self:start}
- .hallV2SearchInput input{font-size:13px}
+ .hallV2Content{padding-top:20px}
  .hallV2Grid{gap:12px}.hallV2CardBody{padding:12px 12px 13px}.hallV2CardBody h3{font-size:clamp(17px,4.65vw,22px)}
  .hallV2CardBody>p{font-size:11px}.hallV2Category{bottom:8px;left:8px;max-width:calc(100% - 16px);font-size:8px;padding:6px 7px}
  .hallV2Open{font-size:10px;padding-top:10px}.hallV2Era{font-size:9px}
@@ -103,3 +76,32 @@
 }
 @media(max-width:340px){.hallV2Grid{grid-template-columns:1fr}.hallV2Portrait{aspect-ratio:4/3}.hallV2CardBody h3{font-size:23px}}
 @media(prefers-reduced-motion:reduce){.hallV2Card,.hallV2Portrait>img{transition:none}.hallV2Card:hover,.hallV2Card:focus-visible{transform:none}}
+
+/* v2.29.19: the catalogue stays clean; search/categories live in a lightweight dialog. */
+.hallV2Content{padding-top:18px}
+.hallV2ListHead{min-height:52px;margin-bottom:21px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.hallV2ListSummary{display:flex;flex-wrap:wrap;gap:10px 24px;align-items:center}
+.hallV2SearchTrigger{position:relative;flex:none;width:43px;height:43px;display:grid;place-items:center;border:1px solid #cdddec;background:#fff;color:#0b376c;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.hallV2SearchTrigger svg{width:21px;height:21px}
+.hallV2SearchTrigger:hover,.hallV2SearchTrigger:focus-visible{background:#0d376d;color:#fff;border-color:#0d376d;outline-offset:3px}
+.hallV2SearchStatus{position:absolute;right:5px;top:5px;width:7px;height:7px;border-radius:50%;background:#e5ad00}
+.hallV2DialogBackdrop{position:fixed;inset:0;z-index:2300;display:grid;place-items:start center;overflow-y:auto;padding:clamp(60px,12vh,130px) 20px 28px;background:rgba(3,20,43,.72)}
+.hallV2Dialog{width:min(620px,100%);min-width:0;padding:30px;border:1px solid #d2e2f1;background:#fff;box-shadow:0 25px 75px rgba(0,13,33,.28);color:#0b315f}
+.hallV2DialogHeading{display:flex;justify-content:space-between;align-items:start;gap:18px;margin-bottom:26px}
+.hallV2DialogHeading small{font-size:10px;font-weight:850;letter-spacing:.1em;color:#6b88a4;text-transform:uppercase}
+.hallV2DialogHeading h2{margin:7px 0 0;font-family:'Arial Narrow','Arial Black',Arial,sans-serif;font-weight:950;font-size:clamp(28px,4vw,40px);line-height:1.05;text-transform:uppercase;letter-spacing:-.035em}
+.hallV2DialogClose{flex:none;display:grid;place-items:center;width:36px;height:36px;border:1px solid #dce6ef;background:#f8fafc;color:#0b315f;font-size:26px;cursor:pointer}
+.hallV2DialogForm>label{display:block;margin-bottom:10px;font-size:12px;font-weight:800;color:#2c577d}
+.hallV2DialogSearchRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.hallV2DialogSearchRow input{min-width:0;min-height:48px;padding:12px 14px;border:1px solid #bbcee2;background:#fff;color:#0b315f;font-size:14px;outline-offset:2px}
+.hallV2DialogSearchRow input:focus{outline:2px solid #216cb3}
+.hallV2DialogSearchRow button{min-width:95px;padding:0 19px;border:0;background:#ffd22c;color:#092e5a;font-size:12px;font-weight:950;text-transform:uppercase;cursor:pointer}
+.hallV2DialogSearchRow button:hover{background:#ffe575}
+.hallV2DialogCategories{margin-top:26px;padding-top:22px;border-top:1px solid #e1eaf2}
+.hallV2DialogCategories h3{margin:0 0 13px;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:#6684a2}
+.hallV2DialogCategories nav{display:flex;flex-wrap:wrap;gap:8px}
+.hallV2DialogCategories nav a{display:inline-flex;align-items:center;min-height:38px;padding:8px 13px;border:1px solid #d3e0ec;background:#f5f8fb;color:#244d77;font-size:12px;font-weight:800;text-decoration:none;white-space:nowrap}
+.hallV2DialogCategories nav a:hover{border-color:#275e97;background:#fff}
+.hallV2DialogCategories nav a.isActive{background:#0c376b;color:#fff;border-color:#0c376b;box-shadow:inset 0 -2px 0 #ffd22c}
+.hallV2DialogReset{display:inline-block;margin-top:20px;color:#1b5fa5;font-size:12px;font-weight:800;text-decoration:underline;text-underline-offset:4px}
+@media(max-width:590px){.hallV2Content{padding-top:9px}.hallV2ListHead{margin-bottom:14px}.hallV2DialogBackdrop{padding:54px 12px 16px}.hallV2Dialog{padding:20px 17px}.hallV2DialogSearchRow button{min-width:76px;padding:0 12px;font-size:11px}.hallV2DialogSearchRow input{font-size:13px}.hallV2DialogCategories nav a{white-space:normal}}
