@@ -71,8 +71,8 @@ verify('all admin UX rules are scoped without !important', () => {
   assert.match(css, /\.adminAppShell \.adminOperationsGrid/);
   assert.match(css, /@media\(max-width:520px\)/);
 });
-verify('search and task list do not require a new Supabase migration', () => {
-  assert.equal(fs.readdirSync(path.join(root,'database')).filter((s)=>s.startsWith('068_')).length,0);
+verify('search and task list remain independent of lineup migration', () => {
+  assert.ok(fs.existsSync(path.join(root,'database','068_atomic_match_lineup_save.sql')));
 });
 
 const passed = checks.filter(Boolean).length;

@@ -84,8 +84,8 @@ verify('dashboard attention cards open pre-filtered worklists',()=>{
 verify('new QA wired into deploy and GitHub CI',()=>{
   assert.match(read('package.json'),/qa:admin-attention/);assert.match(read('package.json'),/qa-admin-attention\.mjs/);assert.match(read('.github/workflows/responsive-qa.yml'),/qa-admin-attention\.mjs/);
 });
-verify('no Supabase migration added for read-only UI features',()=>{
+verify('read-only attention filters remain separate from lineup migration',()=>{
   const db=fs.readdirSync(path.join(root,'database'));
-  assert.equal(db.some(x=>x.startsWith('068_')),false);
+  assert.ok(db.includes('068_atomic_match_lineup_save.sql'));
 });
 const pass=checks.filter(Boolean).length;console.log(`\n${pass}/${checks.length} admin attention checks passed.`);if(pass!==checks.length)process.exitCode=1;

@@ -45,6 +45,7 @@ export default function ClubSquadStatsEditor({
   stats,
   formation,
   coachName,
+  lineupUpdatedAt,
   currentStatus,
   teamName,
   sideLabel,
@@ -55,6 +56,7 @@ export default function ClubSquadStatsEditor({
   stats: ExistingStat[];
   formation: string | null;
   coachName: string | null;
+  lineupUpdatedAt: string | null;
   currentStatus: "empty" | "draft" | "complete";
   teamName: string;
   sideLabel: "ХОЗЯЕВА" | "ГОСТИ";
@@ -125,6 +127,7 @@ export default function ClubSquadStatsEditor({
 
       <form action={saveClubSquadAndStats}>
         <input type="hidden" name="match_id" value={matchId} />
+        <input type="hidden" name="lineup_revision" value={lineupUpdatedAt ?? ""} />
         <div className="matchCenterSquadSummary standalone">
           <span><b>{startersCount}</b>/11 старт</span>
           <span><b>{benchCount}</b> запасных</span>

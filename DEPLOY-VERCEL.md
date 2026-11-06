@@ -1,23 +1,9 @@
-# FC Edineț v2.29.14 — установка и публикация
+# FC Edineț v2.29.16 — установка и публикация
 
-1. Распакуйте папку `fc-edinet-v2.29.14` рядом с предыдущими релизами. Папку с действующим `.env.local` пока не удаляйте.
-2. Запустите `DEPLOY_FC_EDINET.bat` из новой папки. Скрипт проверяет Supabase-параметры, устанавливает зависимости, запускает QA и `next build`, затем отправляет обновление в GitHub/Vercel.
-3. На этапе `[2/8]` должны пройти `qa:site`, `qa:css`, security/editorial/admin/match QA, адаптивный тест и **новый `qa:ui` (20/20)**. Chrome или Edge необходимы для визуальных тестов.
-4. Когда Vercel опубликует релиз, проверьте `https://fc-edinet.vercel.app/api/version` (ожидается **2.29.14**) и запустите `npm run qa:live` (ожидается **12/12**).
-5. Проведите ручную проверку по `PRODUCTION-CHECKLIST-v2.29.14.md`.
+1. Миграция `database/068_atomic_match_lineup_save.sql` уже применена к production Supabase FC Edineț. В новой базе примените её **до публикации кода**. Существующие данные миграция не меняет.
+2. Распакуйте `fc-edinet-v2.29.16` рядом с предыдущими версиями. Не удаляйте старую папку с рабочим `.env.local`.
+3. Запустите `DEPLOY_FC_EDINET.bat`. На шаге `[2/8]` помимо старых проверок выполняется `qa:atomic-lineups` (20/20) и production `next build`.
+4. Проверьте `/api/version` — должно быть `2.29.16`, затем `npm run qa:live` — ожидается 12/12.
+5. Следуйте `PRODUCTION-CHECKLIST-v2.29.16.md`, особенно тесту двух вкладок и сравнению составов. Сохранённые опубликованные протоколы для smoke-теста не изменяйте.
 
-Новый FULL-пакет не содержит `.env.local`, секретов Supabase, `node_modules` или `.next`. Не добавляйте серверные ключи под префиксом `NEXT_PUBLIC_`.
-
-### Полезные команды
-
-```powershell
-npm run qa:site
-npm run qa:css
-npm run qa:ui
-npm run qa:responsive
-npm run qa:all
-npm run build
-npm run qa:live
-```
-
-**Новых миграций Supabase нет.** CSS-эталон `qa/baselines/ui-v2.29.13-css.json.gz` хранится в репозитории только для визуального сравнения; его содержимое — публичные стили, не секреты.
+Новый FULL-пакет не содержит `.env.local`, ключей, `node_modules` или `.next`.

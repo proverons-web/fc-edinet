@@ -450,13 +450,13 @@ export default async function MatchCenterMatchPage({
                 <div className={`matchCenterLineupsGrid club-${clubSide ?? "none"}`}>
                   {clubSide === "home" ? (
                     <>
-                      <ClubSquadStatsEditor matchId={String(match.id)} players={players} entries={clubLineupEntries} stats={playerStats} formation={clubLineupSetting?.formation ?? null} coachName={clubLineupSetting?.coach_name ?? null} currentStatus={(progress?.player_stats_status ?? "empty") as "empty" | "draft" | "complete"} teamName={match.home?.name ?? "FC Edineț"} sideLabel="ХОЗЯЕВА" />
+                      <ClubSquadStatsEditor matchId={String(match.id)} players={players} entries={clubLineupEntries} stats={playerStats} formation={clubLineupSetting?.formation ?? null} coachName={clubLineupSetting?.coach_name ?? null} lineupUpdatedAt={clubLineupSetting?.updated_at ?? null} currentStatus={(progress?.player_stats_status ?? "empty") as "empty" | "draft" | "complete"} teamName={match.home?.name ?? "FC Edineț"} sideLabel="ХОЗЯЕВА" />
                       <LineupEditor match={match} players={players} settings={lineupSettings} entries={lineupEntries} events={events} onlySide="away" />
                     </>
                   ) : clubSide === "away" ? (
                     <>
                       <LineupEditor match={match} players={players} settings={lineupSettings} entries={lineupEntries} events={events} onlySide="home" />
-                      <ClubSquadStatsEditor matchId={String(match.id)} players={players} entries={clubLineupEntries} stats={playerStats} formation={clubLineupSetting?.formation ?? null} coachName={clubLineupSetting?.coach_name ?? null} currentStatus={(progress?.player_stats_status ?? "empty") as "empty" | "draft" | "complete"} teamName={match.away?.name ?? "FC Edineț"} sideLabel="ГОСТИ" />
+                      <ClubSquadStatsEditor matchId={String(match.id)} players={players} entries={clubLineupEntries} stats={playerStats} formation={clubLineupSetting?.formation ?? null} coachName={clubLineupSetting?.coach_name ?? null} lineupUpdatedAt={clubLineupSetting?.updated_at ?? null} currentStatus={(progress?.player_stats_status ?? "empty") as "empty" | "draft" | "complete"} teamName={match.away?.name ?? "FC Edineț"} sideLabel="ГОСТИ" />
                     </>
                   ) : <div className="formError matchCenterNotice">Не удалось определить сторону FC Edineț в этом матче.</div>}
                 </div>

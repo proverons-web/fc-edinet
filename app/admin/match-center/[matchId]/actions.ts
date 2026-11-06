@@ -197,6 +197,39 @@ async function buildEventPayload(
   };
 }
 
+// v2.29.16: a single RPC replaces the lineup and settings in one DB transaction.
+// The database checks the editor role, derives the team from the match and
+// refuses stale forms instead of silently overwriting another tab's changes.
+async function persistLineupAtomically(
+  supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"],
+  matchId: string,
+  side: "home" | "away",
+  formation: string | null,
+  coachName: string | null,
+  rows: Record<string, unknown>[],
+  expectedRevision: string | null,
+  compareRevision: boolean,
+) {
+  const { data, error } = await supabase.rpc("save_match_lineup_atomic", {
+    p_match_id: Number(matchId),
+    p_side: side,
+    p_formation: formation,
+    p_coach_name: coachName,
+    p_rows: rows,
+    p_compare_revision: compareRevision,
+    p_expected_updated_at: expectedRevision,
+  });
+  if (error) {
+    const stale = error.code === "40001" || /changed in another tab/i.test(error.message);
+    go(matchId, { error: stale
+      ? "Состав изменён в другой вкладке. Обнови страницу и проверь данные перед сохранением."
+      : `Не удалось сохранить состав целиком: ${error.message}` });
+  }
+  if (!data || data.saved !== true || data.entries !== rows.length || data.side !== side) {
+    go(matchId, { error: "База не подтвердила сохранение всего состава. Повтори после проверки страницы." });
+  }
+}
+
 function revalidateMatchCenter(matchId: string) {
   revalidatePath("/admin");
   revalidatePath("/admin/match-center");
@@ -608,30 +641,8 @@ export async function saveMatchLineup(formData: FormData) {
 
   if (payload.length > 0 && captains !== 1) go(matchId, { error: "Перед сохранением состава выбери одного капитана." });
 
-  const { error: settingsError } = await supabase
-    .from("match_lineup_settings")
-    .upsert({
-      match_id: matchId,
-      team_id: teamId,
-      side,
-      formation,
-      coach_name: coachName,
-      updated_by: userId,
-      created_by: userId,
-    }, { onConflict: "match_id,side" });
-  if (settingsError) go(matchId, { error: `Не удалось сохранить схему: ${settingsError.message}` });
-
-  const { error: deleteError } = await supabase
-    .from("match_lineup_entries")
-    .delete()
-    .eq("match_id", matchId)
-    .eq("side", side);
-  if (deleteError) go(matchId, { error: `Не удалось обновить состав: ${deleteError.message}` });
-
-  if (payload.length > 0) {
-    const { error: insertError } = await supabase.from("match_lineup_entries").insert(payload);
-    if (insertError) go(matchId, { error: `Не удалось сохранить состав: ${insertError.message}` });
-  }
+  await persistLineupAtomically(supabase, matchId, side, formation, coachName, payload,
+    nullableText(formData, "lineup_revision", 80), true);
 
   revalidateMatchCenter(matchId);
   go(matchId, { saved: `lineup-${side}` });
@@ -702,30 +713,9 @@ export async function importClubLineupFromPlayerStats(formData: FormData) {
     });
   }
 
-  const { error: deleteError } = await supabase
-    .from("match_lineup_entries")
-    .delete()
-    .eq("match_id", matchId)
-    .eq("side", side);
-  if (deleteError) go(matchId, { error: `Не удалось подготовить импорт: ${deleteError.message}` });
-
-  if (rows.length > 0) {
-    const { error: insertError } = await supabase.from("match_lineup_entries").insert(rows);
-    if (insertError) go(matchId, { error: `Не удалось импортировать состав: ${insertError.message}` });
-  }
-
-  const { error: settingsError } = await supabase
-    .from("match_lineup_settings")
-    .upsert({
-      match_id: matchId,
-      team_id: teamId,
-      side,
-      formation: null,
-      coach_name: null,
-      created_by: userId,
-      updated_by: userId,
-    }, { onConflict: "match_id,side" });
-  if (settingsError) go(matchId, { error: `Состав импортирован, но настройки не сохранены: ${settingsError.message}` });
+  // The import is generated against current server-side statistics, so it
+  // runs under the match row lock without a browser revision precondition.
+  await persistLineupAtomically(supabase, matchId, side, null, null, rows, null, false);
 
   revalidateMatchCenter(matchId);
   go(matchId, { saved: "lineup-imported" });
@@ -1118,28 +1108,12 @@ export async function saveClubSquadAndStats(formData: FormData) {
 
   const formation = nullableText(formData, "formation", 40);
   const coachName = nullableText(formData, "coach_name", 160);
-  const { error: settingsError } = await supabase.from("match_lineup_settings").upsert({
-    match_id: matchId,
-    team_id: clubTeamId,
-    side: clubSide,
-    formation,
-    coach_name: coachName,
-    created_by: userId,
-    updated_by: userId,
-  }, { onConflict: "match_id,side" });
-  if (settingsError) go(matchId, { error: `Не удалось сохранить настройки состава: ${settingsError.message}` });
+  await persistLineupAtomically(supabase, matchId, clubSide, formation, coachName,
+    lineupRows, nullableText(formData, "lineup_revision", 80), true);
 
-  const { error: lineupDeleteError } = await supabase
-    .from("match_lineup_entries")
-    .delete()
-    .eq("match_id", matchId)
-    .eq("side", clubSide);
-  if (lineupDeleteError) go(matchId, { error: `Не удалось обновить состав: ${lineupDeleteError.message}` });
-  if (lineupRows.length > 0) {
-    const { error: lineupInsertError } = await supabase.from("match_lineup_entries").insert(lineupRows);
-    if (lineupInsertError) go(matchId, { error: `Не удалось сохранить состав: ${lineupInsertError.message}` });
-  }
-
+  // Derived player statistics and their completion status remain a separate
+  // operation; errors are surfaced. Their full transactional conversion is
+  // tracked separately rather than incorrectly claiming cross-table atomicity.
   await syncClubPlayerStatsFromEvents(supabase, userId, matchId);
 
   const { error: statusError } = await supabase.from("match_statistics_status").upsert({

@@ -149,6 +149,7 @@ function TeamLineup({
       <form action={saveMatchLineup} className="matchLineupForm matchCenterOpponentUnifiedForm">
         <input type="hidden" name="match_id" value={matchId} />
         <input type="hidden" name="side" value={side} />
+        <input type="hidden" name="lineup_revision" value={setting?.updated_at ?? ""} />
 
         <div className="matchCenterSquadSummary standalone">
           <span><b>{starterCount}</b>/11 старт</span>

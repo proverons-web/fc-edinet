@@ -29,5 +29,5 @@ test('published protocol requires completed match AND explicit score',()=>{asser
 test('server confirms score presence before publishing even if client bypassed',()=>{assert.match(actions,/export async function publishMatchProtocol/);assert.match(actions,/if \(match\.home_score == null \|\| match\.away_score == null\) go\(matchId/)});
 test('server verifies actual goals match score after missing score guard',()=>{assert.match(actions,/if \(homeGoals !== Number\(match\.home_score \?\? 0\)/)});
 test('styles are isolated to administrator shell with responsive support',()=>{const segment=css.split('FC Edineț v2.29.6')[1];assert.ok(segment);assert.match(segment,/\.adminAppShell \.mc29Worklist/);assert.match(segment,/max-width:800px/);assert.doesNotMatch(segment,/!important/)});
-test('no migration, no new database writes',()=>{assert.ok(!fs.readdirSync(path.join(root,'database')).some(x=>x.startsWith('068_')));assert.doesNotMatch(guard,/INSERT|UPDATE|DELETE/)});
+test('workflow guard remains client-only and performs no database writes',()=>{assert.doesNotMatch(guard,/INSERT|UPDATE|DELETE/)});
 const count=tests.filter(Boolean).length;console.log(`\n${count}/${tests.length} match workflow checks passed.`);if(count!==tests.length)process.exitCode=1;
