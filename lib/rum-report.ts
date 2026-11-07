@@ -23,6 +23,13 @@ export function percentile75(values: number[]) {
   return sorted[first] + ((sorted[Math.ceil(rank)] ?? sorted[first]) - sorted[first]) * (rank - first);
 }
 
+/** UI filters work only with public device categories, never identifiers. */
+export type RumDeviceFilter = "all" | "mobile" | "tablet" | "desktop";
+
+export function filterRumByDevice(rows: RumSample[], device: RumDeviceFilter) {
+  return device === "all" ? rows : rows.filter((r) => r.device_type === device);
+}
+
 export function summarizeRum(rows: RumSample[]) {
   const names = ["LCP", "INP", "CLS", "FCP", "TTFB"] as const;
   const vitals = names.map((metric) => {
@@ -50,8 +57,17 @@ export function summarizeRum(rows: RumSample[]) {
     routeMap.set(row.route_key, entry);
   }
   const routes = [...routeMap.entries()]
-    .map(([route, counts]) => ({ route, ...counts, badShare: counts.total ? counts.poor / counts.total : 0 }))
+    .map(([route, counts]) => ({
+      route, ...counts,
+      // A route can look "100% slow" from only one slow event. Never rank such
+      // a tiny sample as a confirmed regression.
+      enoughData: counts.total >= 10,
+      badShare: counts.total ? counts.poor / counts.total : 0,
+    }))
     .sort((a, b) => b.errors - a.errors || b.badShare - a.badShare || b.total - a.total)
     .slice(0, 10);
-  return { vitals, devices, routes, errors: errors.length, samples: rows.length };
+  const latestRecordedAt = rows.reduce<string | null>((latest, row) =>
+    typeof row.recorded_at === "string" && (!latest || row.recorded_at > latest)
+      ? row.recorded_at : latest, null);
+  return { vitals, devices, routes, errors: errors.length, samples: rows.length, latestRecordedAt };
 }
