@@ -1,9 +1,10 @@
-# FC Edineț v2.29.20 — установка и публикация
+# FC Edineț v2.30.0 — deployment
 
-1. Распакуй архив в `fc-edinet-v2.29.20` рядом с предыдущими версиями. Скрипт `scripts/prepare-local-env.mjs` восстановит `.env.local` из существующей версии (если он там есть), не печатая секреты.
-2. Запусти `DEPLOY_FC_EDINET.bat`. Он проверит QA и выполнит production `next build` перед GitHub/Vercel.
-3. Миграция `database/069_atomic_player_statistics.sql` уже установлена в production Supabase. Повторно применять не требуется.
-4. Убедись, что `https://fc-edinet.vercel.app/api/version` показывает `2.29.20`.
-5. Выполни `npm run qa:live`. Проверь статистику только на контролируемом тестовом матче; не изменяй исторические результаты ради тестирования.
+1. Extract `fc-edinet-v2.30.0-FULL.zip` into `fc-edinet-v2.30.0` beside prior releases.
+2. Run `DEPLOY_FC_EDINET.bat`. It restores `.env.local` locally when necessary, installs dependencies, runs all QA (including `qa:fan`) and builds before deployment.
+3. No new Supabase migrations are required by the v2.30.0 fan calendar release. Previous migrations 068 and 069 remain in the package for reproducibility.
+4. After deployment verify `https://fc-edinet.vercel.app/api/version` reports `2.30.0`.
+5. Run `npm run qa:live`. The public smoke test verifies the iCalendar feed at `/api/calendar?lang=ru`.
+6. Review `PRODUCTION-CHECKLIST-v2.30.0.md` before considering the release verified.
 
-Область транзакции: сохранение показателей футболистов клуба и опционально обновление статуса статистики. Составы, события и отчёт сохраняются отдельными операциями; их записи не откатываются автоматически при ошибке последующего пересчёта.
+**Scope:** calendar feed and single-match `.ics` exports, localized fan actions and link sharing. No existing match, player or administrator data is changed by installation.

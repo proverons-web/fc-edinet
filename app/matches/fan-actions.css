@@ -1,0 +1,21 @@
+/* FC Edineț v2.30.0 — fan calendar and sharing tools; only loaded by match pages. */
+.fanFixtureTools{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:flex-end}
+.fanFixtureTools .fanSubscribe,.fanFixtureTools .fanDownloadFeed{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:41px;padding:9px 14px;border:1px solid #b6cee6;background:#fff;color:#0a4c93;font-size:11px;font-weight:850;line-height:1.3;text-decoration:none;transition:background .15s,border-color .15s}
+.fanFixtureTools .fanSubscribe{background:#073b76;color:#fff;border-color:#073b76}
+.fanFixtureTools .fanSubscribe:hover{background:#0b559f}
+.fanFixtureTools .fanDownloadFeed:hover{border-color:#0b559f;background:#f2f8ff}
+.fanMatchAction{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:8px 13px;border:1px solid #b8cce3;border-radius:3px;background:#fff;color:#0b4d92;font:inherit;font-size:10px;font-weight:900;line-height:1.3;text-decoration:none;cursor:pointer;white-space:nowrap;letter-spacing:.012em}
+.fanMatchAction:hover,.fanMatchAction:focus-visible{background:#f2f8ff;border-color:#1d69aa;color:#0a3e74}
+.fanMatchCalendar{border-color:#e5c047;background:#fff9dd;color:#604b00}
+.fanMatchCalendar:hover,.fanMatchCalendar:focus-visible{border-color:#c9a31b;background:#fff1b2;color:#403200}
+.fanShareWrap{display:inline-flex;align-items:center;gap:7px}
+.fanShareFeedback{font-size:10px;font-weight:800;color:#177a52}
+.fanMatchHeroActions{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:18px}
+.fanMatchHeroActions .fanMatchAction{min-height:43px;padding-inline:16px}
+.fanMatchHeroActions .fanMatchShare{background:transparent;color:#fff;border-color:rgba(255,255,255,.45)}
+.fanMatchHeroActions .fanMatchShare:hover,.fanMatchHeroActions .fanMatchShare:focus-visible{color:#fff;background:rgba(255,255,255,.12)}
+.fanMatchHeroActions .fanShareFeedback{color:#ffcf1b}
+.fanMatchHeroActions .fanMatchCalendar{background:#ffcf1b;color:#0a2b55;border-color:#ffcf1b}
+.fanMatchHeroActions .fanMatchCalendar:hover{background:#ffe36a;border-color:#ffe36a;color:#092745}
+@media(max-width:780px){.matchPublicSection .sectionHeading.fanUpcomingHeading{align-items:flex-start;flex-direction:column;gap:12px}.fanFixtureTools{justify-content:flex-start}.fanFixtureTools .fanSubscribe,.fanFixtureTools .fanDownloadFeed{font-size:10px;min-height:38px}.fanMatchHeroActions{gap:8px}}
+@media(max-width:430px){.matchFavoriteAction .fanMatchAction{width:100%}.fanMatchHeroActions .fanMatchAction{min-width:0;flex:1 1 auto}.fanMatchHeroActions .fanShareWrap{flex:1 1 auto}.fanMatchHeroActions .fanShareWrap .fanMatchAction{width:100%}.fanShareFeedback{white-space:normal}}

@@ -7,7 +7,7 @@ import path from 'node:path';
 const projectRoot=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const expectedVersion=JSON.parse(fs.readFileSync(path.join(projectRoot,'package.json'),'utf8')).version;
 const base = (process.env.FC_EDINET_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://fc-edinet.vercel.app').replace(/\/+$/,'');
-const routes = [ '/', '/news', '/team', '/staff', '/matches', '/standings', '/statistics', '/media', '/club/about', '/club/hall-of-fame', '/api/version', '/sitemap.xml', '/robots.txt' ];
+const routes = [ '/', '/news', '/team', '/staff', '/matches', '/standings', '/statistics', '/media', '/club/about', '/club/hall-of-fame', '/api/version', '/api/calendar?lang=ru', '/sitemap.xml', '/robots.txt' ];
 const results = [];
 for (const pathname of routes) {
   try {
@@ -23,6 +23,10 @@ for (const pathname of routes) {
       const data = await response.json();
       ok = data?.version === expectedVersion;
       detail += ` version=${String(data?.version ?? '?')}`;
+    } else if (ok && pathname.startsWith('/api/calendar')) {
+      const body=await response.text();
+      ok = type.includes('text/calendar') && body.includes('BEGIN:VCALENDAR') && body.includes('VERSION:2.0') && body.includes('END:VCALENDAR');
+      detail += ` iCalendar=${ok?'ok':'invalid'}`;
     } else if (ok && pathname === '/sitemap.xml') {
       const body=await response.text();
       ok = body.includes('<urlset') && body.includes('/matches') && body.includes('/team');

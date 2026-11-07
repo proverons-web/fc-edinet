@@ -6,6 +6,9 @@ import PublicBreadcrumbs from "@/app/components/PublicBreadcrumbs";
 import PublicBackLink from "@/app/components/PublicBackLink";
 import LineupSubstitutionBadge from "./LineupSubstitutionBadge";
 import MobileTimelineFilter from "./MobileTimelineFilter";
+import MatchShareButton from "../MatchShareButton";
+import CalendarIcon from "../CalendarIcon";
+import "../fan-actions.css";
 import "./match-report-v2298.css";
 import "./match-player-navigation-v22910.css";
 import "./match-lineup-mobile-v22912.css";
@@ -354,6 +357,14 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
                 <span>{match.status === "finished" ? (locale === "ro" ? "MECI ÎNCHEIAT" : "МАТЧ ЗАВЕРШЁН") : t.protocol}</span>
               </div>
               <PublicTeam team={match.away} />
+            </div>
+            <div className="fanMatchHeroActions">
+              <MatchShareButton matchId={match.id} homeName={match.home?.name ?? "FC Edineț"} awayName={match.away?.name ?? "—"} locale={locale} />
+              {match.status === "scheduled" && new Date(match.kickoff).getTime() > Date.now() ? (
+                <a className="fanMatchAction fanMatchCalendar" href={`/api/calendar/${match.id}?lang=${locale}`} download={`fc-edinet-match-${match.id}.ics`}>
+                  <CalendarIcon /> {locale === "ro" ? "Adaugă în calendar" : "Добавить в календарь"}
+                </a>
+              ) : null}
             </div>
             {published && events.length > 0 ? (
               <div className="premiumGoalStrip">

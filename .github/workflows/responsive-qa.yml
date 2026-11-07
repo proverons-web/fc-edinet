@@ -55,6 +55,12 @@ jobs:
         run: node scripts/qa-hall-layout.mjs
       - name: Check performance and image delivery contracts
         run: node scripts/qa-performance.mjs
+      - name: Validate match calendar subscription and sharing contracts
+        run: node --experimental-strip-types scripts/qa-fan-experience.mjs
+      - name: Check fan action geometry across mobile and desktop widths
+        run: node scripts/qa-fan-layout.mjs
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
       - name: UI visual consistency against approved baseline
         run: node scripts/qa-ui-consistency.mjs
         env:

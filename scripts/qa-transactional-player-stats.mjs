@@ -11,7 +11,7 @@ const between=(s,begin,end)=>s.slice(s.indexOf(begin),s.indexOf(end,s.indexOf(be
 const sync=between(center,'async function syncClubPlayerStatsFromEvents','export async function saveClubSquadAndStats');
 const club=between(center,'export async function saveClubSquadAndStats','const MATCH_CENTER_STATUSES');
 const publish=between(center,'export async function publishMatchReport','export async function');
-check('version and source release agree',()=>assert.equal(packageJson.version,'2.29.20'));
+check('version and source release agree',()=>assert.ok(read('lib/release.ts').includes(`RELEASE_VERSION = "${packageJson.version}"`)));
 check('single transactional RPC is defined',()=>assert.match(sql,/create or replace function public\.save_club_player_stats_atomic/));
 check('RPC is security invoker, with server auth and role check',()=>{assert.match(sql,/security invoker/);assert.match(sql,/auth\.uid\(\)/);assert.match(sql,/is_editor_or_admin/)});
 check('RPC is not callable by anonymous visitors',()=>{assert.match(sql,/revoke all on function public\.save_club_player_stats_atomic[\s\S]*?from public,anon,authenticated/);assert.match(sql,/grant execute on function public\.save_club_player_stats_atomic[\s\S]*?to authenticated/)});
