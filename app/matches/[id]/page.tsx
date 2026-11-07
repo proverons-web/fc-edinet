@@ -233,7 +233,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     description,
     path: `/matches/${encodeURIComponent(id)}`,
     locale,
-    image: `/matches/${encodeURIComponent(id)}/opengraph-image`,
+    image: `/matches/${encodeURIComponent(id)}/opengraph-image?v=${encodeURIComponent(match.updated_at || "1")}`,
+    imageWidth: 1200,
+    imageHeight: 630,
   });
 }
 

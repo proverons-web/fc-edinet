@@ -3,8 +3,10 @@ import { createClient } from "@supabase/supabase-js";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { matchScoreText } from "@/lib/public-match-integrity";
+import { socialPhotoDataUrl } from "@/lib/social-preview";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 export const alt = "FC Edineț — meci";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -39,6 +41,12 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   const homeName = home?.name || "FC Edineț";
   const awayName = away?.name || "—";
   const score = matchScoreText(match || {});
+  // Remote logos may be missing or briefly unavailable: render a stable
+  // fallback rather than returning a broken OG image to social crawlers.
+  const [homeLogo, awayLogo] = await Promise.all([
+    socialPhotoDataUrl(home?.logo_url),
+    socialPhotoDataUrl(away?.logo_url),
+  ]);
   const date = match?.kickoff
     ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Chisinau" }).format(new Date(match.kickoff))
     : "FC EDINEȚ";
@@ -61,12 +69,12 @@ export default async function Image({ params }: { params: Promise<{ id: string }
         </div>
 
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 42, zIndex: 2 }}>
-          <TeamBlock name={homeName} logo={home?.logo_url} fallback={home?.short_name} />
+          <TeamBlock name={homeName} logo={homeLogo} fallback={home?.short_name} />
           <div style={{ minWidth: 230, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
             <div style={{ fontSize: score === "VS" ? 68 : 82, fontWeight: 900, letterSpacing: -2 }}>{score}</div>
             <div style={{ width: 84, height: 7, background: "#ffd328", marginTop: 18 }} />
           </div>
-          <TeamBlock name={awayName} logo={away?.logo_url} fallback={away?.short_name} />
+          <TeamBlock name={awayName} logo={awayLogo} fallback={away?.short_name} />
         </div>
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 2, fontSize: 18, color: "rgba(255,255,255,.74)" }}>

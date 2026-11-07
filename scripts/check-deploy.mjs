@@ -92,7 +92,7 @@ if (!fs.existsSync(officialCrestPath)) {
   errors.push("Official crest is missing: public/brand/fc-edinet-crest.png");
 }
 
-for (const requiredSeoFile of ["app/sitemap.ts", "app/robots.ts", "app/opengraph-image.tsx"]) {
+for (const requiredSeoFile of ["app/sitemap.ts", "app/robots.ts", "app/opengraph-image.tsx", "app/news/[slug]/opengraph-image.tsx", "app/media/[slug]/opengraph-image.tsx", "app/matches/[id]/opengraph-image.tsx", "lib/social-image.tsx", "lib/social-preview.ts"]) {
   if (!fs.existsSync(path.join(cwd, requiredSeoFile))) {
     errors.push(`SEO release file is missing: ${requiredSeoFile}`);
   }

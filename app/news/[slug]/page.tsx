@@ -49,7 +49,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description,
     path: `/news/${encodeURIComponent(slug)}`,
     locale,
-    image: article.cover_image_url,
+    image: `/news/${encodeURIComponent(slug)}/opengraph-image?v=${encodeURIComponent(article.updated_at || article.published_at || "1")}`,
+    imageWidth: 1200,
+    imageHeight: 630,
     type: "article",
     article: {
       publishedTime: article.published_at,

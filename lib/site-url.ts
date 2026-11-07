@@ -5,21 +5,13 @@ export function getSiteUrl() {
     return normalizeUrl(explicit);
   }
 
-  // Public deployment URL exposed by Vercel.
-  const publicVercelUrl =
-    process.env.NEXT_PUBLIC_VERCEL_URL?.trim();
+  // Canonical/social URLs must point at the stable public domain, not at a
+  // unique preview deployment URL that social crawlers might cache forever.
+  const productionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (productionHost) return normalizeUrl(productionHost);
 
-  if (publicVercelUrl) {
-    return normalizeUrl(publicVercelUrl);
-  }
-
-  // Stable production-domain system variable when available.
-  const productionHost =
-    process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
-
-  if (productionHost) {
-    return normalizeUrl(productionHost);
-  }
+  const publicVercelUrl = process.env.NEXT_PUBLIC_VERCEL_URL?.trim();
+  if (publicVercelUrl) return normalizeUrl(publicVercelUrl);
 
   // Current deployment URL on the server.
   const deploymentHost = process.env.VERCEL_URL?.trim();

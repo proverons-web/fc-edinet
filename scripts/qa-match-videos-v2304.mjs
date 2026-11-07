@@ -22,8 +22,8 @@ const checks = [
   ["Public match has video section", () => read("app/matches/[id]/page.tsx").includes('id="match-videos"')],
   ["Media index links to edit route", () => read("app/admin/media/page.tsx").includes('/admin/media/videos/${video.id}/edit')],
   ["Media page links to match", () => read("app/components/ManagedPageCanvas.tsx").includes('href={`/matches/${video.match_id}`}')],
-  ["Version constant updated", () => read("lib/release.ts").includes('RELEASE_VERSION = "2.30.7"')],
-  ["Package updated", () => JSON.parse(read("package.json")).version === "2.30.7"],
+  ["Version constant updated", () => read("lib/release.ts").includes('RELEASE_VERSION = "2.30.8"')],
+  ["Package updated", () => JSON.parse(read("package.json")).version === "2.30.8"],
 ];
 let pass=0;
 for(const [name, fn] of checks) { const ok = fn(); assert.ok(ok,name); console.log(`PASS ${name}`); pass++; }

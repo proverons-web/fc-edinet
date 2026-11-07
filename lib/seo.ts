@@ -71,6 +71,8 @@ export function publicMetadata({
   path,
   locale,
   image,
+  imageWidth,
+  imageHeight,
   type = "website",
   article,
 }: {
@@ -79,6 +81,8 @@ export function publicMetadata({
   path: string;
   locale: Locale;
   image?: string | null;
+  imageWidth?: number;
+  imageHeight?: number;
   type?: "website" | "article";
   article?: ArticleOpenGraph;
 }): Metadata {
@@ -90,7 +94,7 @@ export function publicMetadata({
     title,
     description,
     url: canonical,
-    images: [{ url: imageUrl, alt: title }],
+    images: [{ url: imageUrl, alt: title, ...(imageWidth && imageHeight ? { width: imageWidth, height: imageHeight } : {}) }],
   };
 
   return {

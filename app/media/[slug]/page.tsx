@@ -37,7 +37,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: data.description || `${data.title} — FC Edineț`,
     path: `/media/${encodeURIComponent(slug)}`,
     locale,
-    image: data.cover_image_url,
+    image: `/media/${encodeURIComponent(slug)}/opengraph-image?v=${encodeURIComponent(data.updated_at || "1")}`,
+    imageWidth: 1200,
+    imageHeight: 630,
   });
 }
 
