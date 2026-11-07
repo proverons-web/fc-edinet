@@ -38,6 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { data: customPages },
     { data: hallEntries },
     { data: archiveSeasons },
+    { data: historyEvents },
   ] = await Promise.all([
     supabase.from("news").select("slug,updated_at,published_at").eq("status", "published"),
     supabase.from("players").select("slug,updated_at").eq("is_active", true),
@@ -47,6 +48,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     supabase.from("site_custom_pages").select("slug,updated_at,published_at").eq("status", "published"),
     supabase.from("club_hall_of_fame").select("id,updated_at").eq("is_active", true).eq("is_placeholder", false),
     supabase.from("seasons").select("slug,updated_at").eq("is_active", true),
+    supabase.from("club_history_events").select("id,updated_at").eq("is_published", true),
   ]);
 
   return [
@@ -86,6 +88,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: season.updated_at || undefined,
       changeFrequency: "monthly" as const,
       priority: 0.58,
+    })),
+    ...(historyEvents ?? []).map((event) => ({
+      url: `${base}/club/history/events/${event.id}`,
+      lastModified: event.updated_at || undefined,
+      changeFrequency: "yearly" as const,
+      priority: 0.48,
     })),
     ...(hallEntries ?? []).map((person) => ({
       url: `${base}/club/hall-of-fame/${person.id}`,

@@ -6,7 +6,9 @@ import { getLocale } from "@/lib/locale";
 import { publicMetadata } from "@/lib/seo";
 import { createPublicClient } from "@/lib/supabase/public";
 import type { ClubSeasonHistory, Season } from "@/lib/types";
+import { HISTORY_COPY, historyEventHref, historyText, type ClubHistoryEvent } from "@/lib/club-history";
 import "../season-archive.css";
+import "../../history/history-timeline.css";
 
 export const dynamic = "force-dynamic";
 const PAGE_SIZE = 15;
@@ -40,10 +42,13 @@ export default async function ClubSeasonDetailPage({ params, searchParams }: Par
   if (seasonError) throw seasonError;
   if (!seasonData) notFound();
   const season = seasonData as Season;
-  const [historyResponse, competitionsResponse, clubResponse] = await Promise.all([
+  const [historyResponse, competitionsResponse, clubResponse, eventsResponse] = await Promise.all([
     db.from("club_season_history").select("season_id,played,wins,draws,losses,goals_for,goals_against,goal_difference,win_rate,statistics_complete,players_with_stats").eq("season_id", season.id).maybeSingle(),
     db.from("competitions").select("id,name,season_id").eq("season_id", season.id).eq("is_active", true).order("name"),
     db.from("teams").select("id").eq("is_club", true).eq("is_active", true),
+    db.from("club_history_events").select("id,event_year,title,title_ro")
+      .eq("season_id", season.id).eq("is_published", true)
+      .order("event_year", { ascending: false }).limit(6),
   ]);
   const competitions = (competitionsResponse.data ?? []) as CompetitionRow[];
   const clubIds = (clubResponse.data ?? []).map((team) => String(team.id)).filter((id) => /^\d+$/.test(id));
@@ -67,6 +72,7 @@ export default async function ClubSeasonDetailPage({ params, searchParams }: Par
     total = response.count ?? 0;
   }
   const stat = historyResponse.data as unknown as ClubSeasonHistory | null;
+  const relatedEvents = (eventsResponse.data ?? []) as Pick<ClubHistoryEvent, "id"|"event_year"|"title"|"title_ro">[];
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const activeCompetitionId = selectedCompetition ? String(selectedCompetition.id) : undefined;
 
@@ -91,6 +97,10 @@ export default async function ClubSeasonDetailPage({ params, searchParams }: Par
             [label("Пропущено", "Primite"), stat.goals_against],
           ].map(([name, value]) => <div key={name}><small>{name}</small><strong>{value}</strong></div>)}
         </div> : <div className="clubSeasonNotice">{label("Для этого сезона пока не опубликованы завершённые матчи.", "Nu există încă meciuri încheiate publicate pentru acest sezon.")}</div>}
+        {relatedEvents.length > 0 && <section className="clubRelatedHistory" aria-labelledby="season-related-events-title">
+          <h2 id="season-related-events-title">{HISTORY_COPY[locale].related}</h2>
+          <ul>{relatedEvents.map(event => <li key={event.id}><Link href={historyEventHref(event.id)}><span>{event.event_year}</span>{historyText(event.title,event.title_ro,locale)}</Link></li>)}</ul>
+        </section>}
         <div className="clubSeasonHeading clubSeasonMatchesHeading"><div><p className="eyebrow blue">{label("МАТЧИ", "MECIURI")}</p><h2>{label("Протоколы и счёт", "Rapoarte și scoruri")}</h2></div><span>{total} {label("в списке", "în listă")}</span></div>
         {competitions.length > 1 && <nav className="clubSeasonFilters" aria-label={label("Турниры сезона", "Competițiile sezonului")}>
           <Link href={archiveLink(slug)} className={!activeCompetitionId ? "selected" : ""} aria-current={!activeCompetitionId ? "page" : undefined}>{label("Все турниры", "Toate competițiile")}</Link>

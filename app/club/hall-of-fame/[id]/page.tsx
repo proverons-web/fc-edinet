@@ -6,7 +6,9 @@ import { publicMetadata } from "@/lib/seo";
 import { createPublicClient } from "@/lib/supabase/public";
 import type { ClubHallOfFameEntry } from "@/lib/types";
 import { HALL_COPY, hallHref, hallLocalized, hallName } from "@/lib/hall-of-fame";
+import { HISTORY_COPY, historyEventHref, type ClubHistoryEvent } from "@/lib/club-history";
 import "../hall-of-fame.css";
+import "../../history/history-timeline.css";
 
 export const dynamic = "force-dynamic";
 type DetailProps = { params: Promise<{ id: string }>; searchParams: Promise<{ from?: string }> };
@@ -40,6 +42,10 @@ export default async function HallEntryPage({ params, searchParams }: DetailProp
   const era = hallLocalized(entry.era_label, entry.era_label_ro, locale);
   const description = hallLocalized(entry.description, entry.description_ro, locale);
   const roster = hallLocalized(entry.roster_text, entry.roster_text_ro, locale);
+  const { data: relatedData } = await createPublicClient().from("club_history_events")
+    .select("id,event_year,title,title_ro").eq("hall_entry_id", entry.id).eq("is_published", true)
+    .order("event_year", { ascending: false }).limit(6);
+  const relatedEvents = (relatedData ?? []) as Pick<ClubHistoryEvent,"id"|"event_year"|"title"|"title_ro">[];
   // The return target must remain within the hall-of-fame listing.
   const from = typeof search.from === "string" &&
     (search.from === "/club/hall-of-fame" || search.from.startsWith("/club/hall-of-fame?"))
@@ -71,6 +77,10 @@ export default async function HallEntryPage({ params, searchParams }: DetailProp
               {entry.entry_type === "squad" && roster && <section className="hallV2Roster">
                 <h2>{copy.roster}</h2>
                 <ul>{roster.split(/\r?\n/).filter((line) => line.trim()).map((line, i) => <li key={i}>{line.trim()}</li>)}</ul>
+              </section>}
+              {relatedEvents.length > 0 && <section className="clubRelatedHistory" aria-labelledby="hall-related-history-title">
+                <h2 id="hall-related-history-title">{HISTORY_COPY[locale].related}</h2>
+                <ul>{relatedEvents.map(event => <li key={event.id}><Link href={historyEventHref(event.id)}><span>{event.event_year}</span>{hallLocalized(event.title,event.title_ro,locale)}</Link></li>)}</ul>
               </section>}
               <Link className="hallV2Back hallV2BottomBack" href={from}>← {copy.back}</Link>
             </div>

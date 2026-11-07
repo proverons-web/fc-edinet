@@ -1,0 +1,55 @@
+/* FC Edineț v2.30.7: new timeline CSS stays isolated from existing club pages. */
+.clubChronology{background:#f3f6fa;padding:70px 0 92px;scroll-margin-top:120px}
+.clubChronologyIntro{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:26px}
+.clubChronologyIntro h2{font-size:clamp(30px,3.2vw,52px);line-height:1.06;color:#082043;margin:9px 0 14px;letter-spacing:-.035em}
+.clubChronologyIntro p:last-child{color:#50617a;margin:0;line-height:1.6}
+.clubChronologyIntro>a{color:#083b82;font-weight:800;white-space:nowrap}
+.clubChronologyFilters{display:flex;flex-wrap:wrap;gap:8px;padding:0 0 27px;margin:0 0 8px}
+.clubChronologyFilters a{padding:10px 15px;background:#fff;color:#253a58;border:1px solid #d8e0eb;text-decoration:none;font-size:13px;font-weight:750;transition:background .15s,border-color .15s}
+.clubChronologyFilters a.selected,.clubChronologyFilters a:hover{background:#092b58;border-color:#092b58;color:#fff}
+.clubTimelineList{position:relative;display:grid;gap:0;padding-bottom:12px}
+.clubTimelineList::before{content:"";position:absolute;left:124px;top:20px;bottom:24px;width:2px;background:#c6d7eb}
+.clubTimelineEntry{position:relative;display:grid;grid-template-columns:145px minmax(0,1fr);gap:22px;padding:14px 0 22px}
+.clubTimelineDate{position:relative;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 0 0 4px;min-width:0}
+.clubTimelineDate strong{font-size:25px;color:#0a326a;font-weight:900;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.clubTimelineDot{position:absolute;left:114px;top:25px;width:22px;height:22px;background:#f4bd15;border:5px solid #f3f6fa;border-radius:50%;z-index:1;box-shadow:0 0 0 1px #c5d5ea}
+.clubTimelineRepeat{font-size:18px;color:#95a8bf}
+.clubTimelineCard{display:flex;gap:22px;min-height:190px;background:#fff;border:1px solid #dfe6ef;border-left:4px solid #0d3b7c;box-shadow:0 8px 30px rgba(10,34,72,.035);min-width:0}
+.clubTimelineCardBody{flex:1;min-width:0;padding:22px 0 22px 25px}
+.clubTimelineCardEyebrow{display:flex;flex-wrap:wrap;gap:11px;margin:0 0 13px;color:#56749d;font-size:11px;line-height:1.5;font-weight:900;letter-spacing:.065em;text-transform:uppercase}
+.clubTimelineCardEyebrow span+span{color:#9c7300}
+.clubTimelineCard h3{font-size:clamp(20px,2.1vw,27px);line-height:1.2;margin:0 0 13px;letter-spacing:-.02em}
+.clubTimelineCard h3 a{color:#0b264e;text-decoration:none}
+.clubTimelineCard h3 a:hover{color:#0a5bb0}
+.clubTimelineExcerpt{color:#485a70;line-height:1.65;white-space:pre-line;margin:0 0 18px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;line-clamp:4;overflow:hidden}
+.clubTimelineImage{display:block;width:34%;flex:0 0 34%;min-height:188px;background:#dde6f2;overflow:hidden}
+.clubTimelineImage img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.clubTimelineImage:hover img{transform:scale(1.045)}
+.clubTimelineLinks{display:flex;gap:10px 19px;align-items:center;flex-wrap:wrap}
+.clubTimelineLinks a{font-size:12px;font-weight:750;text-decoration:none;color:#15559b}
+.clubTimelineLinks a:hover{text-decoration:underline}
+.clubTimelineLinks a.clubTimelineRead{color:#062d67;font-weight:900}
+.clubTimelinePagination{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #d5dfeb;padding-top:23px;margin-left:167px}
+.clubTimelinePagination a{color:#083d84;font-weight:800}
+.clubTimelinePagination span{color:#63728a}
+.clubTimelineNotice{margin-left:167px;padding:30px;color:#5a6a7e;background:#fff;border:1px solid #dfe6ef}
+.clubHistoryEventDetail{background:#f3f6fa;padding:44px 0 86px}
+.clubHistoryEventDetailInner{max-width:960px}
+.clubHistoryEventBack{display:inline-block;color:#0c4789;font-weight:800;margin-bottom:25px;text-decoration:none}
+.clubHistoryEventArticle{background:#fff;border:1px solid #dfe6ef}
+.clubHistoryEventArticleHead{padding:32px clamp(20px,5vw,55px)}
+.clubHistoryEventArticleHead h1{font-size:clamp(29px,4.5vw,54px);letter-spacing:-.04em;line-height:1.08;color:#07214b;margin:10px 0 16px}
+.clubHistoryEventArticleHead p{margin:0;color:#537096;font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:12px}
+.clubHistoryEventArticleImage{width:100%;max-height:610px;object-fit:contain;display:block;background:#e9eff6}
+.clubHistoryEventArticleBody{padding:24px clamp(20px,5vw,55px) 38px;color:#34465d;line-height:1.85;font-size:16px}
+.clubHistoryEventArticleBody p{margin:0 0 18px;white-space:pre-line}
+.clubHistoryEventRelations{border-top:1px solid #dfe5ed;padding:23px clamp(20px,5vw,55px);display:flex;gap:18px;flex-wrap:wrap}
+.clubHistoryEventRelations a{font-weight:800;color:#0b4a91}
+.clubRelatedHistory{border-top:1px solid #d8e2f0;padding-top:23px;margin-top:35px}
+.clubRelatedHistory h2{font-size:23px;margin:0 0 12px;color:#08284f}
+.clubRelatedHistory ul{margin:0;padding:0;list-style:none;display:grid;gap:9px}
+.clubRelatedHistory li a{display:flex;gap:12px;align-items:baseline;justify-content:flex-start;text-decoration:none;color:#124780;font-weight:700}
+.clubRelatedHistory li a span{font-weight:900;color:#7b891c;min-width:45px}
+@media(max-width:850px){.clubTimelineList::before{left:87px}.clubTimelineEntry{grid-template-columns:107px minmax(0,1fr);gap:15px}.clubTimelineDot{left:77px}.clubTimelineDate strong{font-size:21px}.clubTimelinePagination,.clubTimelineNotice{margin-left:122px}}
+@media(max-width:610px){.clubChronology{padding:46px 0 60px}.clubChronologyIntro{display:block}.clubChronologyIntro>a{display:inline-block;margin-top:13px}.clubTimelineList::before{left:13px}.clubTimelineEntry{display:block;padding:11px 0 20px 31px}.clubTimelineDate{padding:0 0 10px;display:block}.clubTimelineDate strong{font-size:21px}.clubTimelineDot{left:-28px;top:4px;width:20px;height:20px}.clubTimelineCard{flex-direction:column-reverse;gap:0}.clubTimelineImage{width:100%;flex:auto;height:190px;min-height:0}.clubTimelineCardBody{padding:18px}.clubTimelinePagination,.clubTimelineNotice{margin-left:30px}.clubTimelineFilters a{font-size:12px}.clubTimelineCard h3{font-size:22px}.clubHistoryEventArticleHead{padding:24px 20px}}
+@media(prefers-reduced-motion:reduce){.clubTimelineImage img{transition:none}.clubTimelineImage:hover img{transform:none}}
