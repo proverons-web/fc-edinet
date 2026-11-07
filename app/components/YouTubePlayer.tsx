@@ -38,9 +38,14 @@ export default function YouTubePlayer({
           <img
             src={thumbnail}
             alt=""
+            width={640}
+            height={360}
             loading="lazy"
             decoding="async"
-            onError={() => setThumbnail(`https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`)}
+            onError={() => {
+              const fallback = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
+              if (thumbnail !== fallback) setThumbnail(fallback);
+            }}
           />
           <span className="siteYouTubePlay" aria-hidden="true">▶</span>
         </button>

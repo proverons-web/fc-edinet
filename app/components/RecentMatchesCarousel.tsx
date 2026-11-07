@@ -41,7 +41,8 @@ export default function RecentMatchesCarousel({ children, previousLabel, nextLab
     const firstCard = track.querySelector<HTMLElement>(".fcRefRecentMatchCard");
     if (!firstCard) return;
     const gap = Number.parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap || "0") || 0;
-    track.scrollBy({ left: direction * (firstCard.getBoundingClientRect().width + gap), behavior: "smooth" });
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    track.scrollBy({ left: direction * (firstCard.getBoundingClientRect().width + gap), behavior: reducedMotion ? "auto" : "smooth" });
   };
 
   return (

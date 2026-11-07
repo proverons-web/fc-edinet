@@ -1,4 +1,5 @@
 import type { StandingEntry } from "@/lib/types";
+import PublicImage from "@/app/components/PublicImage";
 import { compactStandings, sortStandings } from "@/lib/standings";
 import { publicText, type Locale } from "@/lib/i18n";
 
@@ -52,7 +53,7 @@ export default function StandingsTable({
 
 function TeamLogo({ entry }: { entry: StandingEntry }) {
   const team = entry.team;
-  if (team?.logo_url) return <img className="standingLogo" src={team.logo_url} alt="" />;
-  if (team?.is_club) return <img className="standingLogo" src="/brand/fc-edinet-crest.png" alt="FC Edineț" />;
+  if (team?.logo_url) return <PublicImage className="standingLogo" src={team.logo_url} width={40} height={40} sizes="(max-width: 767px) 20px, 40px" alt="" />;
+  if (team?.is_club) return <PublicImage className="standingLogo" src="/brand/fc-edinet-crest.png" width={40} height={40} sizes="(max-width: 767px) 20px, 40px" alt="FC Edineț" />;
   return <span className="standingLogoFallback">{(team?.short_name || team?.name || "FC").slice(0, 3).toUpperCase()}</span>;
 }

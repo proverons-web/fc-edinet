@@ -15,13 +15,13 @@ function check(title, fn) {
   catch (error) { failed++; console.error("FAIL", title, error.message); }
 }
 
-check("v2.30.10 release is consistent", () => {
-  assert.equal(JSON.parse(read("package.json")).version, "2.30.10");
-  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.10"/);
-  assert.match(site, /STEP-2\.30\.10\.txt/);
+check("v2.30.11 release is consistent", () => {
+  assert.equal(JSON.parse(read("package.json")).version, "2.30.11");
+  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.11"/);
+  assert.match(site, /STEP-2\.30\.11\.txt/);
 });
 check("only one current installation text file", () => {
-  assert.deepEqual(fs.readdirSync(root).filter(x => /^STEP-.*\.txt$/.test(x)), ["STEP-2.30.10.txt"]);
+  assert.deepEqual(fs.readdirSync(root).filter(x => /^STEP-.*\.txt$/.test(x)), ["STEP-2.30.11.txt"]);
 });
 check("match OG renders 1200x630 PNG", () => {
   assert.match(og, /width: 1200, height: 630/);
@@ -113,5 +113,5 @@ check("new QA is part of the mandatory pre-deploy gate", () => {
   assert.match(scripts["deploy:check"], /qa-social-match-logos-v2309\.mjs/);
   assert.match(scripts["qa:all"], /qa:social-logos/);
 });
-console.log(`\nMatch Social Logos v2.30.10: ${passed}/${passed+failed} checks passed.`);
+console.log(`\nMatch Social Logos v2.30.11: ${passed}/${passed+failed} checks passed.`);
 if (failed) process.exitCode=1;

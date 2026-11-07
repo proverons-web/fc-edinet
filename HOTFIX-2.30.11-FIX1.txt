@@ -1,0 +1,32 @@
+FC EDINEȚ — v2.30.11 FULL FIX1
+Дата: 07.11.2026
+
+ИСПРАВЛЕНО
+- app/components/ClubArchiveGallery.tsx: перенесена директива "use client" на первую строку, перед всеми import.
+- Новая проверка scripts/qa-client-directives.mjs сканирует исходники и не пропустит директиву после импортов.
+- Проверка включена в npm run deploy:check, npm run qa:all и GitHub Actions.
+
+ПРИЧИНА
+В прежнем архиве v2.30.11 импорт PublicImage находился перед "use client".
+Turbopack рассматривал ClubArchiveGallery как серверный компонент и останавливал сборку из-за useEffect/useState.
+
+УСТАНОВКА
+1. Не используйте прежний v2.30.11 ZIP — замените его этим FULL FIX1.
+2. Сохраните ваш действующий .env.local и предыдущую рабочую папку в качестве резервной копии.
+3. Распакуйте FIX1 в новую папку, скопируйте в неё .env.local.
+4. Запустите DEPLOY_FC_EDINET.bat.
+5. Установщик проверит исходники, TypeScript и выполнит Next.js production build.
+6. Только после успешной сборки будет выполнена отправка в GitHub.
+7. После развёртывания в Vercel проверьте https://fc-edinet.vercel.app/api/version
+
+Версия приложения: 2.30.11 (прежняя попытка установки завершилась до публикации).
+Новые миграции Supabase: НЕ НУЖНЫ.
+
+РЕЗУЛЬТАТЫ ПРОВЕРКИ
+- npm run qa:client-directives: PASS; проверено 294 исходных файла.
+- npm run qa:mobile: PASS, 19/19.
+- npm run qa:all: PASS.
+- TSX transpile syntax diagnostics ClubArchiveGallery.tsx: 0 errors.
+- npm run build: НЕ ВЫПОЛНЕН в среде подготовки — npm Registry недоступен по DNS; проверить на ПК.
+
+Важно: типизация TypeScript сама по себе не ловила неправильное расположение "use client". Поэтому добавлен отдельный статический контроль клиентских компонентов.

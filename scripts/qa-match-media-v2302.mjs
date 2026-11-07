@@ -13,5 +13,5 @@ assert.match(publicMatch,/id="match-gallery"/);
 assert.match(publicMatch,/matchAlbums\.map/);
 assert.match(read('app/components/MediaAlbumCreateForm.tsx'),/name="match_id"/);
 assert.match(read('app/components/MediaAlbumEditorForm.tsx'),/name="match_id"/);
-assert.match(read('package.json'),/"version": "2\.30\.10"/);
+assert.match(read('package.json'),/"version": "2\.30\.11"/);
 console.log('Match media v2.30.2: 9 checks passed.');

@@ -48,7 +48,7 @@ export default async function SiteHeader() {
       <header className={headerClass} style={{ "--header-height": `${design.height_desktop}px`, "--header-height-mobile": `${design.height_mobile}px` } as CSSProperties}>
         <div className="container nav">
           <Link className="brand" href="/">
-            <img className="globalBrandLogo" src={design.logo_mode === "image" && design.logo_url ? design.logo_url : "/brand/fc-edinet-crest.png"} alt="FC Edineț" decoding="async" style={{ width: Math.max(design.logo_width, 42) }} />
+            <img className="globalBrandLogo" src={design.logo_mode === "image" && design.logo_url ? design.logo_url : "/brand/fc-edinet-crest.png"} alt="FC Edineț" width={Math.max(design.logo_width, 42)} height={Math.round(Math.max(design.logo_width, 42) * 1.17)} decoding="async" style={{ width: Math.max(design.logo_width, 42) }} />
             {design.show_brand_text && <span className="brandText"><strong>{design.brand_name}</strong><small>{design.brand_subtitle}</small></span>}
           </Link>
 

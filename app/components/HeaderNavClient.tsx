@@ -58,6 +58,10 @@ export default function HeaderNavClient({
   const [openManagedMenuId, setOpenManagedMenuId] = useState<number | null>(null);
   const managedMenuCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const accountWrapRef = useRef<HTMLDivElement>(null);
+  // Keep keyboard focus inside the mobile dialog while it is open, and
+  // restore it to the menu toggle when the visitor closes the dialog.
+  const mobileDialogRef = useRef<HTMLDivElement>(null);
+  const mobileToggleRef = useRef<HTMLButtonElement>(null);
   const managedMenuRootRef = useRef<HTMLElement | null>(null);
   const managedDropdownRef = useRef<HTMLDivElement | null>(null);
   const managedTriggerRefs = useRef(new Map<number, HTMLButtonElement>());
@@ -97,11 +101,35 @@ export default function HeaderNavClient({
     if (!menuOpen) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setMenuOpen(false); };
+    const dialog = mobileDialogRef.current;
+    dialog?.querySelector<HTMLButtonElement>(".mobileMenuPanelClose")?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setMenuOpen(false);
+        mobileToggleRef.current?.focus();
+        return;
+      }
+      if (event.key !== "Tab" || !dialog) return;
+      const controls = [...dialog.querySelectorAll<HTMLElement>('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])')]
+        .filter((element) => element.getClientRects().length > 0);
+      if (!controls.length) { event.preventDefault(); return; }
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !dialog.contains(document.activeElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !dialog.contains(document.activeElement))) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
     window.addEventListener("keydown", onKeyDown);
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", onKeyDown);
+      // Do not steal focus if route navigation already moved it elsewhere.
+      if (dialog?.contains(document.activeElement)) mobileToggleRef.current?.focus();
     };
   }, [menuOpen]);
 
@@ -256,15 +284,15 @@ export default function HeaderNavClient({
             </div>}
           </div>
         ) : <Link className="login" href="/login">{labels.login}</Link>)}
-        <button className="menuToggle" type="button" onClick={() => setMenuOpen(!menuOpen)} aria-label={labels.openMenu} aria-expanded={menuOpen} aria-controls="mobile-site-menu">{menuOpen ? "✕" : "☰"}</button>
+        <button ref={mobileToggleRef} className="menuToggle" type="button" onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? (locale === "ro" ? "Închide meniul" : "Закрыть меню") : labels.openMenu} aria-expanded={menuOpen} aria-controls="mobile-site-menu">{menuOpen ? "✕" : "☰"}</button>
       </div>
 
       {menuOpen && typeof document !== "undefined" && createPortal(
         <div className="mobileMenuOverlay">
-          <div className="mobileMenu mobileMenuFixed" id="mobile-site-menu" role="dialog" aria-modal="true" aria-label={labels.openMenu}>
+          <div ref={mobileDialogRef} className="mobileMenu mobileMenuFixed" id="mobile-site-menu" role="dialog" aria-modal="true" aria-label={labels.openMenu}>
             <div className="mobileMenuPanelHeading">
               <strong>{locale === "ro" ? "MENIU" : "МЕНЮ"}</strong>
-              <button type="button" className="mobileMenuPanelClose" onClick={() => setMenuOpen(false)} aria-label={locale === "ro" ? "Închide meniul" : "Закрыть меню"}>✕</button>
+              <button type="button" className="mobileMenuPanelClose" onClick={() => { setMenuOpen(false); mobileToggleRef.current?.focus(); }} aria-label={locale === "ro" ? "Închide meniul" : "Закрыть меню"}>✕</button>
             </div>
             <div className="container mobileMenuInner">
         {useManagedMenu ? topManaged.map((item) => {

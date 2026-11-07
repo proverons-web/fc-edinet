@@ -79,6 +79,8 @@ export default function PageHeroShell({
               className="managedPageHeroResponsive"
               src={desktopSrc}
               alt=""
+              width={1600}
+              height={900}
               loading="eager"
               decoding="async"
               fetchPriority="high"

@@ -15,6 +15,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install project dependencies
+        run: npm install --no-audit --no-fund
+      - name: Guard Next.js client component directives
+        run: npm run qa:client-directives
+      - name: Check all TypeScript sources before UI tests
+        run: npm run typecheck
       - name: Verify public routes and release contracts
         run: node scripts/qa-site.mjs
       - name: Check CSS cascade budget
@@ -55,8 +61,10 @@ jobs:
         run: node scripts/qa-hall-layout.mjs
       - name: Check performance and image delivery contracts
         run: node scripts/qa-performance.mjs
-      - name: Check v2.30.10 cache correctness and release stability
+      - name: Check v2.30.11 cache correctness and release stability
         run: node scripts/qa-performance-stability-v2310.mjs
+      - name: Verify v2.30.11 mobile navigation and image-delivery contracts
+        run: node scripts/qa-mobile-experience-v2311.mjs
       - name: Check new match galleries and image viewer
         run: |
           node scripts/qa-match-media-v2302.mjs

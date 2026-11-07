@@ -263,7 +263,7 @@ export default async function Home() {
             <picture>
               {hero?.mobile_background_image_url && <source media="(max-width: 680px)" srcSet={hero.mobile_background_image_url} />}
               {hero?.tablet_background_image_url && <source media="(max-width: 980px)" srcSet={hero.tablet_background_image_url} />}
-              <img src={heroBaseImage} alt="" loading="eager" decoding="async" fetchPriority="high" />
+              <img src={heroBaseImage} alt="" width={1920} height={1080} loading="eager" decoding="async" fetchPriority="high" />
             </picture>
           ) : (
             <div className="fcRefHeroFallback"><img src={CLUB_LOGO} alt="" decoding="async" fetchPriority="high" /></div>
