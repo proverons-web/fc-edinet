@@ -4,3 +4,8 @@
 .scheduleHistoryAdmin li{padding:9px 0;border-bottom:1px solid rgba(0,0,0,.08)}
 .scheduleHistoryAdmin li strong,.scheduleHistoryAdmin li span,.scheduleHistoryAdmin li small{display:block;line-height:1.5}
 .scheduleEditorSection{border-top:1px solid rgba(20,80,150,.2);padding-top:20px;margin-top:22px}
+
+.scheduleNewDateField{padding:17px 18px;margin:16px 0 24px;border:1px solid rgba(18,80,153,.25);background:rgba(8,77,146,.035)}
+.scheduleNewDateField input{max-width:330px;width:100%}
+.scheduleClearNewDate{align-self:flex-start;margin-top:10px;padding:7px 12px;border:1px solid #99b0ca;color:#144679;background:#fff;cursor:pointer;font:inherit;font-size:13px}
+.scheduleClearNewDate:focus-visible{outline:3px solid #e6b900;outline-offset:2px}

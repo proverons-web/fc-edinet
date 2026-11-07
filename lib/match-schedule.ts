@@ -35,12 +35,39 @@ export function isRescheduled(fixture: ScheduleFixture): boolean {
 export function hasConfirmedDate(fixture: ScheduleFixture): boolean {
   return fixture.status !== "postponed" && fixture.status !== "cancelled";
 }
+/** A postponed fixture may already have an announced replacement date.
+ * The original date remains in original_kickoff; kickoff then stores the new one.
+ * Until the editor switches to scheduled it is still excluded from confirmed fixtures. */
 export function scheduleDateLabel(fixture: ScheduleFixture, locale: Locale): string {
-  if (fixture.status === "postponed") return locale === "ro" ? "Data nouă nu a fost anunțată" : "Новая дата не назначена";
   if (fixture.status === "cancelled") return locale === "ro" ? "Meci anulat" : "Матч отменён";
-  return new Intl.DateTimeFormat(locale === "ro" ? "ro-RO" : "ru-RU", {
+  if (fixture.status === "postponed" && !isRescheduled(fixture)) {
+    return locale === "ro" ? "Data nouă nu a fost anunțată" : "Новая дата не назначена";
+  }
+  const date = new Intl.DateTimeFormat(locale === "ro" ? "ro-RO" : "ru-RU", {
     day:"2-digit",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit",timeZone:"Europe/Chisinau"
   }).format(new Date(fixture.kickoff));
+  if (fixture.status === "postponed") {
+    return (locale === "ro" ? "Data nouă: " : "Новая дата: ") + date;
+  }
+  return date;
+}
+
+/** Resolve the effective kickoff for an editor form without changing the match ID.
+ * For postponement with no new date, restore the original (when previously moved).
+ * A new postponed match with a known date saves the old date separately.
+ */
+export function resolvePostponedKickoff(input: {
+  status: MatchStatus;
+  enteredKickoff: string;
+  replacementKickoff: string | null;
+  existingOriginalKickoff: string | null;
+  isNew: boolean;
+}): { kickoff: string; original_kickoff?: string } {
+  if (input.status !== "postponed") return { kickoff: input.enteredKickoff };
+  const original = input.existingOriginalKickoff ?? input.enteredKickoff;
+  if (!input.replacementKickoff) return { kickoff: original };
+  if (input.isNew) return { kickoff: input.replacementKickoff, original_kickoff: original };
+  return { kickoff: input.replacementKickoff };
 }
 export function scheduleChangeLabel(status: MatchStatus, locale: Locale): string {
   const names: Record<MatchStatus, {ru:string;ro:string}> = {

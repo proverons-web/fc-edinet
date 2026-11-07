@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useState } from "react";
 import {
   saveMatch,
   type MatchFormState,
@@ -36,19 +36,36 @@ export default function MatchEditorForm({
   const [stadium, setStadium] = useState(initialStadium);
   const [matchStatus, setMatchStatus] = useState(match?.status ?? "scheduled");
 
-  const kickoffValue = useMemo(() => {
-    if (!match?.kickoff) return "";
-    const date = new Date(match.kickoff);
+  // datetime-local uses the browser's local time; do not format in UTC here.
+  const toLocalInput = (value?: string | null) => {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"),
+      String(date.getDate()).padStart(2, "0")].join("-") +
+      `T${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+  };
+  const originalKickoffLocal = toLocalInput(match?.original_kickoff);
+  const currentKickoffLocal = toLocalInput(match?.kickoff);
+  const [kickoffValue, setKickoffValue] = useState(currentKickoffLocal);
+  const [originalDraftKickoff, setOriginalDraftKickoff] = useState(originalKickoffLocal || currentKickoffLocal);
+  const [replacementKickoff, setReplacementKickoff] = useState(() =>
+    originalKickoffLocal && currentKickoffLocal !== originalKickoffLocal
+      ? currentKickoffLocal : ""
+  );
 
-    return [
-      date.getFullYear(),
-      String(date.getMonth() + 1).padStart(2, "0"),
-      String(date.getDate()).padStart(2, "0"),
-    ].join("-") +
-      `T${String(date.getHours()).padStart(2, "0")}:${String(
-        date.getMinutes()
-      ).padStart(2, "0")}`;
-  }, [match?.kickoff]);
+  function handleStatusChange(next: ClubMatch["status"]) {
+    // When confirming the new date, keep it in the ordinary kickoff field.
+    if (matchStatus === "postponed" && next === "scheduled") {
+      // Clearing the replacement must not silently resurrect an obsolete date.
+      setKickoffValue(replacementKickoff || originalDraftKickoff || kickoffValue);
+    }
+    if (next === "postponed" && match && !replacementKickoff) {
+      // Treat a date edited immediately before choosing postponement as the new date.
+      if (kickoffValue !== originalDraftKickoff) setReplacementKickoff(kickoffValue);
+    }
+    setMatchStatus(next);
+  }
 
   function handleHomeTeamChange(teamId: string) {
     setHomeTeamId(teamId);
@@ -160,12 +177,17 @@ export default function MatchEditorForm({
 
           <div className="twoFields">
             <div className="fieldGroup">
-              <label htmlFor="kickoff">Дата и время</label>
+              <label htmlFor="kickoff">{matchStatus === "postponed" ? "Первоначальная дата и время" : "Дата и время матча"}</label>
               <input
                 id="kickoff"
                 name="kickoff"
                 type="datetime-local"
-                defaultValue={kickoffValue}
+                value={matchStatus === "postponed" ? originalDraftKickoff : kickoffValue}
+                onChange={(event) => {
+                  setKickoffValue(event.target.value);
+                  if (!match && !replacementKickoff) setOriginalDraftKickoff(event.target.value);
+                }}
+                readOnly={matchStatus === "postponed"}
                 required
               />
             </div>
@@ -200,7 +222,7 @@ export default function MatchEditorForm({
                 id="status"
                 name="status"
                 value={matchStatus}
-                onChange={(event) => setMatchStatus(event.target.value as ClubMatch["status"])}
+                onChange={(event) => handleStatusChange(event.target.value as ClubMatch["status"])}
               >
                 <option value="scheduled">Предстоящий</option>
                 <option value="live">Идёт матч</option>
@@ -244,11 +266,23 @@ export default function MatchEditorForm({
                 <h2>{matchStatus === "postponed" ? "Причина переноса" : matchStatus === "cancelled" ? "Причина отмены" : "История переноса"}</h2>
               </div>
               <p className="fieldHint">
-                При переносе без новой даты оставь в поле даты первоначальное время.
-                Оно сохранится для истории, но не будет показываться болельщикам как подтверждённое.
-                Когда дата будет согласована, укажи её и переключи статус на «Предстоящий».
+                Если новая дата известна, укажи её в отдельном поле ниже. Если неизвестна — оставь его пустым.
+                Изначальная дата сохранится в истории. Пока статус «Перенесён», матч не считается подтверждённым
+                в календаре ближайших игр. После окончательного подтверждения переключи статус на «Предстоящий».
               </p>
               {match?.original_kickoff ? <p className="fieldHint">Первоначальная дата: {new Intl.DateTimeFormat("ru-RU", {dateStyle:"medium",timeStyle:"short",timeZone:"Europe/Chisinau"}).format(new Date(match.original_kickoff))}</p> : null}
+              {matchStatus === "postponed" && (
+                <div className="fieldGroup scheduleNewDateField">
+                  <label htmlFor="rescheduled_kickoff">Новая дата и время матча (если известны)</label>
+                  <input id="rescheduled_kickoff" name="rescheduled_kickoff" type="datetime-local"
+                    value={replacementKickoff} onChange={(event) => setReplacementKickoff(event.target.value)} />
+                  <small className="fieldHint">Можно указать новую дату сразу, не меняя статус «Перенесён».
+                    Болельщики увидят обе даты и причину. Если новая дата окончательно утверждена,
+                    выбери статус «Предстоящий» — дата автоматически перенесётся в основное поле.</small>
+                  {replacementKickoff && <button type="button" className="scheduleClearNewDate"
+                    onClick={() => setReplacementKickoff("")}>Очистить новую дату</button>}
+                </div>
+              )}
               <div className="twoFields">
                 <div className="fieldGroup">
                   <label htmlFor="schedule_reason_ru">Причина (RU)</label>

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireEditor } from "@/lib/editorial";
 import type { MatchStatus } from "@/lib/types";
+import { resolvePostponedKickoff } from "@/lib/match-schedule";
 
 export type MatchFormState = {
   error?: string;
@@ -58,6 +59,7 @@ export async function saveMatch(
   const homeTeamId = nullableId(formData.get("home_team_id"));
   const awayTeamId = nullableId(formData.get("away_team_id"));
   const kickoffLocal = String(formData.get("kickoff") ?? "").trim();
+  const replacementLocal = String(formData.get("rescheduled_kickoff") ?? "").trim();
   const timezoneOffset = Number(formData.get("timezone_offset") ?? 0);
   const stadium = nullableString(formData.get("stadium"));
   const round = nullableString(formData.get("round"));
@@ -87,10 +89,28 @@ export async function saveMatch(
     return { error: "Некорректный статус матча." };
   }
 
-  const kickoff = localDateTimeToIso(kickoffLocal, timezoneOffset);
-  if (!kickoff) {
+  const enteredKickoff = localDateTimeToIso(kickoffLocal, timezoneOffset);
+  if (!enteredKickoff) {
     return { error: "Не удалось распознать дату матча." };
   }
+  const replacementKickoff = status === "postponed" && replacementLocal
+    ? localDateTimeToIso(replacementLocal, timezoneOffset) : null;
+  if (status === "postponed" && replacementLocal && !replacementKickoff) {
+    return { error: "Некорректная новая дата перенесённого матча." };
+  }
+  let originalKickoff: string | null = null;
+  if (matchId && status === "postponed") {
+    const { data: previous, error: previousError } = await supabase
+      .from("matches").select("original_kickoff").eq("id", matchId).maybeSingle();
+    if (previousError || !previous) return { error: "Матч для переноса не найден." };
+    originalKickoff = previous.original_kickoff ?? null;
+  }
+  const schedule = resolvePostponedKickoff({
+    status, enteredKickoff, replacementKickoff,
+    existingOriginalKickoff: originalKickoff,
+    isNew: !matchId,
+  });
+  const kickoff = schedule.kickoff;
 
   // A postponed/cancelled match must not become an apparent upcoming game
   // at its now-expired original kickoff. Its persistent match ID is retained.
@@ -131,6 +151,7 @@ export async function saveMatch(
     home_team_id: homeTeamId,
     away_team_id: awayTeamId,
     kickoff,
+    ...(schedule.original_kickoff ? { original_kickoff: schedule.original_kickoff } : {}),
     stadium,
     round,
     status,

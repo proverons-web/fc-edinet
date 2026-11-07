@@ -33,7 +33,7 @@ export default function MatchScheduleNotice({match,history,locale}: {
               <ol>
                 {history.map(entry => <li key={String(entry.id)}>
                   <strong>{scheduleChangeLabel(entry.new_status,locale)}</strong>
-                  <span>{entry.previous_kickoff ? `${dateText(entry.previous_kickoff,locale)} → ` : ""}{entry.new_status === "postponed" || entry.new_status === "cancelled" ? scheduleDateLabel({kickoff:entry.new_kickoff,status:entry.new_status},locale) : dateText(entry.new_kickoff,locale)}</span>
+                  <span>{entry.previous_kickoff ? `${dateText(entry.previous_kickoff,locale)} → ` : ""}{entry.new_status === "postponed" || entry.new_status === "cancelled" ? scheduleDateLabel({kickoff:entry.new_kickoff,status:entry.new_status,original_kickoff:match.original_kickoff},locale) : dateText(entry.new_kickoff,locale)}</span>
                   {historyReason(entry,locale) ? <small>{historyReason(entry,locale)}</small> : null}
                 </li>)}
               </ol>
