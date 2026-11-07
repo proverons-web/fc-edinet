@@ -374,6 +374,7 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
             <PublicBreadcrumbs locale={locale} items={[{ label: publicText[locale].matches.title, href: "/matches" }, { label: `${match.home?.name ?? "—"} — ${match.away?.name ?? "—"}` }]} className="breadcrumbsOnDark publicMatchBreadcrumbs" />
             <div className="premiumMatchMetaRow">
               <span className="premiumMatchCompetition">{competitionName(match.competition,locale) || t.match}</span>
+              {match.competition?.competition_type==="cup"&&match.competition.slug?<Link href={`/matches/cups/${encodeURIComponent(match.competition.slug)}`} className="premiumMatchCompetition">{locale==="ro"?"Tablou eliminatoriu ↗":"Кубковая сетка ↗"}</Link>:null}
               {match.round ? <span>{match.round}</span> : null}
               <span className={`publicMatchStatusChip status-${match.status}`}>{match.status === "finished" ? (locale === "ro" ? "Final" : "Завершён") : match.status === "live" ? (locale === "ro" ? "ÎN JOC" : "В ИГРЕ") : match.status === "postponed" ? (locale === "ro" ? "Amânat" : "Перенесён") : match.status === "cancelled" ? (locale === "ro" ? "Anulat" : "Отменён") : (locale === "ro" ? "Programat" : "Запланирован")}</span>
               <strong>{match.status === "postponed" || match.status === "cancelled" ? scheduleDateLabel(match,locale) : formatDate(match.kickoff, locale)}</strong>

@@ -7,7 +7,7 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=f=>fs.readFileSync(path.join(root,f),'utf8');
 let passed=0,failed=0;
 const check=(name,test)=>{try{test();console.log('PASS',name);passed++}catch(e){console.error('FAIL',name,e.message);failed++}};
-check('version synced',()=>{assert.equal(JSON.parse(read('package.json')).version,'2.30.18');assert.match(read('lib/release.ts'),/2\.30\.18/)});
+check('version synced',()=>{assert.equal(JSON.parse(read('package.json')).version,'2.30.19');assert.match(read('lib/release.ts'),/2\.30\.19/)});
 check('new migration exists with safe defaults',()=>{const s=read('database/079_multi_competitions.sql');assert.match(s,/DEFAULT 'league'/);assert.match(s,/ADD COLUMN IF NOT EXISTS name_ro/);assert.doesNotMatch(s,/^\s*DELETE\s+FROM|^\s*TRUNCATE/im)});
 check('supported four types',()=>assert.deepEqual(competitionTypes,['league','cup','friendly','other']));
 check('labels RU RO',()=>{assert.equal(competitionTypeLabel('cup','ru'),'Кубок');assert.equal(competitionTypeLabel('friendly','ro'),'Amicale')});
@@ -26,4 +26,4 @@ check('league table cannot be overwritten by cup submission',()=>assert.match(re
 check('home table selects league independent of next match',()=>{const s=read('app/page.tsx');assert.match(s,/competition_type.*league/);assert.match(s,/const competition = competitionResult\.data/)});
 check('home skips postponed next match with unknown date',()=>assert.match(read('app/page.tsx'),/status\.eq\.live,and\(status\.eq\.scheduled,kickoff\.gte/));
 check('new QA wired to deploy and CI',()=>{const p=JSON.parse(read('package.json'));assert.match(p.scripts['qa:all'],/qa:competitions/);assert.match(p.scripts['deploy:check'],/qa-competitions/);assert.match(read('.github/workflows/responsive-qa.yml'),/qa-competitions/)});
-console.log(`Multi-competition v2.30.18: ${passed}/${passed+failed}`);if(failed)process.exitCode=1;
+console.log(`Multi-competition v2.30.19: ${passed}/${passed+failed}`);if(failed)process.exitCode=1;

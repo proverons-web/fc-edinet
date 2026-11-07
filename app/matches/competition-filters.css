@@ -18,3 +18,9 @@
 /* v2.30.18: cup shootout is not a football goal */
 .cupResultDetail { display: block; color: #bc8c00; font-size: .78rem; font-weight: 800; line-height: 1.35; margin-top: 4px; }
 .publicScore .cupResultDetail { max-width: 165px; text-align: center; white-space: normal; }
+
+/* v2.30.19: direct knockout bracket navigation from calendar. */
+.cupBracketNav{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:12px 0 25px}
+.cupBracketNav strong{font-size:12px;color:#27466b}
+.cupBracketNav a{padding:9px 13px;border:1px solid #b8ccdf;color:#09589e;font-size:12px;font-weight:750;background:#fff}
+.cupBracketNav a:hover{border-color:#0e69ad;background:#eef6ff}

@@ -1,0 +1,27 @@
+.cupBracketPage{background:#f4f7fb;min-height:75vh;color:#0a2546}
+.cupBracketHero{background:linear-gradient(110deg,#06172e,#0a3b72);color:#fff;padding:68px 0 54px;border-bottom:3px solid #f2c731}
+.cupBracketHero .eyebrow{color:#f4cf37;font-size:12px;font-weight:850;letter-spacing:.14em}
+.cupBracketHero h1{font-size:clamp(30px,4.4vw,54px);line-height:1.07;max-width:850px;margin:15px 0}
+.cupBracketHero p:last-child{color:#cee1f4}
+.cupBracketBack{display:inline-block;color:#d5e5f8;font-size:12px;font-weight:700;margin-bottom:22px}
+.cupBracketMessage{background:white;border:1px solid #d7e0eb;padding:25px;color:#486078}
+.cupBracketScroller{overflow-x:auto;overscroll-behavior-inline:contain;padding:10px 0 22px;scrollbar-color:#c8d4e4 transparent}
+.cupBracketScroller:focus-visible{outline:3px solid #1669c8;outline-offset:3px}
+.cupBracketStages{display:flex;align-items:stretch;gap:18px;min-width:max-content}
+.cupBracketStage{width:285px;flex:0 0 285px}
+.cupBracketStage h2{font-weight:850;text-transform:uppercase;font-size:16px;min-height:38px;border-bottom:3px solid #f0c630;margin-bottom:22px}
+.cupBracketStageCards{display:flex;flex-direction:column;justify-content:space-around;gap:26px;min-height:100%}
+.cupBracketTie{border:1px solid #d8e1ed;border-left:4px solid #0e63ad;background:white;box-shadow:0 8px 22px rgba(6,32,67,.05);width:100%;overflow:hidden}
+.cupBracketTieNumber{font-size:10px;text-transform:uppercase;letter-spacing:.07em;font-weight:800;color:#64768e;padding:10px 12px;border-bottom:1px solid #edf0f5;display:flex;justify-content:space-between}
+.cupBracketTieNumber span{color:#1a8a52}
+.cupBracketTeamRow{display:flex;gap:8px;align-items:center;min-height:54px;padding:7px 10px;border-bottom:1px solid #eef1f5}
+.cupBracketTeamRow.is-winner{background:#edf8f3;border-left:3px solid #168952;padding-left:7px}
+.cupBracketTeamRow img{width:36px;height:36px;object-fit:contain;flex-shrink:0}
+.cupBracketFallback{width:36px;height:36px;display:grid;place-items:center;background:#edf2f7;color:#7184a0}
+.cupBracketTeamName{font-weight:750;font-size:13px;min-width:0;overflow-wrap:anywhere;flex:1}
+.cupBracketTeamScore{font-size:20px;font-weight:850;font-variant-numeric:tabular-nums}
+.cupBracketTieFoot{padding:10px 12px;font-size:10px;color:#536783;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.cupBracketTieFoot a{color:#075ca3;text-align:right;font-weight:800;white-space:nowrap}
+.cupBracketMismatch{margin:0;padding:8px 12px;background:#fff3d5;color:#795200;font-size:11px}
+@media(max-width:740px){.cupBracketHero{padding:42px 0 35px}.cupBracketStages{min-width:0;display:flex;flex-direction:column;gap:20px;width:100%}.cupBracketStage{width:100%;flex:auto}.cupBracketStage h2{min-height:0;margin-bottom:12px}.cupBracketStageCards{gap:12px;min-height:0}.cupBracketScroller{overflow-x:visible}}
+@media(prefers-reduced-motion:reduce){.cupBracketScroller{scroll-behavior:auto}}

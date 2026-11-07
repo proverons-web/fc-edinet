@@ -33,13 +33,14 @@ export async function saveCompetition(formData: FormData) {
     if (u!.protocol !== "https:" || u!.host !== supabaseHost || logo.length > 2048) fail("Герб должен быть загружен в Supabase Storage этого клуба.");
   }
   if (id) {
-    const [{data: old,error: readError},{count:matchCount,error:matchError},{count:standingCount,error:standingsError}] = await Promise.all([
+    const [{data: old,error: readError},{count:matchCount,error:matchError},{count:standingCount,error:standingsError},{count:tieCount,error:tieError}] = await Promise.all([
       supabase.from("competitions").select("competition_type,season_id").eq("id",id).maybeSingle(),
       supabase.from("matches").select("id",{count:"exact",head:true}).eq("competition_id",id),
       supabase.from("standings").select("id",{count:"exact",head:true}).eq("competition_id",id),
+      supabase.from("cup_bracket_ties").select("id",{count:"exact",head:true}).eq("competition_id",id),
     ]);
-    if (readError || matchError || standingsError || !old) fail("Не удалось проверить связанные данные соревнования.");
-    if (((matchCount || 0)+(standingCount || 0))>0 && (
+    if (readError || matchError || standingsError || tieError || !old) fail("Не удалось проверить связанные данные соревнования.");
+    if (((matchCount || 0)+(standingCount || 0)+(tieCount || 0))>0 && (
       (old.competition_type || "league") !== competitionType || String(old.season_id) !== seasonId || !isActive
     )) fail("У соревнования есть матчи или таблица. Нельзя менять тип, сезон или отключать его.");
   }

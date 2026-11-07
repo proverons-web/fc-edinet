@@ -1,0 +1,22 @@
+.cupAdminPage{display:grid;gap:24px}
+.cupAdminTabs{display:flex;gap:8px;flex-wrap:wrap}
+.cupAdminTabs a{border:1px solid #cbd9e8;padding:10px 15px;background:#fff;font-size:12px;font-weight:750;color:#16385d}
+.cupAdminTabs a.active{background:#0d3867;color:#fff}
+.cupAdminIntroduction{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px}
+.cupAdminIntroduction h2{margin-bottom:7px}
+.cupAdminIntroduction p{max-width:620px;line-height:1.45;color:#57708c}
+.cupAdminIntroduction a{color:#085ba0;font-weight:800}
+.cupAdminPanel{padding:22px;border:1px solid #dae1ed;background:#fff;box-shadow:0 7px 20px rgba(11,34,62,.04)}
+.cupAdminPanel h3{margin:0 0 15px}
+.cupAdminForm{display:grid;gap:18px}
+.cupAdminGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px}
+.cupAdminGrid label{display:grid;gap:7px;color:#243e5b;font-size:12px;font-weight:750}
+.cupAdminGrid input,.cupAdminGrid select{width:100%;min-width:0;border:1px solid #b5c8db;background:white;border-radius:0;padding:12px;color:#12385d}
+.cupAdminFull{grid-column:1/-1}
+.cupAdminTieList{display:grid;gap:12px}
+.cupAdminTieList details{border:1px solid #d5e0eb;padding:14px 17px;background:#f9fbfe}
+.cupAdminTieList summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.cupAdminTieList summary span{color:#5c7189;font-size:12px}
+.cupAdminTieList details[open] .cupAdminForm{margin-top:18px}
+.cupAdminDelete{margin-top:18px;padding-top:13px;border-top:1px solid #dce4ed}
+@media(max-width:680px){.cupAdminGrid{grid-template-columns:1fr}.cupAdminPanel{padding:16px}.cupAdminIntroduction{align-items:flex-start}}

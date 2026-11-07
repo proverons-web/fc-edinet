@@ -68,6 +68,7 @@ export default async function AdminMatchesPage({
           <div className="adminHeroActions">
             <Link href="/admin" className="adminBack">← Админка</Link>
             <Link href="/admin/matches/competitions" className="rowAction muted">Соревнования</Link>
+            <Link href="/admin/matches/cups" className="rowAction muted">Кубковая сетка</Link>
             <Link href="/admin/matches/teams" className="rowAction muted">
               Команды
             </Link>
