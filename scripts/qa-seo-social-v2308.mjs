@@ -47,6 +47,6 @@ check("Open Graph and Twitter card share same absolute image URL", () => { asser
 check("production domain outranks preview deployment host", () => { const p = site.indexOf('process.env.VERCEL_PROJECT_PRODUCTION_URL'); const q = site.indexOf('process.env.NEXT_PUBLIC_VERCEL_URL'); assert.ok(p !== -1 && q !== -1 && p < q); });
 check("no new DB migrations required", () => assert.equal(fs.existsSync(path.join(root, "database/078_social_preview.sql")), false));
 check("new QA included in release gate", () => { const scripts = JSON.parse(read("package.json")).scripts; assert.match(scripts["deploy:check"], /qa-seo-social-v2308\.mjs/); assert.match(scripts["qa:all"], /qa:seo-social/); });
-check("release and installer consistency", () => { assert.equal(JSON.parse(read("package.json")).version, "2.30.13"); assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.13"/); assert.match(read("scripts/qa-site.mjs"), /STEP-2\.30\.13\.txt/); });
-console.log(`\nSEO & Social Sharing v2.30.13: ${passed}/${passed + failed} checks passed.`);
+check("release and installer consistency", () => { assert.equal(JSON.parse(read("package.json")).version, "2.30.14"); assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.14"/); assert.match(read("scripts/qa-site.mjs"), /STEP-2\.30\.14\.txt/); });
+console.log(`\nSEO & Social Sharing v2.30.14: ${passed}/${passed + failed} checks passed.`);
 if (failed) process.exitCode = 1;

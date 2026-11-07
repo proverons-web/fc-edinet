@@ -14,6 +14,7 @@ import { defaultDesignSystem, designSystemCssVariables, normalizeDesignSystem } 
 import { getGlobalDesignConfigs } from "@/lib/site-global-designs";
 import { sportsTeamJsonLd } from "@/lib/seo";
 import VisitorTracker from "./components/VisitorTracker";
+import RealUserMetrics from "./components/RealUserMetrics";
 
 const fceBodyFont = Inter({
   subsets: ["latin", "latin-ext", "cyrillic"],
@@ -65,6 +66,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body className={`${fceBodyFont.variable} ${fceDisplayFont.variable}`} style={designSystemCssVariables(designSystem)}>
         <JsonLd data={teamJsonLd} />
         <VisitorTracker />
+        <RealUserMetrics />
         <SiteHeader />
         {children}
         <SiteFooter />

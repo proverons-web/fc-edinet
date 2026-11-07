@@ -30,7 +30,7 @@ const tests=[
   ['Admin action persists focus',action.includes('cover_position_x: coverPositionX') && action.includes('cover_position_y: coverPositionY')],
   ['DB migration is additive',sql.includes('ADD COLUMN IF NOT EXISTS') && !/DROP TABLE|DELETE FROM/i.test(sql)],
   ['DB validates focus ranges',sql.includes('BETWEEN 0 AND 100')],
-  ['Release version',JSON.parse(read('package.json')).version === '2.30.13' && read('lib/release.ts').includes('RELEASE_VERSION = "2.30.13"')],
+  ['Release version',JSON.parse(read('package.json')).version === '2.30.14' && read('lib/release.ts').includes('RELEASE_VERSION = "2.30.14"')],
 ];
 for(const [name,ok] of tests){assert.ok(ok,name);console.log('PASS',name)}
 console.log(`Album Experience v2.30.5: ${tests.length}/${tests.length} checks passed.`);

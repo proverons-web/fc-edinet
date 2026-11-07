@@ -251,7 +251,7 @@ export default async function AdminDiagnosticsPage() {
               <DiagnosticRow label="Content page schema" value={`v${CONTENT_SCHEMA_VERSION}`} state="info" />
               <DiagnosticRow label="Pro page schema" value={`v${PRO_PAGE_SCHEMA_VERSION}`} state="info" />
               <DiagnosticRow label="Rich content schema" value={`v${RICH_CONTENT_SCHEMA_VERSION}`} state="info" />
-              <DiagnosticRow label="Последняя миграция в проекте" value="077" state="info" detail="Файл 077_club_history_timeline.sql. Этот номер не доказывает, что миграция выполнена в конкретной базе." />
+              <DiagnosticRow label="Последняя миграция в проекте" value="078" state="info" detail="Файл 078_real_user_monitoring.sql. Этот номер не доказывает, что миграция выполнена в конкретной базе." />
             </DiagnosticPanel>
           </div>
 
@@ -297,6 +297,7 @@ export default async function AdminDiagnosticsPage() {
               <p>Экран показывает только факт наличия переменных окружения. Ключи, токены и секретные значения никогда не выводятся в интерфейс.</p>
             </div>
             <div className="diagnosticsQuickLinks">
+              <Link href="/admin/diagnostics/performance">Скорость и ошибки посетителей →</Link>
               <Link href="/admin/audit">Журнал действий →</Link>
               <Link href="/admin/users">Пользователи →</Link>
             </div>
