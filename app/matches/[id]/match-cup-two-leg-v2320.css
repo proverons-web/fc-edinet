@@ -1,0 +1,6 @@
+.cupTwoLegMatchNotice{background:#edf4fc;border-bottom:1px solid #cfdded;color:#133b68}
+.cupTwoLegMatchNoticeInner{display:flex;align-items:center;flex-wrap:wrap;gap:12px 22px;padding-top:14px;padding-bottom:14px;font-size:13px}
+.cupTwoLegMatchNoticeInner strong{font-weight:850}
+.cupTwoLegMatchNoticeInner span{font-weight:700}
+.cupTwoLegMatchNoticeInner a{color:#0762aa;font-weight:800;text-decoration:underline;text-underline-offset:3px}
+@media(max-width:600px){.cupTwoLegMatchNoticeInner{align-items:flex-start;flex-direction:column;gap:8px}}

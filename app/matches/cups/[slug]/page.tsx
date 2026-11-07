@@ -11,8 +11,10 @@ import { resolveCupBracket, bracketStages, type BracketTie, type BracketTeam } f
 import "./style.css";
 
 export const dynamic = "force-dynamic";
-const tieSelect=`id,competition_id,stage_order,stage_name_ru,stage_name_ro,sort_order,match_id,home_team_id,away_team_id,next_tie_id,next_slot,
+const tieSelect=`id,competition_id,stage_order,stage_name_ru,stage_name_ro,sort_order,match_id,return_match_id,leg_mode,shootout_home,shootout_away,home_team_id,away_team_id,next_tie_id,next_slot,
   match:matches!cup_bracket_ties_match_id_fkey(id,competition_id,status,kickoff,home_score,away_score,extra_time_played,home_penalties,away_penalties,
+    home:teams!matches_home_team_id_fkey(id,name,short_name,logo_url),away:teams!matches_away_team_id_fkey(id,name,short_name,logo_url)),
+  return_match:matches!cup_bracket_ties_return_match_id_fkey(id,competition_id,status,kickoff,home_score,away_score,extra_time_played,home_penalties,away_penalties,
     home:teams!matches_home_team_id_fkey(id,name,short_name,logo_url),away:teams!matches_away_team_id_fkey(id,name,short_name,logo_url)),
   home_seed:teams!cup_bracket_ties_home_team_id_fkey(id,name,short_name,logo_url),
   away_seed:teams!cup_bracket_ties_away_team_id_fkey(id,name,short_name,logo_url)`;
@@ -34,9 +36,9 @@ export default async function CupBracketPage({params}:{params:Promise<{slug:stri
     .order("stage_order").order("sort_order").limit(512);
   const stages=error?[]:bracketStages(resolveCupBracket((data||[]) as unknown as BracketTie[]),lang);
   const t=lang==="ro"?{
-    back:"← Toate meciurile",eyebrow:"DRUMUL SPRE TROFEU",title:"Tablou eliminatoriu",noData:"Tabloul competiției nu a fost completat încă.",error:"Tabloul nu poate fi încărcat. Reîncercați mai târziu.",unknown:"De stabilit",planned:"Programat",cancelled:"Anulat",postponed:"Amânat",view:"Raportul meciului",inconsistent:"Participanții partidei necesită verificare editorială"
+    back:"← Toate meciurile",eyebrow:"DRUMUL SPRE TROFEU",title:"Tablou eliminatoriu",noData:"Tabloul competiției nu a fost completat încă.",error:"Tabloul nu poate fi încărcat. Reîncercați mai târziu.",unknown:"De stabilit",planned:"Programat",cancelled:"Anulat",postponed:"Amânat",view:"Raportul meciului",inconsistent:"Participanții partidei necesită verificare editorială",leg1:"Turul",leg2:"Returul",aggregate:"Scor general",shootout:"Lovituri de departajare",pending:"Se așteaptă returul"
   }:{
-    back:"← Все матчи",eyebrow:"ПУТЬ К ТРОФЕЮ",title:"Кубковая сетка",noData:"Сетка этого турнира пока не заполнена.",error:"Не удалось загрузить сетку. Попробуйте позже.",unknown:"Определится",planned:"Запланирован",cancelled:"Отменён",postponed:"Перенесён",view:"Протокол матча",inconsistent:"Участники матча требуют проверки редактором"
+    back:"← Все матчи",eyebrow:"ПУТЬ К ТРОФЕЮ",title:"Кубковая сетка",noData:"Сетка этого турнира пока не заполнена.",error:"Не удалось загрузить сетку. Попробуйте позже.",unknown:"Определится",planned:"Запланирован",cancelled:"Отменён",postponed:"Перенесён",view:"Протокол матча",inconsistent:"Участники матча требуют проверки редактором",leg1:"Первый матч",leg2:"Ответный матч",aggregate:"Сумма двух встреч",shootout:"Серия пенальти",pending:"Ожидается ответный матч"
   };
   return <main className="cupBracketPage">
     <section className="cupBracketHero"><div className="container">
@@ -51,17 +53,30 @@ export default async function CupBracketPage({params}:{params:Promise<{slug:stri
           {stages.map(stage=><section key={stage.order} className="cupBracketStage" aria-label={stage.name}>
             <h2>{stage.name}</h2>
             <div className="cupBracketStageCards">{stage.ties.map(tie=><article key={tie.id} className="cupBracketTie">
-              <div className="cupBracketTieNumber">{lang==="ro"?"Perechea":"Пара"} {tie.sort_order}{tie.match?.status==="finished"?<span>✓</span>:null}</div>
+              <div className="cupBracketTieNumber">{lang==="ro"?"Perechea":"Пара"} {tie.sort_order}
+                {tie.leg_mode==="two_leg"?<span>{lang==="ro"?"Două manșe":"Два матча"}</span>:null}
+                {tie.winner?<span aria-label={lang==="ro"?"Câștigător stabilit":"Победитель определён"}>✓</span>:null}
+              </div>
               {(["home","away"] as const).map(side=>{const team=side==="home"?tie.home_team:tie.away_team;
                 const hasWinner=tie.winner!=null && team!=null && String(team.id)===String(tie.winner.id);
-                const scored=tie.match?.status==="finished";
-                const score=side==="home"?tie.match?.home_score:tie.match?.away_score;
+                const scored=tie.leg_mode==="two_leg"?tie.aggregate_home!=null:tie.match?.status==="finished";
+                const score=tie.leg_mode==="two_leg"?(side==="home"?tie.aggregate_home:tie.aggregate_away):(side==="home"?tie.match?.home_score:tie.match?.away_score);
                 return <div key={side} className={`cupBracketTeamRow${hasWinner?" is-winner":""}`}>
                   <Crest team={team}/><span className="cupBracketTeamName">{team?.name||t.unknown}</span>
                   <span className="cupBracketTeamScore">{scored&&score!=null?score:"–"}</span>
                 </div>})}
+              {tie.leg_mode==="two_leg"?<div className="cupBracketLegDetail" aria-label={t.aggregate}>
+                <div className="cupBracketLegSummary"><strong>{t.aggregate}</strong><span>{tie.aggregate_home!=null?`${tie.aggregate_home}:${tie.aggregate_away}`:t.pending}</span></div>
+                <div className="cupBracketLegMatches">
+                  <div>{t.leg1}: {tie.match?.status==="finished"?`${tie.match.home_score}:${tie.match.away_score}`:"—"}
+                    {tie.match?<Link href={`/matches/${tie.match.id}`}>#{tie.match.id} ↗</Link>:null}</div>
+                  <div>{t.leg2}: {tie.return_match?.status==="finished"?`${tie.return_match.away_score}:${tie.return_match.home_score}`:"—"}
+                    {tie.return_match?<Link href={`/matches/${tie.return_match.id}`}>#{tie.return_match.id} ↗</Link>:null}</div>
+                </div>
+                {tie.shootout&&tie.shootout_home!=null&&tie.shootout_away!=null?<p>{t.shootout}: {tie.shootout_home}:{tie.shootout_away}</p>:null}
+              </div>:null}
               {tie.match?<div className="cupBracketTieFoot">
-                <span>{tie.match.status==="cancelled"?t.cancelled:tie.match.status==="postponed"?t.postponed:tie.match.status==="scheduled"?t.planned:cupResultDetail(tie.match,lang)||""}</span>
+                <span>{tie.match.status==="cancelled"?t.cancelled:tie.match.status==="postponed"?t.postponed:tie.match.status==="scheduled"?t.planned:tie.leg_mode==="two_leg"?"":cupResultDetail(tie.match,lang)||""}</span>
                 <Link href={`/matches/${tie.match.id}`}>{t.view} ↗</Link>
               </div>:null}
               {tie.mismatch?<p className="cupBracketMismatch">{t.inconsistent}</p>:null}

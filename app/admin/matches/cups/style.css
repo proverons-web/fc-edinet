@@ -20,3 +20,10 @@
 .cupAdminTieList details[open] .cupAdminForm{margin-top:18px}
 .cupAdminDelete{margin-top:18px;padding-top:13px;border-top:1px solid #dce4ed}
 @media(max-width:680px){.cupAdminGrid{grid-template-columns:1fr}.cupAdminPanel{padding:16px}.cupAdminIntroduction{align-items:flex-start}}
+
+.cupAdminHint{font-size:12px;color:#546e86;grid-column:1/-1;padding:7px 12px;background:#eff5fb;border-left:3px solid #1b70bb}
+.cupAdminAutoLinks p{font-size:13px;color:#516983;margin:0 0 14px}
+.cupAdminAutoLinkRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #e2eaf2}
+.cupAdminAutoLinkRow span{font-size:13px;line-height:1.45}
+.cupAdminAutoLinkRow button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:680px){.cupAdminAutoLinkRow{flex-direction:column;align-items:stretch}}

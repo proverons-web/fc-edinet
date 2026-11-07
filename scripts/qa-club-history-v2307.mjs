@@ -74,8 +74,8 @@ test("new entry default unpublished", () => assert.match(form,/defaultChecked=\{
 test("season and hall are crosslinked", () => {assert.match(read("app/club/seasons/[slug]/page.tsx"),/\.eq\("season_id", season\.id\)\.eq\("is_published", true\)/);assert.match(read("app/club/hall-of-fame/[id]/page.tsx"),/\.eq\("hall_entry_id", entry\.id\)\.eq\("is_published", true\)/)});
 test("events in sitemap are published only", () => assert.match(read("app/sitemap.ts"),/from\("club_history_events"\)\.select\("id,updated_at"\)\.eq\("is_published", true\)/));
 test("responsive timeline CSS and reduced-motion styles", () => {assert.match(css,/@media\(max-width:610px\)/);assert.match(css,/prefers-reduced-motion/);assert.doesNotMatch(css,/!important/)});
-test("release version consistent", () => {assert.equal(JSON.parse(read("package.json")).version,"2.30.19");assert.match(read("lib/release.ts"),/RELEASE_VERSION = "2\.30\.19"/);assert.match(read("scripts/qa-site.mjs"),/STEP-2\.30\.19\.txt/)});
+test("release version consistent", () => {assert.equal(JSON.parse(read("package.json")).version,"2.30.20");assert.match(read("lib/release.ts"),/RELEASE_VERSION = "2\.30\.20"/);assert.match(read("scripts/qa-site.mjs"),/STEP-2\.30\.20\.txt/)});
 test("new QA included in deploy gate", () => {const scripts=JSON.parse(read("package.json")).scripts;assert.match(scripts["deploy:check"],/qa-club-history-v2307\.mjs/);assert.match(scripts["qa:all"],/qa:club-history/)});
 const failed=results.filter(result=>!result).length;
-console.log(`\nClub History Pro v2.30.19: ${results.length-failed}/${results.length} checks passed.`);
+console.log(`\nClub History Pro v2.30.20: ${results.length-failed}/${results.length} checks passed.`);
 if(failed)process.exitCode=1;

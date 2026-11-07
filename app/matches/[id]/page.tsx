@@ -17,6 +17,7 @@ import "./match-player-navigation-v22910.css";
 import "./match-lineup-mobile-v22912.css";
 import "./match-media-v2302.css";
 import "./match-schedule-v2317.css";
+import "./match-cup-two-leg-v2320.css";
 import MatchScheduleNotice from "./MatchScheduleNotice";
 import { scheduleHistorySelect, scheduleDateLabel, type ScheduleHistoryItem } from "@/lib/match-schedule";
 import JsonLd from "@/app/components/JsonLd";
@@ -34,6 +35,7 @@ import { lineupAnchor, playerProfileHref } from "@/lib/player-navigation";
 import type { ClubMatch, MatchEvent, MatchLineupEntry, MatchLineupSetting, MatchReport, MatchTeamStatistic } from "@/lib/types";
 import { hasRecordedScore, matchScoreText, matchVenue } from "@/lib/public-match-integrity";
 import { cupResultDetail } from "@/lib/cup-results";
+import { evaluateCupTie, type BracketMatch } from "@/lib/cup-bracket";
 
 export const dynamic = "force-dynamic";
 
@@ -276,6 +278,28 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
   const match = await getMatch(id);
   if (!match) notFound();
   const supabase = createPublicClient();
+  // A two-leg shootout is a tie result, not an individual match goal or score.
+  let twoLegSummary:{leg:number,total:string|null,penalties:string|null,otherId:string|null}|null=null;
+  if(match.competition?.competition_type==="cup"){
+    const {data:tie}=await supabase.from("cup_bracket_ties")
+      .select("match_id,return_match_id,leg_mode,shootout_home,shootout_away")
+      .eq("leg_mode","two_leg")
+      .or(`match_id.eq.${id},return_match_id.eq.${id}`).maybeSingle();
+    if(tie){
+      const otherId=String(tie.match_id)===id?tie.return_match_id:tie.match_id;
+      const other=otherId!=null?await getMatch(String(otherId)):null;
+      const first=String(tie.match_id)===id?match:other;
+      const second=String(tie.return_match_id)===id?match:other;
+      const decision=evaluateCupTie({id:0,competition_id:match.competition_id!,stage_order:0,
+        stage_name_ru:"Кубок",sort_order:0,leg_mode:"two_leg",
+        shootout_home:tie.shootout_home,shootout_away:tie.shootout_away,
+        match:first as unknown as BracketMatch|null,return_match:second as unknown as BracketMatch|null});
+      twoLegSummary={leg:String(tie.match_id)===id?1:2,
+        total:decision.aggregate_home!=null?`${decision.aggregate_home}:${decision.aggregate_away}`:null,
+        penalties:decision.shootout?`${tie.shootout_home}:${tie.shootout_away}`:null,
+        otherId:otherId==null?null:String(otherId)};
+    }
+  }
   const {data:scheduleHistoryRows} = await supabase.from("match_schedule_history")
     .select(scheduleHistorySelect).eq("match_id",id)
     .order("changed_at",{ascending:false}).order("id",{ascending:false}).limit(12);
@@ -406,6 +430,14 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
           </div>
         </section>
 
+        {twoLegSummary?<section className="cupTwoLegMatchNotice" aria-label={locale==="ro"?"Duel în două manșe":"Двухматчевое противостояние"}>
+          <div className="container cupTwoLegMatchNoticeInner">
+            <strong>{locale==="ro"?`Cupa · ${twoLegSummary.leg===1?"Turul":"Returul"}`:`Кубок · ${twoLegSummary.leg===1?"Первый матч":"Ответный матч"}`}</strong>
+            {twoLegSummary.total?<span>{locale==="ro"?"Scor general":"Сумма двух матчей"}: {twoLegSummary.total}</span>:null}
+            {twoLegSummary.penalties?<span>{locale==="ro"?"Lovituri de departajare":"Пенальти"}: {twoLegSummary.penalties}</span>:null}
+            {twoLegSummary.otherId?<Link href={`/matches/${twoLegSummary.otherId}`}>{locale==="ro"?"Cealaltă manșă ↗":"Другая встреча ↗"}</Link>:null}
+          </div>
+        </section>:null}
         <MatchScheduleNotice match={match} history={scheduleHistory} locale={locale} />
 
         {published ? (

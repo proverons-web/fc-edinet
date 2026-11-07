@@ -25,3 +25,11 @@
 .cupBracketMismatch{margin:0;padding:8px 12px;background:#fff3d5;color:#795200;font-size:11px}
 @media(max-width:740px){.cupBracketHero{padding:42px 0 35px}.cupBracketStages{min-width:0;display:flex;flex-direction:column;gap:20px;width:100%}.cupBracketStage{width:100%;flex:auto}.cupBracketStage h2{min-height:0;margin-bottom:12px}.cupBracketStageCards{gap:12px;min-height:0}.cupBracketScroller{overflow-x:visible}}
 @media(prefers-reduced-motion:reduce){.cupBracketScroller{scroll-behavior:auto}}
+
+.cupBracketLegDetail{padding:10px 12px;background:#f3f7fc;border-top:1px solid #dce8f3;font-size:11px;color:#1a4167}
+.cupBracketLegSummary{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;margin-bottom:7px}
+.cupBracketLegSummary strong{font-weight:850}
+.cupBracketLegMatches{display:grid;gap:6px;color:#516b86}
+.cupBracketLegMatches>div{display:flex;justify-content:space-between;gap:7px}
+.cupBracketLegMatches a{font-weight:800;color:#115e9a;white-space:nowrap}
+.cupBracketLegDetail p{margin:8px 0 0;color:#174c7b;font-weight:850}

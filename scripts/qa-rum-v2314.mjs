@@ -18,7 +18,7 @@ const sql = read("database/078_real_user_monitoring.sql");
 const admin = read("app/admin/diagnostics/performance/page.tsx");
 const diagnostics = read("app/admin/diagnostics/page.tsx");
 const ci = read(".github/workflows/responsive-qa.yml");
-check("version matches current release", () => assert.equal(pkg.version, "2.30.19"));
+check("version matches current release", () => assert.equal(pkg.version, "2.30.20"));
 check("stable Web Vitals client callback", () => {
   assert.match(client, /^"use client";/);
   assert.match(client, /useReportWebVitals\(onWebVital\)/);
@@ -111,5 +111,5 @@ check("QA script is in deployment and CI", () => {
   assert.match(pkg.scripts["qa:all"], /qa:rum/);
   assert.match(ci, /qa-rum-v2314\.mjs/);
 });
-console.log(`\nRUM v2.30.19: ${passed}/${passed+failed} checks passed`);
+console.log(`\nRUM v2.30.20: ${passed}/${passed+failed} checks passed`);
 if(failed) process.exitCode = 1;
