@@ -3967,3 +3967,6 @@ body:has(.adminEmbedded){background:#f3f6fa}
 .mediaVideoEditorContainer{max-width:820px;margin-inline:auto}
 .mediaVideoEditForm{max-width:100%;margin-inline:auto}
 .proMediaVideoMatchLink{display:inline-block;font-size:12px;font-weight:750;margin-top:8px;color:#155b93;text-underline-offset:3px}
+
+/* v2.30.6: history-to-seasons bridge */
+.clubHistorySeasonJump{margin-top:36px;padding:26px 28px;background:#edf4fb;border-left:4px solid #e5b800}.clubHistorySeasonJump p{font-size:10px;letter-spacing:.12em;font-weight:900;color:#55718c;margin:0 0 8px}.clubHistorySeasonJump h2{margin:0 0 14px;font-size:24px;color:#0a355f}.clubHistorySeasonJump a{font-weight:900;font-size:13px;text-decoration:none;color:#07549b}

@@ -1,0 +1,51 @@
+FC EDINET v2.30.6 FULL — CLUB SEASONS ARCHIVE
+=================================================
+
+WHAT'S NEW
+- /club/seasons: real club seasons with totals from club_season_history.
+- /club/seasons/[slug]: paged finished matches, tournament filters,
+  match scores, result badges and direct links to protocols.
+- "Сезоны / Sezoane" added to the Club subsection navigation.
+- History page links to the new season archive.
+- RU/RO and mobile layout, public metadata and sitemap entries.
+- No fake historical seasons or estimated statistics.
+
+DATABASE
+- This release has NO NEW SQL MIGRATION.
+- The existing public.seasons, competitions, matches, teams and
+  club_season_history view are used. They come from previous migrations.
+- Previous migrations (including 074, 075 and 076) still need to be applied
+  if an older version was installed without them. Do not re-run migrations
+  merely to upgrade v2.30.5 -> v2.30.6.
+- The admin UI for creating seasons and mapping competitions already exists
+  under /admin/statistics. Use it to add actual historic records when available.
+
+INSTALLATION (Windows)
+1. Make a backup of the current project directory and keep your .env.local.
+2. Extract fc-edinet-v2.30.6-FULL.zip into a NEW directory.
+   Do not overlay a working previous version.
+3. If you use local env settings, copy ONLY your own .env.local into the new folder.
+   Never publish keys or .env.local to GitHub.
+4. Double-click DEPLOY_FC_EDINET.bat in the new folder.
+   npm installs packages, all release QA runs, then Next.js production build.
+   If any stage FAILS, nothing is pushed. Fix the failed step before retrying.
+5. After a successful push, check the Vercel production deployment is READY.
+6. Visit https://fc-edinet.vercel.app/api/version and verify 2.30.6.
+7. Visit /club/history and click the link to /club/seasons.
+8. Open the current season. Check scores, links to match protocols,
+   tournament chips when more than one tournament exists, and pagination
+   when more than 15 matches appear. Check mobile (RU and RO).
+
+TROUBLESHOOTING
+- A season appears without results: check it is active; ensure matches are
+  finished, assigned to its competitions and one participating team is marked
+  is_club=true. Results are not fabricated when data is missing.
+- An old inactive competition is not displayed to anonymous visitors because
+  existing public RLS only exposes active competitions. Mark archived
+  competitions active only when it fits your editorial policy.
+- A season is absent: check its "is_active" status in the admin statistics UI.
+- Database/network errors are rendered as an error, not a false zero count.
+- A failed npm/build step is NOT a successful deployment.
+- New season pages are public; no extra editor permissions were introduced.
+
+No live database or Vercel deployment was changed while packaging this ZIP.

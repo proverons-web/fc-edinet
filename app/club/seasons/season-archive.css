@@ -1,0 +1,67 @@
+/* FC Edineț v2.30.6 — club seasons archive (isolated from legacy match styles). */
+.clubSeasonHero{background:linear-gradient(110deg,#04172f 0%,#083567 78%,#114a7c 100%);color:#fff;padding:56px 0 60px;border-bottom:3px solid #f7c524}
+.clubSeasonHero .container{max-width:1180px}
+.clubSeasonHero .eyebrow{color:#f7ce31;font-size:11px;font-weight:900;letter-spacing:.14em}
+.clubSeasonHero h1{font:900 clamp(38px,5vw,65px)/1.04 Arial,sans-serif;letter-spacing:-.045em;text-transform:uppercase;margin:12px 0 16px;color:#fff}
+.clubSeasonHero p:not(.eyebrow){max-width:650px;color:#d6e5f5;font-size:16px;line-height:1.6;margin:0}
+.clubSeasonHeroLinks{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.clubSeasonHeroLinks a{display:inline-flex;align-items:center;gap:8px;color:#fff;text-decoration:none;font-size:13px;font-weight:800;padding:11px 16px;border:1px solid #57799e;background:rgba(255,255,255,.05)}
+.clubSeasonHeroLinks a:hover{border-color:#f7ce31;color:#f7ce31}
+.clubSeasonBack{display:inline-flex;color:#dbeafb;text-decoration:none;font-size:12px;font-weight:800;margin:0 0 28px}
+.clubSeasonBack:hover{color:#f7ce31}
+.clubSeasonSection{background:#f3f6fa;min-height:400px;padding:48px 0 70px;color:#112c48}
+.clubSeasonSection>.container{max-width:1180px}
+.clubSeasonHeading{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:22px}
+.clubSeasonHeading .eyebrow{margin:0 0 5px;font-size:10px;letter-spacing:.13em}
+.clubSeasonHeading h2{margin:0;font:900 clamp(24px,2.6vw,35px)/1.1 Arial,sans-serif;color:#082345}
+.clubSeasonHeading>span{font-size:12px;color:#668099;font-weight:750}
+.clubSeasonGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.clubSeasonCard{position:relative;display:flex;flex-direction:column;min-height:325px;padding:24px;background:#fff;border:1px solid #dce5ef;border-top:4px solid #06396c;color:#082345;text-decoration:none;box-shadow:0 5px 18px rgba(8,39,74,.05);transition:border-color .18s,transform .18s}
+.clubSeasonCard:hover{transform:translateY(-3px);border-top-color:#e7b800}
+.clubSeasonCard:focus-visible,.clubSeasonHero a:focus-visible,.clubSeasonMatch:focus-visible,.clubSeasonFilters a:focus-visible,.clubSeasonPagination a:focus-visible{outline:3px solid #e7b800;outline-offset:3px}
+.clubSeasonCardTop{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:10px;font-weight:900;letter-spacing:.13em;color:#6b8097}
+.clubSeasonCardTop b{padding:6px 8px;background:#eef7fc;color:#09609e;font-size:9px;letter-spacing:.06em}
+.clubSeasonCardYear{display:block;font-size:clamp(30px,3.5vw,46px);font-weight:950;letter-spacing:-.045em;margin:16px 0 22px}
+.clubSeasonCardRecord{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:auto 0 19px}
+.clubSeasonCardRecord span{font-size:10px;color:#698099;display:flex;flex-direction:column;gap:5px}
+.clubSeasonCardRecord b{font-size:23px;line-height:1;color:#082345;font-weight:900}
+.clubSeasonCardBottom{display:flex;gap:22px;border-top:1px solid #e8edf3;padding:14px 0;font-size:11px;color:#67809a}
+.clubSeasonCardBottom b{color:#153858;font-size:14px;margin-left:5px}
+.clubSeasonNoResults{font-size:13px;color:#6e8298;line-height:1.5;margin:auto 0}
+.clubSeasonCardFooter{display:flex;justify-content:space-between;align-items:center;padding-top:15px;margin-top:auto;border-top:1px solid #e8edf3;font-size:12px;font-weight:900;color:#07519a}
+.clubSeasonCardFooter span{font-size:23px;line-height:1}
+.clubSeasonSourceNote{margin-top:23px;font-size:12px;line-height:1.55;color:#6e8296}
+.clubSeasonNotice{padding:25px;background:#fff;border-left:3px solid #9fb5ca;font-size:14px;line-height:1.5;color:#36516b}
+.clubSeasonTotals{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-bottom:44px}
+.clubSeasonTotals>div{padding:21px 18px;background:#fff;border:1px solid #dce6ef;display:flex;flex-direction:column;gap:9px}
+.clubSeasonTotals small{font-size:11px;color:#687f96;font-weight:700}
+.clubSeasonTotals strong{font:900 clamp(27px,3vw,42px)/1 Arial,sans-serif;color:#062e59}
+.clubSeasonMatchesHeading{margin-top:26px}
+.clubSeasonFilters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.clubSeasonFilters a{padding:10px 14px;border:1px solid #d1deeb;background:#fff;color:#315574;text-decoration:none;font-size:12px;font-weight:800}
+.clubSeasonFilters a:hover,.clubSeasonFilters a.selected{background:#0a3e77;border-color:#0a3e77;color:#fff}
+.clubSeasonMatchList{border:1px solid #dce5ef;background:#fff}
+.clubSeasonMatch{display:grid;grid-template-columns:minmax(175px,.9fr) minmax(0,2.5fr) auto;gap:24px;align-items:center;padding:17px 20px;border-bottom:1px solid #e6ebf1;color:#12395d;text-decoration:none;min-height:84px}
+.clubSeasonMatch:last-child{border-bottom:0}
+.clubSeasonMatch:hover{background:#f1f7fc}
+.clubSeasonMatchMeta{display:flex;flex-direction:column;gap:5px;min-width:0}
+.clubSeasonMatchMeta time{font-size:12px;font-weight:900;color:#385775}
+.clubSeasonMatchMeta span{font-size:11px;color:#8295a8;white-space:normal;overflow-wrap:anywhere}
+.clubSeasonMatchTeams{display:grid;grid-template-columns:minmax(0,1fr) 82px minmax(0,1fr);align-items:center;gap:10px;min-width:0}
+.clubSeasonMatchTeams>span{display:flex;align-items:center;gap:9px;min-width:0;overflow-wrap:anywhere;font-size:13px;font-weight:650}
+.clubSeasonMatchTeams>span:last-child{justify-content:flex-end;text-align:right}
+.clubSeasonMatchTeams>span.isClub{font-weight:950;color:#063e75}
+.clubSeasonMatchTeams img{height:31px;width:31px;object-fit:contain;flex:0 0 auto}
+.clubSeasonMatchTeams>b{text-align:center;font-size:19px;white-space:nowrap;font-weight:950;color:#082a4f;font-variant-numeric:tabular-nums}
+.clubSeasonMatchEnd{display:flex;align-items:center;gap:18px}
+.clubSeasonMatchArrow{color:#7191b0;font-size:19px}
+.clubSeasonOutcome{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;font-size:12px;font-weight:950}
+.clubSeasonOutcome.win{background:#e9f6ef;color:#187644}.clubSeasonOutcome.draw{background:#edf0f5;color:#61778c}.clubSeasonOutcome.loss{background:#fcebee;color:#ae3247}
+.clubSeasonPagination{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:22px 0;font-size:12px;font-weight:750;color:#58728b}
+.clubSeasonPagination a{color:#0b4a88;text-decoration:none;padding:10px 13px;border:1px solid #ccdae8;background:white}
+.clubSeasonBottomLinks{display:flex;flex-wrap:wrap;gap:16px;margin-top:34px}
+.clubSeasonBottomLinks a{color:#07549b;font-size:13px;font-weight:800;text-decoration:none}
+@media(max-width:1000px){.clubSeasonGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.clubSeasonTotals{grid-template-columns:repeat(3,minmax(0,1fr))}.clubSeasonMatch{grid-template-columns:minmax(125px,.85fr) minmax(0,2.5fr) auto;gap:12px}}
+@media(max-width:700px){.clubSeasonHero{padding:38px 0 44px}.clubSeasonHero h1{font-size:39px}.clubSeasonHero p:not(.eyebrow){font-size:14px}.clubSeasonSection{padding:32px 0 48px}.clubSeasonGrid{grid-template-columns:1fr}.clubSeasonCard{min-height:280px}.clubSeasonTotals{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.clubSeasonTotals>div{padding:16px 10px}.clubSeasonTotals strong{font-size:28px}.clubSeasonHeading{align-items:center}.clubSeasonMatch{grid-template-columns:1fr auto;gap:12px;padding:15px 12px}.clubSeasonMatchMeta{grid-column:1/-1;flex-direction:row;justify-content:space-between}.clubSeasonMatchTeams{grid-column:1;grid-template-columns:minmax(0,1fr) 60px minmax(0,1fr);gap:6px}.clubSeasonMatchTeams>span{font-size:11px;gap:5px}.clubSeasonMatchTeams>b{font-size:16px}.clubSeasonMatchTeams img{width:22px;height:22px}.clubSeasonMatchEnd{grid-column:2;gap:5px}.clubSeasonMatchArrow{display:none}.clubSeasonOutcome{width:26px;height:26px;font-size:10px}}
+@media(max-width:380px){.clubSeasonTotals{grid-template-columns:repeat(2,minmax(0,1fr))}.clubSeasonMatchTeams img{display:none}.clubSeasonMatch{gap:6px}}
+@media(prefers-reduced-motion:reduce){.clubSeasonCard{transition:none}.clubSeasonCard:hover{transform:none}}
