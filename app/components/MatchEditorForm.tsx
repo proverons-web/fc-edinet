@@ -5,6 +5,7 @@ import {
   saveMatch,
   type MatchFormState,
 } from "@/app/admin/matches/actions";
+import {competitionTypes,competitionTypeLabel} from "@/lib/competition";
 import type {
   ClubMatch,
   ClubTeam,
@@ -30,6 +31,7 @@ export default function MatchEditorForm({
     teams.find((team) => String(team.id) === initialHomeId)?.home_stadium ??
     "";
 
+  const defaultCompetition = competitions.find(c => (c.competition_type || "league") === "league") || competitions[0];
   const [homeTeamId, setHomeTeamId] = useState(initialHomeId);
   const [stadium, setStadium] = useState(initialStadium);
 
@@ -130,24 +132,17 @@ export default function MatchEditorForm({
                 defaultValue={
                   match?.competition_id
                     ? String(match.competition_id)
-                    : competitions[0]
-                      ? String(competitions[0].id)
-                      : ""
+                    : defaultCompetition ? String(defaultCompetition.id) : ""
                 }
               >
                 <option value="">Без турнира</option>
 
-                {competitions.map((competition) => (
-                  <option
-                    key={competition.id}
-                    value={String(competition.id)}
-                  >
-                    {competition.name}
-                    {competition.season
-                      ? ` · ${competition.season}`
-                      : ""}
-                  </option>
-                ))}
+                {competitionTypes.map(type => {
+                  const group = competitions.filter(c => (c.competition_type || "league") === type);
+                  return group.length ? <optgroup key={type} label={competitionTypeLabel(type,"ru")}>
+                    {group.map(c => <option key={c.id} value={String(c.id)}>{c.name}{c.season ? ` · ${c.season}` : ""}</option>)}
+                  </optgroup> : null;
+                })}
               </select>
             </div>
 

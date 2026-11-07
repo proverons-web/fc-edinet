@@ -20,7 +20,7 @@ check("the match return is blocked for invalid IDs",()=>{assert.equal(matchRetur
 check("season and row identifiers are validated",()=>{assert.equal(validSeasonId("hello&redirect"),null);assert.equal(validLineupId("x</script>"),null);assert.equal(lineupAnchor("bad#"),"lineups")});
 check("fromLineup is ignored when fromMatch is missing",()=>assert.equal(playerProfileHref("one",{fromLineupId:123}),"/team/one"));
 check("valid UUID season or lineup supported",()=>{const uuid="123e4567-e89b-12d3-a456-426614174000";assert.equal(validSeasonId(uuid),uuid);assert.equal(validLineupId(uuid),uuid)});
-check("match fetch selects competition season ID",()=>assert.match(m,/competition:competitions![^`\n]+\(id,name,slug,season,season_id,is_active\)/));
+check("match fetch selects competition season ID",()=>assert.match(m,/competition:competitions![^`\n]+\(id,name,name_ro,slug,season,season_id,competition_type,is_active\)/));
 check("club roster passes match and season context to each row",()=>{assert.equal((m.match(/matchId=\{match\.id\} seasonId=\{match\.competition\?\.season_id\}/g)||[]).length,2)});
 check("club player name opens contextual profile",()=>assert.match(m,/href=\{profileHref\}/));
 check("season context lives in the player profile link, not a separate roster link",()=>{

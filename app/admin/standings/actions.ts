@@ -22,6 +22,9 @@ export async function saveStandings(
     return { error: "Турнир не выбран." };
   }
 
+  const {data: competition, error: competitionError} = await supabase.from("competitions").select("id,competition_type,is_active").eq("id",competitionId).maybeSingle();
+  if (competitionError || !competition || !competition.is_active || competition.competition_type !== "league") return {error:"Турнирная таблица доступна только для активного чемпионата."};
+
   const teamIds = formData
     .getAll("team_id")
     .map((value) => String(value).trim())

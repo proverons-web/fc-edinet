@@ -167,7 +167,11 @@ export type ClubTeam = {
   is_active: boolean;
 };
 
+export type CompetitionType = "league" | "cup" | "friendly" | "other";
 export type Competition = {
+  competition_type?: CompetitionType;
+  name_ro?: string | null;
+  logo_url?: string | null;
   id: string | number;
   name: string;
   slug: string;

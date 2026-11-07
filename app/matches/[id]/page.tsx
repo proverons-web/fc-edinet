@@ -25,6 +25,7 @@ import { compareMatchStat } from "@/lib/match-stat-visualization";
 import { lineupEventParticipant, lineupEventsForPlayer } from "@/lib/public-match-player-stats";
 import { publicText } from "@/lib/i18n";
 import { publicMetadata, sportsEventJsonLd } from "@/lib/seo";
+import {competitionName} from "@/lib/competition";
 import { RELEASE_VERSION } from "@/lib/release";
 import { lineupAnchor, playerProfileHref } from "@/lib/player-navigation";
 import type { ClubMatch, MatchEvent, MatchLineupEntry, MatchLineupSetting, MatchReport, MatchTeamStatistic } from "@/lib/types";
@@ -200,7 +201,7 @@ function matchSelect() {
   return `id,competition_id,home_team_id,away_team_id,kickoff,stadium,round,status,home_score,away_score,notes,created_at,updated_at,
   home:teams!matches_home_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
   away:teams!matches_away_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
-  competition:competitions!matches_competition_id_fkey(id,name,slug,season,season_id,is_active)`;
+  competition:competitions!matches_competition_id_fkey(id,name,name_ro,slug,season,season_id,competition_type,is_active)`;
 }
 
 const getMatch = cache(async (id: string): Promise<ClubMatch | null> => {
@@ -364,7 +365,7 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
             <PublicBackLink fallbackHref="/matches" locale={locale} className="publicBackOnDark" />
             <PublicBreadcrumbs locale={locale} items={[{ label: publicText[locale].matches.title, href: "/matches" }, { label: `${match.home?.name ?? "—"} — ${match.away?.name ?? "—"}` }]} className="breadcrumbsOnDark publicMatchBreadcrumbs" />
             <div className="premiumMatchMetaRow">
-              <span className="premiumMatchCompetition">{match.competition?.name ?? t.match}</span>
+              <span className="premiumMatchCompetition">{competitionName(match.competition,locale) || t.match}</span>
               {match.round ? <span>{match.round}</span> : null}
               <span className={`publicMatchStatusChip status-${match.status}`}>{match.status === "finished" ? (locale === "ro" ? "Final" : "Завершён") : match.status === "live" ? (locale === "ro" ? "ÎN JOC" : "В ИГРЕ") : match.status === "postponed" ? (locale === "ro" ? "Amânat" : "Перенесён") : (locale === "ro" ? "Programat" : "Запланирован")}</span>
               <strong>{formatDate(match.kickoff, locale)}</strong>

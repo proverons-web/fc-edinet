@@ -25,7 +25,7 @@ export default async function StandingsPage({ searchParams }: PageProps) {
   const supabase = createPublicClient();
   const params = await searchParams;
   const [{ data: competitionsData }, design] = await Promise.all([
-    supabase.from("competitions").select("*").eq("is_active", true).order("name"),
+    supabase.from("competitions").select("*").eq("is_active", true).eq("competition_type","league").order("name"),
     getPublishedSitePageDesign(supabase, "standings"),
   ]);
   const competitions = (competitionsData ?? []) as Competition[];

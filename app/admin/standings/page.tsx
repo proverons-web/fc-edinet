@@ -26,6 +26,7 @@ export default async function AdminStandingsPage({
         .from("competitions")
         .select("*")
         .eq("is_active", true)
+        .eq("competition_type", "league")
         .order("name"),
       supabase
         .from("teams")

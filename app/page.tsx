@@ -8,6 +8,7 @@ import FormMatchDots from "@/app/components/FormMatchDots";
 import { createPublicClient } from "@/lib/supabase/public";
 import { getLocale } from "@/lib/locale";
 import { publicSectionMetadata } from "@/lib/seo";
+import {competitionName} from "@/lib/competition";
 import { dateLocale, localized, publicText, type Locale } from "@/lib/i18n";
 import { newsCoverStyle } from "@/lib/news-cover";
 import { defaultHomepageCanvas, normalizeHomepageCanvas } from "@/lib/homepage-canvas";
@@ -94,8 +95,7 @@ export default async function Home() {
     supabase
       .from("matches")
       .select(matchSelect())
-      .in("status", ["scheduled", "live", "postponed"])
-      .gte("kickoff", now)
+      .or(`status.eq.live,and(status.eq.scheduled,kickoff.gte.${now})`)
       .order("kickoff", { ascending: true })
       .limit(1)
       .maybeSingle(),
@@ -109,6 +109,7 @@ export default async function Home() {
       .from("competitions")
       .select("*")
       .eq("is_active", true)
+      .eq("competition_type", "league")
       .order("name")
       .limit(1)
       .maybeSingle(),
@@ -150,7 +151,8 @@ export default async function Home() {
   const nextMatch = nextMatchResult.data as unknown as ClubMatch | null;
   // The first row of the finished-match feed is also the last match; avoid a duplicate request.
   const lastMatch = (recentMatchesResult.data?.[0] ?? null) as unknown as ClubMatch | null;
-  const competition = (nextMatch?.competition || lastMatch?.competition || competitionResult.data) as Competition | null;
+  // Cup or friendly next match cannot determine the Liga 2 standings.
+  const competition = competitionResult.data as Competition | null;
   const allFinishedMatches = (recentMatchesResult.data ?? []) as unknown as ClubMatch[];
   const activeSeasonName = String(competition?.season ?? "").trim();
   const recentMatches = activeSeasonName
@@ -298,7 +300,7 @@ export default async function Home() {
           <div className="fcV215DashboardLeft">
             {lastMatch && <Link href={`/matches/${lastMatch.id}`} className="fcV215LastMatch fcV215LastMatchHero fcV215DashboardLastMatch">
               <div className="fcV215LastMatchHead">
-                <span>{lastMatch.competition?.name || competition?.name || "Liga 2"}{lastMatch.round ? ` · ${lastMatch.round}` : ""}</span>
+                <span>{competitionName(lastMatch.competition,locale) || competitionName(competition,locale) || "Liga 2"}{lastMatch.round ? ` · ${lastMatch.round}` : ""}</span>
               </div>
               <div className="fcV215LastMatchTeams">
                 <ReferenceTeam team={lastMatch.home} locale={locale} />
@@ -330,7 +332,7 @@ export default async function Home() {
           <aside className="fcRefNextMatch fcV215NextMatchDashboard">
             {nextMatch ? <>
               <div className="fcRefCompetition">
-                <span className="fcRefMatchChip">{nextMatch.competition?.name || competition?.name || "Liga 2"}</span>
+                <span className="fcRefMatchChip">{competitionName(nextMatch.competition,locale) || competitionName(competition,locale) || "Liga 2"}</span>
                 {nextMatch.round ? <span className="fcRefMatchChip">{nextMatch.round}</span> : null}
                 <span className="fcRefMatchChip fcRefMatchChipAccent">{locale === "ro" ? "MECI VIITOR" : "БЛИЖАЙШИЙ МАТЧ"}</span>
               </div>
@@ -382,7 +384,7 @@ export default async function Home() {
                 return (
                   <Link key={match.id} href={`/matches/${match.id}`} className={`fcRefRecentMatchCard${clubWin ? " is-win" : draw ? " is-draw" : " is-loss"}`}>
                     <div className="fcRefRecentMatchMeta">
-                      <span>{match.competition?.name || competition?.name || "Liga 2"}</span>
+                      <span>{competitionName(match.competition,locale) || competitionName(competition,locale) || "Liga 2"}</span>
                       {match.round ? <b>{match.round}</b> : null}
                     </div>
                     <div className="fcRefRecentMatchBody">
@@ -526,6 +528,6 @@ function matchSelect() {
     home_score,away_score,notes,
     home:teams!matches_home_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
     away:teams!matches_away_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
-    competition:competitions!matches_competition_id_fkey(id,name,slug,season,is_active)
+    competition:competitions!matches_competition_id_fkey(id,name,name_ro,slug,season,competition_type,is_active)
   `;
 }

@@ -25,11 +25,11 @@ check("one pinned Node.js major for Vercel deployments", () => {
   assert.equal(packageJson.engines.node, "22.x");
 });
 check("package and release metadata agree", () => {
-  assert.equal(packageJson.version, "2.30.15");
-  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.15"/);
+  assert.equal(packageJson.version, "2.30.16");
+  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.16"/);
 });
 check("there is one current installer STEP file", () => {
-  assert.deepEqual(fs.readdirSync(root).filter(f => /^STEP-.*\.txt$/.test(f)), ["STEP-2.30.15.txt"]);
+  assert.deepEqual(fs.readdirSync(root).filter(f => /^STEP-.*\.txt$/.test(f)), ["STEP-2.30.16.txt"]);
 });
 check("no project .npmrc injects unsupported cache-dir", () => {
   const npmrc = path.join(root, ".npmrc");
@@ -104,9 +104,9 @@ check("release runs new QA in deploy, qa:all and CI", () => {
   assert.match(packageJson.scripts["qa:all"], /qa:rum-health/);
   assert.match(ci, /qa-rum-health-v2315\.mjs/);
 });
-check("v2.30.15 does not require new SQL migration", () => {
-  assert.match(read("STEP-2.30.15.txt"), /SQL-МИГРАЦИИ: НЕТ/);
-  assert.match(read("STEP-2.30.15.txt"), /078_real_user_monitoring\.sql/);
+check("v2.30.16 does not require new SQL migration", () => {
+  assert.match(read("STEP-2.30.16.txt"), /SQL-МИГРАЦИИ: ДА/);
+  assert.match(read("STEP-2.30.16.txt"), /078_real_user_monitoring\.sql/);
 });
-console.log(`\nFC Edineț v2.30.15 RUM operations: ${passed}/${passed + failed} checks passed`);
+console.log(`\nFC Edineț v2.30.16 RUM operations: ${passed}/${passed + failed} checks passed`);
 if (failed) process.exitCode = 1;

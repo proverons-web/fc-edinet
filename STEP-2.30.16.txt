@@ -1,0 +1,18 @@
+FC Edineț v2.30.16 FULL — Multi-Competition System
+SQL-МИГРАЦИИ: ДА — database/079_multi_competitions.sql
+
+1. Сделай резервную копию сайта и базы Supabase.
+2. В Supabase SQL Editor выполни database/079_multi_competitions.sql ДО установки.
+   Миграция безопасно добавляет тип, RO-название и герб; 19 матчей Liga 2 не меняются.
+3. Распакуй полный ZIP в новую папку и перенеси .env.local (не отправляй секреты).
+4. Запусти DEPLOY_FC_EDINET.bat. Он запустит QA, typecheck и next build до GitHub push.
+5. После READY проверь /api/version (2.30.16).
+6. В /admin/matches/competitions проверь Liga 2 и создай Кубок или товарищеский турнир для сезона.
+7. В /admin/matches/new выбери турнир, дату и команды.
+8. На /matches проверь фильтры типа/турнира, на /standings — таблицу только Liga 2.
+9. Проверь RU/RO, протокол, избранное и главную страницу.
+
+История переносов/причины и новые даты — отдельный этап v2.30.17.
+Дополнительное время и серия пенальти — этап v2.30.18.
+Ранее применённую 078_real_user_monitoring.sql повторять не нужно.
+Полный next build в текущей среде не подтверждён — выполнит установщик на Windows.

@@ -87,6 +87,15 @@ export async function saveMatch(
     return { error: "Не удалось распознать дату матча." };
   }
 
+  if (competitionId) {
+    const {data: competition, error: cError} = await supabase.from("competitions").select("id,is_active").eq("id", competitionId).maybeSingle();
+    if (cError || !competition) return {error:"Указанный турнир не найден."};
+    if (!competition.is_active) {
+      const {data: original} = matchId ? await supabase.from("matches").select("competition_id").eq("id",matchId).maybeSingle() : {data:null};
+      if (String(original?.competition_id || "") !== competitionId) return {error:"Турнир неактивен."};
+    }
+  }
+
   const homeScore = parseScore(homeScoreRaw);
   const awayScore = parseScore(awayScoreRaw);
 
@@ -109,8 +118,8 @@ export async function saveMatch(
     stadium,
     round,
     status,
-    home_score: status === "scheduled" ? null : homeScore,
-    away_score: status === "scheduled" ? null : awayScore,
+    home_score: ["scheduled","postponed","cancelled"].includes(status) ? null : homeScore,
+    away_score: ["scheduled","postponed","cancelled"].includes(status) ? null : awayScore,
     notes,
   };
 

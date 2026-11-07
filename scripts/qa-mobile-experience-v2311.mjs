@@ -19,9 +19,9 @@ function check(name, task) {
   try {task();checks.push(true);console.log('PASS',name);}
   catch (e) {checks.push(false);console.error('FAIL',name,e.message);}
 }
-check('Release metadata matches v2.30.15', () => {
-  assert.equal(pkg.version, '2.30.15');
-  assert.match(read('lib/release.ts'), /RELEASE_VERSION = "2\.30\.15"/);
+check('Release metadata matches v2.30.16', () => {
+  assert.equal(pkg.version, '2.30.16');
+  assert.match(read('lib/release.ts'), /RELEASE_VERSION = "2\.30\.16"/);
 });
 check('Mobile dialog is portalled above the sticky header', () => {
   assert.match(nav,/createPortal\(/);
@@ -97,7 +97,7 @@ check('Hero has intrinsic dimensions and remains high priority', () => {
   assert.match(header, /height=\{Math\.round\(Math\.max\(design\.logo_width, 42\) \* 1\.17\)\}/);
 });
 check('Historical mobile contracts survive new monitoring migration', () => {
-  assert.match(read('STEP-2.30.15.txt'), /SQL-МИГРАЦИИ: НЕТ/);
+  assert.match(read('STEP-2.30.16.txt'), /SQL-МИГРАЦИИ: ДА/);
   assert.equal(fs.readdirSync(path.join(root,'database')).filter(n=>/^078_/.test(n)).length,1);
 });
 check('Mobile regression checks run in deploy, QA and CI', () => {
@@ -108,5 +108,5 @@ check('Mobile regression checks run in deploy, QA and CI', () => {
   assert.match(read('.github/workflows/responsive-qa.yml'),/npm run typecheck/);
 });
 const passes = checks.filter(Boolean).length;
-console.log(`\nMobile Experience v2.30.15: ${passes}/${checks.length} source checks passed. These checks do not measure field Core Web Vitals.`);
+console.log(`\nMobile Experience v2.30.16: ${passes}/${checks.length} source checks passed. These checks do not measure field Core Web Vitals.`);
 if(passes!==checks.length) process.exitCode=1;
