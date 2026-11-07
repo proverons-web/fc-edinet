@@ -1,0 +1,35 @@
+/* FC Edinet v2.30.5: isolated, centered, full-viewport album viewer.
+   Intentionally no .mediaLightbox classes: older cascade must not resize this viewer. */
+.mediaViewer2305{position:fixed;inset:0;z-index:10000;display:grid;grid-template-rows:64px minmax(0,1fr) auto auto;background:#030a15;color:#fff;overflow:hidden;isolation:isolate}
+.mediaViewer2305,.mediaViewer2305 *{box-sizing:border-box}
+.mediaViewer2305Bar{display:flex;align-items:center;justify-content:space-between;min-width:0;gap:20px;padding:10px 24px;border-bottom:1px solid rgba(255,255,255,.1);background:#07172c}
+.mediaViewer2305Heading{display:flex;gap:16px;align-items:center;min-width:0}
+.mediaViewer2305Counter{font-size:14px;color:#ffd328;font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mediaViewer2305Album{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:750;color:#d4e1f2}
+.mediaViewer2305Close{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;padding:0;border:1px solid #526277;border-radius:3px;background:#122944;color:#fff;font-size:29px;line-height:1;cursor:pointer}
+.mediaViewer2305Close:hover,.mediaViewer2305Nav:hover{background:#254d77}
+.mediaViewer2305Stage{position:relative;display:grid;place-items:center;min-width:0;min-height:0;overflow:hidden;padding:16px clamp(48px,6.3vw,110px);touch-action:pan-y pinch-zoom}
+.mediaViewer2305Canvas{display:flex;align-items:center;justify-content:center;width:100%;height:100%;min-width:0;min-height:0;overflow:hidden}
+.mediaViewer2305Canvas>img{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain;object-position:center;box-shadow:0 10px 34px rgba(0,0,0,.25)}
+.mediaViewer2305Nav{position:absolute;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:46px;height:64px;border:1px solid #263c57;border-radius:3px;background:rgba(12,31,54,.8);color:#fff;font-size:42px;line-height:1;cursor:pointer;touch-action:manipulation}
+.mediaViewer2305Nav.isPrevious{left:12px}.mediaViewer2305Nav.isNext{right:12px}
+.mediaViewer2305Footer{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:59px;padding:10px 24px;border-top:1px solid rgba(255,255,255,.08);background:#07172c}
+.mediaViewer2305Details{min-width:0}.mediaViewer2305Caption{font-size:13px;font-weight:800;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:min(65vw,840px)}.mediaViewer2305Details small{display:block;color:#a2b6ce;font-size:11px;margin-top:3px}
+.mediaViewer2305Actions{display:flex;gap:13px;align-items:center;flex-shrink:0}.mediaViewer2305Actions>a{color:#bbd2ef;font-size:11px;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.mediaViewer2305Actions .photoShareMain{white-space:nowrap}
+.mediaViewer2305Filmstrip{display:flex;justify-content:safe center;align-items:center;gap:8px;overflow-x:auto;overflow-y:hidden;max-width:100vw;min-height:94px;padding:10px 20px 16px;background:#07111f;scrollbar-width:thin;scrollbar-color:#4e6580 #07111f}
+.mediaViewer2305Filmstrip>button{flex:0 0 90px;width:90px;height:62px;padding:2px;border:2px solid transparent;background:#182a3d;opacity:.68;cursor:pointer;border-radius:2px;transition:opacity .15s}
+.mediaViewer2305Filmstrip>button.isActive{border-color:#ffd328;opacity:1}
+.mediaViewer2305Filmstrip>button:hover{opacity:1}
+.mediaViewer2305Filmstrip img{display:block;width:100%;height:100%;object-fit:cover}
+.mediaViewer2305 :is(button,a):focus-visible{outline:3px solid #ffd328;outline-offset:3px}
+@media(max-width:700px){
+ .mediaViewer2305{grid-template-rows:54px minmax(0,1fr) auto auto}
+ .mediaViewer2305Bar{padding:6px 10px 6px 14px;gap:8px}.mediaViewer2305Close{flex-basis:38px;width:38px;height:38px}
+ .mediaViewer2305Heading{gap:9px}.mediaViewer2305Counter{font-size:12px}.mediaViewer2305Album{font-size:11px}
+ .mediaViewer2305Stage{padding:8px 4px 8px}.mediaViewer2305Canvas{padding-inline:8px}.mediaViewer2305Nav{width:34px;height:49px;font-size:32px;background:rgba(12,31,54,.68)}.mediaViewer2305Nav.isPrevious{left:2px}.mediaViewer2305Nav.isNext{right:2px}
+ .mediaViewer2305Footer{padding:9px 12px;gap:8px}.mediaViewer2305Caption{max-width:46vw;font-size:12px}.mediaViewer2305Actions{gap:8px}.mediaViewer2305Actions>a{max-width:90px;line-height:1.2;font-size:10px}
+ .mediaViewer2305Filmstrip{min-height:76px;padding:6px 10px 10px;gap:6px;justify-content:flex-start}.mediaViewer2305Filmstrip>button{flex-basis:69px;width:69px;height:51px}
+}
+@media(max-height:540px){.mediaViewer2305{grid-template-rows:46px minmax(0,1fr) 44px 54px}.mediaViewer2305Bar{padding-block:2px}.mediaViewer2305Filmstrip{min-height:54px;padding:4px 10px}.mediaViewer2305Filmstrip>button{height:45px;flex-basis:61px}.mediaViewer2305Footer{min-height:44px;padding-block:4px}.mediaViewer2305Stage{padding-block:4px}}
+@media(prefers-reduced-motion:reduce){.mediaViewer2305 *{transition:none!important;scroll-behavior:auto!important}}

@@ -7,6 +7,7 @@ export default function PageHeroShell({
   className,
   contentClassName = "container",
   contentImageUrl = null,
+  contentImagePosition,
   showBackgroundMedia = false,
   children,
 }: {
@@ -14,6 +15,7 @@ export default function PageHeroShell({
   className: string;
   contentClassName?: string;
   contentImageUrl?: string | null;
+  contentImagePosition?: { x: number; y: number };
   showBackgroundMedia?: boolean;
   children: ReactNode;
 }) {
@@ -48,20 +50,21 @@ export default function PageHeroShell({
   const mobileSrc = selectedMobile || tabletSrc || desktopSrc;
   const hasMedia = Boolean(desktopSrc || tabletSrc || mobileSrc);
 
+  const albumImagePosition = design.background_mode === "content" && contentImageUrl && contentImagePosition ? contentImagePosition : null;
   const style = {
     "--page-hero-height-desktop": `${design.hero_height_desktop}px`,
     "--page-hero-height-tablet": `${design.hero_height_tablet}px`,
     "--page-hero-height-mobile": `${design.hero_height_mobile}px`,
     "--page-hero-content-width": `${design.content_width}px`,
     "--page-hero-overlay-alpha": String(design.overlay_opacity / 100),
-    "--page-hero-desktop-x": `${design.desktop_position_x}%`,
-    "--page-hero-desktop-y": `${design.desktop_position_y}%`,
+    "--page-hero-desktop-x": `${albumImagePosition?.x ?? design.desktop_position_x}%`,
+    "--page-hero-desktop-y": `${albumImagePosition?.y ?? design.desktop_position_y}%`,
     "--page-hero-desktop-zoom": String(design.desktop_zoom_percent / 100),
-    "--page-hero-tablet-x": `${design.tablet_position_x}%`,
-    "--page-hero-tablet-y": `${design.tablet_position_y}%`,
+    "--page-hero-tablet-x": `${albumImagePosition?.x ?? design.tablet_position_x}%`,
+    "--page-hero-tablet-y": `${albumImagePosition?.y ?? design.tablet_position_y}%`,
     "--page-hero-tablet-zoom": String(design.tablet_zoom_percent / 100),
-    "--page-hero-mobile-x": `${design.mobile_position_x}%`,
-    "--page-hero-mobile-y": `${design.mobile_position_y}%`,
+    "--page-hero-mobile-x": `${albumImagePosition?.x ?? design.mobile_position_x}%`,
+    "--page-hero-mobile-y": `${albumImagePosition?.y ?? design.mobile_position_y}%`,
     "--page-hero-mobile-zoom": String(design.mobile_zoom_percent / 100),
   } as CSSProperties;
 

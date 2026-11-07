@@ -1,0 +1,12 @@
+.albumCoverFocus2305{border:1px solid #dce5f0;background:#f6f9fd;padding:20px;margin:20px 0;display:grid;gap:15px}
+.albumCoverFocus2305Title{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}.albumCoverFocus2305Title b{font-size:17px;color:#0a2851}.albumCoverFocus2305Title p{margin:6px 0 0;color:#506987;font-size:12px;line-height:1.6}
+.albumCoverReset2305{padding:9px 12px;background:#fff;color:#0a3669;border:1px solid #cad8e8;white-space:nowrap;font-size:12px;font-weight:750;cursor:pointer}
+.albumCoverFocus2305Preview{position:relative;overflow:hidden;width:100%;height:clamp(160px,24vw,270px);cursor:grab;touch-action:none;background:#09254b;user-select:none}
+.albumCoverFocus2305Preview:active{cursor:grabbing}
+.albumCoverFocus2305Preview>img{display:block;width:100%;height:100%;object-fit:cover;pointer-events:none;user-select:none}
+.albumCoverFocus2305Overlay{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:end;gap:9px;padding:24px;background:linear-gradient(0deg,rgba(0,9,26,.8),transparent 76%);color:#fff;pointer-events:none}
+.albumCoverFocus2305Overlay span{color:#ffd328;font-size:9px;font-weight:900;letter-spacing:.12em}.albumCoverFocus2305Overlay strong{font-weight:900;font-size:clamp(21px,3vw,40px);line-height:1.04;text-transform:uppercase;text-shadow:0 2px 12px #0008}
+.albumCoverFocus2305Empty{padding:32px 20px;background:#e5edf6;color:#45627e;text-align:center;font-size:13px}
+.albumCoverFocus2305Controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}.albumCoverFocus2305Controls label{display:grid;gap:8px;font-size:12px;font-weight:800;color:#133a66}.albumCoverFocus2305Controls label span{display:flex;justify-content:space-between}.albumCoverFocus2305Controls input{width:100%;accent-color:#126ad0}
+.albumCoverFocus2305>small{color:#5a6e84;font-size:11px;line-height:1.6}
+@media(max-width:680px){.albumCoverFocus2305{padding:13px;gap:13px}.albumCoverFocus2305Title{flex-direction:column;gap:10px}.albumCoverFocus2305Controls{grid-template-columns:1fr;gap:15px}.albumCoverFocus2305Overlay{padding:14px}}

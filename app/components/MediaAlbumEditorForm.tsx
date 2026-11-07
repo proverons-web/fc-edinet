@@ -6,13 +6,15 @@ import {
   type MediaFormState,
 } from "@/app/admin/media/actions";
 import type { MediaAlbum } from "@/lib/types";
+import AlbumCoverPositionEditor from "@/app/components/AlbumCoverPositionEditor";
 
 const initialState: MediaFormState = {};
 
 export default function MediaAlbumEditorForm({
-  album, matches,
+  album, matches, coverPreviewUrl,
 }: {
   album: MediaAlbum;
+  coverPreviewUrl: string | null;
   matches: { id: string; label: string }[];
 }) {
   const [title, setTitle] = useState(album.title);
@@ -116,6 +118,8 @@ export default function MediaAlbumEditorForm({
           defaultValue={album.description ?? ""}
         />
       </div>
+
+      <AlbumCoverPositionEditor imageUrl={coverPreviewUrl} title={title} initialX={album.cover_position_x ?? 50} initialY={album.cover_position_y ?? 50} />
 
       {state.error && <div className="formError">{state.error}</div>}
       {state.success && <div className="formSuccess">{state.success}</div>}

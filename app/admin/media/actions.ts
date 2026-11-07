@@ -87,6 +87,8 @@ export async function updateAlbum(
   const eventDate = nullableText(formData.get("event_date"));
   const location = nullableText(formData.get("location"));
   const displayOrder = integer(formData.get("display_order"), 100);
+  const coverPositionX = percent(formData.get("cover_position_x"));
+  const coverPositionY = percent(formData.get("cover_position_y"));
   const isPublished = formData.get("is_published") === "on";
   const matchId = await validateMatchSelection(supabase, formData.get("match_id"));
   if (matchId === "invalid") return { error: "Выбранный матч не найден." };
@@ -104,6 +106,8 @@ export async function updateAlbum(
       event_date: eventDate,
       location,
       display_order: displayOrder,
+      cover_position_x: coverPositionX,
+      cover_position_y: coverPositionY,
       match_id: matchId,
       is_published: isPublished,
     })
@@ -497,6 +501,11 @@ function nullableText(value: FormDataEntryValue | null) {
 function integer(value: FormDataEntryValue | null, fallback: number) {
   const valueNumber = Number(text(value));
   return Number.isInteger(valueNumber) ? valueNumber : fallback;
+}
+
+function percent(value: FormDataEntryValue | null) {
+  const n = Number(value);
+  return value === null || !Number.isFinite(n) ? 50 : Math.min(100, Math.max(0, Math.round(n)));
 }
 
 function slugify(value: string) {

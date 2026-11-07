@@ -104,7 +104,7 @@ export default async function AdminAlbumEditPage({
             </div>
           )}
 
-          <MediaAlbumEditorForm album={album} matches={matches} />
+          <MediaAlbumEditorForm album={album} matches={matches} coverPreviewUrl={photos.find(photo => photo.thumb_url === album.cover_image_url || photo.image_url === album.cover_image_url)?.image_url ?? album.cover_image_url} />
 
           <AlbumPhotoUploader
             albumId={String(album.id)}

@@ -53,9 +53,11 @@ export default async function MediaAlbumPage({ params }: PageProps) {
   if (!album) notFound();
   const { data: photosData } = await supabase.from("media_photos").select("*").eq("album_id", album.id).eq("is_published", true).order("display_order").order("id");
   const photos = (photosData ?? []) as MediaPhoto[];
+  // The album card stores a thumbnail for speed; the hero uses the full-resolution photo.
+  const heroCover = photos.find(photo => photo.thumb_url === album.cover_image_url || photo.image_url === album.cover_image_url)?.image_url ?? album.cover_image_url;
 
   return <main>
-    <PageHeroShell design={design} className="mediaAlbumHero" contentImageUrl={album.cover_image_url} showBackgroundMedia>
+    <PageHeroShell design={design} className="mediaAlbumHero" contentImageUrl={heroCover} contentImagePosition={{ x: album.cover_position_x ?? 50, y: album.cover_position_y ?? 50 }} showBackgroundMedia>
 <>{heroLayerVisible(design.layer_config,"navigation") && <div className="mediaAlbumNavigation" style={heroLayerStyle(design.layer_config,"navigation")}><PublicBackLink fallbackHref="/media" locale={locale} className="publicBackOnDark" /><PublicBreadcrumbs locale={locale} items={[{ label: text.title, href: "/media" }, { label: album.title }]} className="breadcrumbsOnDark" />{design.show_eyebrow && <p className="eyebrow">{formatDate(album.event_date, locale)}{album.location ? ` • ${album.location}` : ""}</p>}</div>}{heroLayerVisible(design.layer_config,"title") && <h1 style={heroLayerStyle(design.layer_config,"title")}>{album.title}</h1>}{heroLayerVisible(design.layer_config,"description") && design.show_description && album.description && <p style={heroLayerStyle(design.layer_config,"description")}>{album.description}</p>}{heroLayerVisible(design.layer_config,"count") && <span className="mediaAlbumCount" style={heroLayerStyle(design.layer_config,"count")}>{photos.length} {photoWord(photos.length, locale)}</span>}</>
     </PageHeroShell>
     <section className="section mediaGallerySection"><div className="container">{photos.length ? <MediaGallery photos={photos} albumTitle={album.title} text={{ openPhoto:text.openPhoto, open:text.open, close:text.close, previousPhoto:text.previousPhoto, nextPhoto:text.nextPhoto, photoBy:text.photoBy, separatePage:text.separatePage, share:text.share, copied:text.copied, copyLink:text.copyLink }}/> : <div className="adminEmpty">{text.albumEmpty}</div>}</div></section>
