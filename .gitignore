@@ -43,3 +43,7 @@ desktop.ini
 
 # QA generated screenshots (local only)
 qa-artifacts/
+
+# Generated read-only post-deploy health reports
+production-health-report.json
+production-health-*.json

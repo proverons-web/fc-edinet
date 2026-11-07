@@ -2,31 +2,33 @@ import { NextResponse } from "next/server";
 import { RELEASE_VERSION } from "@/lib/release";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
+/**
+ * Public *configuration/liveness* signal, not a live Supabase readiness check.
+ * Detailed database status and internal configuration belong in /admin/diagnostics.
+ * Do not accidentally publish API-key availability, model names or server internals.
+ */
 export async function GET() {
-  const supabaseConfigured = Boolean(
+  const configured = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   );
-  const translationConfigured = Boolean(process.env.OPENAI_API_KEY);
 
   return NextResponse.json(
     {
-      status: supabaseConfigured ? "ok" : "configuration_error",
+      status: configured ? "ok" : "configuration_error",
       app: "fc-edinet",
       version: RELEASE_VERSION,
-      environment: process.env.VERCEL_ENV || process.env.NODE_ENV,
-      supabaseConfigured,
-      translationConfigured,
-      translationModel:
-        process.env.OPENAI_TRANSLATION_MODEL || "gpt-5.6-luna",
-      authProxy: "bypassed",
+      check: "configuration_only",
+      database: "not_checked",
       time: new Date().toISOString(),
     },
     {
-      status: supabaseConfigured ? 200 : 503,
+      status: configured ? 200 : 503,
       headers: {
-        "Cache-Control": "no-store",
+        "Cache-Control": "no-store, max-age=0",
+        "CDN-Cache-Control": "no-store",
       },
     }
   );

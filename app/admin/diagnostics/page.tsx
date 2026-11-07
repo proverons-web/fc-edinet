@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/editorial";
 import { getSiteUrl } from "@/lib/site-url";
 import { isSupabaseAdminConfigured } from "@/lib/supabase/admin";
 import { RELEASE_API_VERSION, RELEASE_VERSION } from "@/lib/release";
+import packageJson from "@/package.json";
 
 export const metadata = { title: "Диагностика системы — Админ" };
 export const dynamic = "force-dynamic";
@@ -41,6 +42,7 @@ function statusFromError(error: { message?: string } | null | undefined): CheckS
 export default async function AdminDiagnosticsPage() {
   const { supabase, profile } = await requireAdmin();
 
+  const diagnosticsStartedAt = Date.now();
   const [
     profileCount,
     matchCount,
@@ -61,7 +63,26 @@ export default async function AdminDiagnosticsPage() {
     supabase.from("site_page_design_drafts").select("page_key,updated_at,autosaved_at").order("updated_at", { ascending: false }).limit(1).maybeSingle(),
   ]);
 
+  // These queries already power the protected diagnostics page. Their combined
+  // latency is a real round-trip measurement (not a synthetic Core Web Vital).
+  const databaseDurationMs = Date.now() - diagnosticsStartedAt;
+  const failedDatabaseQueries = [
+    profileCount, matchCount, newsCount, designCount,
+    latestAudit, latestPagePublish, latestGlobalPublish, latestPageDraft,
+  ].filter((result) => Boolean(result.error)).length;
+  const databaseCheckState: CheckState = failedDatabaseQueries
+    ? "error"
+    : databaseDurationMs > 2000 ? "warn" : "ok";
+
   const dbChecks: DiagnosticCheck[] = [
+    {
+      label: "Supabase / время ответа",
+      value: `${databaseDurationMs} мс · ${8 - failedDatabaseQueries}/8`,
+      state: databaseCheckState,
+      detail: failedDatabaseQueries
+        ? `${failedDatabaseQueries} из 8 запросов диагностики завершились ошибкой.`
+        : "Время выполнения 8 параллельных запросов. Не является LCP, INP или измерением скорости страницы.",
+    },
     {
       label: "Supabase / profiles",
       value: profileCount.error ? "Ошибка" : `${profileCount.count ?? 0} пользователей`,
@@ -219,7 +240,7 @@ export default async function AdminDiagnosticsPage() {
               <DiagnosticRow label="Public URL" value={siteUrl} state="ok" />
               <DiagnosticRow label="Текущий администратор" value={profile.email || profile.display_name || profile.id} state="ok" />
               <DiagnosticRow label="Язык профиля" value={(profile.preferred_language || "ru").toUpperCase()} state="info" />
-              <DiagnosticRow label="Next.js" value="16.3.2" state="info" />
+              <DiagnosticRow label="Next.js" value={packageJson.dependencies.next} state="info" />
               <DiagnosticRow label="Node.js" value={process.version} state="info" />
               <DiagnosticRow label="API Version" value={`v${APP_VERSION}`} state="ok" detail="Должна совпадать с /api/version и версией FULL-релиза." />
             </DiagnosticPanel>
@@ -230,7 +251,7 @@ export default async function AdminDiagnosticsPage() {
               <DiagnosticRow label="Content page schema" value={`v${CONTENT_SCHEMA_VERSION}`} state="info" />
               <DiagnosticRow label="Pro page schema" value={`v${PRO_PAGE_SCHEMA_VERSION}`} state="info" />
               <DiagnosticRow label="Rich content schema" value={`v${RICH_CONTENT_SCHEMA_VERSION}`} state="info" />
-              <DiagnosticRow label="DB migration marker" value="061" state="ok" detail="Публичные RLS-политики меню и custom pages разделены для anon/authenticated и проверены." />
+              <DiagnosticRow label="Последняя миграция в проекте" value="077" state="info" detail="Файл 077_club_history_timeline.sql. Этот номер не доказывает, что миграция выполнена в конкретной базе." />
             </DiagnosticPanel>
           </div>
 
@@ -258,7 +279,8 @@ export default async function AdminDiagnosticsPage() {
             </DiagnosticPanel>
           </div>
 
-          <DiagnosticPanel title="Публичные маршруты" eyebrow="ROUTES" wide>
+          <DiagnosticPanel title="Маршруты в исходниках" eyebrow="ROUTES · НЕ HTTP-ПРОВЕРКА" wide>
+            <p>Это список объявленных маршрутов, а не результат проверки HTTP. После публикации запусти CHECK_PRODUCTION_FC_EDINET.bat.</p>
             <div className="diagnosticsRouteGrid">
               {publicRoutes.map((route) => (
                 <div className={`diagnosticsRoute${route.ok ? " ok" : " error"}`} key={route.label}>

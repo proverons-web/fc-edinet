@@ -18,10 +18,10 @@ function check(label, fn) {
   try { fn(); checks.push(true); console.log("PASS", label); }
   catch (err) { checks.push(false); console.error("FAIL", label, err.message); }
 }
-check("v2.30.12 release and canonical version agree", () => {
-  assert.equal(pkg.version, "2.30.12");
-  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.12"/);
-  assert.deepEqual(fs.readdirSync(root).filter(n => /^STEP-.*\.txt$/.test(n)), ["STEP-2.30.12.txt"]);
+check("v2.30.13 release and canonical version agree", () => {
+  assert.equal(pkg.version, "2.30.13");
+  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.13"/);
+  assert.deepEqual(fs.readdirSync(root).filter(n => /^STEP-.*\.txt$/.test(n)), ["STEP-2.30.13.txt"]);
 });
 check("Public menu comes from cookie-free public client", () => {
   assert.match(menu, /createPublicClient\(\)/);
@@ -124,9 +124,9 @@ check("Homepage preserves safe hero and section fallbacks", () => {
   assert.match(home, /const heroCanvas = repairHomepageCanvas/);
 });
 check("Stability release needs no database schema changes", () => {
-  assert.match(read("STEP-2.30.12.txt"), /SQL-МИГРАЦИИ: НЕТ/);
+  assert.match(read("STEP-2.30.13.txt"), /SQL-МИГРАЦИИ: НЕТ/);
   assert.equal(fs.readdirSync(path.join(root,"database")).filter(n => /^078_/.test(n)).length, 0);
 });
 const passed = checks.filter(Boolean).length;
-console.log(`\nPerformance & Stability v2.30.12: ${passed}/${checks.length} source contracts passed (not a speed benchmark).`);
+console.log(`\nPerformance & Stability v2.30.13: ${passed}/${checks.length} source contracts passed (not a speed benchmark).`);
 if (passed !== checks.length) process.exitCode = 1;
