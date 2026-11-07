@@ -1,5 +1,6 @@
 import Link from "next/link";
 import YouTubePlayer from "@/app/components/YouTubePlayer";
+import { videoKindLabel } from "@/lib/media-video";
 import MediaHubControls from "@/app/components/MediaHubControls";
 import type { MediaAlbum, MediaVideo, Partner, PartnerLevel, SitePageDesignSnapshot } from "@/lib/types";
 import type { CSSProperties } from "react";
@@ -108,8 +109,9 @@ function MediaVideos({ section, videos, locale }: { section: ProPageLayoutConfig
           <span className="proMediaVideoPlatform">FC EDINEȚ TV</span>
         </div>
         <div className="proMediaVideoCopy">
-          <span>{formatDate(video.published_at, locale)}</span>
+          <span>{videoKindLabel(video.video_kind, locale)} · {formatDate(video.published_at, locale)}</span>
           <h3>{video.title}</h3>
+          {video.match_id && <Link className="proMediaVideoMatchLink" href={`/matches/${video.match_id}`}>{locale === "ro" ? "Raportul meciului →" : "Протокол матча →"}</Link>}
           {video.description && section.variant !== "grid" && <p>{video.description}</p>}
           <b className="proMediaVideoWatch">{watchLabel}</b>
         </div>

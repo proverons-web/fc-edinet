@@ -7,6 +7,9 @@ import PublicBackLink from "@/app/components/PublicBackLink";
 import LineupSubstitutionBadge from "./LineupSubstitutionBadge";
 import MobileTimelineFilter from "./MobileTimelineFilter";
 import MatchShareButton from "../MatchShareButton";
+import YouTubePlayer from "@/app/components/YouTubePlayer";
+import { videoKindLabel } from "@/lib/media-video";
+import type { MediaVideo } from "@/lib/types";
 import CalendarIcon from "../CalendarIcon";
 import "../fan-actions.css";
 import "./match-report-v2298.css";
@@ -271,6 +274,12 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
     .eq("match_id", id).eq("is_published", true)
     .order("display_order").order("event_date", { ascending: false }).limit(8);
   const matchAlbums = matchAlbumsData ?? [];
+  // Before migration 075 an unavailable match_id column yields no video cards.
+  const { data: matchVideosData } = await supabase.from("media_videos")
+    .select("id,title,youtube_id,video_kind,description,published_at,match_id")
+    .eq("match_id", id).eq("is_published", true)
+    .order("display_order").order("published_at", { ascending: false }).limit(6);
+  const matchVideos = (matchVideosData ?? []) as MediaVideo[];
 
   const { data: reportData } = await supabase
     .from("match_reports")
@@ -391,6 +400,7 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
               <a href="#timeline">{t.timeline}</a>
               <a href="#lineups">{t.lineups}</a>
               {matchAlbums.length ? <a href="#match-gallery">{locale === "ro" ? "Fotografii" : "Фотографии"}</a> : null}
+              {matchVideos.length ? <a href="#match-videos">{locale === "ro" ? "Video" : "Видео"}</a> : null}
               {hasInfo ? <a href="#info">{locale === "ro" ? "Informații" : "Информация"}</a> : null}
             </div>
           </nav>
@@ -478,6 +488,20 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
             )}
           </div>
         </section>
+        {matchVideos.length > 0 ? <section id="match-videos" className="section matchVideoSection">
+          <div className="container">
+            <div className="publicMatchSectionHead premiumSectionHead"><p className="eyebrow blue">FC EDINEȚ TV</p>
+              <h2>{locale === "ro" ? "Video de la meci" : "Видео матча"}</h2></div>
+            <div className="matchVideoGrid">
+              {matchVideos.map(video => <article className="matchVideoCard" key={String(video.id)}>
+                <YouTubePlayer videoId={video.youtube_id} title={video.title}/>
+                <div className="matchVideoCopy"><span className="matchVideoType">{videoKindLabel(video.video_kind, locale)}</span>
+                  <h3>{video.title}</h3>{video.description && <p>{video.description}</p>}
+                </div>
+              </article>)}
+            </div>
+          </div>
+        </section> : null}
         {matchAlbums.length > 0 ? <section id="match-gallery" className="section matchMediaSection">
           <div className="container">
             <div className="publicMatchSectionHead premiumSectionHead"><p className="eyebrow blue">FC EDINEȚ MEDIA</p><h2>{locale === "ro" ? "Fotografii de la meci" : "Фотографии матча"}</h2></div>

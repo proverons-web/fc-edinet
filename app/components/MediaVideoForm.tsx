@@ -8,7 +8,7 @@ import {
 
 const initialState: MediaFormState = {};
 
-export default function MediaVideoForm() {
+export default function MediaVideoForm({ matches = [] }: { matches?: { id: string; label: string }[] }) {
   const [state, action, pending] = useActionState(
     addVideo,
     initialState
@@ -43,6 +43,25 @@ export default function MediaVideoForm() {
           name="description"
           rows={3}
         />
+      </div>
+
+      <div className="twoFields">
+        <div className="fieldGroup">
+          <label htmlFor="media_video_kind">Тип видео</label>
+          <select id="media_video_kind" name="video_kind" defaultValue="other">
+            <option value="highlights">Обзор матча</option>
+            <option value="full_match">Полная запись</option>
+            <option value="interview">Интервью</option>
+            <option value="other">Другое видео</option>
+          </select>
+        </div>
+        <div className="fieldGroup">
+          <label htmlFor="media_video_match">Матч (необязательно)</label>
+          <select id="media_video_match" name="match_id" defaultValue="">
+            <option value="">Без привязки</option>
+            {matches.map((match) => <option key={match.id} value={match.id}>{match.label}</option>)}
+          </select>
+        </div>
       </div>
 
       <div className="fieldGroup">

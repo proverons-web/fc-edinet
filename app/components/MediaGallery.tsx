@@ -20,6 +20,8 @@ type MediaGalleryText = {
 
 export default function MediaGallery({ photos, albumTitle, text }: { photos: MediaPhoto[]; albumTitle: string; text: MediaGalleryText; }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const lastOpener = useRef<number | null>(null);
+  const thumbsRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const lightboxRef = useRef<HTMLDivElement>(null);
   const openerRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -37,6 +39,8 @@ export default function MediaGallery({ photos, albumTitle, text }: { photos: Med
       if (event.key === "Escape") setActiveIndex(null);
       if (event.key === "ArrowRight") setActiveIndex((current) => current === null ? null : (current + 1) % photos.length);
       if (event.key === "ArrowLeft") setActiveIndex((current) => current === null ? null : (current - 1 + photos.length) % photos.length);
+      if (event.key === "Home") { event.preventDefault(); setActiveIndex(0); }
+      if (event.key === "End") { event.preventDefault(); setActiveIndex(photos.length - 1); }
       if (event.key === "Tab") {
         const dialog = lightboxRef.current;
         if (!dialog) return;
@@ -51,9 +55,19 @@ export default function MediaGallery({ photos, albumTitle, text }: { photos: Med
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", keydown);
-      openerRefs.current[activeIndex]?.focus();
+      // Focus is restored only after the dialog closes, not on every photo change.
     };
-  }, [activeIndex, photos.length]);
+  }, [activeIndex !== null, photos.length]);
+
+  useEffect(() => {
+    if (activeIndex === null && lastOpener.current !== null) {
+      openerRefs.current[lastOpener.current]?.focus();
+      lastOpener.current = null;
+    }
+    if (activeIndex !== null) {
+      thumbsRef.current?.querySelector(`[data-photo-index="${activeIndex}"]`)?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    }
+  }, [activeIndex]);
 
   const previous = () => setActiveIndex((current) => current === null ? null : (current - 1 + photos.length) % photos.length);
   const next = () => setActiveIndex((current) => current === null ? null : (current + 1) % photos.length);
@@ -75,7 +89,7 @@ export default function MediaGallery({ photos, albumTitle, text }: { photos: Med
 
   return <>
     <div className="mediaMasonry">
-      {photos.map((photo, index) => <button ref={(node) => { openerRefs.current[index] = node; }} type="button" className="mediaPhotoTile" key={photo.id} onClick={() => setActiveIndex(index)} aria-label={`${text.openPhoto} ${index + 1}`}>
+      {photos.map((photo, index) => <button ref={(node) => { openerRefs.current[index] = node; }} type="button" className="mediaPhotoTile" key={photo.id} onClick={() => { lastOpener.current = index; setActiveIndex(index); }} aria-label={`${text.openPhoto} ${index + 1}`}>
         <img src={photo.thumb_url} alt={photo.caption || `${albumTitle} — фото ${index + 1}`} loading="lazy" decoding="async" />
         <span className="mediaPhotoHover"><b>{text.open}</b><small>{index + 1} / {photos.length}</small></span>
       </button>)}
@@ -84,7 +98,7 @@ export default function MediaGallery({ photos, albumTitle, text }: { photos: Med
     {active && activeIndex !== null && <div ref={lightboxRef} className="mediaLightbox" role="dialog" aria-modal="true" aria-label={active.caption || albumTitle} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       <button ref={closeRef} type="button" className="mediaLightboxClose" onClick={() => setActiveIndex(null)} aria-label={text.close}>✕</button>
       {photos.length > 1 && <><button type="button" className="mediaLightboxArrow previous" onClick={previous} aria-label={text.previousPhoto}>‹</button><button type="button" className="mediaLightboxArrow next" onClick={next} aria-label={text.nextPhoto}>›</button></>}
-      <div className="mediaLightboxContent"><div className="mediaLightboxImage"><img src={active.image_url} alt={active.caption || albumTitle} /></div>
+      <div className="mediaLightboxContent"><div className="mediaLightboxStage"><div className="mediaLightboxImage"><img key={active.id} src={active.image_url} alt={active.caption || albumTitle} /></div>{photos.length > 1 && <div className="mediaLightboxThumbs" ref={thumbsRef} aria-label="Навигация по фотографиям">{photos.map((photo, index) => <button key={photo.id} data-photo-index={index} type="button" className={index === activeIndex ? "isActive" : ""} aria-current={index === activeIndex ? "true" : undefined} aria-label={`${text.openPhoto} ${index + 1}`} onClick={() => setActiveIndex(index)}><img src={photo.thumb_url} alt="" loading="lazy" /></button>)}</div>}</div>
       <aside className="mediaLightboxInfo"><div><span className="mediaLightboxCounter" aria-live="polite">{activeIndex + 1} / {photos.length}</span><h3>{active.caption || albumTitle}</h3>{active.photographer && <p>{text.photoBy}: {active.photographer}</p>}</div>
       <div className="mediaLightboxActions"><PhotoShareButton photoId={active.id} title={active.caption || albumTitle} text={shareText} /><Link href={`/media/photo/${active.id}`}>{text.separatePage}</Link></div></aside></div>
     </div>}

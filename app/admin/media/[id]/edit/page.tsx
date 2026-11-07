@@ -2,6 +2,7 @@ import Link from "next/link";
 import ConfirmSubmitButton from "@/app/components/ConfirmSubmitButton";
 import { notFound } from "next/navigation";
 import AlbumPhotoUploader from "@/app/components/AlbumPhotoUploader";
+import AlbumPhotoOrder from "@/app/components/AlbumPhotoOrder";
 import MediaAlbumEditorForm from "@/app/components/MediaAlbumEditorForm";
 import {
   deleteAlbum,
@@ -119,7 +120,7 @@ export default async function AdminAlbumEditPage({
             </div>
 
             {photos.length > 0 ? (
-              <div className="mediaPhotoAdminGrid">
+              <><AlbumPhotoOrder albumId={String(album.id)} photos={photos.map(photo => ({ id: String(photo.id), thumb_url: photo.thumb_url, caption: photo.caption }))} /><div className="mediaPhotoAdminGrid">
                 {photos.map((photo) => (
                   <article className="mediaPhotoAdminCard" key={photo.id}>
                     <div className="mediaPhotoAdminImage">
@@ -209,7 +210,7 @@ export default async function AdminAlbumEditPage({
                     </div>
                   </article>
                 ))}
-              </div>
+              </div></>
             ) : (
               <div className="adminEmpty">
                 В альбоме пока нет фотографий.

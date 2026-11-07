@@ -355,6 +355,8 @@ export type MediaVideo = {
   description: string | null;
   youtube_url: string;
   youtube_id: string;
+  match_id?: string | number | null;
+  video_kind?: import("@/lib/media-video").MediaVideoKind;
   published_at: string | null;
   is_published: boolean;
   show_on_homepage: boolean;

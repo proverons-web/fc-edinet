@@ -11,6 +11,7 @@ import { requireEditor } from "@/lib/editorial";
 import AdminListSearch from "@/app/components/AdminListSearch";
 import { adminListHref, adminTextMatches, parseAdminQuery } from "@/lib/admin-list-search";
 import { mediaMatchesPublication } from "@/lib/admin-attention";
+import { videoKindLabel } from "@/lib/media-video";
 import type {
   MediaAlbum,
   MediaVideo,
@@ -50,7 +51,7 @@ export default async function AdminMediaPage({ searchParams }: PageProps) {
   const albums = rawAlbums.filter((album) => mediaMatchesPublication(status, album.is_published) &&
     adminTextMatches(search, album.title, album.location, album.description, album.event_date));
   const videos = rawVideos.filter((video) => mediaMatchesPublication(status, video.is_published) &&
-    adminTextMatches(search, video.title, video.description, video.youtube_id));
+    adminTextMatches(search, video.title, video.description, video.youtube_id, videoKindLabel(video.video_kind)));
 
   return (
     <main className="adminPage">
@@ -94,7 +95,7 @@ export default async function AdminMediaPage({ searchParams }: PageProps) {
 
           <div className="mediaAdminTwoColumns">
             <MediaAlbumCreateForm matches={matches} />
-            <MediaVideoForm />
+            <MediaVideoForm matches={matches} />
           </div>
 
           <section className="mediaAdminSection">
@@ -171,8 +172,11 @@ export default async function AdminMediaPage({ searchParams }: PageProps) {
                       <span>
                         {video.is_published ? "На сайте" : "Скрыто"}
                         {video.show_on_homepage ? " · На главной" : ""}
+                        {` · ${videoKindLabel(video.video_kind)}`}
+                        {video.match_id ? ` · Матч #${video.match_id}` : ""}
                       </span>
                       <MediaHomepageToggle videoId={video.id} checked={Boolean(video.show_on_homepage)} />
+                      <Link href={`/admin/media/videos/${video.id}/edit`} className="rowAction muted">Редактировать →</Link>
                     </div>
 
                     {profile.role === "admin" && (

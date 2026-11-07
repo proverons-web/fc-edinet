@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireEditor } from "@/lib/editorial";
+import { extractYouTubeId, isVideoKind } from "@/lib/media-video";
 
 export type MediaFormState = {
   error?: string;
@@ -216,6 +217,30 @@ export async function updatePhoto(formData: FormData) {
   revalidatePath(`/media/photo/${photoId}`);
 }
 
+/** Persist an explicit, fully validated ordering for one album. */
+export async function saveAlbumPhotoOrder(albumId: string, orderedIds: string[]): Promise<{ ok: true } | { ok: false; error: string }> {
+  const { supabase } = await requireEditor();
+  if (!albumId || !Array.isArray(orderedIds) || orderedIds.length > 500 || orderedIds.some(id => typeof id !== "string" || !id)) {
+    return { ok: false, error: "Некорректный список фотографий." };
+  }
+  const { data: album, error: albumError } = await supabase.from("media_albums").select("slug").eq("id", albumId).maybeSingle();
+  if (albumError || !album) return { ok: false, error: "Альбом не найден." };
+  const { data: existing, error: readError } = await supabase.from("media_photos").select("id").eq("album_id", albumId);
+  if (readError || !existing) return { ok: false, error: "Не удалось прочитать фотографии." };
+  const expected = new Set(existing.map(photo => String(photo.id)));
+  if (expected.size !== orderedIds.length || new Set(orderedIds).size !== orderedIds.length || orderedIds.some(id => !expected.has(id))) {
+    return { ok: false, error: "Список фотографий изменился. Обнови страницу и повтори попытку." };
+  }
+  for (let index = 0; index < orderedIds.length; index++) {
+    const { error } = await supabase.from("media_photos").update({ display_order: index + 1 }).eq("id", orderedIds[index]).eq("album_id", albumId);
+    if (error) return { ok: false, error: "Ошибка сохранения. Обнови страницу перед повторной попыткой." };
+  }
+  revalidatePath(`/admin/media/${albumId}/edit`);
+  revalidatePath(`/media/${album.slug}`);
+  revalidatePath("/media");
+  return { ok: true };
+}
+
 export async function setAlbumCover(formData: FormData) {
   const { supabase } = await requireEditor();
 
@@ -332,52 +357,84 @@ export async function addVideo(
   formData: FormData
 ): Promise<MediaFormState> {
   const { supabase } = await requireEditor();
+  const title = text(formData.get("title"));
+  const youtubeUrl = text(formData.get("youtube_url"));
+  const youtubeId = extractYouTubeId(youtubeUrl);
+  const videoKind = text(formData.get("video_kind"));
+  const matchId = await validateMatchSelection(supabase, formData.get("match_id"));
+  const publishedAt = nullableText(formData.get("published_at"));
+  const description = nullableText(formData.get("description"));
+  const isPublished = formData.get("is_published") === "on";
+  const showOnHomepage = isPublished && formData.get("show_on_homepage") === "on";
+  if (!title || !youtubeId) return { error: "Укажи название и корректную YouTube-ссылку." };
+  if (!isVideoKind(videoKind)) return { error: "Выбери корректный тип видео." };
+  if (matchId === "invalid") return { error: "Выбранный матч не найден." };
+
+  const { data: insertedVideo, error } = await supabase.from("media_videos").insert({
+    title, youtube_url: youtubeUrl, youtube_id: youtubeId,
+    description, published_at: publishedAt, video_kind: videoKind, match_id: matchId,
+    is_published: isPublished, show_on_homepage: false,
+  }).select("id").single();
+  if (error || !insertedVideo) return { error: `Не удалось добавить видео: ${error?.message ?? "unknown error"}` };
+
+  if (showOnHomepage) {
+    const { error: featureError } = await setFeaturedVideo(supabase, String(insertedVideo.id));
+    if (featureError) return { error: `Видео добавлено, но не удалось показать его на главной: ${featureError}` };
+  }
+  revalidatePath("/"); revalidatePath("/media"); revalidatePath("/admin/media");
+  if (matchId) revalidatePath(`/matches/${matchId}`);
+  return { success: "Видео добавлено." };
+}
+
+export async function updateVideo(
+  _previousState: MediaFormState,
+  formData: FormData
+): Promise<MediaFormState> {
+  const { supabase } = await requireEditor();
+  const id = text(formData.get("video_id"));
+  if (!/^\d+$/.test(id)) return { error: "Неверный идентификатор видео." };
+  const { data: original, error: originalError } = await supabase.from("media_videos")
+    .select("id,match_id").eq("id", id).maybeSingle();
+  if (originalError || !original) return { error: "Видео не найдено или недоступно." };
 
   const title = text(formData.get("title"));
   const youtubeUrl = text(formData.get("youtube_url"));
-  const description = nullableText(formData.get("description"));
+  const youtubeId = extractYouTubeId(youtubeUrl);
+  const videoKind = text(formData.get("video_kind"));
+  const matchId = await validateMatchSelection(supabase, formData.get("match_id"));
   const publishedAt = nullableText(formData.get("published_at"));
+  const description = nullableText(formData.get("description"));
   const isPublished = formData.get("is_published") === "on";
   const showOnHomepage = isPublished && formData.get("show_on_homepage") === "on";
-  const youtubeId = extractYouTubeId(youtubeUrl);
+  if (!title || !youtubeId) return { error: "Укажи название и корректную YouTube-ссылку." };
+  if (!isVideoKind(videoKind)) return { error: "Выбери корректный тип видео." };
+  if (matchId === "invalid") return { error: "Выбранный матч не найден." };
 
-  if (!title || !youtubeId) {
-    return { error: "Укажи название и корректную YouTube-ссылку." };
-  }
-
-  const { data: insertedVideo, error } = await supabase.from("media_videos").insert({
-    title,
-    youtube_url: youtubeUrl,
-    youtube_id: youtubeId,
-    description,
-    published_at: publishedAt,
-    is_published: isPublished,
-    show_on_homepage: false,
-  }).select("id").single();
-
-  if (error || !insertedVideo) {
-    return { error: `Не удалось добавить видео: ${error?.message ?? "unknown error"}` };
-  }
+  const { error } = await supabase.from("media_videos").update({
+    title, youtube_url: youtubeUrl, youtube_id: youtubeId, description,
+    published_at: publishedAt, video_kind: videoKind, match_id: matchId,
+    is_published: isPublished, show_on_homepage: false,
+  }).eq("id", id);
+  if (error) return { error: `Не удалось сохранить видео: ${error.message}` };
 
   if (showOnHomepage) {
-    const { error: clearError } = await supabase
-      .from("media_videos")
-      .update({ show_on_homepage: false })
-      .eq("show_on_homepage", true);
-    if (clearError) return { error: `Видео добавлено, но не удалось обновить главное видео: ${clearError.message}` };
-
-    const { error: featureError } = await supabase
-      .from("media_videos")
-      .update({ show_on_homepage: true })
-      .eq("id", insertedVideo.id);
-    if (featureError) return { error: `Видео добавлено, но не удалось показать его на главной: ${featureError.message}` };
+    const { error: featureError } = await setFeaturedVideo(supabase, id);
+    if (featureError) return { error: `Видео сохранено, но не удалось закрепить его на главной: ${featureError}` };
   }
+  revalidatePath("/"); revalidatePath("/media"); revalidatePath("/admin/media");
+  revalidatePath(`/admin/media/videos/${id}/edit`);
+  if (matchId) revalidatePath(`/matches/${matchId}`);
+  if (original.match_id) revalidatePath(`/matches/${original.match_id}`);
+  return { success: "Изменения сохранены." };
+}
 
-  revalidatePath("/");
-  revalidatePath("/media");
-  revalidatePath("/admin/media");
-
-  return { success: "Видео добавлено." };
+async function setFeaturedVideo(supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"], id: string) {
+  const { error: clearError } = await supabase.from("media_videos")
+    .update({ show_on_homepage: false }).eq("show_on_homepage", true);
+  if (clearError) return { error: clearError.message };
+  const { error } = await supabase.from("media_videos")
+    .update({ show_on_homepage: true }).eq("id", id).eq("is_published", true);
+  return { error: error?.message ?? null };
 }
 
 export async function setVideoHomepage(formData: FormData) {
@@ -426,35 +483,6 @@ export async function deleteVideo(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/media");
   revalidatePath("/admin/media");
-}
-
-function extractYouTubeId(value: string) {
-  try {
-    const url = new URL(value);
-
-    if (url.hostname === "youtu.be") {
-      return url.pathname.split("/").filter(Boolean)[0] || null;
-    }
-
-    if (
-      url.hostname.endsWith("youtube.com") ||
-      url.hostname.endsWith("youtube-nocookie.com")
-    ) {
-      if (url.pathname.startsWith("/shorts/")) {
-        return url.pathname.split("/")[2] || null;
-      }
-
-      if (url.pathname.startsWith("/embed/")) {
-        return url.pathname.split("/")[2] || null;
-      }
-
-      return url.searchParams.get("v");
-    }
-  } catch {
-    return null;
-  }
-
-  return null;
 }
 
 function text(value: FormDataEntryValue | null) {
