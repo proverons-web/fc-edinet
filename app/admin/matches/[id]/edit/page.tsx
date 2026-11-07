@@ -37,7 +37,7 @@ export default async function EditMatchPage({
       .from("matches")
       .select(`
         id,competition_id,home_team_id,away_team_id,kickoff,stadium,round,status,
-        home_score,away_score,notes,original_kickoff,schedule_reason_ru,schedule_reason_ro,created_at,updated_at,
+        home_score,away_score,extra_time_played,home_penalties,away_penalties,notes,original_kickoff,schedule_reason_ru,schedule_reason_ro,created_at,updated_at,
         home:teams!matches_home_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
         away:teams!matches_away_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
         competition:competitions!matches_competition_id_fkey(id,name,slug,season,is_active)

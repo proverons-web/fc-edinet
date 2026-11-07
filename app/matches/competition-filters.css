@@ -14,3 +14,7 @@
 .publicMatchMeta .matchPostponedChip{display:inline-flex;align-items:center;min-height:23px;padding:4px 9px;border:1px solid #d7a42a;background:#fff4cf;color:#704b00;font-size:10px!important;line-height:1;font-weight:900;letter-spacing:.05em;text-transform:uppercase}
 .publicMatchMeta .matchScheduleOriginalDate{display:block;color:#697d94;font-size:11px;line-height:1.35}
 @media(max-width:700px){.publicMatchCompetitionLine{justify-content:center}.publicMatchMeta .matchPostponedChip{font-size:9px!important}}
+
+/* v2.30.18: cup shootout is not a football goal */
+.cupResultDetail { display: block; color: #bc8c00; font-size: .78rem; font-weight: 800; line-height: 1.35; margin-top: 4px; }
+.publicScore .cupResultDetail { max-width: 165px; text-align: center; white-space: normal; }

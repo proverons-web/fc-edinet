@@ -9,6 +9,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 import { getLocale } from "@/lib/locale";
 import { publicSectionMetadata } from "@/lib/seo";
 import {competitionName} from "@/lib/competition";
+import { matchWinner, cupResultDetail } from "@/lib/cup-results";
 import { dateLocale, localized, publicText, type Locale } from "@/lib/i18n";
 import { newsCoverStyle } from "@/lib/news-cover";
 import { defaultHomepageCanvas, normalizeHomepageCanvas } from "@/lib/homepage-canvas";
@@ -191,9 +192,10 @@ export default async function Home() {
     acc.played += 1;
     acc.goalsFor += gf;
     acc.goalsAgainst += ga;
-    if (gf > ga) acc.wins += 1;
-    else if (gf === ga) acc.draws += 1;
-    else acc.losses += 1;
+    const winner = matchWinner(match);
+    if (winner === "draw") acc.draws += 1;
+    else if (winner === (clubIsHome ? "home" : "away")) acc.wins += 1;
+    else if (winner) acc.losses += 1;
     return acc;
   }, { played: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0 });
   const clubStandingIndex = standings.findIndex((row) => Boolean(row.team?.is_club));
@@ -377,10 +379,9 @@ export default async function Home() {
             >
               {recentMatches.map((match) => {
                 const clubIsHome = Boolean(match.home?.is_club);
-                const clubGoals = clubIsHome ? match.home_score : match.away_score;
-                const rivalGoals = clubIsHome ? match.away_score : match.home_score;
-                const clubWin = Number(clubGoals ?? -1) > Number(rivalGoals ?? -1);
-                const draw = Number(clubGoals ?? -1) === Number(rivalGoals ?? -1);
+                const decision = matchWinner(match);
+                const clubWin = decision === (clubIsHome ? "home" : "away");
+                const draw = decision === "draw";
                 return (
                   <Link key={match.id} href={`/matches/${match.id}`} className={`fcRefRecentMatchCard${clubWin ? " is-win" : draw ? " is-draw" : " is-loss"}`}>
                     <div className="fcRefRecentMatchMeta">
@@ -392,6 +393,7 @@ export default async function Home() {
                       <div className="fcRefRecentMatchScore">
                         <em>{formatMatchShortDate(match.kickoff, locale)}</em>
                         <strong>{match.home_score}:{match.away_score}</strong>
+                        {cupResultDetail(match,locale) && <small className="cupResultDetail">{cupResultDetail(match,locale)}</small>}
                         <span>{draw ? (locale === "ro" ? "Egal" : "Ничья") : clubWin ? (locale === "ro" ? "Victorie" : "Победа") : (locale === "ro" ? "Înfrângere" : "Поражение")}</span>
                       </div>
                       <RecentMatchTeam team={match.away} locale={locale} />
@@ -525,7 +527,7 @@ function legacyHeroCoordinates(position?: HomepageHero["background_position"] | 
 function matchSelect() {
   return `
     id,competition_id,home_team_id,away_team_id,kickoff,stadium,round,status,
-    home_score,away_score,notes,
+    home_score,away_score,extra_time_played,home_penalties,away_penalties,notes,
     home:teams!matches_home_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
     away:teams!matches_away_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
     competition:competitions!matches_competition_id_fkey(id,name,name_ro,slug,season,competition_type,is_active)

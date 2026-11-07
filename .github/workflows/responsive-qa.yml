@@ -71,6 +71,8 @@ jobs:
         run: node scripts/qa-production-health-v2313.mjs
       - name: Multi-competition regression QA
         run: node --experimental-strip-types scripts/qa-competitions-v2316.mjs && node --experimental-strip-types scripts/qa-schedule-v2317.mjs
+      - name: Cup match decisions and competition-by-competition statistics QA
+        run: node --experimental-strip-types scripts/qa-cup-v2318.mjs
       - name: Real-user monitoring, privacy and p75 QA
         run: node --experimental-strip-types scripts/qa-rum-v2314.mjs
       - name: RUM operations and Node runtime pin QA

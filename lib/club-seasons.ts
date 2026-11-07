@@ -1,6 +1,7 @@
+import { matchWinner, type CupResultSource } from "./cup-results.ts";
 /** Pure formatting and result helpers for the historical club-season archive. */
 export type ArchiveSide = { is_club?: boolean | null } | null;
-export type ArchiveResult = {
+export type ArchiveResult = CupResultSource & {
   home: ArchiveSide;
   away: ArchiveSide;
   home_score: number | null;
@@ -11,14 +12,10 @@ export type ArchiveOutcome = "win" | "draw" | "loss";
 
 /** Unknown scores never become 0–0 or a fabricated draw. */
 export function clubArchiveOutcome(match: ArchiveResult): ArchiveOutcome | null {
-  if (match.status !== "finished") return null;
-  if (!Number.isInteger(match.home_score) || !Number.isInteger(match.away_score)) return null;
-  if (!match.home?.is_club && !match.away?.is_club) return null;
-  const clubGoals = match.home?.is_club ? Number(match.home_score) : Number(match.away_score);
-  const opponentGoals = match.home?.is_club ? Number(match.away_score) : Number(match.home_score);
-  if (clubGoals > opponentGoals) return "win";
-  if (clubGoals < opponentGoals) return "loss";
-  return "draw";
+  const winner = matchWinner(match);
+  if (!winner || (!match.home?.is_club && !match.away?.is_club)) return null;
+  if (winner === "draw") return "draw";
+  return (winner === "home" && match.home?.is_club) || (winner === "away" && match.away?.is_club) ? "win" : "loss";
 }
 
 export function archivePage(value: string | undefined): number {

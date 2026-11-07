@@ -1,7 +1,8 @@
+import { matchWinner, type CupResultSource } from "./cup-results.ts";
 /** Public match display contract. Missing scores are never converted into a fictitious 0:0.
  * Shared by the calendar, match report, favorites and social preview.
  */
-export type ScoreSource = {
+export type ScoreSource = CupResultSource & {
   status?: string | null;
   home_score?: number | null;
   away_score?: number | null;
@@ -35,10 +36,11 @@ export function matchVenue(match: VenueSource): string | null {
 
 export type ResultMatch = ScoreSource & { home?: { is_club?: boolean | null } | null; away?: { is_club?: boolean | null } | null };
 export function clubMatchResultClass(match: ResultMatch): string {
-  if (match.status !== "finished" || !hasRecordedScore(match)) return "";
+  const winner = matchWinner(match);
+  if (!winner) return "";
   const homeClub = Boolean(match.home?.is_club);
   const awayClub = Boolean(match.away?.is_club);
-  if (match.home_score === match.away_score) return " result-draw";
-  if ((homeClub && Number(match.home_score) > Number(match.away_score)) || (awayClub && Number(match.away_score) > Number(match.home_score))) return " result-win";
-  return homeClub || awayClub ? " result-loss" : "";
+  if (!homeClub && !awayClub) return "";
+  if (winner === "draw") return " result-draw";
+  return (winner === "home" && homeClub) || (winner === "away" && awayClub) ? " result-win" : " result-loss";
 }

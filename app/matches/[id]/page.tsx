@@ -33,6 +33,7 @@ import { RELEASE_VERSION } from "@/lib/release";
 import { lineupAnchor, playerProfileHref } from "@/lib/player-navigation";
 import type { ClubMatch, MatchEvent, MatchLineupEntry, MatchLineupSetting, MatchReport, MatchTeamStatistic } from "@/lib/types";
 import { hasRecordedScore, matchScoreText, matchVenue } from "@/lib/public-match-integrity";
+import { cupResultDetail } from "@/lib/cup-results";
 
 export const dynamic = "force-dynamic";
 
@@ -201,7 +202,7 @@ function publicRunningScoreByEvent(events: MatchEvent[], match: ClubMatch) {
 }
 
 function matchSelect() {
-  return `id,competition_id,home_team_id,away_team_id,kickoff,stadium,round,status,home_score,away_score,notes,original_kickoff,schedule_reason_ru,schedule_reason_ro,created_at,updated_at,
+  return `id,competition_id,home_team_id,away_team_id,kickoff,stadium,round,status,home_score,away_score,extra_time_played,home_penalties,away_penalties,notes,original_kickoff,schedule_reason_ru,schedule_reason_ro,created_at,updated_at,
   home:teams!matches_home_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
   away:teams!matches_away_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
   competition:competitions!matches_competition_id_fkey(id,name,name_ro,slug,season,season_id,competition_type,is_active)`;
@@ -228,7 +229,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const away = match.away?.name ?? "—";
   const title = `${home} — ${away}`;
   const score = hasRecordedScore(match)
-    ? `${match.home_score}:${match.away_score}`
+    ? `${match.home_score}:${match.away_score}${cupResultDetail(match,locale) ? ` (${cupResultDetail(match,locale)})` : ""}`
     : null;
   const description = locale === "ro"
     ? `${title}.${score ? ` Scor ${score}.` : ""} Calendar și raportul meciului FC Edineț.`
@@ -381,6 +382,7 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
               <PublicTeam team={match.home} />
               <div className="publicMatchBigScore premiumBigScore">
                 <b>{statusHasScore ? matchScoreText(match) : "VS"}</b>
+                {cupResultDetail(match,locale) && <small className="cupResultDetail cupResultDetailHero">{cupResultDetail(match,locale)}</small>}
                 <span>{match.status === "finished" ? (locale === "ro" ? "MECI ÎNCHEIAT" : "МАТЧ ЗАВЕРШЁН") : t.protocol}</span>
               </div>
               <PublicTeam team={match.away} />
@@ -430,7 +432,7 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
               <div className="premiumMatchContent">
                 <section className="premiumOverview" id="overview">
                   <div className="premiumOverviewHead">
-                    <div><p className="eyebrow blue">{locale === "ro" ? "REZUMAT" : "ИТОГ МАТЧА"}</p><h2 className="premiumOverviewResultTitle"><span className="premiumOverviewTeam is-home">{match.home?.name ?? "—"}</span> <span className="premiumOverviewScore">{matchScoreText(match, ":")}</span> <span className="premiumOverviewTeam is-away">{match.away?.name ?? "—"}</span></h2></div>
+                    <div><p className="eyebrow blue">{locale === "ro" ? "REZUMAT" : "ИТОГ МАТЧА"}</p><h2 className="premiumOverviewResultTitle"><span className="premiumOverviewTeam is-home">{match.home?.name ?? "—"}</span> <span className="premiumOverviewScore">{matchScoreText(match, ":")}</span> <span className="premiumOverviewTeam is-away">{match.away?.name ?? "—"}</span></h2>{cupResultDetail(match,locale) && <p className="cupResultDetail cupResultDetailOverview">{cupResultDetail(match,locale)}</p>}</div>
                   </div>
                   <div className="premiumOverviewMetrics">
                     <MatchMetric label={locale === "ro" ? "Goluri" : "Голы"} home={match.home_score} away={match.away_score} />

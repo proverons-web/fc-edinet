@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireEditor } from "@/lib/editorial";
 import type { MatchStatus } from "@/lib/types";
 import { resolvePostponedKickoff } from "@/lib/match-schedule";
+import { validateCupResult } from "@/lib/cup-results";
 
 export type MatchFormState = {
   error?: string;
@@ -123,9 +124,11 @@ export async function saveMatch(
     }
   }
 
+  let competitionType: string | null = null;
   if (competitionId) {
-    const {data: competition, error: cError} = await supabase.from("competitions").select("id,is_active").eq("id", competitionId).maybeSingle();
+    const {data: competition, error: cError} = await supabase.from("competitions").select("id,is_active,competition_type").eq("id", competitionId).maybeSingle();
     if (cError || !competition) return {error:"Указанный турнир не найден."};
+    competitionType = competition.competition_type ?? "league";
     if (!competition.is_active) {
       const {data: original} = matchId ? await supabase.from("matches").select("competition_id").eq("id",matchId).maybeSingle() : {data:null};
       if (String(original?.competition_id || "") !== competitionId) return {error:"Турнир неактивен."};
@@ -146,8 +149,27 @@ export async function saveMatch(
     return { error: "Для завершённого матча укажи итоговый счёт." };
   }
 
+  // Shootout attempts are never included in home_score/away_score or goal events.
+  const homePenalties = parseScore(String(formData.get("home_penalties") ?? "").trim());
+  const awayPenalties = parseScore(String(formData.get("away_penalties") ?? "").trim());
+  const extraTimePlayed = formData.get("extra_time_played") === "on";
+  if (homePenalties === "invalid" || awayPenalties === "invalid") {
+    return { error: "Количество голов в серии пенальти должно быть целым неотрицательным числом." };
+  }
+  const cupError = validateCupResult({
+    status, home_score: homeScore, away_score: awayScore,
+    extra_time_played: extraTimePlayed,
+    home_penalties: homePenalties, away_penalties: awayPenalties,
+    competitionType,
+  });
+  if (cupError) return { error: cupError };
+  if (extraTimePlayed && status !== "finished") return { error: "Отметку дополнительного времени можно выставить после завершения матча." };
+
   const payload = {
     competition_id: competitionId,
+    extra_time_played: status === "finished" ? extraTimePlayed : false,
+    home_penalties: status === "finished" ? homePenalties : null,
+    away_penalties: status === "finished" ? awayPenalties : null,
     home_team_id: homeTeamId,
     away_team_id: awayTeamId,
     kickoff,

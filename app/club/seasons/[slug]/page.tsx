@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import ClubSectionShell from "@/app/components/ClubSectionShell";
 import { archiveDate, archiveLink, archivePage, clubArchiveOutcome } from "@/lib/club-seasons";
 import { getLocale } from "@/lib/locale";
+import { cupResultDetail } from "@/lib/cup-results";
 import { publicMetadata } from "@/lib/seo";
 import { createPublicClient } from "@/lib/supabase/public";
 import type { ClubSeasonHistory, Season } from "@/lib/types";
@@ -17,10 +18,12 @@ type TeamRef = { id: number | string; name: string; short_name: string | null; l
 type MatchRow = {
   id: number | string; kickoff: string; round: string | null;
   home_score: number | null; away_score: number | null; status: string;
+  extra_time_played?: boolean | null; home_penalties?: number | null; away_penalties?: number | null;
   home: TeamRef; away: TeamRef;
   competition: { id: number | string; name: string } | null;
 };
-type CompetitionRow = { id: string | number; name: string; season_id: string | number | null };
+type CompetitionRow = { id: string | number; name: string; name_ro?: string | null; competition_type?: string | null; season_id: string | number | null };
+type CompetitionSummary = { competition_id: number | string; season_id: number | string; played: number; wins: number; draws: number; losses: number; goals_for: number; goals_against: number };
 
 export async function generateMetadata({ params }: { params: Params["params"] }) {
   const locale = await getLocale();
@@ -42,17 +45,20 @@ export default async function ClubSeasonDetailPage({ params, searchParams }: Par
   if (seasonError) throw seasonError;
   if (!seasonData) notFound();
   const season = seasonData as Season;
-  const [historyResponse, competitionsResponse, clubResponse, eventsResponse] = await Promise.all([
+  const [historyResponse, competitionsResponse, clubResponse, eventsResponse, competitionStatsResponse] = await Promise.all([
     db.from("club_season_history").select("season_id,played,wins,draws,losses,goals_for,goals_against,goal_difference,win_rate,statistics_complete,players_with_stats").eq("season_id", season.id).maybeSingle(),
-    db.from("competitions").select("id,name,season_id").eq("season_id", season.id).eq("is_active", true).order("name"),
+    db.from("competitions").select("id,name,name_ro,competition_type,season_id").eq("season_id", season.id).eq("is_active", true).order("name"),
     db.from("teams").select("id").eq("is_club", true).eq("is_active", true),
     db.from("club_history_events").select("id,event_year,title,title_ro")
       .eq("season_id", season.id).eq("is_published", true)
       .order("event_year", { ascending: false }).limit(6),
+    db.from("club_competition_results").select("competition_id,season_id,played,wins,draws,losses,goals_for,goals_against").eq("season_id", season.id),
   ]);
   const competitions = (competitionsResponse.data ?? []) as CompetitionRow[];
+  const competitionResults = (competitionStatsResponse.data ?? []) as CompetitionSummary[];
+  const byCompetitionId = new Map(competitionResults.map(row => [String(row.competition_id), row]));
   const clubIds = (clubResponse.data ?? []).map((team) => String(team.id)).filter((id) => /^\d+$/.test(id));
-  const errors = [historyResponse.error, competitionsResponse.error, clubResponse.error].filter(Boolean);
+  const errors = [historyResponse.error, competitionsResponse.error, clubResponse.error, competitionStatsResponse.error].filter(Boolean);
   const requestedCompetition = query.competition && /^\d+$/.test(query.competition) ? query.competition : "";
   const selectedCompetition = competitions.find((item) => String(item.id) === requestedCompetition);
   const ids = (selectedCompetition ? [selectedCompetition] : competitions).map((item) => Number(item.id));
@@ -63,7 +69,7 @@ export default async function ClubSeasonDetailPage({ params, searchParams }: Par
   if (!errors.length && ids.length && clubIds.length) {
     const clubFilter = clubIds.flatMap((id) => [`home_team_id.eq.${id}`, `away_team_id.eq.${id}`]).join(",");
     const response = await db.from("matches")
-      .select("id,kickoff,round,home_score,away_score,status,home:teams!matches_home_team_id_fkey(id,name,short_name,logo_url,is_club),away:teams!matches_away_team_id_fkey(id,name,short_name,logo_url,is_club),competition:competitions!matches_competition_id_fkey(id,name)", { count: "exact" })
+      .select("id,kickoff,round,home_score,away_score,extra_time_played,home_penalties,away_penalties,status,home:teams!matches_home_team_id_fkey(id,name,short_name,logo_url,is_club),away:teams!matches_away_team_id_fkey(id,name,short_name,logo_url,is_club),competition:competitions!matches_competition_id_fkey(id,name)", { count: "exact" })
       .in("competition_id", ids).eq("status", "finished").or(clubFilter)
       .order("kickoff", { ascending: false }).order("id", { ascending: false })
       .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
@@ -71,7 +77,18 @@ export default async function ClubSeasonDetailPage({ params, searchParams }: Par
     matches = (response.data ?? []) as unknown as MatchRow[];
     total = response.count ?? 0;
   }
-  const stat = historyResponse.data as unknown as ClubSeasonHistory | null;
+  const historicalStat = historyResponse.data as unknown as ClubSeasonHistory | null;
+  // Per-competition view treats a decided cup shootout as a win/loss while
+  // goals for/against remain football goals from 90/120 minutes only.
+  const stat = historicalStat && competitionResults.length ? {
+    ...historicalStat,
+    played: competitionResults.reduce((n,c)=>n+c.played,0),
+    wins: competitionResults.reduce((n,c)=>n+c.wins,0),
+    draws: competitionResults.reduce((n,c)=>n+c.draws,0),
+    losses: competitionResults.reduce((n,c)=>n+c.losses,0),
+    goals_for: competitionResults.reduce((n,c)=>n+c.goals_for,0),
+    goals_against: competitionResults.reduce((n,c)=>n+c.goals_against,0),
+  } : historicalStat;
   const relatedEvents = (eventsResponse.data ?? []) as Pick<ClubHistoryEvent, "id"|"event_year"|"title"|"title_ro">[];
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const activeCompetitionId = selectedCompetition ? String(selectedCompetition.id) : undefined;
@@ -97,6 +114,19 @@ export default async function ClubSeasonDetailPage({ params, searchParams }: Par
             [label("Пропущено", "Primite"), stat.goals_against],
           ].map(([name, value]) => <div key={name}><small>{name}</small><strong>{value}</strong></div>)}
         </div> : <div className="clubSeasonNotice">{label("Для этого сезона пока не опубликованы завершённые матчи.", "Nu există încă meciuri încheiate publicate pentru acest sezon.")}</div>}
+        {competitions.length > 0 && <section className="clubCompetitionBreakdown" aria-label={label("Результаты по турнирам","Rezultate pe competiții")}>
+          <div className="clubSeasonHeading"><div><p className="eyebrow blue">{label("СОРЕВНОВАНИЯ", "COMPETIȚII")}</p><h2>{label("Отдельно по каждому турниру", "Separat pe competiții")}</h2></div></div>
+          <div className="clubCompetitionGrid">{competitions.map(competition => {
+            const result = byCompetitionId.get(String(competition.id));
+            return <Link key={competition.id} className="clubCompetitionCard" href={archiveLink(slug,String(competition.id))}>
+              <span>{locale === "ro" ? (competition.name_ro || competition.name) : competition.name}</span>
+              <strong>{result?.played ?? 0} {label("матчей", "meciuri")}</strong>
+              <small>{label("П", "V")} {result?.wins ?? 0} · {label("Н", "E")} {result?.draws ?? 0} · {label("Пр", "Î")} {result?.losses ?? 0}</small>
+              <small>{label("Мячи", "Goluri")}: {result?.goals_for ?? 0}:{result?.goals_against ?? 0}</small>
+            </Link>;
+          })}</div>
+          <p className="clubSeasonSourceNote">{label("В кубковых матчах победитель серии пенальти считается победителем встречи, но голы в серии не прибавляются к счёту или статистике игроков.", "În cupă, câștigătorul loviturilor de departajare este considerat învingător, dar loviturile nu se adaugă la golurile meciului ori ale jucătorilor.")}</p>
+        </section>}
         {relatedEvents.length > 0 && <section className="clubRelatedHistory" aria-labelledby="season-related-events-title">
           <h2 id="season-related-events-title">{HISTORY_COPY[locale].related}</h2>
           <ul>{relatedEvents.map(event => <li key={event.id}><Link href={historyEventHref(event.id)}><span>{event.event_year}</span>{historyText(event.title,event.title_ro,locale)}</Link></li>)}</ul>
@@ -110,7 +140,7 @@ export default async function ClubSeasonDetailPage({ params, searchParams }: Par
           const outcome = clubArchiveOutcome(match);
           return <Link href={`/matches/${match.id}`} className="clubSeasonMatch" key={match.id}>
             <div className="clubSeasonMatchMeta"><time dateTime={match.kickoff}>{archiveDate(match.kickoff, locale)}</time><span>{match.competition?.name ?? "FC Edineț"}{match.round ? ` · ${match.round}` : ""}</span></div>
-            <div className="clubSeasonMatchTeams"><span className={match.home?.is_club ? "isClub" : ""}>{match.home?.logo_url && <img src={match.home.logo_url} alt="" loading="lazy"/>}{match.home?.name ?? "—"}</span><b>{match.home_score === null || match.away_score === null ? "— : —" : `${match.home_score} : ${match.away_score}`}</b><span className={match.away?.is_club ? "isClub" : ""}>{match.away?.logo_url && <img src={match.away.logo_url} alt="" loading="lazy"/>}{match.away?.name ?? "—"}</span></div>
+            <div className="clubSeasonMatchTeams"><span className={match.home?.is_club ? "isClub" : ""}>{match.home?.logo_url && <img src={match.home.logo_url} alt="" loading="lazy"/>}{match.home?.name ?? "—"}</span><div className="clubSeasonResult"><b>{match.home_score === null || match.away_score === null ? "— : —" : `${match.home_score} : ${match.away_score}`}</b>{cupResultDetail(match,locale) && <small className="cupResultDetail">{cupResultDetail(match,locale)}</small>}</div><span className={match.away?.is_club ? "isClub" : ""}>{match.away?.logo_url && <img src={match.away.logo_url} alt="" loading="lazy"/>}{match.away?.name ?? "—"}</span></div>
             <div className="clubSeasonMatchEnd">{outcome && <span className={`clubSeasonOutcome ${outcome}`}>{outcome === "win" ? label("П", "V") : outcome === "draw" ? label("Н", "E") : label("Пр", "Î")}</span>}<span className="clubSeasonMatchArrow" aria-hidden="true">→</span></div>
           </Link>;
         })}</div> : <div className="clubSeasonNotice">{label("Завершённые матчи не найдены для выбранного турнира.", "Nu există meciuri încheiate pentru competiția selectată.")}</div>}

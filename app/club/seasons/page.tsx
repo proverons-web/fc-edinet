@@ -21,15 +21,24 @@ export default async function ClubSeasonsPage() {
   const locale = await getLocale();
   const ro = locale === "ro";
   const db = createPublicClient();
-  const [seasonsResponse, historyResponse] = await Promise.all([
+  const [seasonsResponse, historyResponse, competitionsResponse] = await Promise.all([
     db.from("seasons").select("id,name,slug,starts_on,ends_on,is_current,is_active")
       .eq("is_active", true).order("starts_on", { ascending: false, nullsFirst: false }).order("name", { ascending: false }),
     db.from("club_season_history").select("season_id,played,wins,draws,losses,goals_for,goals_against,goal_difference,win_rate,statistics_complete,players_with_stats"),
+    db.from("club_competition_results").select("season_id,played,wins,draws,losses,goals_for,goals_against"),
   ]);
   const seasons = (seasonsResponse.data ?? []) as Season[];
   const results = (historyResponse.data ?? []) as unknown as ClubSeasonHistory[];
   const history = new Map(results.map((row) => [String(row.season_id), row]));
-  const loadFailed = Boolean(seasonsResponse.error || historyResponse.error);
+  const competitionTotals = new Map<string, {played:number;wins:number;draws:number;losses:number;goals_for:number;goals_against:number}>();
+  for (const row of competitionsResponse.data ?? []) {
+    const key = String(row.season_id);
+    const old = competitionTotals.get(key) || {played:0,wins:0,draws:0,losses:0,goals_for:0,goals_against:0};
+    old.played += row.played; old.wins += row.wins; old.draws += row.draws;
+    old.losses += row.losses; old.goals_for += row.goals_for; old.goals_against += row.goals_against;
+    competitionTotals.set(key,old);
+  }
+  const loadFailed = Boolean(seasonsResponse.error || historyResponse.error || competitionsResponse.error);
   const label = (ru: string, romanian: string) => ro ? romanian : ru;
 
   return <ClubSectionShell locale={locale} active="seasons" title={label("Архив сезонов", "Arhiva sezoanelor")}>
@@ -44,7 +53,9 @@ export default async function ClubSeasonsPage() {
       <span>{seasons.length} {label("в базе", "în arhivă")}</span></div>
       {loadFailed ? <div className="clubSeasonNotice" role="alert">{label("Не удалось загрузить архив сезонов. Повторите попытку позже.", "Arhiva sezoanelor nu poate fi încărcată. Încercați din nou mai târziu.")}</div>
       : seasons.length ? <div className="clubSeasonGrid">{seasons.map((season) => {
-        const result = history.get(String(season.id));
+        const legacy = history.get(String(season.id));
+        const cupAware = competitionTotals.get(String(season.id));
+        const result = legacy && cupAware ? {...legacy, ...cupAware, goal_difference: cupAware.goals_for - cupAware.goals_against} : legacy;
         return <Link className="clubSeasonCard" href={`/club/seasons/${encodeURIComponent(season.slug)}`} key={season.id}>
           <div className="clubSeasonCardTop"><span>{label("СЕЗОН", "SEZON")}</span>{season.is_current && <b>{label("ТЕКУЩИЙ", "ACTUAL")}</b>}</div>
           <strong className="clubSeasonCardYear">{season.name}</strong>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireEditor } from "@/lib/editorial";
+import { cupResultDetail } from "@/lib/cup-results";
 import { secondYellowEventIds } from "@/lib/match-discipline";
 import type {
   ClubMatch,
@@ -158,10 +159,10 @@ export default async function MatchCenterMatchPage({
     .from("matches")
     .select(`
       id,competition_id,home_team_id,away_team_id,kickoff,stadium,round,status,
-      home_score,away_score,notes,created_at,updated_at,
+      home_score,away_score,extra_time_played,home_penalties,away_penalties,notes,created_at,updated_at,
       home:teams!matches_home_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
       away:teams!matches_away_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
-      competition:competitions!matches_competition_id_fkey(id,name,slug,season,season_id,is_active)
+      competition:competitions!matches_competition_id_fkey(id,name,slug,season,season_id,competition_type,is_active)
     `)
     .eq("id", matchId)
     .maybeSingle();
@@ -384,6 +385,7 @@ export default async function MatchCenterMatchPage({
             <MatchCenterWorkflowGuard key={workflowRevision} />
 
             <section className="mc26StatusBoard" aria-label="Состояние матча">
+              {cupResultDetail(match,"ru") && <div className="saveNotice">Итог кубкового матча: {cupResultDetail(match,"ru")}. Голы серии не добавляются в таймлайн.</div>}
               <ProgressCard label="Матч" value={match.status === "finished" ? "Завершён" : match.status === "live" ? "Идёт" : match.status === "scheduled" ? "Запланирован" : match.status === "postponed" ? "Перенесён" : "Отменён"} tone={match.status === "finished" ? "ready" : "draft"} detail={`${match.home_score ?? "—"}:${match.away_score ?? "—"}`} />
               <ProgressCard label="Составы" value={`${homeStarters}/11 • ${awayStarters}/11`} tone={lineupsReady ? "ready" : lineupEntries.length > 0 ? "draft" : "empty"} detail="HOME • AWAY" />
               <ProgressCard label="События" value={String(events.length)} tone={events.length > 0 && timelineMatchesScore ? "ready" : events.length > 0 ? "draft" : "empty"} detail={timelineMatchesScore ? "Голы сверены" : "Проверь голы"} />
@@ -435,6 +437,12 @@ export default async function MatchCenterMatchPage({
                     <label className="fieldGroup"><span>Статус</span><select name="status" defaultValue={match.status}><option value="scheduled">Запланирован</option><option value="live">Идёт</option><option value="finished">Завершён</option><option value="postponed">Перенесён</option><option value="cancelled">Отменён</option></select></label>
                     <label className="fieldGroup"><span>Счёт хозяев</span><input name="home_score" type="number" min={0} max={99} defaultValue={match.home_score ?? ""} placeholder="—" /></label>
                     <label className="fieldGroup"><span>Счёт гостей</span><input name="away_score" type="number" min={0} max={99} defaultValue={match.away_score ?? ""} placeholder="—" /></label>
+                    {match.competition?.competition_type === "cup" && <>
+                      <label className="fieldGroup"><span>Доп. время (2 × 15 мин)</span><span style={{display:"flex",gap:10,alignItems:"center"}}><input name="extra_time_played" type="checkbox" defaultChecked={Boolean(match.extra_time_played)} /> Было дополнительное время</span></label>
+                      <label className="fieldGroup"><span>Пенальти хозяев (серия)</span><input name="home_penalties" type="number" min={0} max={99} defaultValue={match.home_penalties ?? ""} placeholder="—" /></label>
+                      <label className="fieldGroup"><span>Пенальти гостей (серия)</span><input name="away_penalties" type="number" min={0} max={99} defaultValue={match.away_penalties ?? ""} placeholder="—" /></label>
+                      <p className="fieldHint mc26Span2">Счёт выше включает голы в дополнительное время. Серия пенальти не увеличивает голы игроков и не добавляется в таймлайн.</p>
+                    </>}
                     <label className="fieldGroup"><span>Тур / этап</span><input name="round" defaultValue={match.round ?? ""} maxLength={120} placeholder="Например, Тур 12" /></label>
                     <label className="fieldGroup mc26Span2"><span>Стадион</span><input name="stadium" defaultValue={match.stadium ?? ""} maxLength={180} /></label>
                     <label className="fieldGroup mc26Span2"><span>Внутренняя заметка</span><textarea name="notes" rows={3} maxLength={2000} defaultValue={match.notes ?? ""} placeholder="Необязательно" /></label>

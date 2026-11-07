@@ -11,7 +11,7 @@ function check(label,fn){try{fn();passed++;console.log("PASS",label)}catch(e){fa
 const f={id:20,kickoff:"2026-12-05T13:00:00Z",updated_at:"2026-11-07T19:22:00Z",status:"scheduled",home:{name:"FC Edineț"},away:{name:"Côte d'Azur"}};
 const old={...f,status:"postponed",original_kickoff:"2026-12-05T13:00:00Z",schedule_reason_ru:"Плохая погода",schedule_reason_ro:"Vreme rea"};
 const rescheduled={...old,kickoff:"2026-12-12T13:00:00Z"};
-check("release version",()=>assert.equal(JSON.parse(read("package.json")).version,"2.30.17"));
+check("release version",()=>assert.equal(JSON.parse(read("package.json")).version,"2.30.18"));
 check("original date preserved",()=>assert.ok(isRescheduled(rescheduled)));
 check("nonrescheduled fixture",()=>assert.equal(isRescheduled(f),false));
 check("status hides unconfirmed date RU",()=>assert.equal(scheduleDateLabel(old,"ru"),"Новая дата не назначена"));
@@ -88,4 +88,4 @@ check("FIX2 postponed card is highlighted on mobile and desktop",()=>{
   assert.match(css,/\.matchPostponedChip/);
   assert.match(css,/@media\(max-width:700px\)/);
 });
-console.log(`v2.30.17 scheduling: ${passed}/${passed+failed}`);if(failed)process.exitCode=1;
+console.log(`v2.30.18 scheduling: ${passed}/${passed+failed}`);if(failed)process.exitCode=1;

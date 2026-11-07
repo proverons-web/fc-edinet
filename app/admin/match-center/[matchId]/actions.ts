@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireEditor } from "@/lib/editorial";
+import { validateCupResult } from "@/lib/cup-results";
 import type { MatchEventType } from "@/lib/types";
 
 const EVENT_TYPES = new Set<MatchEventType>([
@@ -1165,12 +1166,35 @@ export async function saveMatchBasics(formData: FormData) {
     go(matchId, { error: "Для завершённого матча укажи итоговый счёт." });
   }
 
+  const { data: selectedMatch, error: selectedError } = await supabase
+    .from("matches").select("id,competition_id").eq("id",matchId).maybeSingle();
+  if (selectedError || !selectedMatch) go(matchId,{error:"Матч не найден."});
+  let competitionType: string | null = null;
+  if (selectedMatch.competition_id) {
+    const {data: competition, error: competitionError} = await supabase
+      .from("competitions").select("competition_type").eq("id",selectedMatch.competition_id).maybeSingle();
+    if (competitionError || !competition) go(matchId,{error:"Не удалось проверить соревнование матча."});
+    competitionType = competition.competition_type ?? "league";
+  }
+  const extraTimePlayed = formData.get("extra_time_played") === "on";
+  const homePenalties = nullableNumber(formData,"home_penalties",0,99,"Пенальти хозяев",matchId);
+  const awayPenalties = nullableNumber(formData,"away_penalties",0,99,"Пенальти гостей",matchId);
+  const cupError = validateCupResult({
+    competitionType,status,home_score:homeScore,away_score:awayScore,
+    extra_time_played:extraTimePlayed,home_penalties:homePenalties,away_penalties:awayPenalties,
+  });
+  if (cupError) go(matchId,{error:cupError});
+  if (extraTimePlayed && status !== "finished") go(matchId,{error:"Отметь дополнительное время после завершения кубкового матча."});
+
   const { error } = await supabase
     .from("matches")
     .update({
       status,
-      home_score: status === "scheduled" ? null : homeScore,
-      away_score: status === "scheduled" ? null : awayScore,
+      extra_time_played: status === "finished" ? extraTimePlayed : false,
+      home_penalties: status === "finished" ? homePenalties : null,
+      away_penalties: status === "finished" ? awayPenalties : null,
+      home_score: ["scheduled","postponed","cancelled"].includes(status) ? null : homeScore,
+      away_score: ["scheduled","postponed","cancelled"].includes(status) ? null : awayScore,
       stadium: nullableText(formData, "stadium", 180),
       round: nullableText(formData, "round", 120),
       notes: nullableText(formData, "notes", 2000),

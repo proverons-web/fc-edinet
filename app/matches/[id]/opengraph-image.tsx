@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { matchScoreText } from "@/lib/public-match-integrity";
+import { cupResultDetail } from "@/lib/cup-results";
 import { socialTeamLogoDataUrl, socialTeamNameFont } from "@/lib/social-preview";
 
 export const runtime = "nodejs";
@@ -26,7 +27,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   if (supabase && /^\d+$/.test(id)) {
     const { data } = await supabase
       .from("matches")
-      .select(`id,kickoff,status,home_score,away_score,round,stadium,
+      .select(`id,kickoff,status,home_score,away_score,extra_time_played,home_penalties,away_penalties,round,stadium,
         home:teams!matches_home_team_id_fkey(name,short_name,logo_url,is_club),
         away:teams!matches_away_team_id_fkey(name,short_name,logo_url,is_club),
         competition:competitions!matches_competition_id_fkey(name)`)
@@ -70,7 +71,8 @@ export default async function Image({ params }: { params: Promise<{ id: string }
           <TeamBlock name={homeName} logo={homeLogo || (home?.is_club ? crest : null)} fallback={home?.short_name} />
           <div style={{ width: 252, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
             <div style={{ fontSize: score === "VS" ? 73 : 89, fontWeight: 900, letterSpacing: -2, whiteSpace: "nowrap" }}>{score}</div>
-            <div style={{ width: 90, height: 7, background: "#ffd328", marginTop: 20 }} />
+            {cupResultDetail(match,"ru") && <div style={{ display:"flex", textAlign:"center", fontSize: 17, color:"#ffd328", marginTop: 8, width:252, lineHeight:1.2, justifyContent:"center" }}>{cupResultDetail(match,"ru")}</div>}
+            <div style={{ width: 90, height: 7, background: "#ffd328", marginTop: 14 }} />
           </div>
           <TeamBlock name={awayName} logo={awayLogo || (away?.is_club ? crest : null)} fallback={away?.short_name} />
         </div>

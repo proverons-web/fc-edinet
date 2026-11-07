@@ -196,6 +196,10 @@ export type ClubMatch = {
   kickoff: string;
   stadium: string | null;
   round: string | null;
+  /** Goals include extra time but never penalty shootout attempts. */
+  extra_time_played?: boolean;
+  home_penalties?: number | null;
+  away_penalties?: number | null;
   status: MatchStatus;
   home_score: number | null;
   away_score: number | null;

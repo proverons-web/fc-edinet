@@ -9,3 +9,8 @@
 .scheduleNewDateField input{max-width:330px;width:100%}
 .scheduleClearNewDate{align-self:flex-start;margin-top:10px;padding:7px 12px;border:1px solid #99b0ca;color:#144679;background:#fff;cursor:pointer;font:inherit;font-size:13px}
 .scheduleClearNewDate:focus-visible{outline:3px solid #e6b900;outline-offset:2px}
+
+/* v2.30.18 — Cup match scoring controls */
+.cupResultEditor { margin: 24px 0; padding: 22px; border: 1px solid #cad6e6; border-left: 4px solid #e0b527; background: #f7f9fc; }
+.cupExtraTimeField { display: flex; gap: 12px; align-items: center; font-weight: 700; margin: 12px 0; }
+.cupExtraTimeField input { width: 19px; height: 19px; accent-color: #0b4a94; flex-shrink: 0; }

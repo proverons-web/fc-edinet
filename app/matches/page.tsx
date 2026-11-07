@@ -11,6 +11,7 @@ import {competitionTypes,competitionName,competitionTypeLabel} from "@/lib/compe
 import { scheduleDateLabel, scheduleReason, isRescheduled, hasAnnouncedReplacementDate, appearsInDatedCalendar, orderFixturesByKickoff } from "@/lib/match-schedule";
 import "./competition-filters.css";
 import { clubMatchResultClass, matchScoreText, matchVenue } from "@/lib/public-match-integrity";
+import { cupResultDetail } from "@/lib/cup-results";
 import { getLocale } from "@/lib/locale";
 import { publicSectionMetadata } from "@/lib/seo";
 import { accountText } from "@/lib/account-i18n";
@@ -103,6 +104,7 @@ function PublicMatchCard({match,locale,isAuthenticated,isFavorite}:{match:ClubMa
    <div className="publicScore">
     {match.status==="finished"||match.status==="live"?<b>{matchScoreText(match)}</b>:<b aria-label={locale==="ro"?"contra":"против"}>—</b>}
     <span>{matchStatusLabelsI18n[locale][match.status]}</span>
+    {cupResultDetail(match,locale) && <small className="cupResultDetail">{cupResultDetail(match,locale)}</small>}
    </div>
    <div className={match.away?.is_club?"clubTeam":""}><TeamBadge team={match.away}/><strong>{match.away?.name??"—"}</strong></div>
   </div>
@@ -114,4 +116,4 @@ function PublicMatchCard({match,locale,isAuthenticated,isFavorite}:{match:ClubMa
  </article>;
 }
 function TeamBadge({team}:{team:ClubMatch["home"]}){if(team?.logo_url)return <PublicImage className="publicTeamLogo" src={team.logo_url} width={62} height={62} sizes="(max-width: 767px) 46px, 62px" alt=""/>;return <div className={`publicTeamBadge ${team?.is_club?"club":""}`}>{(team?.short_name||team?.name||"FC").slice(0,3).toUpperCase()}</div>}
-function matchSelect(){return `id,competition_id,home_team_id,away_team_id,kickoff,stadium,round,status,home_score,away_score,notes,original_kickoff,schedule_reason_ru,schedule_reason_ro,created_at,updated_at,home:teams!matches_home_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),away:teams!matches_away_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),competition:competitions!matches_competition_id_fkey(id,name,name_ro,slug,season,competition_type,is_active)`}
+function matchSelect(){return `id,competition_id,home_team_id,away_team_id,kickoff,stadium,round,status,home_score,away_score,extra_time_played,home_penalties,away_penalties,notes,original_kickoff,schedule_reason_ru,schedule_reason_ro,created_at,updated_at,home:teams!matches_home_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),away:teams!matches_away_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),competition:competitions!matches_competition_id_fkey(id,name,name_ro,slug,season,competition_type,is_active)`}

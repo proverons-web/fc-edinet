@@ -20,6 +20,7 @@ import type {
   Season,
 } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
+import { matchWinner, cupResultDetail } from "@/lib/cup-results";
 import { accountText } from "@/lib/account-i18n";
 import { dateLocale, footLabelsI18n, localized, positionLabelsI18n, publicText } from "@/lib/i18n";
 import { getPublishedSitePageDesign } from "@/lib/page-design";
@@ -249,7 +250,7 @@ export default async function PlayerPage({ params, searchParams }: PageProps) {
               .from("matches")
               .select(`
                 id,competition_id,home_team_id,away_team_id,kickoff,stadium,round,status,
-                home_score,away_score,notes,created_at,updated_at,
+                home_score,away_score,extra_time_played,home_penalties,away_penalties,notes,created_at,updated_at,
                 home:teams!matches_home_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
                 away:teams!matches_away_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
                 competition:competitions!matches_competition_id_fkey(id,name,slug,season,season_id,is_active)
@@ -894,7 +895,7 @@ function PlayerRecentMatchRow({ item, locale, text }: { item: RecentPlayerMatch;
         {opponent?.logo_url ? <img src={opponent.logo_url} alt="" /> : <span className="playerRecentOpponentLogo">FC</span>}
         <div>
           <strong>{opponent?.name ?? "—"}</strong>
-          <span>{formatScore(match)} · {clubIsHome ? (locale === "ro" ? "acasă" : "дома") : (locale === "ro" ? "deplasare" : "в гостях")}</span>
+          <span>{formatScore(match)}{cupResultDetail(match,locale) ? ` (${cupResultDetail(match,locale)})` : ""} · {clubIsHome ? (locale === "ro" ? "acasă" : "дома") : (locale === "ro" ? "deplasare" : "в гостях")}</span>
         </div>
       </div>
       <div className="playerRecentRole">
@@ -925,14 +926,10 @@ function getOpponent(match: ClubMatch) {
 }
 
 function getClubResult(match: ClubMatch) {
-  const homeScore = numberValue(match.home_score);
-  const awayScore = numberValue(match.away_score);
+  const winner = matchWinner(match);
   const clubHome = Boolean(match.home?.is_club);
-  const clubScore = clubHome ? homeScore : awayScore;
-  const opponentScore = clubHome ? awayScore : homeScore;
-  if (clubScore > opponentScore) return { className: "w" as const };
-  if (clubScore < opponentScore) return { className: "l" as const };
-  return { className: "d" as const };
+  if (winner === "draw" || winner === null) return { className: "d" as const };
+  return { className: winner === (clubHome ? "home" : "away") ? "w" as const : "l" as const };
 }
 
 function formatScore(match: ClubMatch) {

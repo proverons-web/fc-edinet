@@ -65,3 +65,13 @@
 @media(max-width:700px){.clubSeasonHero{padding:38px 0 44px}.clubSeasonHero h1{font-size:39px}.clubSeasonHero p:not(.eyebrow){font-size:14px}.clubSeasonSection{padding:32px 0 48px}.clubSeasonGrid{grid-template-columns:1fr}.clubSeasonCard{min-height:280px}.clubSeasonTotals{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.clubSeasonTotals>div{padding:16px 10px}.clubSeasonTotals strong{font-size:28px}.clubSeasonHeading{align-items:center}.clubSeasonMatch{grid-template-columns:1fr auto;gap:12px;padding:15px 12px}.clubSeasonMatchMeta{grid-column:1/-1;flex-direction:row;justify-content:space-between}.clubSeasonMatchTeams{grid-column:1;grid-template-columns:minmax(0,1fr) 60px minmax(0,1fr);gap:6px}.clubSeasonMatchTeams>span{font-size:11px;gap:5px}.clubSeasonMatchTeams>b{font-size:16px}.clubSeasonMatchTeams img{width:22px;height:22px}.clubSeasonMatchEnd{grid-column:2;gap:5px}.clubSeasonMatchArrow{display:none}.clubSeasonOutcome{width:26px;height:26px;font-size:10px}}
 @media(max-width:380px){.clubSeasonTotals{grid-template-columns:repeat(2,minmax(0,1fr))}.clubSeasonMatchTeams img{display:none}.clubSeasonMatch{gap:6px}}
 @media(prefers-reduced-motion:reduce){.clubSeasonCard{transition:none}.clubSeasonCard:hover{transform:none}}
+
+/* v2.30.18 competition-by-competition season records */
+.clubCompetitionBreakdown { padding: 16px 0 30px; }
+.clubCompetitionGrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr)); gap:12px; }
+.clubCompetitionCard { display:flex; flex-direction:column; gap:8px; border:1px solid #dbe4ef; border-top:3px solid #0b4d9f; padding:20px; color:#0b2b4f; background:#fff; text-decoration:none; }
+.clubCompetitionCard:hover,.clubCompetitionCard:focus-visible { border-color:#b28b00; }
+.clubCompetitionCard strong { font-size:1.35rem; }
+.clubCompetitionCard small { color:#425877; font-size:.82rem; }
+.clubSeasonResult { display:flex; flex-direction:column; justify-content:center; align-items:center; gap:4px; }
+.clubSeasonResult .cupResultDetail { font-size:.69rem; text-align:center; max-width:180px; }

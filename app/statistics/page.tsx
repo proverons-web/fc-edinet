@@ -12,6 +12,7 @@ import type {
   Season,
 } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
+import { matchWinner } from "@/lib/cup-results";
 import { publicSectionMetadata } from "@/lib/seo";
 import { positionLabelsI18n } from "@/lib/i18n";
 import { getPublishedSitePageDesign } from "@/lib/page-design";
@@ -353,9 +354,10 @@ function resultSummary(matches: ClubMatch[], clubId: string | number, completedI
     played += 1;
     goalsFor += own;
     goalsAgainst += opponent;
-    if (own > opponent) wins += 1;
-    else if (own === opponent) draws += 1;
-    else losses += 1;
+    const decided = matchWinner(match);
+    if (decided === "draw") draws += 1;
+    else if (decided === (home ? "home" : "away")) wins += 1;
+    else if (decided) losses += 1;
     if (completedIds.has(String(match.id))) statisticsComplete += 1;
   }
 
@@ -411,6 +413,7 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
     clubResult,
     historyResult,
     careerResult,
+    competitionTotalsResult,
   ] = await Promise.all([
     supabase
       .from("seasons")
@@ -442,6 +445,7 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
     supabase
       .from("player_career_totals")
       .select("*"),
+    supabase.from("club_competition_results").select("season_id,played,wins,draws,losses,goals_for,goals_against"),
   ]);
 
   const seasons = (seasonsResult.data ?? []) as Season[];
@@ -533,7 +537,7 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
   if (club && competitionIds.length > 0) {
     const matchesQuery = await supabase
       .from("matches")
-      .select("id,competition_id,home_team_id,away_team_id,kickoff,stadium,round,status,home_score,away_score,notes,created_at,updated_at")
+      .select("id,competition_id,home_team_id,away_team_id,kickoff,stadium,round,status,home_score,away_score,extra_time_played,home_penalties,away_penalties,notes,created_at,updated_at")
       .eq("status", "finished")
       .in("competition_id", competitionIds.map(String))
       .or(`home_team_id.eq.${club.id},away_team_id.eq.${club.id}`);
@@ -552,7 +556,8 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
 
   const results = club ? resultSummary(finishedMatches, club.id, completedMatchIds) : resultSummary([], "", completedMatchIds);
 
-  const historyTotals = clubHistory.reduce(
+  const competitionHistory = (competitionTotalsResult.data ?? []) as Array<{ played:number;wins:number;draws:number;losses:number;goals_for:number;goals_against:number;statistics_complete?:number }>;
+  const historyTotals = (competitionTotalsResult.error ? clubHistory : competitionHistory).reduce(
     (acc, row) => {
       acc.played += numberValue(row.played);
       acc.wins += numberValue(row.wins);
@@ -565,6 +570,8 @@ export default async function StatisticsPage({ searchParams }: PageProps) {
     },
     { played: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, statisticsComplete: 0 }
   );
+  // Coverage is recorded by match center, not by the competition-results view.
+  historyTotals.statisticsComplete = clubHistory.reduce((n,r)=>n+numberValue(r.statistics_complete),0);
   const historyWinRate = historyTotals.played
     ? Math.round((historyTotals.wins / historyTotals.played) * 100)
     : 0;

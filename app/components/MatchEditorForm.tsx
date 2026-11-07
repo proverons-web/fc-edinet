@@ -35,6 +35,9 @@ export default function MatchEditorForm({
   const [homeTeamId, setHomeTeamId] = useState(initialHomeId);
   const [stadium, setStadium] = useState(initialStadium);
   const [matchStatus, setMatchStatus] = useState(match?.status ?? "scheduled");
+  const [competitionId, setCompetitionId] = useState(String(match?.competition_id ?? defaultCompetition?.id ?? ""));
+  const competitionType = competitions.find(c => String(c.id) === competitionId)?.competition_type ?? "league";
+  const cupMatch = competitionType === "cup";
 
   // datetime-local uses the browser's local time; do not format in UTC here.
   const toLocalInput = (value?: string | null) => {
@@ -147,11 +150,8 @@ export default function MatchEditorForm({
               <select
                 id="competition_id"
                 name="competition_id"
-                defaultValue={
-                  match?.competition_id
-                    ? String(match.competition_id)
-                    : defaultCompetition ? String(defaultCompetition.id) : ""
-                }
+                value={competitionId}
+                onChange={(event) => setCompetitionId(event.target.value)}
               >
                 <option value="">Без турнира</option>
 
@@ -170,8 +170,18 @@ export default function MatchEditorForm({
                 id="round"
                 name="round"
                 defaultValue={match?.round ?? ""}
-                placeholder="Тур 5"
+                placeholder={cupMatch ? "Например: 1/8 финала" : "Тур 5"}
+                list={cupMatch ? "cup-stage-options" : undefined}
               />
+              {cupMatch && <datalist id="cup-stage-options">
+                <option value="Предварительный раунд" />
+                <option value="1/32 финала" />
+                <option value="1/16 финала" />
+                <option value="1/8 финала" />
+                <option value="1/4 финала" />
+                <option value="1/2 финала" />
+                <option value="Финал" />
+              </datalist>}
             </div>
           </div>
 
@@ -258,6 +268,17 @@ export default function MatchEditorForm({
               />
             </div>
           </div>
+
+          {cupMatch && matchStatus === "finished" && <section className="cupResultEditor" aria-label="Итог кубковой встречи">
+            <div className="formSectionTitle"><p className="eyebrow blue">КУБКОВЫЙ МАТЧ</p><h2>Дополнительное время и серия пенальти</h2></div>
+            <label className="cupExtraTimeField"><input type="checkbox" name="extra_time_played" defaultChecked={Boolean(match?.extra_time_played)} /> Играли дополнительное время (2 × 15 минут)</label>
+            <p className="fieldHint">В основных полях счёта указывай все голы за матч, включая дополнительное время. Удары послематчевой серии пенальти в этот счёт не входят.</p>
+            <div className="twoFields">
+              <div className="fieldGroup"><label htmlFor="home_penalties">Серия пенальти — хозяева</label><input id="home_penalties" name="home_penalties" type="number" min={0} max={99} defaultValue={match?.home_penalties ?? ""} placeholder="—" /></div>
+              <div className="fieldGroup"><label htmlFor="away_penalties">Серия пенальти — гости</label><input id="away_penalties" name="away_penalties" type="number" min={0} max={99} defaultValue={match?.away_penalties ?? ""} placeholder="—" /></div>
+            </div>
+            <small className="fieldHint">Заполни оба поля серии или оставь оба пустыми. Если серия была, основной счёт должен быть ничейным, а счёт серии — определять победителя.</small>
+          </section>}
 
           {(matchStatus === "postponed" || matchStatus === "cancelled" || Boolean(match?.original_kickoff)) && (
             <section className="scheduleEditorSection">

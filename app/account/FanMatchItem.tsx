@@ -4,6 +4,7 @@ import { accountText } from "@/lib/account-i18n";
 import { fanDashboardText } from "@/lib/fan-favorites";
 import { dateLocale, matchStatusLabelsI18n, type Locale } from "@/lib/i18n";
 import { matchScoreText } from "@/lib/public-match-integrity";
+import { cupResultDetail } from "@/lib/cup-results";
 import {scheduleDateLabel, scheduleReason} from "@/lib/match-schedule";
 import type { ClubMatch } from "@/lib/types";
 
@@ -26,6 +27,7 @@ export default function FanMatchItem({match, locale, removable = false}: {match:
         <Link href={`/matches/${match.id}`} className="fanV2301MatchTitle">
           {match.home?.name ?? "—"} <b>{match.status === "finished" || match.status === "live" ? matchScoreText(match, ":") : "–"}</b> {match.away?.name ?? "—"}
         </Link>
+        {cupResultDetail(match,locale) && <small className="cupResultDetail">{cupResultDetail(match,locale)}</small>}
         {match.status === "postponed" || match.status === "cancelled"
           ? <span className="fanV2301ScheduleChange">{scheduleDateLabel(match,locale)}{scheduleReason(match,locale) ? ` · ${scheduleReason(match,locale)}` : ""}</span>
           : <time dateTime={match.kickoff}>{when}</time>}
