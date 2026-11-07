@@ -41,12 +41,12 @@ check("news OG is dynamic and only for published articles", () => { assert.match
 check("album OG is dynamic and only for published albums", () => { assert.match(albumOg, /force-dynamic/); assert.match(albumOg, /\.eq\("is_published", true\)/); });
 check("news metadata uses branded card with update-versioned URL", () => { assert.match(news, /opengraph-image\?v=\$\{encodeURIComponent\(article\.updated_at/); assert.match(news, /imageWidth: 1200/); });
 check("album metadata uses branded card with update-versioned URL", () => { assert.match(album, /opengraph-image\?v=\$\{encodeURIComponent\(data\.updated_at/); assert.match(album, /imageHeight: 630/); });
-check("match card uses live public data and existing safe score policy", () => { assert.match(matchOg, /force-dynamic/); assert.match(matchOg, /matchScoreText\(match \|\| \{\}\)/); assert.match(matchOg, /socialPhotoDataUrl/); });
+check("match card uses live public data and existing safe score policy", () => { assert.match(matchOg, /force-dynamic/); assert.match(matchOg, /matchScoreText\(match \|\| \{\}\)/); assert.match(matchOg, /socialTeamLogoDataUrl/); });
 check("match metadata points to cache-busted card", () => { assert.match(match, /opengraph-image\?v=\$\{encodeURIComponent\(match\.updated_at/); assert.match(match, /imageWidth: 1200/); });
 check("Open Graph and Twitter card share same absolute image URL", () => { assert.match(seo, /images: \[\{ url: imageUrl/); assert.match(seo, /images: \[imageUrl\]/); assert.match(seo, /alternates: \{ canonical \}/); });
 check("production domain outranks preview deployment host", () => { const p = site.indexOf('process.env.VERCEL_PROJECT_PRODUCTION_URL'); const q = site.indexOf('process.env.NEXT_PUBLIC_VERCEL_URL'); assert.ok(p !== -1 && q !== -1 && p < q); });
 check("no new DB migrations required", () => assert.equal(fs.existsSync(path.join(root, "database/078_social_preview.sql")), false));
 check("new QA included in release gate", () => { const scripts = JSON.parse(read("package.json")).scripts; assert.match(scripts["deploy:check"], /qa-seo-social-v2308\.mjs/); assert.match(scripts["qa:all"], /qa:seo-social/); });
-check("release and installer consistency", () => { assert.equal(JSON.parse(read("package.json")).version, "2.30.8"); assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.8"/); assert.match(read("scripts/qa-site.mjs"), /STEP-2\.30\.8\.txt/); });
-console.log(`\nSEO & Social Sharing v2.30.8: ${passed}/${passed + failed} checks passed.`);
+check("release and installer consistency", () => { assert.equal(JSON.parse(read("package.json")).version, "2.30.9"); assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.9"/); assert.match(read("scripts/qa-site.mjs"), /STEP-2\.30\.9\.txt/); });
+console.log(`\nSEO & Social Sharing v2.30.9: ${passed}/${passed + failed} checks passed.`);
 if (failed) process.exitCode = 1;

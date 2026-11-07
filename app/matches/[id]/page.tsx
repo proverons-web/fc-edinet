@@ -25,6 +25,7 @@ import { compareMatchStat } from "@/lib/match-stat-visualization";
 import { lineupEventParticipant, lineupEventsForPlayer } from "@/lib/public-match-player-stats";
 import { publicText } from "@/lib/i18n";
 import { publicMetadata, sportsEventJsonLd } from "@/lib/seo";
+import { RELEASE_VERSION } from "@/lib/release";
 import { lineupAnchor, playerProfileHref } from "@/lib/player-navigation";
 import type { ClubMatch, MatchEvent, MatchLineupEntry, MatchLineupSetting, MatchReport, MatchTeamStatistic } from "@/lib/types";
 import { hasRecordedScore, matchScoreText, matchVenue } from "@/lib/public-match-integrity";
@@ -233,7 +234,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     description,
     path: `/matches/${encodeURIComponent(id)}`,
     locale,
-    image: `/matches/${encodeURIComponent(id)}/opengraph-image?v=${encodeURIComponent(match.updated_at || "1")}`,
+    image: `/matches/${encodeURIComponent(id)}/opengraph-image?v=${encodeURIComponent(match.updated_at || "1")}&r=${RELEASE_VERSION}`,
     imageWidth: 1200,
     imageHeight: 630,
   });

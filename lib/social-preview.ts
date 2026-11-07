@@ -63,3 +63,41 @@ export async function socialPhotoDataUrl(candidate: string | null | undefined): 
     return `data:${type};base64,${Buffer.from(bytes).toString("base64")}`;
   } catch { return null; }
 }
+
+/**
+ * Stable, transparent team badges for match social cards.
+ * Supabase stores team logos as PNG/JPEG/WebP; normalize all of them into a
+ * small PNG before passing to Satori, which is more reliable than decoding a
+ * remote object or a large original inside ImageResponse.
+ */
+export async function socialTeamLogoDataUrl(candidate: string | null | undefined): Promise<string | null> {
+  const url = publicSocialImageUrl(candidate, process.env.NEXT_PUBLIC_SUPABASE_URL);
+  if (!url) return null;
+  try {
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(4500),
+      cache: "no-store",
+      redirect: "error",
+    });
+    if (!response.ok) return null;
+    const type = response.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase();
+    if (type !== "image/png" && type !== "image/jpeg" && type !== "image/webp") return null;
+    if (Number(response.headers.get("content-length") || 0) > 6_000_000) return null;
+    const bytes = Buffer.from(await response.arrayBuffer());
+    if (!bytes.length || bytes.length > 6_000_000) return null;
+    const sharp = (await import("sharp")).default;
+    const png = await sharp(bytes, { limitInputPixels: 24_000_000 })
+      .rotate()
+      .resize({ width: 200, height: 200, fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+      .png({ compressionLevel: 9 })
+      .toBuffer();
+    return `data:image/png;base64,${png.toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
+
+/** Readable club names without oversized type on long opponent names. */
+export function socialTeamNameFont(name: string): number {
+  return name.length > 29 ? 24 : name.length > 20 ? 27 : name.length > 14 ? 30 : 34;
+}
