@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireEditor } from "@/lib/editorial";
 import { cleanSiteSlug, isReservedSiteSlug, normalizeSiteMenuHref } from "@/lib/site-builder";
@@ -30,6 +30,7 @@ export async function createCustomPage(fd: FormData) {
     const { data: maxRow } = await supabase.from("site_menu_items").select("display_order").order("display_order", { ascending: false }).limit(1).maybeSingle();
     await supabase.from("site_menu_items").insert({ label_ru: titleRu, label_ro: titleRo, href: `/${slug}`, custom_page_id: data.id, display_order: Number(maxRow?.display_order ?? 100) + 10 });
   }
+  updateTag("fce-public-site-menu");
   revalidatePath("/", "layout");
   redirect(`/admin/site-builder?page=custom:${data.id}&created=1`);
 }
@@ -71,6 +72,7 @@ export async function saveCustomPage(fd: FormData) {
   }
 
   await supabase.from("site_menu_items").update({ href: `/${slug}`, label_ru: patch.title_ru, label_ro: patch.title_ro, updated_at: now }).eq("custom_page_id", id);
+  updateTag("fce-public-site-menu");
   revalidatePath("/", "layout");
   revalidatePath(`/${existing.slug}`);
   revalidatePath(`/${slug}`);
@@ -84,6 +86,7 @@ export async function deleteCustomPage(fd: FormData) {
   const { data: existing } = await supabase.from("site_custom_pages").select("slug").eq("id", id).maybeSingle();
   const { error } = await supabase.from("site_custom_pages").delete().eq("id", id);
   if (error) redirect(builderHref("error=delete_failed"));
+  updateTag("fce-public-site-menu");
   revalidatePath("/", "layout");
   if (existing?.slug) revalidatePath(`/${existing.slug}`);
   redirect("/admin/site-builder?deleted=1");
@@ -106,6 +109,7 @@ export async function saveMenuItem(fd: FormData) {
   };
   const { error } = await supabase.from("site_menu_items").update(patch).eq("id", id);
   if (error) redirect(builderHref("error=menu_save_failed"));
+  updateTag("fce-public-site-menu");
   revalidatePath("/", "layout");
 }
 
@@ -125,6 +129,7 @@ export async function createMenuItem(fd: FormData) {
     display_order: Number(maxRow?.display_order ?? 100) + 10,
   });
   if (error) redirect(builderHref("error=menu_create_failed"));
+  updateTag("fce-public-site-menu");
   revalidatePath("/", "layout");
 }
 
@@ -133,6 +138,7 @@ export async function reorderMenuItems(ids: number[]) {
   const cleanIds = ids.filter((id) => Number.isFinite(id));
   if (!cleanIds.length) return;
   await Promise.all(cleanIds.map((id, index) => supabase.from("site_menu_items").update({ display_order: (index + 1) * 10, updated_at: new Date().toISOString() }).eq("id", id)));
+  updateTag("fce-public-site-menu");
   revalidatePath("/", "layout");
 }
 
@@ -142,5 +148,6 @@ export async function deleteMenuItem(id: number) {
   const { data } = await supabase.from("site_menu_items").select("system_key").eq("id", id).maybeSingle();
   if (data?.system_key) return;
   await supabase.from("site_menu_items").delete().eq("id", id);
+  updateTag("fce-public-site-menu");
   revalidatePath("/", "layout");
 }

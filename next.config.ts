@@ -36,7 +36,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
-      { source: "/brand/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
+      { source: "/brand/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=3600, must-revalidate" }] },
     ];
   },
 };

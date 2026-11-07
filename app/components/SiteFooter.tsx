@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { getLocale } from "@/lib/locale";
 import { publicText } from "@/lib/i18n";
 import { defaultFooterDesign, localizedValue, normalizeFooterDesign } from "@/lib/global-design";
@@ -7,7 +8,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 
 type VisitCounts = { unique_24h: number; unique_7d: number; unique_30d: number };
 
-async function getVisitCounts(): Promise<VisitCounts | null> {
+const getVisitCounts = unstable_cache(async (): Promise<VisitCounts | null> => {
   try {
     const supabase = createPublicClient();
     const { data, error } = await supabase.rpc("get_public_visit_counts");
@@ -23,7 +24,7 @@ async function getVisitCounts(): Promise<VisitCounts | null> {
   } catch {
     return null;
   }
-}
+}, ["fce-public-visit-counts-v1"], { revalidate: 60 });
 
 export default async function SiteFooter() {
   const locale = await getLocale();

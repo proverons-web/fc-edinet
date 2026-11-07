@@ -3,15 +3,13 @@ import Link from "next/link";
 import HeaderNavClient from "@/app/components/HeaderNavClient";
 import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 import { createClient } from "@/lib/supabase/server";
-import { createPublicClient } from "@/lib/supabase/public";
 import type { Profile } from "@/lib/types";
 import { staffRoles } from "@/lib/types";
 import { getLocale } from "@/lib/locale";
 import { publicText } from "@/lib/i18n";
 import { accountText } from "@/lib/account-i18n";
 import { defaultHeaderDesign, localizedValue, normalizeHeaderDesign } from "@/lib/global-design";
-import type { SiteMenuItem } from "@/lib/site-builder";
-import { canonicalPublicMenu, hasCanonicalMenuHierarchy, normalizeCanonicalMenuRoutes } from "@/lib/site-navigation";
+import { getPublicSiteMenu } from "@/lib/site-public-menu";
 import { getGlobalDesignConfigs } from "@/lib/site-global-designs";
 
 export default async function SiteHeader() {
@@ -19,18 +17,13 @@ export default async function SiteHeader() {
   const text = publicText[locale];
   const account = accountText[locale];
   const supabase = await createClient();
-  const publicSupabase = createPublicClient();
-  const [{ data: claimsData }, globalDesigns, menuResult] = await Promise.all([
+  const [{ data: claimsData }, globalDesigns, managedMenu] = await Promise.all([
     supabase.auth.getClaims(),
     getGlobalDesignConfigs(),
-    publicSupabase.from("site_menu_items").select("*").eq("visible", true).order("display_order").order("id"),
+    getPublicSiteMenu(),
   ]);
   const userId = claimsData?.claims?.sub;
   const design = normalizeHeaderDesign(globalDesigns.header, defaultHeaderDesign);
-  const fetchedMenu = normalizeCanonicalMenuRoutes((menuResult.data ?? []) as SiteMenuItem[]);
-  const managedMenu = !menuResult.error && hasCanonicalMenuHierarchy(fetchedMenu)
-    ? fetchedMenu
-    : canonicalPublicMenu;
 
   let profile: Profile | null = null;
   if (userId) {

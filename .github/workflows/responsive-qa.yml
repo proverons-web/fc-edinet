@@ -55,6 +55,22 @@ jobs:
         run: node scripts/qa-hall-layout.mjs
       - name: Check performance and image delivery contracts
         run: node scripts/qa-performance.mjs
+      - name: Check v2.30.10 cache correctness and release stability
+        run: node scripts/qa-performance-stability-v2310.mjs
+      - name: Check new match galleries and image viewer
+        run: |
+          node scripts/qa-match-media-v2302.mjs
+          node scripts/qa-media-gallery-v2303.mjs
+          node scripts/qa-media-albums-v2305.mjs
+      - name: Check match videos and club history archive
+        run: |
+          node --experimental-strip-types scripts/qa-match-videos-v2304.mjs
+          node --experimental-strip-types scripts/qa-club-seasons-v2306.mjs
+          node --experimental-strip-types scripts/qa-club-history-v2307.mjs
+      - name: Check social images and club match logos
+        run: |
+          node --experimental-strip-types scripts/qa-seo-social-v2308.mjs
+          node --experimental-strip-types scripts/qa-social-match-logos-v2309.mjs
       - name: Validate match calendar subscription and sharing contracts
         run: node --experimental-strip-types scripts/qa-fan-experience.mjs
       - name: Check fan action geometry across mobile and desktop widths

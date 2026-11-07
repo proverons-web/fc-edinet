@@ -43,16 +43,34 @@ export default async function Home() {
   const supabase = createPublicClient();
   const now = new Date().toISOString();
 
-  const [heroResult, settingsResult, sectionsResult] = await Promise.all([
+  // Start independent public feeds immediately. They do not depend on the
+  // editorial Hero/section settings; only the optional pinned article does.
+  const homepageConfigPromise = Promise.all([
     supabase.from("homepage_hero").select("*").eq("id", 1).maybeSingle(),
     supabase.from("homepage_settings").select("*").eq("id", 1).maybeSingle(),
     supabase.from("homepage_sections").select("*").order("display_order", { ascending: true }),
   ]);
+  // Always resolve to a news row or null. Supabase queries are PromiseLike,
+  // not native Promises: mixing a PostgrestBuilder with Promise.resolve() in
+  // the same callback caused TypeScript TS2345 / TS2339 during `next build`.
+  const pinnedNewsPromise = homepageConfigPromise.then(async ([, settingsResult]) => {
+    const cfg = settingsResult.data as HomepageSettings | null;
+    if (!(cfg?.show_pinned_news && cfg.pinned_news_id)) return null;
 
-  const hero = heroResult.data as HomepageHero | null;
-  const settings = settingsResult.data as HomepageSettings | null;
-  const sectionRows = (sectionsResult.data ?? []) as HomepageSection[];
-  const sectionEnabled = (key: string) => sectionRows.find((row) => row.section_key === key)?.is_enabled !== false;
+    const { data, error } = await supabase
+      .from("news")
+      .select(`
+        id,title,title_ro,slug,excerpt,excerpt_ro,cover_image_url,cover_position_x,cover_position_y,cover_zoom,author_name,status,
+        published_at,views,is_featured,category_id,
+        category:news_categories(id,name,name_ro,slug)
+      `)
+      .eq("id", cfg.pinned_news_id)
+      .eq("status", "published")
+      .lte("published_at", now)
+      .maybeSingle();
+
+    return error ? null : data;
+  });
 
   const [playersResult, newsResult, nextMatchResult, recentMatchesResult, competitionResult, partnersResult, pinnedNewsResult, albumsResult, videosResult] = await Promise.all([
     supabase
@@ -102,19 +120,7 @@ export default async function Home() {
       .order("display_order")
       .order("name")
       .limit(20),
-    settings?.show_pinned_news && settings.pinned_news_id
-      ? supabase
-          .from("news")
-          .select(`
-            id,title,title_ro,slug,excerpt,excerpt_ro,cover_image_url,cover_position_x,cover_position_y,cover_zoom,author_name,status,
-            published_at,views,is_featured,category_id,
-            category:news_categories(id,name,name_ro,slug)
-          `)
-          .eq("id", settings.pinned_news_id)
-          .eq("status", "published")
-          .lte("published_at", now)
-          .maybeSingle()
-      : Promise.resolve({ data: null, error: null }),
+    pinnedNewsPromise,
     supabase
       .from("media_albums")
       .select("id,title,slug,description,event_date,location,cover_image_url")
@@ -132,9 +138,15 @@ export default async function Home() {
       .limit(3),
   ]);
 
+  const [heroResult, settingsResult, sectionsResult] = await homepageConfigPromise;
+  const hero = heroResult.data as HomepageHero | null;
+  const settings = settingsResult.data as HomepageSettings | null;
+  const sectionRows = (sectionsResult.data ?? []) as HomepageSection[];
+  const sectionEnabled = (key: string) => sectionRows.find((row) => row.section_key === key)?.is_enabled !== false;
+
   const players = (playersResult.data ?? []) as Pick<Player, "id" | "first_name" | "last_name" | "slug" | "shirt_number" | "position" | "photo_url">[];
   const allNews = (newsResult.data ?? []) as unknown as NewsListArticle[];
-  const pinnedNews = pinnedNewsResult.data as unknown as NewsListArticle | null;
+  const pinnedNews = pinnedNewsResult as unknown as NewsListArticle | null;
   const nextMatch = nextMatchResult.data as unknown as ClubMatch | null;
   // The first row of the finished-match feed is also the last match; avoid a duplicate request.
   const lastMatch = (recentMatchesResult.data?.[0] ?? null) as unknown as ClubMatch | null;

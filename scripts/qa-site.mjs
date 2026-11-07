@@ -38,7 +38,7 @@ ok("security headers configured", read("next.config.ts").includes("X-Content-Typ
 
 // Final Product QA hardening.
 ok("cookie-free public Supabase client", exists("lib/supabase/public.ts") && read("lib/supabase/public.ts").includes("persistSession: false"));
-ok("public menu isolated from auth cookies", read("app/components/SiteHeader.tsx").includes('publicSupabase.from("site_menu_items")'));
+ok("public menu isolated from auth cookies", read("app/components/SiteHeader.tsx").includes("getPublicSiteMenu()") && read("lib/site-public-menu.ts").includes("createPublicClient()"));
 ok("global public design isolated from auth cookies", read("lib/site-global-designs.ts").includes("createPublicClient"));
 ok("homepage public data isolated from auth cookies", read("app/page.tsx").includes("createPublicClient"));
 ok("stale auth 401 clears session cookies", /status === 401/.test(read("lib/supabase/proxy.ts")));
@@ -74,7 +74,7 @@ ok("public staff hides placeholder records", read("app/staff/page.tsx").includes
 ok("legacy team squad redirects", read("app/team/squad/page.tsx").includes('redirect("/team")'));
 ok("legacy team staff redirects", read("app/team/staff/page.tsx").includes('redirect("/staff")'));
 ok("canonical fallback staff route", read("lib/site-navigation.ts").includes('system_key: "team_staff"') && read("lib/site-navigation.ts").includes('href: "/staff"'));
-ok("stale database staff route normalized at runtime", read("lib/site-navigation.ts").includes("normalizeCanonicalMenuRoutes") && read("app/components/SiteHeader.tsx").includes("normalizeCanonicalMenuRoutes") && read("app/admin/site-builder/page.tsx").includes("normalizeCanonicalMenuRoutes"));
+ok("stale database staff route normalized at runtime", read("lib/site-navigation.ts").includes("normalizeCanonicalMenuRoutes") && read("lib/site-public-menu.ts").includes("normalizeCanonicalMenuRoutes") && read("app/admin/site-builder/page.tsx").includes("normalizeCanonicalMenuRoutes"));
 ok("global design fallback staff route", read("lib/global-design.ts").includes('label_ru: "Тренерский штаб"') && read("lib/global-design.ts").includes('href: "/staff"'));
 ok("staff admin opens canonical public route", read("app/admin/staff/page.tsx").includes('href="/staff"'));
 ok("legacy roster filter removed", !exists("app/components/TeamRosterBrowser.tsx"));
@@ -92,7 +92,7 @@ ok("season migration exists", exists("database/059_navigation_season_2627.sql"))
 ok("season contains calendar statistics standings", ["system_key='matches'","system_key='statistics'","system_key='standings'"].every((x) => read("database/059_navigation_season_2627.sql").includes(x)));
 ok("fallback nav uses season label", read("lib/i18n.ts").includes('team: "Сезон 26/27"'));
 ok("canonical managed-menu fallback exists", exists("lib/site-navigation.ts") && read("lib/site-navigation.ts").includes("canonicalPublicMenu"));
-ok("header rejects broken flat managed menu", read("app/components/SiteHeader.tsx").includes("hasCanonicalMenuHierarchy") && read("app/components/SiteHeader.tsx").includes("canonicalPublicMenu"));
+ok("header rejects broken flat managed menu", read("lib/site-public-menu.ts").includes("hasCanonicalMenuHierarchy") && read("lib/site-public-menu.ts").includes("canonicalPublicMenu"));
 ok("header always supplies managed hierarchy", read("app/components/SiteHeader.tsx").includes("managedMenu={managedMenu}"));
 ok("public menu RLS migration exists", exists("database/060_fix_public_site_menu_rls.sql") && read("database/060_fix_public_site_menu_rls.sql").includes('to anon') && !read("database/060_fix_public_site_menu_rls.sql").includes('to anon,authenticated'));
 ok("public custom pages RLS migration exists", exists("database/061_fix_public_custom_pages_rls.sql") && read("database/061_fix_public_custom_pages_rls.sql").includes('to anon'));
@@ -122,8 +122,8 @@ ok("next match VS circle replaced", homeCss.includes('Modern VS separator') && h
 ok("results rail frame and rounding removed", homeCss.includes('.fcV215ResultsSection .fcV215MatchRailWide{') && homeCss.includes('.fcV215ResultsSection .fcRefRecentMatchCard,') && homeCss.includes('border:0!important;') && homeCss.includes('border-radius:0!important;'));
 ok("homepage news rounding removed", homeCss.includes('.fcRefLeadColumn,\n.fcRefLatestColumn{') && homeCss.includes('.fcRefNewsRow>div{\n  border-radius:0!important;'));
 const releaseSource = read("lib/release.ts");
-ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.30.9"'));
-ok("release version", JSON.parse(read("package.json")).version === "2.30.9");
+ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.30.10"'));
+ok("release version", JSON.parse(read("package.json")).version === "2.30.10");
 
 ok("v2.28.8 next-match footprint restored", homeCss.includes("FC EDINEȚ v2.28.8 — LARGE CRESTS WITHOUT TALLER MATCH CARD") && homeCss.includes("min-height:168px!important") && homeCss.includes("height:168px!important"));
 ok("v2.28.8 crests enlarge without layout growth", homeCss.includes("transform:scale(1.58) translateY(-7px)!important"));
@@ -133,7 +133,7 @@ ok("v2.28.10 recent match crest alignment fixed", homeCss.includes("FC EDINEȚ v
 ok("v2.28.11 recent match crest stage added", homepageSource.includes('className="fcRefRecentMatchCrest"') && homeCss.includes("FC EDINEȚ v2.28.11 — RECENT MATCHES HORIZONTAL CREST LINE"));
 ok("recent match crests aligned", homeCss.includes("object-position:center center!important") && homepageSource.includes('className="fcRefRecentMatchLogoBox"'));
 const legacyTxt = fs.readdirSync(root).filter((name)=>/^(STEP-|DEPLOY-|FIX-).*\.txt$/.test(name));
-ok("v2.28.24 legacy step/deploy/fix txt pruned", legacyTxt.length === 1 && legacyTxt[0] === 'STEP-2.30.9.txt', legacyTxt.join(', '));
+ok("v2.28.24 legacy step/deploy/fix txt pruned", legacyTxt.length === 1 && legacyTxt[0] === 'STEP-2.30.10.txt', legacyTxt.join(', '));
 ok("v2.28.12 recent match side padding restored", homeCss.includes("FC EDINEȚ v2.28.12 — RECENT MATCH SIDE PADDING FIX"));
 ok("v2.28.13 recent match logo boxes added", homepageSource.includes('className="fcRefRecentMatchLogoBox"') && homeCss.includes("FC EDINEȚ v2.28.13 — RECENT MATCH LOGO BOXES"));
 ok("v2.28.14 recent match card compacted", homeCss.includes("FC EDINEȚ v2.28.14 — RECENT MATCH CARD COMPACTION"));
