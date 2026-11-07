@@ -1,8 +1,0 @@
-FC Edineț v2.30.0 — Fan Experience
-
-Install: extract FULL ZIP alongside previous versions, run DEPLOY_FC_EDINET.bat.
-Supabase database migration: not required.
-New public features: match iCalendar links, subscribed calendar feed, share match link.
-Run npm run qa:fan, then after deployment npm run qa:live.
-Test /matches and /matches/<id>, /api/calendar?lang=ru and /api/calendar/<id>?lang=ru.
-The calendar feed only includes confirmed upcoming scheduled matches; 2-hour calendar duration is an estimate.

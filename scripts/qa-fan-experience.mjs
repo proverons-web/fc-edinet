@@ -102,8 +102,8 @@ check("New fan styles are route-scoped without additional global imports or !imp
   assert.doesNotMatch(read("app/layout.tsx"), /fan-actions/);
 });
 check("Site version is consistent with new release and routes", () => {
-  assert.equal(JSON.parse(read("package.json")).version, "2.30.0");
-  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.0"/);
+  assert.equal(JSON.parse(read("package.json")).version, "2.30.1");
+  assert.ok(read("lib/release.ts").includes(`RELEASE_VERSION = "${JSON.parse(read("package.json")).version}"`));
   assert.ok(fs.existsSync(path.join(root, "app/api/calendar/[id]/route.ts")));
 });
 console.log(`\nFan Experience QA: ${passed}/${passed + failed} passed.`);

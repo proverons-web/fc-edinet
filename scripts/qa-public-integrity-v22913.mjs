@@ -77,7 +77,8 @@ check('public protocol does not invent zero scores in key summary blocks', () =>
   assert.ok(s.includes('home={match.home_score} away={match.away_score}'));
 });
 check('favorite cards and social preview use shared score policies', () => {
-  assert.ok(read('app/account/favorites/page.tsx').includes('matchScoreText(match, ":")'));
+  assert.ok(read('app/account/FanMatchItem.tsx').includes('matchScoreText(match, ":")'));
+  assert.ok(read('app/account/favorites/page.tsx').includes('<FanMatchItem '));
   assert.ok(read('app/matches/[id]/opengraph-image.tsx').includes('matchScoreText(match || {})'));
 });
 check('public back button falls back on direct external arrival', () => {

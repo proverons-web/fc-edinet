@@ -61,6 +61,12 @@ jobs:
         run: node scripts/qa-fan-layout.mjs
         env:
           CHROME_PATH: /usr/bin/google-chrome
+      - name: Personalized fan dashboard logic and privacy contracts
+        run: node --experimental-strip-types scripts/qa-fan-dashboard.mjs
+      - name: Fan dashboard mobile geometry
+        run: node scripts/qa-fan-dashboard-layout.mjs
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
       - name: UI visual consistency against approved baseline
         run: node scripts/qa-ui-consistency.mjs
         env:

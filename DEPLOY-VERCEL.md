@@ -1,10 +1,9 @@
-# FC Edineț v2.30.0 — deployment
+# FC Edineț v2.30.1 — deployment
 
-1. Extract `fc-edinet-v2.30.0-FULL.zip` into `fc-edinet-v2.30.0` beside prior releases.
-2. Run `DEPLOY_FC_EDINET.bat`. It restores `.env.local` locally when necessary, installs dependencies, runs all QA (including `qa:fan`) and builds before deployment.
-3. No new Supabase migrations are required by the v2.30.0 fan calendar release. Previous migrations 068 and 069 remain in the package for reproducibility.
-4. After deployment verify `https://fc-edinet.vercel.app/api/version` reports `2.30.0`.
-5. Run `npm run qa:live`. The public smoke test verifies the iCalendar feed at `/api/calendar?lang=ru`.
-6. Review `PRODUCTION-CHECKLIST-v2.30.0.md` before considering the release verified.
+1. Extract `fc-edinet-v2.30.1-FULL.zip` into `fc-edinet-v2.30.1` next to the previous release.
+2. Run `DEPLOY_FC_EDINET.bat`. The deploy process restores `.env.local` locally when needed, runs the QA suite, and requires a successful `next build` before publishing to Vercel.
+3. No new Supabase migrations are required. The fan dashboard reads the existing `favorite_players`, `favorite_matches`, `matches`, `players`, `teams`, and `competitions` tables. RLS and explicit `user_id` filters protect user-specific reads.
+4. After publishing check `https://fc-edinet.vercel.app/api/version` reports `2.30.1` and execute `npm run qa:live` (public URLs).
+5. Log in as a regular fan and complete the account-specific steps in `PRODUCTION-CHECKLIST-v2.30.1.md`. Public smoke tests cannot exercise private account pages.
 
-**Scope:** calendar feed and single-match `.ics` exports, localized fan actions and link sharing. No existing match, player or administrator data is changed by installation.
+**Changes:** Personal fan dashboard in `/account`, categorised/sorted favorite matches in `/account/favorites`, calendar export for saved future matches and clear error states. RU/RO supported. No automatic emailing or push notifications.
