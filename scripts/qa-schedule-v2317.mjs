@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
-import {scheduleDateLabel, scheduleReason, isRescheduled, scheduleChangeLabel, resolvePostponedKickoff} from "../lib/match-schedule.ts";
+import {scheduleDateLabel, scheduleReason, isRescheduled, scheduleChangeLabel, resolvePostponedKickoff, hasAnnouncedReplacementDate, appearsInDatedCalendar, orderFixturesByKickoff} from "../lib/match-schedule.ts";
 import {createMatchCalendar, isCalendarEligible} from "../lib/match-calendar.ts";
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
 const read=(p)=>fs.readFileSync(path.join(root,p),"utf8");
@@ -55,4 +55,37 @@ check("favorite list retains changed fixture",()=>assert.match(read("lib/fan-fav
 check("feed includes changes",()=>assert.match(read("app/api/calendar/route.ts"),/includeStatusChanges:true/));
 check("revalidation on schedule updates",()=>assert.match(read("app/admin/matches/actions.ts"),/revalidatePath\(`\/matches\/\$\{savedId\}`\)/));
 check("account cards don't promise old dates",()=>assert.match(read("app/account/FanMatchItem.tsx"),/scheduleDateLabel/));
+// FIX2: Calendar placement is based on the actual NEW kickoff, not the status group.
+const calendarNow = new Date("2026-11-07T18:00:00Z");
+const fixture21 = {...f, id:21, kickoff:"2026-11-21T10:00:00Z"};
+const fixture24 = {...old, id:18, kickoff:"2026-11-24T11:00:00Z", original_kickoff:"2026-11-07T10:00:00Z"};
+const fixture28 = {...f, id:28, kickoff:"2026-11-28T10:00:00Z"};
+check("FIX2 moved match with announced date counts as dated fixture",()=>assert.equal(hasAnnouncedReplacementDate(fixture24),true));
+check("FIX2 postponed without new date stays in separate group",()=>assert.equal(hasAnnouncedReplacementDate(old),false));
+check("FIX2 postponed known date belongs in calendar",()=>assert.equal(appearsInDatedCalendar(fixture24,calendarNow),true));
+check("FIX2 chronological order places 24 November between 21 and 28",()=>{
+  const sorted=orderFixturesByKickoff([fixture28,fixture24,fixture21].filter(m=>appearsInDatedCalendar(m,calendarNow)));
+  assert.deepEqual(sorted.map(m=>m.id),[21,18,28]);
+});
+check("FIX2 postponed without date is not a dated fixture",()=>assert.equal(appearsInDatedCalendar(old,calendarNow),false));
+check("FIX2 cancelled match is not a dated fixture",()=>assert.equal(appearsInDatedCalendar({...fixture24,status:"cancelled"},calendarNow),false));
+check("FIX2 postponed replacement already passed does not look upcoming",()=>assert.equal(appearsInDatedCalendar(fixture24,new Date("2026-12-01T00:00:00Z")),false));
+check("FIX2 future fixture remains dated",()=>assert.equal(appearsInDatedCalendar(fixture21,calendarNow),true));
+check("FIX2 match-list uses new placement function and chronological sorting",()=>{
+  const page=read("app/matches/page.tsx");
+  assert.match(page,/orderFixturesByKickoff\(allUpcoming\.filter\(m=>appearsInDatedCalendar/);
+  assert.match(page,/!appearsInDatedCalendar\(m,currentDate\)/);
+  assert.match(page,/matchPostponedCard/);
+});
+check("FIX2 new date is shown in the left date badge",()=>{
+  const page=read("app/matches/page.tsx");
+  assert.match(page,/showDateInBadge=match.status!=="cancelled"/);
+  assert.match(page,/showDateInBadge\?day:"—"/);
+});
+check("FIX2 postponed card is highlighted on mobile and desktop",()=>{
+  const css=read("app/matches/competition-filters.css");
+  assert.match(css,/\.publicMatchCard\.matchPostponedCard/);
+  assert.match(css,/\.matchPostponedChip/);
+  assert.match(css,/@media\(max-width:700px\)/);
+});
 console.log(`v2.30.17 scheduling: ${passed}/${passed+failed}`);if(failed)process.exitCode=1;

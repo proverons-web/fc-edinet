@@ -32,6 +32,28 @@ export function isRescheduled(fixture: ScheduleFixture): boolean {
   const current = Date.parse(fixture.kickoff);
   return Number.isFinite(original) && Number.isFinite(current) && original !== current;
 }
+/** A postponed game with a known replacement date has its real kickoff in kickoff,
+ * while original_kickoff preserves the earlier fixture. Keep the status postponed
+ * (not confirmed) while placing the card on the correct calendar day. */
+export function hasAnnouncedReplacementDate(fixture: ScheduleFixture): boolean {
+  return fixture.status === "postponed" && isRescheduled(fixture)
+    && Number.isFinite(Date.parse(fixture.kickoff));
+}
+
+/** The dated fixture list includes postponed matches with a future announced date.
+ * This is a DISPLAY classification only: the next-match widget and iCalendar
+ * subscriptions keep treating postponed fixtures as unconfirmed. */
+export function appearsInDatedCalendar(fixture: ScheduleFixture, now: Date = new Date()): boolean {
+  if (fixture.status === "live") return true;
+  const kickoff = Date.parse(fixture.kickoff);
+  if (!Number.isFinite(kickoff) || kickoff < now.getTime()) return false;
+  return fixture.status === "scheduled" || hasAnnouncedReplacementDate(fixture);
+}
+
+export function orderFixturesByKickoff<T extends ScheduleFixture>(fixtures: readonly T[]): T[] {
+  return [...fixtures].sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff));
+}
+
 export function hasConfirmedDate(fixture: ScheduleFixture): boolean {
   return fixture.status !== "postponed" && fixture.status !== "cancelled";
 }

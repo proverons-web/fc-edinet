@@ -8,7 +8,7 @@ import { toggleFavoriteMatch } from "@/app/account/actions";
 import { createClient } from "@/lib/supabase/server";
 import type { ClubMatch, Competition, CompetitionType } from "@/lib/types";
 import {competitionTypes,competitionName,competitionTypeLabel} from "@/lib/competition";
-import { scheduleDateLabel, scheduleReason, isRescheduled } from "@/lib/match-schedule";
+import { scheduleDateLabel, scheduleReason, isRescheduled, hasAnnouncedReplacementDate, appearsInDatedCalendar, orderFixturesByKickoff } from "@/lib/match-schedule";
 import "./competition-filters.css";
 import { clubMatchResultClass, matchScoreText, matchVenue } from "@/lib/public-match-integrity";
 import { getLocale } from "@/lib/locale";
@@ -43,8 +43,11 @@ export default async function MatchesPage({searchParams}:{searchParams:Promise<{
  if(ids){upcomingQuery=upcomingQuery.in("competition_id",ids);finishedQuery=finishedQuery.in("competition_id",ids);cancelledQuery=cancelledQuery.in("competition_id",ids)}
  const [upcomingResult,finishedResult,cancelledResult]=await Promise.all([upcomingQuery,finishedQuery,cancelledQuery]);
  const allUpcoming=(upcomingResult.data??[]) as unknown as ClubMatch[];
- const upcoming=allUpcoming.filter(m=>m.status==="scheduled"||m.status==="live");
- const postponed=allUpcoming.filter(m=>m.status==="postponed");
+ // Keep a postponed fixture with a NEW known date between the other dated matches.
+ // Undated postponements and cancellations stay in the separate status section.
+ const currentDate = new Date(now);
+ const upcoming=orderFixturesByKickoff(allUpcoming.filter(m=>appearsInDatedCalendar(m,currentDate)));
+ const postponed=allUpcoming.filter(m=>m.status==="postponed" && !appearsInDatedCalendar(m,currentDate));
  const cancelled=(cancelledResult.data??[]) as unknown as ClubMatch[];
  const affected=[...postponed,...cancelled].sort((a,b)=>Date.parse(b.updated_at||b.kickoff)-Date.parse(a.updated_at||a.kickoff));
  const finished=(finishedResult.data??[]) as unknown as ClubMatch[];
@@ -64,6 +67,51 @@ export default async function MatchesPage({searchParams}:{searchParams:Promise<{
   <div className="sectionHeading matchResultsHeading"><div><p className="eyebrow blue">{text.results}</p><h2>{text.latest}</h2></div></div>{finished.length?<div className="publicMatchList">{finished.map(m=><PublicMatchCard key={m.id} match={m} locale={locale} isAuthenticated={Boolean(userId)} isFavorite={favoriteIds.has(String(m.id))}/>)}</div>:<div className="adminEmpty">{text.resultsEmpty}</div>}
  </div></section></main>
 }
-function PublicMatchCard({match,locale,isAuthenticated,isFavorite}:{match:ClubMatch;locale:Locale;isAuthenticated:boolean;isFavorite:boolean}){const text=publicText[locale].matches;const account=accountText[locale];const date=new Intl.DateTimeFormat(dateLocale(locale),{day:"2-digit",month:"long",year:"numeric",timeZone:"Europe/Chisinau"}).format(new Date(match.kickoff));const day=new Intl.DateTimeFormat(dateLocale(locale),{day:"2-digit",timeZone:"Europe/Chisinau"}).format(new Date(match.kickoff));const month=new Intl.DateTimeFormat(dateLocale(locale),{month:"short",timeZone:"Europe/Chisinau"}).format(new Date(match.kickoff));const time=new Intl.DateTimeFormat(dateLocale(locale),{hour:"2-digit",minute:"2-digit",timeZone:"Europe/Chisinau"}).format(new Date(match.kickoff));const resultClass=clubMatchResultClass(match);return <article className={`publicMatchCard${resultClass}`}><div className="publicMatchDateBadge"><strong>{match.status === "postponed" || match.status === "cancelled" ? "—" : day}</strong><span>{match.status === "postponed" || match.status === "cancelled" ? "" : month}</span></div><div className="publicMatchMeta"><span>{competitionName(match.competition,locale)||text.match}</span><strong>{match.status==="postponed"||match.status==="cancelled"?scheduleDateLabel(match,locale):`${date} · ${time}`}</strong>{(match.status==="postponed"||match.status==="cancelled") && scheduleReason(match,locale) ? <small className="matchScheduleReasonInline">{scheduleReason(match,locale)}</small> : null}{match.status==="scheduled" && isRescheduled(match) ? <small className="matchScheduleRescheduledInline">{locale==="ro"?"Dată actualizată":"Дата изменена"}</small> : null}<small>{match.round||"—"} · {matchVenue(match) || text.stadiumTbd}</small></div><div className="publicTeams"><div className={match.home?.is_club?"clubTeam":""}><TeamBadge team={match.home}/><strong>{match.home?.name??"—"}</strong></div><div className="publicScore">{match.status==="finished"||match.status==="live"?<b>{matchScoreText(match)}</b>:<b aria-label={locale === "ro" ? "contra" : "против"}>—</b>}<span>{matchStatusLabelsI18n[locale][match.status]}</span></div><div className={match.away?.is_club?"clubTeam":""}><TeamBadge team={match.away}/><strong>{match.away?.name??"—"}</strong></div></div><div className="matchFavoriteAction"><Link className="publicMatchDetailsButton" prefetch={false} href={`/matches/${match.id}`}>{locale==="ro"?"Detalii":"Протокол"} →</Link>{match.status === "scheduled" && new Date(match.kickoff).getTime() > Date.now() ? <a className="fanMatchAction fanMatchCalendar" href={`/api/calendar/${match.id}?lang=${locale}`} download={`fc-edinet-match-${match.id}.ics`}><CalendarIcon /> {locale === "ro" ? "În calendar" : "В календарь"}</a> : null}{isAuthenticated?<form action={toggleFavoriteMatch.bind(null,String(match.id),"/matches")}><button className={isFavorite?"favoriteActiveButton":"favoriteButton"} type="submit">{isFavorite?account.removeMatch:account.followMatch}</button></form>:<Link className="favoriteButton" href="/login">{account.loginToFavorite}</Link>}</div></article>}
+function PublicMatchCard({match,locale,isAuthenticated,isFavorite}:{match:ClubMatch;locale:Locale;isAuthenticated:boolean;isFavorite:boolean}) {
+ const text=publicText[locale].matches;
+ const account=accountText[locale];
+ const kickoff=new Date(match.kickoff);
+ const date=new Intl.DateTimeFormat(dateLocale(locale),{day:"2-digit",month:"long",year:"numeric",timeZone:"Europe/Chisinau"}).format(kickoff);
+ const day=new Intl.DateTimeFormat(dateLocale(locale),{day:"2-digit",timeZone:"Europe/Chisinau"}).format(kickoff);
+ const month=new Intl.DateTimeFormat(dateLocale(locale),{month:"short",timeZone:"Europe/Chisinau"}).format(kickoff);
+ const time=new Intl.DateTimeFormat(dateLocale(locale),{hour:"2-digit",minute:"2-digit",timeZone:"Europe/Chisinau"}).format(kickoff);
+ const resultClass=clubMatchResultClass(match);
+ const postponed=match.status==="postponed";
+ const hasNewDate=hasAnnouncedReplacementDate(match);
+ const showDateInBadge=match.status!=="cancelled" && (!postponed || hasNewDate);
+ const originalDate=hasNewDate && match.original_kickoff
+  ? new Intl.DateTimeFormat(dateLocale(locale),{day:"2-digit",month:"long",year:"numeric",timeZone:"Europe/Chisinau"}).format(new Date(match.original_kickoff))
+  : null;
+ return <article className={`publicMatchCard${resultClass}${postponed?" matchPostponedCard":""}`}>
+  <div className="publicMatchDateBadge">
+   <strong>{showDateInBadge?day:"—"}</strong>
+   <span>{showDateInBadge?month:""}</span>
+  </div>
+  <div className="publicMatchMeta">
+   <div className="publicMatchCompetitionLine">
+    <span>{competitionName(match.competition,locale)||text.match}</span>
+    {postponed?<span className="matchPostponedChip">{locale==="ro"?"AMÂNAT":"ПЕРЕНЕСЁН"}</span>:null}
+   </div>
+   <strong>{postponed||match.status==="cancelled"?scheduleDateLabel(match,locale):`${date} · ${time}`}</strong>
+   {originalDate?<small className="matchScheduleOriginalDate">{locale==="ro"?"Data inițială":"Было запланировано"}: {originalDate}</small>:null}
+   {(postponed||match.status==="cancelled") && scheduleReason(match,locale) ? <small className="matchScheduleReasonInline">{scheduleReason(match,locale)}</small> : null}
+   {match.status==="scheduled" && isRescheduled(match) ? <small className="matchScheduleRescheduledInline">{locale==="ro"?"Dată actualizată":"Дата изменена"}</small> : null}
+   <small>{match.round||"—"} · {matchVenue(match) || text.stadiumTbd}</small>
+  </div>
+  <div className="publicTeams">
+   <div className={match.home?.is_club?"clubTeam":""}><TeamBadge team={match.home}/><strong>{match.home?.name??"—"}</strong></div>
+   <div className="publicScore">
+    {match.status==="finished"||match.status==="live"?<b>{matchScoreText(match)}</b>:<b aria-label={locale==="ro"?"contra":"против"}>—</b>}
+    <span>{matchStatusLabelsI18n[locale][match.status]}</span>
+   </div>
+   <div className={match.away?.is_club?"clubTeam":""}><TeamBadge team={match.away}/><strong>{match.away?.name??"—"}</strong></div>
+  </div>
+  <div className="matchFavoriteAction">
+   <Link className="publicMatchDetailsButton" prefetch={false} href={`/matches/${match.id}`}>{locale==="ro"?"Detalii":"Протокол"} →</Link>
+   {match.status==="scheduled" && kickoff.getTime()>Date.now() ? <a className="fanMatchAction fanMatchCalendar" href={`/api/calendar/${match.id}?lang=${locale}`} download={`fc-edinet-match-${match.id}.ics`}><CalendarIcon /> {locale==="ro"?"În calendar":"В календарь"}</a> : null}
+   {isAuthenticated?<form action={toggleFavoriteMatch.bind(null,String(match.id),"/matches")}><button className={isFavorite?"favoriteActiveButton":"favoriteButton"} type="submit">{isFavorite?account.removeMatch:account.followMatch}</button></form>:<Link className="favoriteButton" href="/login">{account.loginToFavorite}</Link>}
+  </div>
+ </article>;
+}
 function TeamBadge({team}:{team:ClubMatch["home"]}){if(team?.logo_url)return <PublicImage className="publicTeamLogo" src={team.logo_url} width={62} height={62} sizes="(max-width: 767px) 46px, 62px" alt=""/>;return <div className={`publicTeamBadge ${team?.is_club?"club":""}`}>{(team?.short_name||team?.name||"FC").slice(0,3).toUpperCase()}</div>}
 function matchSelect(){return `id,competition_id,home_team_id,away_team_id,kickoff,stadium,round,status,home_score,away_score,notes,original_kickoff,schedule_reason_ru,schedule_reason_ro,created_at,updated_at,home:teams!matches_home_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),away:teams!matches_away_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),competition:competitions!matches_competition_id_fkey(id,name,name_ro,slug,season,competition_type,is_active)`}

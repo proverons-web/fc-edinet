@@ -2,3 +2,15 @@
 
 .matchScheduleReasonInline{font-size:12px;color:#74511c;max-width:44ch;line-height:1.4;overflow-wrap:anywhere}
 .matchScheduleRescheduledInline{font-size:12px;color:#0755a5;font-weight:700}
+
+/* v2.30.17 FIX2 — rescheduled matches remain in the calendar at their NEW date. */
+.publicMatchCard.matchPostponedCard{border-color:#dfc27c!important}
+.publicMatchCard.matchPostponedCard:before{background:#d9a01e!important;width:5px!important}
+.publicMatchCard.matchPostponedCard:hover{border-color:#bb922d!important}
+.publicMatchCard.matchPostponedCard .publicMatchDateBadge{background:#102c4d;color:#fff}
+.publicMatchCard.matchPostponedCard .publicMatchDateBadge span{color:#ffd328}
+.publicMatchCard.matchPostponedCard .publicScore span{color:#986400!important}
+.publicMatchCompetitionLine{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.publicMatchMeta .matchPostponedChip{display:inline-flex;align-items:center;min-height:23px;padding:4px 9px;border:1px solid #d7a42a;background:#fff4cf;color:#704b00;font-size:10px!important;line-height:1;font-weight:900;letter-spacing:.05em;text-transform:uppercase}
+.publicMatchMeta .matchScheduleOriginalDate{display:block;color:#697d94;font-size:11px;line-height:1.35}
+@media(max-width:700px){.publicMatchCompetitionLine{justify-content:center}.publicMatchMeta .matchPostponedChip{font-size:9px!important}}
