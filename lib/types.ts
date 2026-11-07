@@ -326,6 +326,7 @@ export type MediaAlbum = {
   event_date: string | null;
   location: string | null;
   cover_image_url: string | null;
+  match_id?: string | number | null;
   is_published: boolean;
   display_order: number;
   created_at: string;

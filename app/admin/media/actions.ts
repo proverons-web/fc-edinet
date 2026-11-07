@@ -33,6 +33,8 @@ export async function createAlbum(
   const eventDate = nullableText(formData.get("event_date"));
   const location = nullableText(formData.get("location"));
   const isPublished = formData.get("is_published") === "on";
+  const matchId = await validateMatchSelection(supabase, formData.get("match_id"));
+  if (matchId === "invalid") return { error: "Выбранный матч не найден." };
 
   if (title.length < 3) {
     return { error: "Название альбома слишком короткое." };
@@ -50,6 +52,7 @@ export async function createAlbum(
       description,
       event_date: eventDate,
       location,
+      match_id: matchId,
       is_published: isPublished,
     })
     .select("id")
@@ -84,6 +87,8 @@ export async function updateAlbum(
   const location = nullableText(formData.get("location"));
   const displayOrder = integer(formData.get("display_order"), 100);
   const isPublished = formData.get("is_published") === "on";
+  const matchId = await validateMatchSelection(supabase, formData.get("match_id"));
+  if (matchId === "invalid") return { error: "Выбранный матч не найден." };
 
   if (!albumId || title.length < 3 || !slug) {
     return { error: "Проверь название и slug альбома." };
@@ -98,6 +103,7 @@ export async function updateAlbum(
       event_date: eventDate,
       location,
       display_order: displayOrder,
+      match_id: matchId,
       is_published: isPublished,
     })
     .eq("id", albumId);
@@ -112,6 +118,7 @@ export async function updateAlbum(
 
   revalidatePath("/media");
   revalidatePath(`/media/${slug}`);
+  if (matchId) revalidatePath(`/matches/${matchId}`);
   revalidatePath("/admin/media");
   revalidatePath(`/admin/media/${albumId}/edit`);
 
@@ -482,4 +489,13 @@ function slugify(value: string) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
+}
+
+// Verify IDs server-side. The empty selection intentionally means an unlinked album.
+async function validateMatchSelection(supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"], raw: FormDataEntryValue | null): Promise<string | null | "invalid"> {
+  const value = typeof raw === "string" ? raw.trim() : "";
+  if (!value) return null;
+  if (!/^\d+$/.test(value)) return "invalid";
+  const { data, error } = await supabase.from("matches").select("id").eq("id", value).maybeSingle();
+  return error || !data ? "invalid" : value;
 }

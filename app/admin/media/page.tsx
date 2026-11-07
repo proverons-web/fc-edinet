@@ -1,3 +1,4 @@
+import { mediaMatchOptions } from "@/lib/media-match-options";
 import Link from "next/link";
 import ConfirmSubmitButton from "@/app/components/ConfirmSubmitButton";
 import MediaAlbumCreateForm from "@/app/components/MediaAlbumCreateForm";
@@ -42,6 +43,7 @@ export default async function AdminMediaPage({ searchParams }: PageProps) {
         .order("published_at", { ascending: false }),
     ]);
 
+  const matches = await mediaMatchOptions(supabase);
   const rawAlbums = (albumsData ?? []) as MediaAlbum[];
   const rawVideos = (videosData ?? []) as MediaVideo[];
   const albumCountWithoutCover = rawAlbums.filter((album) => !album.cover_image_url?.trim()).length;
@@ -91,7 +93,7 @@ export default async function AdminMediaPage({ searchParams }: PageProps) {
           {(albumsError || videosError) && <p role="alert" className="adminAttentionError">Не удалось загрузить медиатеку: {albumsError?.message || videosError?.message}</p>}
 
           <div className="mediaAdminTwoColumns">
-            <MediaAlbumCreateForm />
+            <MediaAlbumCreateForm matches={matches} />
             <MediaVideoForm />
           </div>
 

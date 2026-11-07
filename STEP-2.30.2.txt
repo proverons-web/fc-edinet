@@ -1,0 +1,11 @@
+FC EDINET v2.30.2 FULL — MATCH PHOTO ALBUMS
+
+1. Run database/074_media_match_albums.sql ONCE in Supabase SQL Editor.
+2. Deploy using DEPLOY_FC_EDINET.bat from this version folder.
+3. Admin > Media: create/edit an album and select a match (optional).
+4. Publish album, upload photos, and open /matches/<match_id>.
+5. Scroll to Photo Gallery / Fotografii de la meci and open the album.
+6. Confirm RU/RO and mobile behavior.
+
+IMPORTANT: The Supabase migration must precede editing albums in v2.30.2.
+This release does not delete previous albums or photos.

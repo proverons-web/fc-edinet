@@ -1,0 +1,17 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const read = p => fs.readFileSync(p,'utf8');
+const migration=read('database/074_media_match_albums.sql');
+assert.match(migration,/ADD COLUMN IF NOT EXISTS match_id/);
+assert.match(migration,/REFERENCES public\.matches\(id\) ON DELETE SET NULL/);
+const actions=read('app/admin/media/actions.ts');
+assert.match(actions,/validateMatchSelection/);
+assert.match(actions,/match_id: matchId/g);
+const publicMatch=read('app/matches/[id]/page.tsx');
+assert.match(publicMatch,/\.eq\("match_id", id\)\.eq\("is_published", true\)/);
+assert.match(publicMatch,/id="match-gallery"/);
+assert.match(publicMatch,/matchAlbums\.map/);
+assert.match(read('app/components/MediaAlbumCreateForm.tsx'),/name="match_id"/);
+assert.match(read('app/components/MediaAlbumEditorForm.tsx'),/name="match_id"/);
+assert.match(read('package.json'),/"version": "2\.30\.2"/);
+console.log('Match media v2.30.2: 9 checks passed.');

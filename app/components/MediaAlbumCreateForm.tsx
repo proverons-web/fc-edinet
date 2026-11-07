@@ -8,7 +8,7 @@ import {
 
 const initialState: MediaFormState = {};
 
-export default function MediaAlbumCreateForm() {
+export default function MediaAlbumCreateForm({ matches = [] }: { matches?: { id: string; label: string }[] }) {
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
@@ -70,6 +70,14 @@ export default function MediaAlbumCreateForm() {
             placeholder="Stadionul Edineț"
           />
         </div>
+      </div>
+
+      <div className="fieldGroup">
+        <label htmlFor="media_match_id">Матч (необязательно)</label>
+        <select id="media_match_id" name="match_id" defaultValue="">
+          <option value="">Без привязки к матчу</option>
+          {matches.map((match) => <option key={match.id} value={match.id}>{match.label}</option>)}
+        </select>
       </div>
 
       <div className="fieldGroup">

@@ -10,9 +10,10 @@ import type { MediaAlbum } from "@/lib/types";
 const initialState: MediaFormState = {};
 
 export default function MediaAlbumEditorForm({
-  album,
+  album, matches,
 }: {
   album: MediaAlbum;
+  matches: { id: string; label: string }[];
 }) {
   const [title, setTitle] = useState(album.title);
   const [slug, setSlug] = useState(album.slug);
@@ -95,6 +96,15 @@ export default function MediaAlbumEditorForm({
             defaultValue={album.display_order}
           />
         </div>
+      </div>
+
+      <div className="fieldGroup">
+        <label htmlFor="album_match_id">Матч (необязательно)</label>
+        <select id="album_match_id" name="match_id" defaultValue={String(album.match_id ?? "")}>
+          <option value="">Без привязки к матчу</option>
+          {matches.map((match) => <option key={match.id} value={match.id}>{match.label}</option>)}
+        </select>
+        <small>Опубликованный альбом появится в протоколе выбранного матча.</small>
       </div>
 
       <div className="fieldGroup">

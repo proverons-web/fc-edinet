@@ -10,6 +10,7 @@ import {
   updatePhoto,
 } from "@/app/admin/media/actions";
 import { requireEditor } from "@/lib/editorial";
+import { mediaMatchOptions } from "@/lib/media-match-options";
 import type {
   MediaAlbum,
   MediaPhoto,
@@ -56,6 +57,7 @@ export default async function AdminAlbumEditPage({
   if (!albumData) notFound();
 
   const album = albumData as MediaAlbum;
+  const matches = await mediaMatchOptions(supabase);
   const photos = (photosData ?? []) as MediaPhoto[];
 
   const created = Array.isArray(query.created)
@@ -101,7 +103,7 @@ export default async function AdminAlbumEditPage({
             </div>
           )}
 
-          <MediaAlbumEditorForm album={album} />
+          <MediaAlbumEditorForm album={album} matches={matches} />
 
           <AlbumPhotoUploader
             albumId={String(album.id)}

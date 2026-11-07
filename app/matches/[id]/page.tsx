@@ -12,6 +12,7 @@ import "../fan-actions.css";
 import "./match-report-v2298.css";
 import "./match-player-navigation-v22910.css";
 import "./match-lineup-mobile-v22912.css";
+import "./match-media-v2302.css";
 import JsonLd from "@/app/components/JsonLd";
 import { notFound } from "next/navigation";
 import { createPublicClient } from "@/lib/supabase/public";
@@ -264,6 +265,12 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
   const match = await getMatch(id);
   if (!match) notFound();
   const supabase = createPublicClient();
+  // Older installations without migration 074 simply show no photo albums.
+  const { data: matchAlbumsData } = await supabase.from("media_albums")
+    .select("id,title,slug,cover_image_url,event_date")
+    .eq("match_id", id).eq("is_published", true)
+    .order("display_order").order("event_date", { ascending: false }).limit(8);
+  const matchAlbums = matchAlbumsData ?? [];
 
   const { data: reportData } = await supabase
     .from("match_reports")
@@ -383,6 +390,7 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
               {hasTeamStatistics ? <a href="#statistics">{t.statistics}</a> : null}
               <a href="#timeline">{t.timeline}</a>
               <a href="#lineups">{t.lineups}</a>
+              {matchAlbums.length ? <a href="#match-gallery">{locale === "ro" ? "Fotografii" : "Фотографии"}</a> : null}
               {hasInfo ? <a href="#info">{locale === "ro" ? "Informații" : "Информация"}</a> : null}
             </div>
           </nav>
@@ -470,6 +478,15 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
             )}
           </div>
         </section>
+        {matchAlbums.length > 0 ? <section id="match-gallery" className="section matchMediaSection">
+          <div className="container">
+            <div className="publicMatchSectionHead premiumSectionHead"><p className="eyebrow blue">FC EDINEȚ MEDIA</p><h2>{locale === "ro" ? "Fotografii de la meci" : "Фотографии матча"}</h2></div>
+            <div className="matchMediaGrid">{matchAlbums.map((album) => <Link href={`/media/${album.slug}`} className="matchMediaAlbum" key={String(album.id)}>
+              {album.cover_image_url ? <img src={album.cover_image_url} alt="" loading="lazy" decoding="async" /> : <span className="matchMediaNoCover">FC EDINEȚ</span>}
+              <span className="matchMediaAlbumTitle">{album.title}<small>{locale === "ro" ? "Deschide albumul →" : "Открыть альбом →"}</small></span>
+            </Link>)}</div>
+          </div>
+        </section> : null}
       </main>
     </>
   );
