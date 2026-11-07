@@ -2192,7 +2192,8 @@ h1,h2,h3{font-family:var(--ds-font-heading);font-weight:var(--ds-heading-weight)
   .matchCenterPage .adminSurface{padding-top:24px}
   .matchCenterSummary,.matchCenterProgressGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
   .matchCenterSummaryCard{min-height:78px;padding:13px}.matchCenterSummaryCard strong{font-size:28px}
-  .matchCenterRow{grid-template-columns:1fr;gap:10px;padding:13px}.matchCenterDate{display:flex;gap:8px;align-items:center}.matchCenterWorkflow,.matchCenterRowActions{grid-column:1}.matchCenterWorkflow{}.matchCenterRowActions{display:grid;grid-template-columns:1fr}.matchCenterRowActions .primaryButton,.matchCenterRowActions .rowAction{width:100%;min-width:0}
+  .matchCenterRow{grid-template-columns:1fr;gap:10px;padding:13px}.matchCenterDate{display:flex;gap:8px;align-items:center}.matchCenterWorkflow,.matchCenterRowActions{grid-column:1}
+.matchCenterRowActions{display:grid;grid-template-columns:1fr}.matchCenterRowActions .primaryButton,.matchCenterRowActions .rowAction{width:100%;min-width:0}
   .matchCenterFieldGrid{grid-template-columns:1fr}.matchCenterWideField{grid-column:auto}.matchCenterFormFooter{align-items:stretch;flex-direction:column}.matchCenterFormFooter .primaryButton{width:100%}
   .matchCenterSidebar{grid-template-columns:1fr}.matchCenterSidebar>section:last-child{grid-column:auto}
 }
@@ -2202,16 +2203,20 @@ h1,h2,h3{font-family:var(--ds-font-heading);font-weight:var(--ds-heading-weight)
    ============================================================ */
 .matchCenterTimelineWarning{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:13px 15px;border:1px solid #f1d59a;border-radius:14px;background:#fffaf0;color:#7a5a15}.matchCenterTimelineWarning strong{font-size:11px;white-space:nowrap}.matchCenterTimelineWarning span{font-size:10px;line-height:1.5;text-align:right}
 .matchEventEditor{margin:0;display:grid;gap:18px}.matchEventEditor .statisticsPanelHead{align-items:flex-start}
-.matchEventForm{display:grid;gap:16px}.matchEventFields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.matchEventFields .fieldGroup{margin:0}.matchEventFields .fieldGroup>span{display:block;margin-bottom:6px;font-size:9px;font-weight:850;color:#526b86}.matchEventFields .matchEventDescription{grid-column:span 3}.matchEventFields .matchEventSortOrder{}
+.matchEventForm{display:grid;gap:16px}.matchEventFields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.matchEventFields .fieldGroup{margin:0}.matchEventFields .fieldGroup>span{display:block;margin-bottom:6px;font-size:9px;font-weight:850;color:#526b86}.matchEventFields .matchEventDescription{grid-column:span 3}
+
 .matchEventFormFooter{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-top:15px;border-top:1px solid #e7edf3}.matchEventFormFooter p{max-width:760px;margin:0;font-size:10px;line-height:1.55;color:#718297}.matchEventFormFooter b{color:#294765}
 .matchTimelinePanel{margin:0;display:grid;gap:16px}.matchTimeline{position:relative;display:grid;gap:0;padding:4px 0}.matchTimeline:before{content:"";position:absolute;left:87px;top:8px;bottom:8px;width:1px;background:#dbe5ef}
 .matchTimelineEvent{position:relative;display:grid;grid-template-columns:62px 50px minmax(0,1fr);align-items:start;min-height:82px}.matchTimelineMinute{padding-top:17px;text-align:right;font-size:15px;font-weight:950;color:#17395f;letter-spacing:-.02em}.matchTimelineRail{position:relative;display:flex;justify-content:center;padding-top:12px;z-index:1}.matchTimelineRail span{display:grid;place-items:center;min-width:31px;height:31px;padding:0 6px;border:4px solid #fff;border-radius:999px;background:#eaf3ff;color:#0d61c8;font-size:10px;font-weight:950;box-shadow:0 0 0 1px #cfddec}.matchTimelineEvent.away .matchTimelineRail span{background:#f1f4f7;color:#536a82}
 .matchTimelineCard{margin:5px 0 12px;padding:12px 14px;border:1px solid #e0e7ef;border-radius:14px;background:#fff}.matchTimelineEvent.home .matchTimelineCard{border-left:3px solid #0d61c8}.matchTimelineEvent.away .matchTimelineCard{border-left:3px solid #7b8998}.matchTimelineEventHead{display:flex;align-items:center;justify-content:space-between;gap:14px}.matchTimelineEventHead>div{display:grid;gap:2px}.matchTimelineEventHead small{font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:#8b98a7}.matchTimelineEventHead strong{font-size:12px;color:#17395f}.matchTimelineEventHead>span{font-size:11px;font-weight:800;color:#4c627a;text-align:right}.matchTimelineCard>p{margin:8px 0 0;padding-top:8px;border-top:1px dashed #e2e8ef;font-size:10px;line-height:1.45;color:#738399}
 .matchTimelineActions{display:flex;align-items:flex-start;justify-content:flex-end;gap:8px;margin-top:9px}.matchTimelineActions details{min-width:0;flex:1}.matchTimelineActions summary{cursor:pointer;list-style:none;font-size:9px;font-weight:900;color:#0d61c8}.matchTimelineActions summary::-webkit-details-marker{display:none}.matchTimelineActions form:not(.matchEventEditForm){margin:0}.matchTimelineActions .rowAction{min-height:30px;padding:0 9px;font-size:9px}
-.matchEventEditForm{display:grid;gap:12px;margin-top:10px;padding:12px;border-radius:12px;background:#f7f9fc;border:1px solid #e2e8ef}.matchEventFields.compact{gap:9px}.matchEventFields.compact .matchEventDescription,.matchEventFields.compact .matchEventSortOrder{}.matchEventEditForm>.rowAction{justify-self:end}
+.matchEventEditForm{display:grid;gap:12px;margin-top:10px;padding:12px;border-radius:12px;background:#f7f9fc;border:1px solid #e2e8ef}.matchEventFields.compact{gap:9px}
+.matchEventEditForm>.rowAction{justify-self:end}
 
 @media(max-width:980px){
-  .matchEventFields{}.matchEventFields .matchEventDescription{}.matchEventFields .matchEventSortOrder{}
+
+
+
   .matchCenterTimelineWarning{flex-direction:column;gap:5px}.matchCenterTimelineWarning span{text-align:left}
 }
 @media(max-width:620px){
@@ -2574,7 +2579,8 @@ h1,h2,h3{font-family:var(--ds-font-heading);font-weight:var(--ds-heading-weight)
 
 /* Unified Site Builder */
 .unifiedSiteBuilder{background:#e9eef5;min-height:100vh}.unifiedBuilderSurface{display:grid;grid-template-columns:190px minmax(0,1fr);min-height:calc(100vh - 190px)}.unifiedBuilderSidebar{padding:18px 12px;background:#061a35;color:#c5d4e6;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:calc(100vh - 0px);overflow:auto}.unifiedBuilderSidebar>strong{padding:12px 10px 6px;color:#7890ae;font-size:9px;letter-spacing:.12em}.unifiedBuilderSidebar a{padding:10px 11px;border-radius:4px;color:#dce8f6;font-size:12px;font-weight:800}.unifiedBuilderSidebar a:hover,.unifiedBuilderSidebar a.active{background:#0b4b98;color:#fff}.unifiedBuilderSidebar hr{width:100%;border:0;border-top:1px solid rgba(255,255,255,.1);margin:10px 0}.unifiedBuilderMain{min-width:0;padding:12px}.unifiedBuilderTop{min-height:58px;padding:10px 14px;background:#fff;border:1px solid #d5dee9;display:flex;align-items:center;justify-content:space-between;gap:20px}.unifiedBuilderTop>div{display:grid}.unifiedBuilderTop>div span{font-size:10px;color:#73839a}.unifiedBuilderTop nav{display:flex;gap:4px}.unifiedBuilderTop nav a{padding:8px 14px;background:#edf2f7;color:#43566f;font-size:11px;font-weight:900}.unifiedBuilderTop nav a.active{background:#0b4b98;color:#fff}.unifiedBuilderSplit{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(360px,.92fr);gap:10px;margin-top:10px;height:calc(100vh - 280px);min-height:680px}.unifiedBuilderSplit>section{min-width:0;background:#fff;border:1px solid #d5dee9;display:grid;grid-template-rows:38px 1fr}.unifiedBuilderSplit header{display:flex;align-items:center;justify-content:space-between;padding:0 10px;border-bottom:1px solid #d5dee9;background:#f7f9fc}.unifiedBuilderSplit header span{font-size:9px;font-weight:950;letter-spacing:.08em;color:#64758d}.unifiedBuilderSplit header a{font-size:9px;font-weight:850;color:#0b4b98}.unifiedBuilderSplit iframe{width:100%;height:100%;border:0;background:#fff}
-@media(max-width:1100px){.unifiedBuilderSplit{grid-template-columns:1fr;}.unifiedBuilderSplit>section{height:720px}.unifiedBuilderSurface{grid-template-columns:150px 1fr}}@media(max-width:720px){.unifiedBuilderSurface{grid-template-columns:1fr}.unifiedBuilderSidebar{position:static;height:auto;display:grid;grid-template-columns:repeat(2,1fr)}.unifiedBuilderSidebar>strong,.unifiedBuilderSidebar hr{grid-column:1/-1}.unifiedBuilderSplit>section{}.unifiedBuilderTop{align-items:flex-start;flex-direction:column}}
+@media(max-width:1100px){.unifiedBuilderSplit{grid-template-columns:1fr;}.unifiedBuilderSplit>section{height:720px}.unifiedBuilderSurface{grid-template-columns:150px 1fr}}@media(max-width:720px){.unifiedBuilderSurface{grid-template-columns:1fr}.unifiedBuilderSidebar{position:static;height:auto;display:grid;grid-template-columns:repeat(2,1fr)}.unifiedBuilderSidebar>strong,.unifiedBuilderSidebar hr{grid-column:1/-1}
+.unifiedBuilderTop{align-items:flex-start;flex-direction:column}}
 
 /* ===== FC EDINET v2.4.1 — Unified Site Builder 2.0 ===== */
 html,body,button,input,select,textarea{font-synthesis:none;text-rendering:geometricPrecision;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
@@ -3192,7 +3198,9 @@ body:has(.adminEmbedded){background:#f3f6fa}
 .matchTimelineEvent.opponent-event .matchTimelineRail span{background:#fff2d8;color:#a56700;box-shadow:0 0 0 1px #edcf98}.matchTimelineEvent.opponent-event .matchTimelineCard{border-left:4px solid #d49625;background:#fffdfa}
 @media(max-width:1380px){.matchCenterLineupsGrid{grid-template-columns:1fr}.matchCenterSquadCompactRow{grid-template-columns:28px minmax(220px,1fr) 110px 38px minmax(130px,.7fr)}}
 @media(max-width:980px){.matchEventFields{grid-template-columns:repeat(2,minmax(0,1fr))}.matchEventFields .matchEventDescription{grid-column:span 2}.matchEventFields .matchEventSortOrder{grid-column:auto}}
-@media(max-width:720px){.matchCenterSquadCompactRow{}.matchCenterPlayerPick{grid-column:2/-1;}.matchCenterCompactPosition{grid-column:2}.matchCenterCaptainToggle{grid-column:3}.matchCenterAutoStats{}.matchEventFields,.matchEventFields.compact{grid-template-columns:1fr}.matchEventFields .matchEventDescription,.matchEventFields.compact .matchEventDescription{grid-column:auto}.matchTimeline{max-width:none}.matchTimeline:before{left:50px}.matchTimelineEvent{grid-template-columns:32px 36px minmax(0,1fr)}}
+@media(max-width:720px){
+.matchCenterPlayerPick{grid-column:2/-1;}.matchCenterCompactPosition{grid-column:2}.matchCenterCaptainToggle{grid-column:3}
+.matchEventFields,.matchEventFields.compact{grid-template-columns:1fr}.matchEventFields .matchEventDescription,.matchEventFields.compact .matchEventDescription{grid-column:auto}.matchTimeline{max-width:none}.matchTimeline:before{left:50px}.matchTimelineEvent{grid-template-columns:32px 36px minmax(0,1fr)}}
 
 
 /* ============================================================
@@ -3321,7 +3329,7 @@ body:has(.adminEmbedded){background:#f3f6fa}
 }
 @media(max-width:720px){
   .matchCenterSquadCompactRow{grid-template-columns:28px minmax(0,1fr) 86px 36px}
-  .matchCenterAutoStats{}
+
   .matchCenterLineupsGrid .matchLineupRow{grid-template-columns:24px minmax(0,1fr) 40px 56px 30px}
 }
 

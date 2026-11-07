@@ -25,6 +25,8 @@ jobs:
         run: node scripts/qa-site.mjs
       - name: Check CSS cascade budget
         run: node scripts/qa-css-audit.mjs
+      - name: Check CSS empty rules and keyboard focus contracts
+        run: node scripts/qa-css-polish-v2312.mjs
       - name: Check dependency and database security contracts
         run: node scripts/qa-security.mjs
       - name: Check editorial workflow and publishing protections
@@ -61,9 +63,9 @@ jobs:
         run: node scripts/qa-hall-layout.mjs
       - name: Check performance and image delivery contracts
         run: node scripts/qa-performance.mjs
-      - name: Check v2.30.11 cache correctness and release stability
+      - name: Check v2.30.12 cache correctness and release stability
         run: node scripts/qa-performance-stability-v2310.mjs
-      - name: Verify v2.30.11 mobile navigation and image-delivery contracts
+      - name: Verify v2.30.12 mobile navigation and image-delivery contracts
         run: node scripts/qa-mobile-experience-v2311.mjs
       - name: Check new match galleries and image viewer
         run: |
