@@ -16,6 +16,9 @@ import "./match-report-v2298.css";
 import "./match-player-navigation-v22910.css";
 import "./match-lineup-mobile-v22912.css";
 import "./match-media-v2302.css";
+import "./match-schedule-v2317.css";
+import MatchScheduleNotice from "./MatchScheduleNotice";
+import { scheduleHistorySelect, scheduleDateLabel, type ScheduleHistoryItem } from "@/lib/match-schedule";
 import JsonLd from "@/app/components/JsonLd";
 import { notFound } from "next/navigation";
 import { createPublicClient } from "@/lib/supabase/public";
@@ -198,7 +201,7 @@ function publicRunningScoreByEvent(events: MatchEvent[], match: ClubMatch) {
 }
 
 function matchSelect() {
-  return `id,competition_id,home_team_id,away_team_id,kickoff,stadium,round,status,home_score,away_score,notes,created_at,updated_at,
+  return `id,competition_id,home_team_id,away_team_id,kickoff,stadium,round,status,home_score,away_score,notes,original_kickoff,schedule_reason_ru,schedule_reason_ro,created_at,updated_at,
   home:teams!matches_home_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
   away:teams!matches_away_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
   competition:competitions!matches_competition_id_fkey(id,name,name_ro,slug,season,season_id,competition_type,is_active)`;
@@ -272,6 +275,10 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
   const match = await getMatch(id);
   if (!match) notFound();
   const supabase = createPublicClient();
+  const {data:scheduleHistoryRows} = await supabase.from("match_schedule_history")
+    .select(scheduleHistorySelect).eq("match_id",id)
+    .order("changed_at",{ascending:false}).order("id",{ascending:false}).limit(12);
+  const scheduleHistory=(scheduleHistoryRows??[]) as ScheduleHistoryItem[];
   // Older installations without migration 074 simply show no photo albums.
   const { data: matchAlbumsData } = await supabase.from("media_albums")
     .select("id,title,slug,cover_image_url,event_date")
@@ -367,8 +374,8 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
             <div className="premiumMatchMetaRow">
               <span className="premiumMatchCompetition">{competitionName(match.competition,locale) || t.match}</span>
               {match.round ? <span>{match.round}</span> : null}
-              <span className={`publicMatchStatusChip status-${match.status}`}>{match.status === "finished" ? (locale === "ro" ? "Final" : "Завершён") : match.status === "live" ? (locale === "ro" ? "ÎN JOC" : "В ИГРЕ") : match.status === "postponed" ? (locale === "ro" ? "Amânat" : "Перенесён") : (locale === "ro" ? "Programat" : "Запланирован")}</span>
-              <strong>{formatDate(match.kickoff, locale)}</strong>
+              <span className={`publicMatchStatusChip status-${match.status}`}>{match.status === "finished" ? (locale === "ro" ? "Final" : "Завершён") : match.status === "live" ? (locale === "ro" ? "ÎN JOC" : "В ИГРЕ") : match.status === "postponed" ? (locale === "ro" ? "Amânat" : "Перенесён") : match.status === "cancelled" ? (locale === "ro" ? "Anulat" : "Отменён") : (locale === "ro" ? "Programat" : "Запланирован")}</span>
+              <strong>{match.status === "postponed" || match.status === "cancelled" ? scheduleDateLabel(match,locale) : formatDate(match.kickoff, locale)}</strong>
             </div>
             <div className="publicMatchScoreBoard premiumScoreBoard">
               <PublicTeam team={match.home} />
@@ -395,6 +402,8 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
             ) : null}
           </div>
         </section>
+
+        <MatchScheduleNotice match={match} history={scheduleHistory} locale={locale} />
 
         {published ? (
           <nav className="premiumMatchNav" aria-label={locale === "ro" ? "Navigarea raportului" : "Навигация по протоколу"}>

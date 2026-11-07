@@ -4,6 +4,7 @@ import { accountText } from "@/lib/account-i18n";
 import { fanDashboardText } from "@/lib/fan-favorites";
 import { dateLocale, matchStatusLabelsI18n, type Locale } from "@/lib/i18n";
 import { matchScoreText } from "@/lib/public-match-integrity";
+import {scheduleDateLabel, scheduleReason} from "@/lib/match-schedule";
 import type { ClubMatch } from "@/lib/types";
 
 export default function FanMatchItem({match, locale, removable = false}: {match:ClubMatch;locale:Locale;removable?:boolean}) {
@@ -25,7 +26,9 @@ export default function FanMatchItem({match, locale, removable = false}: {match:
         <Link href={`/matches/${match.id}`} className="fanV2301MatchTitle">
           {match.home?.name ?? "—"} <b>{match.status === "finished" || match.status === "live" ? matchScoreText(match, ":") : "–"}</b> {match.away?.name ?? "—"}
         </Link>
-        <time dateTime={match.kickoff}>{when}</time>
+        {match.status === "postponed" || match.status === "cancelled"
+          ? <span className="fanV2301ScheduleChange">{scheduleDateLabel(match,locale)}{scheduleReason(match,locale) ? ` · ${scheduleReason(match,locale)}` : ""}</span>
+          : <time dateTime={match.kickoff}>{when}</time>}
       </div>
       <div className="fanV2301MatchActions">
         {calendable ? <a href={`/api/calendar/${match.id}?lang=${locale}`} download={`fc-edinet-match-${match.id}.ics`} className="fanV2301Action">{fan.inCalendar}</a> : null}

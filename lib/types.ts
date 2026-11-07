@@ -200,6 +200,9 @@ export type ClubMatch = {
   home_score: number | null;
   away_score: number | null;
   notes: string | null;
+  original_kickoff?: string | null;
+  schedule_reason_ru?: string | null;
+  schedule_reason_ro?: string | null;
   home: ClubTeam | null;
   away: ClubTeam | null;
   competition: Competition | null;

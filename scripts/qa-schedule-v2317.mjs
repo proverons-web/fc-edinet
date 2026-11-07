@@ -1,0 +1,48 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import {fileURLToPath} from "node:url";
+import {scheduleDateLabel, scheduleReason, isRescheduled, scheduleChangeLabel} from "../lib/match-schedule.ts";
+import {createMatchCalendar, isCalendarEligible} from "../lib/match-calendar.ts";
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
+const read=(p)=>fs.readFileSync(path.join(root,p),"utf8");
+let passed=0,failed=0;
+function check(label,fn){try{fn();passed++;console.log("PASS",label)}catch(e){failed++;console.error("FAIL",label,e)}}
+const f={id:20,kickoff:"2026-12-05T13:00:00Z",updated_at:"2026-11-07T19:22:00Z",status:"scheduled",home:{name:"FC Edineț"},away:{name:"Côte d'Azur"}};
+const old={...f,status:"postponed",original_kickoff:"2026-11-14T13:00:00Z",schedule_reason_ru:"Плохая погода",schedule_reason_ro:"Vreme rea"};
+check("release version",()=>assert.equal(JSON.parse(read("package.json")).version,"2.30.17"));
+check("original date preserved",()=>assert.ok(isRescheduled(old)));
+check("nonrescheduled fixture",()=>assert.equal(isRescheduled(f),false));
+check("status hides unconfirmed date RU",()=>assert.equal(scheduleDateLabel(old,"ru"),"Новая дата не назначена"));
+check("status hides unconfirmed date RO",()=>assert.match(scheduleDateLabel(old,"ro"),/Data nouă/));
+check("cancellation has no false kickoff",()=>assert.equal(scheduleDateLabel({...old,status:"cancelled"},"ru"),"Матч отменён"));
+check("localized reason RU",()=>assert.equal(scheduleReason(old,"ru"),"Плохая погода"));
+check("localized reason RO",()=>assert.equal(scheduleReason(old,"ro"),"Vreme rea"));
+check("localized fallback",()=>assert.equal(scheduleReason({...old,schedule_reason_ro:null},"ro"),"Плохая погода"));
+check("status translation",()=>assert.equal(scheduleChangeLabel("scheduled","ru"),"Дата назначена"));
+check("calendar still blocks postponed download",()=>assert.equal(isCalendarEligible(old,new Date("2026-11-01")),false));
+check("confirmed calendar event",()=>assert.match(createMatchCalendar([f],"https://fc-edinet.vercel.app",{now:new Date("2026-11-01")}),/STATUS:CONFIRMED/));
+check("default calendar excludes postponed",()=>assert.doesNotMatch(createMatchCalendar([old],"https://fc-edinet.vercel.app",{now:new Date("2026-11-01")}),/BEGIN:VEVENT/));
+check("subscription exports cancellation",()=>assert.match(createMatchCalendar([old],"https://fc-edinet.vercel.app",{now:new Date("2026-11-01"),includeStatusChanges:true}),/STATUS:CANCELLED/));
+check("subscription uses same stable UID",()=>{const opts={now:new Date("2026-11-01")};const a=createMatchCalendar([f],"https://fc-edinet.vercel.app",opts);const b=createMatchCalendar([old],"https://fc-edinet.vercel.app",{...opts,includeStatusChanges:true});const pattern=/UID:([^\r\n]+)/;assert.equal(a.match(pattern)?.[1],b.match(pattern)?.[1]);});
+check("cancelled event has no alarm",()=>assert.doesNotMatch(createMatchCalendar([old],"https://fc-edinet.vercel.app",{includeStatusChanges:true}),/BEGIN:VALARM/));
+check("migration preserves matches",()=>{const sql=read("database/080_match_schedule_history.sql");assert.match(sql,/CREATE TABLE IF NOT EXISTS public\.match_schedule_history/);assert.match(sql,/TRIGGER match_schedule_log/);assert.match(sql,/REFERENCES public\.matches\(id\)/);assert.doesNotMatch(sql,/TRUNCATE|DELETE FROM public\.matches/i)});
+check("ordinary live/finished transitions are not recorded as postponements",()=>{
+  const sql=read("database/080_match_schedule_history.sql");
+  assert.match(sql,/OLD\.status IN \('postponed','cancelled'\) OR NEW\.status IN \('postponed','cancelled'\)/);
+});
+check("OG image hides cancelled or postponed dates",()=>{
+  const og=read("app/matches/[id]/opengraph-image.tsx");
+  assert.match(og,/МАТЧ ПЕРЕНЕСЁН/);assert.match(og,/МАТЧ ОТМЕНЁН/);
+});
+check("migration RLS and private triggers",()=>{const sql=read("database/080_match_schedule_history.sql");assert.match(sql,/ENABLE ROW LEVEL SECURITY/);assert.match(sql,/FUNCTION private\.log_match_schedule_change/);assert.match(sql,/REVOKE ALL ON public\.match_schedule_history/);});
+check("reinstated fixtures require a future kickoff",()=>assert.match(read("app/admin/matches/actions.ts"),/Назначь новую будущую дату/));
+check("mutation authorized",()=>assert.match(read("app/admin/matches/actions.ts"),/await requireEditor\(\)/));
+check("mutation reasons validated",()=>assert.match(read("app/admin/matches/actions.ts"),/600/));
+check("admin edit history",()=>assert.match(read("app/admin/matches/[id]/edit/page.tsx"),/match_schedule_history/));
+check("match page displays schedule",()=>assert.match(read("app/matches/[id]/page.tsx"),/<MatchScheduleNotice/));
+check("favorite list retains changed fixture",()=>assert.match(read("lib/fan-favorites.ts"),/original_kickoff/));
+check("feed includes changes",()=>assert.match(read("app/api/calendar/route.ts"),/includeStatusChanges:true/));
+check("revalidation on schedule updates",()=>assert.match(read("app/admin/matches/actions.ts"),/revalidatePath\(`\/matches\/\$\{savedId\}`\)/));
+check("account cards don't promise old dates",()=>assert.match(read("app/account/FanMatchItem.tsx"),/scheduleDateLabel/));
+console.log(`v2.30.17 scheduling: ${passed}/${passed+failed}`);if(failed)process.exitCode=1;

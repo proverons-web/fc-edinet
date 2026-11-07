@@ -34,6 +34,7 @@ export default function MatchEditorForm({
   const defaultCompetition = competitions.find(c => (c.competition_type || "league") === "league") || competitions[0];
   const [homeTeamId, setHomeTeamId] = useState(initialHomeId);
   const [stadium, setStadium] = useState(initialStadium);
+  const [matchStatus, setMatchStatus] = useState(match?.status ?? "scheduled");
 
   const kickoffValue = useMemo(() => {
     if (!match?.kickoff) return "";
@@ -198,7 +199,8 @@ export default function MatchEditorForm({
               <select
                 id="status"
                 name="status"
-                defaultValue={match?.status ?? "scheduled"}
+                value={matchStatus}
+                onChange={(event) => setMatchStatus(event.target.value as ClubMatch["status"])}
               >
                 <option value="scheduled">Предстоящий</option>
                 <option value="live">Идёт матч</option>
@@ -234,6 +236,31 @@ export default function MatchEditorForm({
               />
             </div>
           </div>
+
+          {(matchStatus === "postponed" || matchStatus === "cancelled" || Boolean(match?.original_kickoff)) && (
+            <section className="scheduleEditorSection">
+              <div className="formSectionTitle">
+                <p className="eyebrow blue">ИЗМЕНЕНИЯ РАСПИСАНИЯ</p>
+                <h2>{matchStatus === "postponed" ? "Причина переноса" : matchStatus === "cancelled" ? "Причина отмены" : "История переноса"}</h2>
+              </div>
+              <p className="fieldHint">
+                При переносе без новой даты оставь в поле даты первоначальное время.
+                Оно сохранится для истории, но не будет показываться болельщикам как подтверждённое.
+                Когда дата будет согласована, укажи её и переключи статус на «Предстоящий».
+              </p>
+              {match?.original_kickoff ? <p className="fieldHint">Первоначальная дата: {new Intl.DateTimeFormat("ru-RU", {dateStyle:"medium",timeStyle:"short",timeZone:"Europe/Chisinau"}).format(new Date(match.original_kickoff))}</p> : null}
+              <div className="twoFields">
+                <div className="fieldGroup">
+                  <label htmlFor="schedule_reason_ru">Причина (RU)</label>
+                  <textarea id="schedule_reason_ru" name="schedule_reason_ru" maxLength={600} rows={3} defaultValue={match?.schedule_reason_ru ?? ""} placeholder="Например: неблагоприятные погодные условия" />
+                </div>
+                <div className="fieldGroup">
+                  <label htmlFor="schedule_reason_ro">Motivul (RO)</label>
+                  <textarea id="schedule_reason_ro" name="schedule_reason_ro" maxLength={600} rows={3} defaultValue={match?.schedule_reason_ro ?? ""} placeholder="De exemplu: condiții meteorologice nefavorabile" />
+                </div>
+              </div>
+            </section>
+          )}
 
           <div className="fieldGroup">
             <label htmlFor="notes">Заметка</label>

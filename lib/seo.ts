@@ -259,7 +259,12 @@ export function sportsEventJsonLd(match: ClubMatch, locale: Locale) {
     name: `${home} — ${away}`,
     url,
     startDate: match.kickoff,
-    eventStatus: statusMap[match.status],
+    eventStatus: match.status === "scheduled" && match.original_kickoff
+      && Date.parse(match.original_kickoff) !== Date.parse(match.kickoff)
+      ? "https://schema.org/EventRescheduled" : statusMap[match.status],
+    previousStartDate: match.original_kickoff
+      && Date.parse(match.original_kickoff) !== Date.parse(match.kickoff)
+      ? match.original_kickoff : undefined,
     sport: "Football",
     description: score
       ? locale === "ro"

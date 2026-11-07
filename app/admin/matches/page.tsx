@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireEditor } from "@/lib/editorial";
 import type { ClubMatch } from "@/lib/types";
 import { matchStatusLabels } from "@/lib/types";
+import {scheduleDateLabel,scheduleReason} from "@/lib/match-schedule";
 import AdminListSearch from "@/app/components/AdminListSearch";
 import { adminListHref, adminTextMatches, parseAdminQuery } from "@/lib/admin-list-search";
 import { matchNeedsScore, matchNeedsStadium, parseAttentionFocus } from "@/lib/admin-attention";
@@ -28,7 +29,7 @@ export default async function AdminMatchesPage({
     .from("matches")
     .select(`
       id,competition_id,home_team_id,away_team_id,kickoff,stadium,round,status,
-      home_score,away_score,notes,created_at,updated_at,
+      home_score,away_score,notes,original_kickoff,schedule_reason_ru,schedule_reason_ro,created_at,updated_at,
       home:teams!matches_home_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
       away:teams!matches_away_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
       competition:competitions!matches_competition_id_fkey(id,name,slug,season,is_active)
@@ -114,14 +115,14 @@ export default async function AdminMatchesPage({
                 <article className="adminMatchRow" key={match.id}>
                   <div className="adminMatchDate">
                     <strong>
-                      {new Intl.DateTimeFormat("ru-RU", {
+                      {match.status === "postponed" || match.status === "cancelled" ? "—" : new Intl.DateTimeFormat("ru-RU", {
                         day: "2-digit",
                         month: "short",
                         timeZone: "Europe/Chisinau",
                       }).format(new Date(match.kickoff))}
                     </strong>
                     <span>
-                      {new Intl.DateTimeFormat("ru-RU", {
+                      {match.status === "postponed" || match.status === "cancelled" ? "—" : new Intl.DateTimeFormat("ru-RU", {
                         hour: "2-digit",
                         minute: "2-digit",
                         timeZone: "Europe/Chisinau",
@@ -136,6 +137,7 @@ export default async function AdminMatchesPage({
                       </span>
                       <span>{match.competition?.name ?? "Матч"}</span>
                       {match.round && <span>{match.round}</span>}
+                      {match.status === "postponed" || match.status === "cancelled" ? <span className="adminAttentionTag">{scheduleDateLabel(match,"ru")}{scheduleReason(match,"ru") ? ` — ${scheduleReason(match,"ru")}` : ""}</span> : null}
                       {matchNeedsStadium(match) && <span className="adminAttentionTag">Без стадиона</span>}
                       {matchNeedsScore(match) && <span className="adminAttentionTag">Счёт не заполнен</span>}
                     </div>

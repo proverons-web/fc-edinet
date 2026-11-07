@@ -65,6 +65,11 @@ export async function saveMatch(
   const homeScoreRaw = String(formData.get("home_score") ?? "").trim();
   const awayScoreRaw = String(formData.get("away_score") ?? "").trim();
   const notes = nullableString(formData.get("notes"));
+  const reasonRu = nullableString(formData.get("schedule_reason_ru"));
+  const reasonRo = nullableString(formData.get("schedule_reason_ro"));
+  if ((reasonRu?.length ?? 0) > 600 || (reasonRo?.length ?? 0) > 600) {
+    return { error: "Причина переноса не должна превышать 600 символов." };
+  }
 
   if (!homeTeamId || !awayTeamId) {
     return { error: "Выбери обе команды." };
@@ -85,6 +90,17 @@ export async function saveMatch(
   const kickoff = localDateTimeToIso(kickoffLocal, timezoneOffset);
   if (!kickoff) {
     return { error: "Не удалось распознать дату матча." };
+  }
+
+  // A postponed/cancelled match must not become an apparent upcoming game
+  // at its now-expired original kickoff. Its persistent match ID is retained.
+  if (matchId && status === "scheduled") {
+    const { data: previous, error: previousError } = await supabase
+      .from("matches").select("status,kickoff").eq("id",matchId).maybeSingle();
+    if (previousError || !previous) return { error: "Матч для изменения расписания не найден." };
+    if (["postponed","cancelled"].includes(previous.status) && Date.parse(kickoff) <= Date.now()) {
+      return { error: "Назначь новую будущую дату перед возвращением перенесённого матча в календарь." };
+    }
   }
 
   if (competitionId) {
@@ -121,6 +137,8 @@ export async function saveMatch(
     home_score: ["scheduled","postponed","cancelled"].includes(status) ? null : homeScore,
     away_score: ["scheduled","postponed","cancelled"].includes(status) ? null : awayScore,
     notes,
+    schedule_reason_ru: reasonRu,
+    schedule_reason_ro: reasonRo,
   };
 
   let savedId: string;
@@ -156,6 +174,10 @@ export async function saveMatch(
   revalidatePath("/matches");
   revalidatePath("/admin");
   revalidatePath("/admin/matches");
+  revalidatePath(`/matches/${savedId}`);
+  revalidatePath(`/api/calendar/${savedId}`);
+  revalidatePath("/account");
+  revalidatePath("/account/favorites");
 
   redirect(`/admin/matches/${savedId}/edit?saved=1`);
 }

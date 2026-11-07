@@ -2,7 +2,7 @@ import type { ClubMatch, Player } from "@/lib/types";
 
 /** Shared, minimal PostgREST projections for private account pages. */
 export const FAN_PLAYER_SELECT = "created_at,player:players!favorite_players_player_id_fkey(id,first_name,last_name,slug,shirt_number,position,photo_url,is_active)";
-export const FAN_MATCH_SELECT = "created_at,match:matches!favorite_matches_match_id_fkey(id,kickoff,stadium,round,status,home_score,away_score,home:teams!matches_home_team_id_fkey(id,name,short_name,logo_url,is_club),away:teams!matches_away_team_id_fkey(id,name,short_name,logo_url,is_club),competition:competitions!matches_competition_id_fkey(name))";
+export const FAN_MATCH_SELECT = "created_at,match:matches!favorite_matches_match_id_fkey(id,kickoff,stadium,round,status,home_score,away_score,original_kickoff,schedule_reason_ru,schedule_reason_ro,home:teams!matches_home_team_id_fkey(id,name,short_name,logo_url,is_club),away:teams!matches_away_team_id_fkey(id,name,short_name,logo_url,is_club),competition:competitions!matches_competition_id_fkey(name))";
 
 export type FanFavoritePlayer = { created_at: string; player: Player | null };
 export type FanFavoriteMatch = { created_at: string; match: ClubMatch | null };

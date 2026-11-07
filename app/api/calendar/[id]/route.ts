@@ -11,7 +11,7 @@ export async function GET(request: Request, { params }: Context) {
   if (!/^[1-9]\d{0,15}$/.test(id)) return new Response("Invalid match", { status: 400 });
   const db = createPublicClient();
   const { data, error } = await db.from("matches")
-    .select(`id,kickoff,updated_at,status,stadium,round,
+    .select(`id,kickoff,updated_at,status,stadium,round,original_kickoff,schedule_reason_ru,schedule_reason_ro,
       home:teams!matches_home_team_id_fkey(name,home_stadium),
       away:teams!matches_away_team_id_fkey(name),
       competition:competitions!matches_competition_id_fkey(name)`)

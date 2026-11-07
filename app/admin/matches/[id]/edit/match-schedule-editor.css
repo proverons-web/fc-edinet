@@ -1,0 +1,6 @@
+.scheduleHistoryAdmin{padding:22px;margin:24px 0;border:1px solid rgba(22,65,114,.18);background:#fff}
+.scheduleHistoryAdmin h2{font-size:20px;margin:0 0 10px}
+.scheduleHistoryAdmin ol{list-style:decimal;padding-left:22px}
+.scheduleHistoryAdmin li{padding:9px 0;border-bottom:1px solid rgba(0,0,0,.08)}
+.scheduleHistoryAdmin li strong,.scheduleHistoryAdmin li span,.scheduleHistoryAdmin li small{display:block;line-height:1.5}
+.scheduleEditorSection{border-top:1px solid rgba(20,80,150,.2);padding-top:20px;margin-top:22px}

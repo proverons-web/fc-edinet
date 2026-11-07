@@ -1,0 +1,21 @@
+/* FC Edineț v2.30.17: compact, non-invasive fixture schedule status */
+.matchScheduleNoticeSection{padding-block:16px 6px}
+.matchScheduleNotice{display:flex;gap:clamp(16px,3vw,32px);justify-content:space-between;align-items:flex-start;padding:clamp(18px,3vw,28px);border:1px solid rgba(20,78,150,.18);border-left:4px solid #0755a5;background:rgba(12,63,131,.04)}
+.matchScheduleNotice.is-interrupted{border-left-color:#c1861d;background:rgba(225,163,40,.08)}
+.matchScheduleNotice h2{font-size:clamp(19px,2vw,25px);margin:4px 0 10px}
+.matchScheduleNotice p{margin:6px 0;line-height:1.5}
+.matchScheduleNoticeEyebrow{font-size:11px;font-weight:800;letter-spacing:.12em;color:#0755a5}
+.matchScheduleNotice.is-interrupted .matchScheduleNoticeEyebrow{color:#986015}
+.matchScheduleReason{max-width:72ch}
+.matchScheduleHistory{flex:0 1 380px;min-width:220px}
+.matchScheduleHistory summary{cursor:pointer;font-weight:700;font-size:13px;padding:10px 0}
+.matchScheduleHistory ol{list-style:decimal;padding-left:20px;max-height:290px;overflow:auto}
+.matchScheduleHistory li{font-size:13px;padding:9px 0}
+.matchScheduleHistory li strong,.matchScheduleHistory li span,.matchScheduleHistory li small{display:block;line-height:1.45}
+.matchScheduleReasonInline,.matchScheduleRescheduledInline{font-size:12px;color:inherit;max-width:45ch}
+.scheduleHistoryAdmin{padding:20px;margin:24px 0;border:1px solid rgba(22,65,114,.18);background:#fff}
+.scheduleHistoryAdmin h2{font-size:20px;margin:0 0 10px}
+.scheduleHistoryAdmin li{padding:9px 0;border-bottom:1px solid rgba(0,0,0,.08)}
+.scheduleHistoryAdmin li strong,.scheduleHistoryAdmin li span,.scheduleHistoryAdmin li small{display:block}
+.scheduleEditorSection{border-top:1px solid rgba(20,80,150,.2);padding-top:20px;margin-top:22px}
+@media(max-width:750px){.matchScheduleNotice{display:block}.matchScheduleHistory{min-width:0;width:100%;margin-top:12px}}

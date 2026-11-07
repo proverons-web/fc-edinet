@@ -9,6 +9,9 @@ export type CalendarFixture = {
   status: string;
   stadium?: string | null;
   round?: string | null;
+  original_kickoff?: string | null;
+  schedule_reason_ru?: string | null;
+  schedule_reason_ro?: string | null;
   home?: { name?: string | null; home_stadium?: string | null } | null;
   away?: { name?: string | null } | null;
   competition?: { name?: string | null } | null;
@@ -57,8 +60,12 @@ function fixtureLines(fixture: CalendarFixture, origin: string, now: Date, local
   const end = new Date(start.getTime() + 120 * 60_000);
   const teamA = fixture.home?.name?.trim() || "FC Edineț";
   const teamB = fixture.away?.name?.trim() || "—";
+  const withdrawn = fixture.status === "postponed" || fixture.status === "cancelled";
+  const reason = locale === "ro" ? (fixture.schedule_reason_ro || fixture.schedule_reason_ru) : (fixture.schedule_reason_ru || fixture.schedule_reason_ro);
   const description = [
     fixture.competition?.name,
+    withdrawn ? (locale === "ro" ? "Data nu este confirmată; consultați site-ul clubului." : "Дата не подтверждена; уточняйте на сайте клуба.") : null,
+    withdrawn ? reason : null,
     fixture.round,
     locale === "ro" ? "Durata din calendar este aproximativă (2 ore)." : "Продолжительность в календаре приблизительная (2 часа).",
     `${locale === "ro" ? "Detalii" : "Подробнее"}: ${origin}/matches/${fixture.id}`,
@@ -72,25 +79,26 @@ function fixtureLines(fixture: CalendarFixture, origin: string, now: Date, local
     `DTSTART:${utcStamp(start)}`,
     `DTEND:${utcStamp(end)}`,
     `LAST-MODIFIED:${utcStamp(fixture.updated_at && !Number.isNaN(Date.parse(fixture.updated_at)) ? fixture.updated_at : fixture.kickoff)}`,
-    `SUMMARY:${escapeIcsText(`${teamA} — ${teamB}`)}`,
+    `SUMMARY:${escapeIcsText(`${withdrawn ? (locale === "ro" ? "ANULAT/AMÂNAT: " : "ОТМЕНЁН/ПЕРЕНЕСЁН: ") : ""}${teamA} — ${teamB}`)}`,
+    `SEQUENCE:${Number.isFinite(Date.parse(fixture.updated_at || "")) ? Math.floor(Date.parse(fixture.updated_at as string)/1000) : 0}`,
     `DESCRIPTION:${escapeIcsText(description)}`,
     `URL:${origin}/matches/${encodeURIComponent(String(fixture.id))}`,
-    "STATUS:CONFIRMED",
-    "TRANSP:OPAQUE",
+    withdrawn ? "STATUS:CANCELLED" : "STATUS:CONFIRMED",
+    withdrawn ? "TRANSP:TRANSPARENT" : "TRANSP:OPAQUE",
   ];
   if (venue) lines.push(`LOCATION:${escapeIcsText(venue)}`);
-  lines.push(
+  if (!withdrawn) lines.push(
     "BEGIN:VALARM",
     "ACTION:DISPLAY",
     "TRIGGER:-PT60M",
     `DESCRIPTION:${escapeIcsText(`${locale === "ro" ? "Începe în curând" : "Скоро матч"}: ${teamA} — ${teamB}`)}`,
     "END:VALARM",
-    "END:VEVENT",
   );
+  lines.push("END:VEVENT");
   return lines;
 }
 
-export function createMatchCalendar(fixtures: CalendarFixture[], origin: string, opts: { now?: Date; title?: string; locale?: "ru" | "ro" } = {}): string {
+export function createMatchCalendar(fixtures: CalendarFixture[], origin: string, opts: { now?: Date; title?: string; locale?: "ru" | "ro"; includeStatusChanges?: boolean } = {}): string {
   const now = opts.now ?? new Date();
   const locale = opts.locale === "ro" ? "ro" : "ru";
   const safeOrigin = new URL(origin).origin;
@@ -105,7 +113,7 @@ export function createMatchCalendar(fixtures: CalendarFixture[], origin: string,
     "REFRESH-INTERVAL;VALUE=DURATION:PT6H",
   ];
   const events = fixtures
-    .filter((fixture) => isCalendarEligible(fixture, now))
+    .filter((fixture) => isCalendarEligible(fixture, now) || (opts.includeStatusChanges && (fixture.status === "postponed" || fixture.status === "cancelled")))
     .sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff))
     .flatMap((fixture) => fixtureLines(fixture, safeOrigin, now, locale));
   return [...header, ...events, "END:VCALENDAR"].map(foldIcsLine).join("\r\n") + "\r\n";

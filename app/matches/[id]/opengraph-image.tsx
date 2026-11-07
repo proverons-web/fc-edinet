@@ -47,9 +47,10 @@ export default async function Image({ params }: { params: Promise<{ id: string }
     socialTeamLogoDataUrl(home?.logo_url),
     socialTeamLogoDataUrl(away?.logo_url),
   ]);
-  const date = match?.kickoff
-    ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Chisinau" }).format(new Date(match.kickoff))
-    : "FC EDINEȚ";
+  const date = match?.status === "postponed" ? "МАТЧ ПЕРЕНЕСЁН" :
+    match?.status === "cancelled" ? "МАТЧ ОТМЕНЁН" : match?.kickoff
+      ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Chisinau" }).format(new Date(match.kickoff))
+      : "FC EDINEȚ";
   const crestBytes = await fs.readFile(path.join(process.cwd(), "public", "brand", "fc-edinet-crest.png"));
   const crest = `data:image/png;base64,${crestBytes.toString("base64")}`;
 

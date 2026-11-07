@@ -5,6 +5,8 @@ import MatchEditorForm from "@/app/components/MatchEditorForm";
 import { deleteMatch } from "@/app/admin/matches/actions";
 import { requireEditor } from "@/lib/editorial";
 import type { ClubMatch, ClubTeam, Competition } from "@/lib/types";
+import { scheduleHistorySelect, type ScheduleHistoryItem } from "@/lib/match-schedule";
+import "./match-schedule-editor.css";
 
 export const metadata = { title: "Редактирование матча — Админ" };
 export const dynamic = "force-dynamic";
@@ -29,12 +31,13 @@ export default async function EditMatchPage({
     { data: matchData },
     { data: teamsData },
     { data: competitionsData },
+    { data: scheduleHistoryData },
   ] = await Promise.all([
     supabase
       .from("matches")
       .select(`
         id,competition_id,home_team_id,away_team_id,kickoff,stadium,round,status,
-        home_score,away_score,notes,created_at,updated_at,
+        home_score,away_score,notes,original_kickoff,schedule_reason_ru,schedule_reason_ro,created_at,updated_at,
         home:teams!matches_home_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
         away:teams!matches_away_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
         competition:competitions!matches_competition_id_fkey(id,name,slug,season,is_active)
@@ -43,6 +46,8 @@ export default async function EditMatchPage({
       .maybeSingle(),
     supabase.from("teams").select("*").order("is_club", { ascending: false }).order("name"),
     supabase.from("competitions").select("*").order("name"),
+    supabase.from("match_schedule_history").select(scheduleHistorySelect)
+      .eq("match_id",matchId).order("changed_at",{ascending:false}).limit(20),
   ]);
 
   if (!matchData) notFound();
@@ -77,6 +82,23 @@ export default async function EditMatchPage({
             teams={(teamsData ?? []) as ClubTeam[]}
             competitions={(competitionsData ?? []) as Competition[]}
           />
+
+          {(scheduleHistoryData?.length ?? 0) > 0 && (
+            <section className="scheduleHistoryAdmin" aria-label="История изменений расписания">
+              <h2>История переносов и изменений даты</h2>
+              <p>Записи создаются автоматически при сохранении матча и не редактируются вручную.</p>
+              <ol>
+                {(scheduleHistoryData as ScheduleHistoryItem[]).map((entry) => (
+                  <li key={String(entry.id)}>
+                    <strong>{entry.previous_status || "Создан"} → {entry.new_status}</strong>
+                    <span>{entry.previous_kickoff ? new Date(entry.previous_kickoff).toLocaleString("ru-RU",{timeZone:"Europe/Chisinau"}) : "—"} → {new Date(entry.new_kickoff).toLocaleString("ru-RU",{timeZone:"Europe/Chisinau"})}</span>
+                    {entry.reason_ru || entry.reason_ro ? <p>{entry.reason_ru || entry.reason_ro}</p> : null}
+                    <small>{new Date(entry.changed_at).toLocaleString("ru-RU",{timeZone:"Europe/Chisinau"})}</small>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
 
           {profile.role === "admin" && (
             <form action={deleteMatch} className="dangerZone">
