@@ -198,62 +198,22 @@ export async function saveMatchStatistics(formData: FormData) {
     }
   }
 
-  const selectedPlayerIds = new Set(payload.map((row) => String(row.player_id)));
-
-  const { data: existingRows, error: existingError } = await supabase
-    .from("player_match_stats")
-    .select("player_id")
-    .eq("match_id", matchId);
-
-  if (existingError) {
-    go(matchId, { error: `Не удалось загрузить сохранённую статистику: ${existingError.message}` });
-  }
-
-  const toDelete = (existingRows ?? [])
-    .map((row) => String(row.player_id))
-    .filter((playerId) => validPlayerIds.has(playerId) && !selectedPlayerIds.has(playerId));
-
-  if (toDelete.length > 0) {
-    const { error: deleteError } = await supabase
-      .from("player_match_stats")
-      .delete()
-      .eq("match_id", matchId)
-      .in("player_id", toDelete);
-
-    if (deleteError) {
-      go(matchId, {
-        error: `Не удалось убрать игроков из матча: ${deleteError.message}. Проверь, применена ли миграция 035.`,
-      });
-    }
-  }
-
-  if (payload.length > 0) {
-    const { error: upsertError } = await supabase
-      .from("player_match_stats")
-      .upsert(payload, { onConflict: "match_id,player_id" });
-
-    if (upsertError) {
-      go(matchId, { error: `Не удалось сохранить статистику: ${upsertError.message}` });
-    }
-  }
-
+  // v2.29.20: replace the club player snapshot and mark its completion in
+  // one transaction. PostgreSQL rejects the entire operation on any error.
   const completed = intent === "complete";
-  const now = new Date().toISOString();
-  const { error: stateError } = await supabase
-    .from("match_statistics_status")
-    .upsert(
-      {
-        match_id: matchId,
-        status: completed ? "complete" : "draft",
-        completed_at: completed ? now : null,
-        completed_by: completed ? userId : null,
-        updated_by: userId,
-      },
-      { onConflict: "match_id" }
-    );
-
-  if (stateError) {
-    go(matchId, { error: `Показатели сохранены, но статус матча не обновлён: ${stateError.message}` });
+  const { data: saved, error: atomicError } = await supabase.rpc("save_club_player_stats_atomic", {
+    p_match_id: Number(matchId),
+    p_rows: payload,
+    p_status: completed ? "complete" : "draft",
+    // This route is kept for legacy requests; the active editor is the match center.
+    p_compare_revision: false,
+    p_expected_updated_at: null,
+  });
+  if (atomicError) {
+    go(matchId, { error: `Не удалось сохранить статистику целиком: ${atomicError.message}` });
+  }
+  if (!saved || saved.saved !== true || saved.entries !== payload.length) {
+    go(matchId, { error: "База не подтвердила полное сохранение статистики." });
   }
 
   revalidatePath("/admin");

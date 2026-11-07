@@ -366,9 +366,8 @@ export async function publishMatchProtocol(formData: FormData) {
     go(matchId, { error: `Перед публикацией таймлайн голов должен совпадать со счётом (${homeGoals}:${awayGoals} / ${match.home_score ?? 0}:${match.away_score ?? 0}).` });
   }
 
-  // Keep match statistics in sync before publication. This is intentionally
-  // independent from the navigation label “Календарь” and the /matches route.
-  await syncClubPlayerStatsFromEvents(supabase, userId, matchId);
+  // Evaluate club readiness first; statistics and any completion transition
+  // will be committed together by save_club_player_stats_atomic below.
   const { data: clubTeams, error: clubTeamsError } = await supabase.from("teams").select("id").eq("is_club", true);
   if (clubTeamsError) go(matchId, { error: `Не удалось проверить команду клуба: ${clubTeamsError.message}` });
   const clubTeamIds = new Set((clubTeams ?? []).map((team) => String(team.id)));
@@ -383,17 +382,11 @@ export async function publishMatchProtocol(formData: FormData) {
   if (clubLineupError) go(matchId, { error: `Не удалось проверить клубный состав: ${clubLineupError.message}` });
   const starters = (clubLineup ?? []).filter((row) => row.lineup_role === "starter");
   const hasGoalkeeper = starters.some((row) => row.position === "goalkeeper");
-  if (starters.length === 11 && hasGoalkeeper) {
-    const { error: statusError } = await supabase.from("match_statistics_status").upsert({
-      match_id: matchId,
-      status: "complete",
-      completed_at: new Date().toISOString(),
-      completed_by: userId,
-      updated_by: userId,
-    }, { onConflict: "match_id" });
-    if (statusError) go(matchId, { error: `Не удалось завершить статус статистики: ${statusError.message}` });
-  }
+  await syncClubPlayerStatsFromEvents(supabase, userId, matchId,
+    starters.length === 11 && hasGoalkeeper ? "complete" : null);
 
+  // The report publication itself is still a separate transaction. Errors
+  // after player-stat synchronization are surfaced, never swallowed.
   const now = new Date().toISOString();
   const { error } = await supabase
     .from("match_reports")
@@ -777,6 +770,7 @@ async function syncClubPlayerStatsFromEvents(
   supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"],
   userId: string,
   matchId: string,
+  status: "draft" | "complete" | null = null,
 ) {
   const { data: match, error: matchError } = await supabase
     .from("matches")
@@ -964,17 +958,30 @@ async function syncClubPlayerStatsFromEvents(
     });
   }
 
-  const selectedIds = new Set(statsRows.map((row) => String(row.player_id)));
-  const staleIds = [...existingByPlayer.keys()].filter((id) => !selectedIds.has(id));
-  // Persist current rows first. Never delete older statistics before a new
-  // upsert succeeds: a failed write must not erase the previous snapshot.
-  if (statsRows.length > 0) {
-    const { error: upsertError } = await supabase.from("player_match_stats").upsert(statsRows, { onConflict: "match_id,player_id" });
-    if (upsertError) go(matchId, { error: `Пересчёт статистики не завершён: ${upsertError.message}. Сохранённое событие или состав проверь повторно.` });
+  // v2.29.20: the complete club snapshot and optional status transition are
+  // committed in one PostgreSQL transaction. A stale snapshot cannot overwrite
+  // statistics written after this request loaded its baseline.
+  const expectedUpdatedAt = (existingResult.data ?? [])
+    .map((row) => typeof row.updated_at === "string" ? row.updated_at : "")
+    .filter(Boolean)
+    .sort()
+    .at(-1) ?? null;
+  const { data: saved, error: atomicError } = await supabase.rpc("save_club_player_stats_atomic", {
+    p_match_id: Number(matchId),
+    p_rows: statsRows,
+    p_status: status,
+    p_compare_revision: true,
+    p_expected_updated_at: expectedUpdatedAt,
+  });
+  if (atomicError) {
+    const conflict = atomicError.code === "40001" || /another tab/i.test(atomicError.message);
+    go(matchId, { error: conflict
+      ? "Статистика изменилась в другой вкладке. Обнови страницу перед повторным сохранением."
+      : `Пересчёт статистики не завершён: ${atomicError.message}. Данные события или состава проверь повторно.` });
   }
-  if (staleIds.length > 0) {
-    const { error: staleError } = await supabase.from("player_match_stats").delete().eq("match_id", matchId).eq("team_id", clubTeamId).in("player_id", staleIds);
-    if (staleError) go(matchId, { error: `Не удалось очистить устаревшую статистику: ${staleError.message}. Требуется повторная проверка.` });
+  if (!saved || saved.saved !== true || saved.entries !== statsRows.length ||
+      String(saved.team_id) !== String(clubTeamId)) {
+    go(matchId, { error: "База не подтвердила транзакционное сохранение статистики. Проверь данные матча." });
   }
 }
 
@@ -1111,19 +1118,9 @@ export async function saveClubSquadAndStats(formData: FormData) {
   await persistLineupAtomically(supabase, matchId, clubSide, formation, coachName,
     lineupRows, nullableText(formData, "lineup_revision", 80), true);
 
-  // Derived player statistics and their completion status remain a separate
-  // operation; errors are surfaced. Their full transactional conversion is
-  // tracked separately rather than incorrectly claiming cross-table atomicity.
-  await syncClubPlayerStatsFromEvents(supabase, userId, matchId);
-
-  const { error: statusError } = await supabase.from("match_statistics_status").upsert({
-    match_id: matchId,
-    status: completed ? "complete" : "draft",
-    completed_at: completed ? new Date().toISOString() : null,
-    completed_by: completed ? userId : null,
-    updated_by: userId,
-  }, { onConflict: "match_id" });
-  if (statusError) go(matchId, { error: `Состав сохранён, но статус статистики не обновлён: ${statusError.message}` });
+  // The club statistics and the completed/draft status now form one atomic
+  // transaction. The lineup itself is saved by the preceding (separate) RPC.
+  await syncClubPlayerStatsFromEvents(supabase, userId, matchId, completed ? "complete" : "draft");
 
   revalidateMatchCenter(matchId);
   revalidatePath(`/admin/statistics/${matchId}`);

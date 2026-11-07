@@ -54,7 +54,8 @@ check('record count and captain count validated',()=>{
 check('player ID is verified in database',()=>assert.match(sql,/from public\.players where id=v_player_id/));
 check('event and season-stat sync still exist',()=>{
  assert.match(club,/await syncClubPlayerStatsFromEvents/);
- assert.match(club,/\.from\("match_statistics_status"\)\.upsert/);
+ assert.match(club,/await syncClubPlayerStatsFromEvents\(supabase, userId, matchId, completed \? "complete" : "draft"\)/);
+ assert.doesNotMatch(club,/\.from\("match_statistics_status"\)\.upsert/);
 });
 check('migration cannot be executed by anonymous users',()=>assert.doesNotMatch(sql,/grant execute [\s\S]*?to anon/));
 console.log(`\n${passed}/20 atomic lineup checks passed.`);

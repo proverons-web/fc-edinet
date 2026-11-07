@@ -31,11 +31,12 @@ check("duplicate player ID is flagged",()=>assert.ok(audit(base,[report],events,
 check("goal from alien team is flagged",()=>assert.ok(audit(base,[report],[...events,goal(999,"goal")]).issues.some(i=>i.code==="event_team_outside_match")));
 check("no published flag hides publication blockers",()=>assert.ok(!audit(base,[],events,lineups).issues.some(i=>i.severity==="critical")));
 const actions=read("app/admin/match-center/[matchId]/actions.ts");
+const sql=read("database/069_atomic_player_statistics.sql");
 const page=read("app/admin/data-integrity/page.tsx");
-check("server sync surfaces failed data writes",()=>assert.ok(actions.includes("if (upsertError) go(matchId") && actions.includes("if (staleError) go(matchId")));
-check("write happens before stale-row deletion",()=>assert.ok(actions.indexOf('const { error: upsertError }')<actions.indexOf('const { error: staleError }')));
-check("statistics sync is scoped to club team",()=>assert.ok(actions.includes('.eq("team_id", clubTeamId).in("player_id", staleIds)')));
-check("publication checks club lineup only",()=>assert.ok(actions.includes('.eq("team_id", matchClubId)')&&actions.includes('if (statusError) go(matchId')));
+check("server sync surfaces failed data writes",()=>assert.ok(actions.includes("if (atomicError)") && actions.includes("Пересчёт статистики не завершён")));
+check("write happens before stale-row deletion",()=>assert.ok(sql.indexOf("insert into public.player_match_stats (")<sql.indexOf("delete from public.player_match_stats s")));
+check("statistics sync is scoped to club team",()=>assert.ok(sql.includes('s.team_id = v_club_team_id') && actions.includes('p_rows: statsRows')));
+check("publication checks club lineup only",()=>assert.ok(actions.includes('.eq("team_id", matchClubId)')&&actions.includes('starters.length === 11 && hasGoalkeeper ? "complete" : null')));
 check("audit page is staff protected and read-only",()=>assert.ok(page.includes("requireEditor()")&&!page.includes('.insert(')&&!page.includes('.update(')&&!page.includes('.delete(')));
 check("audit linked from dashboard",()=>assert.ok(read("app/admin/page.tsx").includes('href: "/admin/data-integrity"')));
 check("audit failure is not silently reported as zero",()=>assert.ok(page.includes("if (errors.length)")&&page.includes('role="alert"')));
