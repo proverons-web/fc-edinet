@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { UserRole } from "@/lib/types";
 
 type NavItem = { href: string; label: string; icon: string; minRole: UserRole; keywords?: string };
@@ -12,7 +12,10 @@ const groups: NavGroup[] = [
   {
     id: "main",
     label: "ГЛАВНОЕ",
-    items: [{ href: "/admin", label: "Обзор", icon: "⌂", minRole: "author" }],
+    items: [
+      { href: "/admin", label: "Главная админки", icon: "⌂", minRole: "author" },
+      { href: "/admin/site-builder", label: "Редактор сайта", icon: "✎", minRole: "editor", keywords: "визуальный редактор страницы дизайн hero конструктор site builder меню" },
+    ],
   },
   {
     id: "editorial",
@@ -37,6 +40,7 @@ const groups: NavGroup[] = [
     label: "МАТЧИ И ТУРНИР",
     items: [
       { href: "/admin/matches", label: "Календарь", icon: "M", minRole: "editor", keywords: "матчи результаты соперники" },
+      { href: "/admin/matches/competitions", label: "Соревнования", icon: "C", minRole: "editor", keywords: "лига кубок товарищеские турниры" },
       { href: "/admin/match-center", label: "Протокол матча", icon: "MC", minRole: "editor", keywords: "события составы статистика матч центр" },
       { href: "/admin/standings", label: "Таблица", icon: "T", minRole: "editor", keywords: "турнир очки положение" },
       { href: "/admin/statistics", label: "Статистика", icon: "S", minRole: "editor", keywords: "игроки сезоны матчи данные" },
@@ -94,6 +98,10 @@ const adminRouteLabels: Record<string, string> = {
   audit: "Журнал действий",
   diagnostics: "Диагностика",
   "page-builder": "Редактор страницы",
+  "site-builder": "Редактор сайта",
+  design: "Дизайн",
+  competitions: "Соревнования",
+  cups: "Кубковая сетка",
   new: "Новая запись",
   teams: "Команды",
 };
@@ -119,7 +127,11 @@ export default function AdminShellClient({
   const searchParams = useSearchParams();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [navQuery, setNavQuery] = useState("");
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({ analytics: true, system: true });
+  const sidebarRef = useRef<HTMLElement>(null);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
+  const navSearchRef = useRef<HTMLInputElement>(null);
+  const wasMobileOpen = useRef(false);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -129,21 +141,44 @@ export default function AdminShellClient({
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem("fc-admin-nav-collapsed");
-      if (raw) setCollapsed(JSON.parse(raw));
+      if (raw) {
+        const saved: unknown = JSON.parse(raw);
+        if (saved && typeof saved === "object" && !Array.isArray(saved)) {
+          setCollapsed(Object.fromEntries(Object.entries(saved).filter((entry) => typeof entry[1] === "boolean")));
+        }
+      }
     } catch {}
   }, []);
 
   useEffect(() => {
-    if (!mobileOpen) return;
+    if (!mobileOpen) {
+      if (wasMobileOpen.current) mobileMenuButtonRef.current?.focus();
+      wasMobileOpen.current = false;
+      return;
+    }
+    wasMobileOpen.current = true;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    navSearchRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMobileOpen(false);
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setMobileOpen(false);
+      }
+      if (event.key !== "Tab" || !sidebarRef.current) return;
+      const focusable = Array.from(sidebarRef.current.querySelectorAll<HTMLElement>(
+        'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled])'
+      )).filter((node) => node.getClientRects().length > 0);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     };
-    window.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keydown", onKeyDown);
     return () => {
       document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("keydown", onKeyDown);
     };
   }, [mobileOpen]);
 
@@ -161,7 +196,11 @@ export default function AdminShellClient({
     return <div className="adminEmbedded">{children}</div>;
   }
 
-  const isActive = (href: string) => href === "/admin" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
+  const matchingNavRoutes = visibleGroups.flatMap((group) => group.items)
+    .filter((item) => pathname === item.href || pathname.startsWith(`${item.href}/`))
+    .sort((a, b) => b.href.length - a.href.length);
+  const activeHref = matchingNavRoutes[0]?.href;
+  const isActive = (href: string) => href === activeHref;
   const trail = getAdminTrail(pathname);
 
   const toggleGroup = (id: string) => {
@@ -172,7 +211,7 @@ export default function AdminShellClient({
 
   return (
     <div className="adminAppShell">
-      <aside id="admin-sidebar" className={`adminSidebar${mobileOpen ? " isOpen" : ""}`}>
+      <aside ref={sidebarRef} id="admin-sidebar" className={`adminSidebar${mobileOpen ? " isOpen" : ""}`} aria-label="Разделы управления сайтом">
         <div className="adminBrandBlock">
           <img src="/brand/fc-edinet-crest.png" alt="FC Edineț" />
           <div><strong>FC EDINEȚ</strong><span>ADMIN CENTER</span></div>
@@ -180,7 +219,7 @@ export default function AdminShellClient({
 
         <div className="adminNavSearch">
           <span aria-hidden="true">⌕</span>
-          <input value={navQuery} onChange={(event) => setNavQuery(event.target.value)} placeholder="Найти раздел…" aria-label="Найти раздел админки" />
+          <input ref={navSearchRef} type="search" value={navQuery} onChange={(event) => setNavQuery(event.target.value)} placeholder="Найти раздел…" aria-label="Поиск по разделам админки" />
           {navQuery && <button type="button" onClick={() => setNavQuery("")} aria-label="Очистить поиск">×</button>}
         </div>
 
@@ -190,7 +229,7 @@ export default function AdminShellClient({
             const isCollapsed = !normalizedQuery && !hasActive && Boolean(collapsed[group.id]);
             return (
               <section key={group.id} className={`adminNavGroup${isCollapsed ? " isCollapsed" : ""}`}>
-                <button type="button" className="adminNavGroupToggle" onClick={() => toggleGroup(group.id)} aria-expanded={!isCollapsed}>
+                <button type="button" className="adminNavGroupToggle" onClick={() => toggleGroup(group.id)} aria-expanded={!isCollapsed} aria-label={`${group.label}: ${isCollapsed ? "развернуть" : "свернуть"}`} >
                   <span>{group.label}</span><i aria-hidden="true">⌄</i>
                 </button>
                 {!isCollapsed && <div className="adminNavGroupItems">
@@ -214,7 +253,7 @@ export default function AdminShellClient({
 
       <div className="adminShellMain">
         <header className="adminTopbar">
-          <button type="button" className="adminMobileMenu" onClick={() => setMobileOpen((value) => !value)} aria-label={mobileOpen ? "Закрыть меню" : "Открыть меню"} aria-expanded={mobileOpen} aria-controls="admin-sidebar">☰</button>
+          <button ref={mobileMenuButtonRef} type="button" className="adminMobileMenu" onClick={() => setMobileOpen((value) => !value)} aria-label={mobileOpen ? "Закрыть меню" : "Открыть меню"} aria-expanded={mobileOpen} aria-controls="admin-sidebar">☰</button>
           <nav className="adminTopbarTrail" aria-label="Навигационная цепочка">
             <Link href="/admin">FC Edineț</Link>
             {trail.map((label, index) => (

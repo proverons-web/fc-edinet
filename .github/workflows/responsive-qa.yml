@@ -77,6 +77,8 @@ jobs:
         run: node --experimental-strip-types scripts/qa-cup-bracket-v2319.mjs
       - name: Two-leg cup ties, automatic progression and SQL guards
         run: node --experimental-strip-types scripts/qa-cup-two-leg-v2320.mjs
+      - name: Unified Site Builder access, navigation and menu ordering
+        run: node --experimental-strip-types scripts/qa-unified-admin-v2321.mjs
       - name: Real-user monitoring, privacy and p75 QA
         run: node --experimental-strip-types scripts/qa-rum-v2314.mjs
       - name: RUM operations and Node runtime pin QA

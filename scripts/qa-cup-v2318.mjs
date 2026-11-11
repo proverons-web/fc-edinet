@@ -11,7 +11,7 @@ let passed=0,failed=0;
 const check=(name,fn)=>{try{fn();passed++;console.log("PASS",name)}catch(e){failed++;console.error("FAIL",name,e.stack||e)}};
 const base={status:"finished",home_score:1,away_score:1,extra_time_played:true,home_penalties:4,away_penalties:3,competitionType:"cup",home:{is_club:true},away:{is_club:false}};
 const validate=d=>validateCupResult({...base,...d});
-check("v2.30.20 version",()=>assert.equal(JSON.parse(read("package.json")).version,"2.30.20"));
+check("v2.30.21 version",()=>assert.equal(JSON.parse(read("package.json")).version,"2.30.21"));
 check("cup penalty winner home",()=>assert.equal(matchWinner(base),"home"));
 check("cup penalty winner away",()=>assert.equal(matchWinner({...base,home_penalties:3,away_penalties:4}),"away"));
 check("level match without penalty is draw",()=>assert.equal(matchWinner({...base,home_penalties:null,away_penalties:null}),"draw"));
@@ -53,6 +53,6 @@ check("home results use decision",()=>assert.match(read("app/page.tsx"),/matchWi
 check("player profile determines cup result by shootout",()=>{const s=read("app/team/[slug]/page.tsx");assert.match(s,/matchWinner\(match\)/);assert.match(s,/cupResultDetail\(match,locale\)/)});
 
 check("league standings still protected",()=>{assert.match(read("app/standings/page.tsx"),/competition_type.*league/);assert.match(read("app/admin/standings/actions.ts"),/competition\.competition_type !== "league"/)});
-check("release and migration listed in step",()=>assert.match(read("STEP-2.30.20.txt"),/081_cup_results\.sql/));
-console.log(`FC Edineț v2.30.20 Cup QA: ${passed}/${passed+failed}`);
+check("release and migration listed in step",()=>assert.match(read("STEP-2.30.21.txt"),/081_cup_results\.sql/));
+console.log(`FC Edineț v2.30.21 Cup QA: ${passed}/${passed+failed}`);
 if(failed)process.exitCode=1;

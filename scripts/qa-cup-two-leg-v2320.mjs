@@ -45,5 +45,5 @@ test('migration atomic stage linking',()=>assert.match(sql,/pg_advisory_xact_loc
 test('public page includes return match and aggregate',()=>{const s=text('app/matches/cups/[slug]/page.tsx');assert.match(s,/return_match:matches!/);assert.match(s,/aggregate_home/);assert.match(s,/cupBracketLegDetail/)});
 test('editor checks both legs and editor role',()=>{const s=text('app/admin/matches/cups/actions.ts');assert.match(s,/requireEditor/);assert.match(s,/validateTwoLegTie/);assert.match(s,/auto_link_cup_bracket_round/)});
 test('regular match report shows only tie summary, not changing score',()=>{const s=text('app/matches/[id]/page.tsx');assert.match(s,/cupTwoLegMatchNotice/);assert.match(s,/evaluateCupTie/);});
-test('release matches',()=>{assert.equal(JSON.parse(text('package.json')).version,'2.30.20');assert.match(text('lib/release.ts'),/2\.30\.20/);});
-console.log(`Cup Two-Leg v2.30.20: ${ok}/${ok+bad}`);if(bad)process.exitCode=1;
+test('release matches',()=>{assert.equal(JSON.parse(text('package.json')).version,'2.30.21');assert.match(text('lib/release.ts'),/2\.30\.21/);});
+console.log(`Cup Two-Leg v2.30.21: ${ok}/${ok+bad}`);if(bad)process.exitCode=1;

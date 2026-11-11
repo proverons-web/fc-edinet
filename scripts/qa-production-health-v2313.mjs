@@ -11,7 +11,7 @@ function check(name, cb) {
 }
 
 const packageInfo = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"));
-check("release 2.30.20 consistent", () => { assert.equal(packageInfo.version, "2.30.20"); });
+check("release 2.30.21 consistent", () => { assert.equal(packageInfo.version, "2.30.21"); });
 check("public routes are safe GETs only", () => {
   assert.equal(PUBLIC_CHECKS.length, 10);
   assert.ok(PUBLIC_CHECKS.every(c => c.path.startsWith("/") && !c.path.startsWith("/admin") && !c.path.startsWith("/api/analytics")));
@@ -44,7 +44,7 @@ check("deploy and CI include offline regression guard", () => {
 const server = createServer((req, res) => {
   if (req.url === "/api/version") {
     res.writeHead(200, { "content-type": "application/json" });
-    res.end(JSON.stringify({ ok: true, version: "2.30.20" }));
+    res.end(JSON.stringify({ ok: true, version: "2.30.21" }));
   } else if (req.url === "/api/health") {
     res.writeHead(200, { "content-type": "application/json" });
     res.end(JSON.stringify({ status: "ok", check: "configuration_only" }));
@@ -59,14 +59,14 @@ await once(server, "listening");
 const port = server.address().port;
 const baseUrl = `http://127.0.0.1:${port}`;
 try {
-  const good = await runProductionHealth({ baseUrl, expectedVersion: "2.30.20" });
+  const good = await runProductionHealth({ baseUrl, expectedVersion: "2.30.21" });
   check("all ten routes pass healthy fixture", () => assert.equal(good.passed, good.total));
   const wrongVersion = await runProductionHealth({ baseUrl, expectedVersion: "2.30.12", checks: [PUBLIC_CHECKS[0]] });
   check("outdated release is detected", () => {
     assert.equal(wrongVersion.passed, 0);
     assert.match(wrongVersion.results[0].error, /expected v2\.30\.12/);
   });
-  const missing = await runProductionHealth({ baseUrl, expectedVersion: "2.30.20", checks: [{ path: "/bad", kind: "html" }] });
+  const missing = await runProductionHealth({ baseUrl, expectedVersion: "2.30.21", checks: [{ path: "/bad", kind: "html" }] });
   check("HTTP 404 causes a failing result", () => assert.equal(missing.results[0].httpStatus, 404));
 } finally { server.close(); await once(server, "close"); }
 console.log(`\nProduction Health (offline fixture): ${passed}/9 tests passed.`);

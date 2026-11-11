@@ -15,7 +15,7 @@ const semi1=tie(1,1,1,makeMatch(101,a,b,2,1),{next_tie_id:3,next_slot:"home"});
 const semi2=tie(2,1,2,makeMatch(102,c,d,1,1,{home_penalties:4,away_penalties:5}),{next_tie_id:3,next_slot:"away"});
 const final=tie(3,2,1);
 const resolved=resolveCupBracket([final,semi2,semi1]);
-check("release synchronized",()=>{assert.equal(JSON.parse(read("package.json")).version,"2.30.20");assert.match(read("lib/release.ts"),/RELEASE_VERSION = "2\.30\.20"/)});
+check("release synchronized",()=>{assert.equal(JSON.parse(read("package.json")).version,"2.30.21");assert.match(read("lib/release.ts"),/RELEASE_VERSION = "2\.30\.21"/)});
 check("semi winners by official score",()=>assert.equal(bracketWinner(semi1)?.name,"FC Edineț"));
 check("semi away penalty winner",()=>assert.equal(bracketWinner(semi2)?.name,"Delta"));
 check("unplayed placeholder winner is absent",()=>assert.equal(bracketWinner(final),null));
@@ -57,6 +57,6 @@ check("calendar links cup editions",()=>assert.match(read("app/matches/page.tsx"
 check("match detail links bracket",()=>assert.match(read("app/matches/[id]/page.tsx"),/Кубковая сетка/));
 check("sitemap includes cup edition pages",()=>assert.match(read("app/sitemap.ts"),/matches\/cups/));
 check("installer checks bracket QA",()=>assert.match(read("package.json"),/qa-cup-bracket-v2319\.mjs/));
-check("new migration listed in release",()=>assert.match(read("STEP-2.30.20.txt"),/082_cup_bracket\.sql/));
-console.log(`v2.30.20 Cup Bracket QA: ${passed}/${passed+failed}`);
+check("new migration listed in release",()=>assert.match(read("STEP-2.30.21.txt"),/082_cup_bracket\.sql/));
+console.log(`v2.30.21 Cup Bracket QA: ${passed}/${passed+failed}`);
 if(failed)process.exitCode=1;

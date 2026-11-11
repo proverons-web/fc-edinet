@@ -40,7 +40,7 @@ export default async function AdminPage() {
     <main className="adminPage adminDashboardV2">
       <section className="adminDashboardIntro">
         <div>
-          <p className="eyebrow blue">FC EDINEȚ • ADMIN CENTER</p>
+          <p className="eyebrow blue">FC EDINEȚ • УПРАВЛЕНИЕ САЙТОМ</p>
           <h1>Панель управления</h1>
           <p>Рабочие разделы сгруппированы по задачам. Всё редкое и системное вынесено отдельно.</p>
         </div>
@@ -51,12 +51,32 @@ export default async function AdminPage() {
         </div>
       </section>
 
+      {canEdit && <section className="adminUnifiedFeature" aria-label="Основной редактор сайта">
+        <div className="adminUnifiedFeatureCopy">
+          <p className="eyebrow">ОСНОВНОЙ ИНСТРУМЕНТ</p>
+          <h2>Редактор сайта</h2>
+          <p>Страницы, оформление, меню и предпросмотр для компьютера и телефона — в одном месте.</p>
+          <div className="adminUnifiedFeatureSteps"><span>1. Страница</span><span>2. Дизайн или контент</span><span>3. Сохранение и проверка</span></div>
+        </div>
+        <Link className="adminUnifiedFeatureAction" href="/admin/site-builder">Открыть редактор <span aria-hidden="true">→</span></Link>
+      </section>}
+
       <section className="adminDashboardStats">
         <Stat label="Активные игроки" value={playersResult.count} hint="сейчас в составе" />
         <Stat label="Опубликовано" value={publishedResult.count} hint="новостей на сайте" />
         <Stat label="Черновики" value={draftsResult.count} hint="ещё не опубликованы" />
         <Stat label="На проверке" value={reviewResult.count} hint="ждут решения" accent={Boolean(reviewResult.count)} />
       </section>
+
+      {canEdit && <section className="adminQuickTasks" aria-label="Быстрые действия">
+        <h2>Быстрые действия</h2>
+        <div>
+          <Link href="/admin/news/new">+ Написать новость</Link>
+          <Link href="/admin/matches/new">+ Добавить матч</Link>
+          <Link href="/admin/media">Управлять медиа</Link>
+          <Link href="/admin/site-builder">Изменить оформление</Link>
+        </div>
+      </section>}
 
       {canEdit && (
         <section className="adminOperations">
@@ -111,17 +131,17 @@ export default async function AdminPage() {
         ]} />
       </>}
 
-      {isAdmin && <DashboardSection eyebrow="СИСТЕМА" title="Доступ и контроль" text="Служебные функции администратора." modules={[
+      {isAdmin && <details className="adminAdvancedTools"><summary>Системные инструменты <span>Пользователи, журнал действий, диагностика</span></summary><DashboardSection eyebrow="СИСТЕМА" title="Доступ и контроль" text="Служебные функции администратора." modules={[
         { title: "Пользователи", text: "Аккаунты, роли сотрудников и права доступа.", href: "/admin/users", icon: "U", kicker: "Только admin" },
         { title: "Журнал действий", text: "История изменений, удалений и смены ролей.", href: "/admin/audit", icon: "A", kicker: "Только admin" },
         { title: "Диагностика", text: "Версия, окружение, Supabase, SEO и системные проверки.", href: "/admin/diagnostics", icon: "D", kicker: "Только admin" },
-      ]} />}
+      ]} /></details>}
     </main>
   );
 }
 
 function Stat({ label, value, hint, accent = false }: { label: string; value: number | null; hint: string; accent?: boolean }) {
-  return <article className={`adminDashStat${accent ? " isAccent" : ""}`}><strong>{value ?? 0}</strong><div><b>{label}</b><span>{hint}</span></div></article>;
+  return <article className={`adminDashStat${accent ? " isAccent" : ""}`}><strong>{value ?? "—"}</strong><div><b>{label}</b><span>{value === null ? "Не удалось загрузить" : hint}</span></div></article>;
 }
 
 function OperationCard({ title, value, detail, href }: { title: string; value: number; detail: string; href: string }) {

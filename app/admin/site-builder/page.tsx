@@ -24,7 +24,7 @@ function first(v:string|string[]|undefined){return Array.isArray(v)?v[0]:v}
 export default async function UnifiedSiteBuilder({searchParams}:Props){
  const {supabase}=await requireEditor();
  const q=searchParams?await searchParams:{};
- const [{data:customData},{data:menuData}]=await Promise.all([
+ const [{data:customData,error:pagesError},{data:menuData,error:menuError}]=await Promise.all([
    supabase.from("site_custom_pages").select("*").order("updated_at",{ascending:false}),
    supabase.from("site_menu_items").select("*").order("display_order").order("id"),
  ]);
@@ -36,6 +36,12 @@ export default async function UnifiedSiteBuilder({searchParams}:Props){
  const noticeMap:Record<string,string>={
    invalid_slug:"Укажи корректный адрес страницы латиницей.", reserved_slug:"Этот адрес зарезервирован системным разделом сайта. Выбери другой slug.", slug_taken:"Страница с таким адресом уже существует.", create_failed:"Не удалось создать страницу.", invalid_page:"Некорректная страница.", page_not_found:"Страница не найдена.", save_failed:"Не удалось сохранить страницу.", delete_failed:"Не удалось удалить страницу.", invalid_href:"Некорректная ссылка меню. Используй /раздел, https://, mailto: или tel:.", invalid_menu_item:"Некорректный пункт меню.", menu_save_failed:"Не удалось сохранить пункт меню.", menu_create_failed:"Не удалось создать пункт меню."
  };
- const notice=error?noticeMap[error]||"Операция не выполнена.":first(q.saved)?"Страница сохранена.":first(q.created)?"Страница создана.":first(q.deleted)?"Страница удалена.":undefined;
+ const notice = pagesError || menuError
+   ? "Не удалось загрузить все данные редактора. Проверь соединение с Supabase и попробуй обновить страницу."
+   : error ? noticeMap[error] || "Операция не выполнена."
+   : first(q.saved) ? "Страница сохранена."
+   : first(q.created) ? "Страница создана."
+   : first(q.deleted) ? "Страница удалена."
+   : undefined;
  return <UnifiedSiteBuilderClient pages={pages} selectedKey={selectedKey} customPages={customPages} menuItems={normalizeCanonicalMenuRoutes((menuData??[]) as SiteMenuItem[])} notice={notice}/>;
 }

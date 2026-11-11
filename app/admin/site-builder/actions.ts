@@ -135,9 +135,21 @@ export async function createMenuItem(fd: FormData) {
 
 export async function reorderMenuItems(ids: number[]) {
   const { supabase } = await requireEditor();
-  const cleanIds = ids.filter((id) => Number.isFinite(id));
-  if (!cleanIds.length) return;
-  await Promise.all(cleanIds.map((id, index) => supabase.from("site_menu_items").update({ display_order: (index + 1) * 10, updated_at: new Date().toISOString() }).eq("id", id)));
+  const cleanIds = ids.filter((id) => Number.isSafeInteger(id) && id > 0);
+  if (!cleanIds.length || cleanIds.length !== ids.length || new Set(cleanIds).size !== cleanIds.length) {
+    throw new Error("Некорректный порядок меню.");
+  }
+  const { data: existing, error: readError } = await supabase.from("site_menu_items").select("id");
+  if (readError || !existing || existing.length !== cleanIds.length) {
+    throw new Error("Список пунктов меню изменился. Обнови страницу и попробуй снова.");
+  }
+  const known = new Set(existing.map((item) => Number(item.id)));
+  if (cleanIds.some((id) => !known.has(id))) throw new Error("Найден неизвестный пункт меню.");
+  const now = new Date().toISOString();
+  const writes = await Promise.all(cleanIds.map((id, index) => supabase.from("site_menu_items").update({ display_order: (index + 1) * 10, updated_at: now }).eq("id", id).select("id")));
+  if (writes.some((write) => write.error || !write.data?.length)) {
+    throw new Error("Не удалось сохранить порядок всех пунктов. Обнови страницу и повтори.");
+  }
   updateTag("fce-public-site-menu");
   revalidatePath("/", "layout");
 }
