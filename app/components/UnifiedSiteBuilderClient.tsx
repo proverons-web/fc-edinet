@@ -34,6 +34,8 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, menuItems
   const [editorTab, setEditorTab] = useState<Tab>("design");
   const [pageQuery, setPageQuery] = useState("");
   const [customDirty, setCustomDirty] = useState(false);
+  const [embeddedDirty, setEmbeddedDirty] = useState(false);
+  const [editorFeedback, setEditorFeedback] = useState("");
   const [menu, setMenu] = useState(menuItems);
   const [dragId, setDragId] = useState<number | null>(null);
   const [orderState, setOrderState] = useState<"idle" | "saved" | "error">("idle");
@@ -41,6 +43,9 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, menuItems
   const drawerRef = useRef<HTMLElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
+  const editorFrameRef = useRef<HTMLIFrameElement>(null);
+  const dirtyRef = useRef(false);
+  dirtyRef.current = customDirty || embeddedDirty;
 
   const selectedCustom = selected.kind === "custom" ? selected.custom : null;
   const hasSeparateEditors = selected.kind === "system" && selected.design !== selected.content;
@@ -58,11 +63,14 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, menuItems
     triggerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setEditorTab(tab);
     setCustomDirty(false);
+    setEmbeddedDirty(false);
+    setEditorFeedback("");
     setPanel(next);
   };
   const closePanel = () => {
-    if (customDirty && !window.confirm("Есть несохранённые изменения. Закрыть редактор без сохранения?")) return;
+    if (dirtyRef.current && !window.confirm("Есть несохранённые изменения. Закрыть редактор без сохранения?")) return;
     setCustomDirty(false);
+    setEmbeddedDirty(false);
     setPanel("none");
     const trigger = triggerRef.current;
     requestAnimationFrame(() => trigger?.focus());
@@ -96,19 +104,49 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, menuItems
   }, [panel]);
 
   const changePage = (key: string) => {
-    if (customDirty && !window.confirm("Есть несохранённые изменения. Перейти на другую страницу?")) return;
+    if (dirtyRef.current && !window.confirm("Есть несохранённые изменения. Перейти на другую страницу?")) return;
     setCustomDirty(false);
+    setEmbeddedDirty(false);
     setPanel("none");
     setEditorTab("design");
     router.push(`/admin/site-builder?page=${encodeURIComponent(key)}`);
   };
 
+
+  // Accept editor updates from the currently embedded, same-origin frame only.
+  // Never trust postMessage from the public preview or unrelated browser frames.
+  useEffect(() => {
+    if (panel !== "edit") return;
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin || event.source !== editorFrameRef.current?.contentWindow) return;
+      const payload = event.data;
+      if (!payload || typeof payload !== "object") return;
+      if (payload.type === "fc-builder-editor-state" && typeof payload.dirty === "boolean") {
+        setEmbeddedDirty(payload.dirty);
+      } else if (payload.type === "fc-builder-editor-saved" && typeof payload.published === "boolean") {
+        setEditorFeedback(payload.published ? "Страница опубликована. Обнови предпросмотр, чтобы проверить её на сайте." : "Черновик сохранён. Посетители пока не видят эти изменения.");
+        if (payload.published) setPreviewRevision((revision) => revision + 1);
+      }
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [panel]);
+
+  const switchEditorTab = (next: Tab) => {
+    if (next === editorTab) return;
+    if (embeddedDirty && !window.confirm("В редакторе есть несохранённые изменения. Переключить вкладку и потерять их?")) return;
+    setEmbeddedDirty(false);
+    setEditorFeedback("");
+    setEditorTab(next);
+  };
+
   function saveOrder(next: SiteMenuItem[]) {
+    const previous = menu;
     setMenu(next);
     setOrderState("idle");
     startTransition(async () => {
       try { await reorderMenuItems(next.map((item) => item.id)); setOrderState("saved"); router.refresh(); }
-      catch { setOrderState("error"); router.refresh(); }
+      catch { setMenu(previous); setOrderState("error"); router.refresh(); }
     });
   }
 
@@ -213,12 +251,14 @@ export default function UnifiedSiteBuilderClient({ pages, selectedKey, menuItems
             </form>
           </> : <>
             {hasSeparateEditors && <div className="builderEditTabs" role="group" aria-label="Режим редактирования">
-              <button type="button" className={editorTab === "design" ? "active" : ""} aria-pressed={editorTab === "design"} onClick={() => setEditorTab("design")}>Дизайн</button>
-              <button type="button" className={editorTab === "content" ? "active" : ""} aria-pressed={editorTab === "content"} onClick={() => setEditorTab("content")}>Контент</button>
+              <button type="button" className={editorTab === "design" ? "active" : ""} aria-pressed={editorTab === "design"} onClick={() => switchEditorTab("design")}>Дизайн</button>
+              <button type="button" className={editorTab === "content" ? "active" : ""} aria-pressed={editorTab === "content"} onClick={() => switchEditorTab("content")}>Контент</button>
             </div>}
             <p className="builderHint">{editorTab === "design" ? "Фон, положение изображения, Hero и блоки страницы. Сохраняй черновик и публикуй изменения в редакторе ниже." : "Тексты, фотографии и записи раздела. Сохраняй изменения внутри формы ниже."} Не переключай вкладку с несохранёнными изменениями.</p>
             <div className="siteBuilderEditorTools"><a href={editorUrl} target="_blank" rel="noreferrer">Открыть редактор в отдельной вкладке ↗</a></div>
-            <iframe key={embeddedEditorUrl} className="siteBuilderEditorFrame" title={`Редактор ${selected.label}, ${editorTab === "design" ? "дизайн" : "контент"}`} src={embeddedEditorUrl}/>
+            {embeddedDirty && <p className="builderUnsavedWarning" role="status">Есть несохранённые изменения. Сохрани черновик или опубликуй перед закрытием редактора.</p>}
+            {editorFeedback && <p className="builderEditorFeedback" role="status">{editorFeedback}</p>}
+            <iframe ref={editorFrameRef} key={embeddedEditorUrl} className="siteBuilderEditorFrame" title={`Редактор ${selected.label}, ${editorTab === "design" ? "дизайн" : "контент"}`} src={embeddedEditorUrl} onLoad={() => setEmbeddedDirty(false)}/>
           </>}
         </div>}
 

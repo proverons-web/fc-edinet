@@ -5,6 +5,7 @@ import { useActionState, useEffect, useMemo, useRef, useState, type DragEvent, t
 import type { MediaAlbum, MediaVideo, Partner, SitePageDesignSnapshot } from "@/lib/types";
 import type { Locale } from "@/lib/i18n";
 import ManagedPageCanvas from "@/app/components/ManagedPageCanvas";
+import { moveBuilderSection, dropBuilderSection } from "@/lib/editor-section-order";
 import {
   defaultProPageLayout,
   proPageLabels,
@@ -50,15 +51,19 @@ export default function ProPageBuilder({ pageKey, initial, action, locale, heroD
   const [undoStack, setUndoStack] = useState<ProPageLayoutConfig[]>([]);
   const [redoStack, setRedoStack] = useState<ProPageLayoutConfig[]>([]);
   const [draggedKey, setDraggedKey] = useState<string | null>(null);
+  const [showEmbeddedPreview, setShowEmbeddedPreview] = useState(false);
+  const [savedJson, setSavedJson] = useState(() => JSON.stringify(initial));
+  const submittedJson = useRef<string | null>(null);
   const [autoScale, setAutoScale] = useState(.62);
   const previewWrapRef = useRef<HTMLDivElement | null>(null);
   const labels = proSectionLabels(pageKey);
   const selected = layout.sections.find((section) => section.key === selectedKey) ?? layout.sections[0];
   const spec = devices[breakpoint];
   const json = useMemo(() => JSON.stringify(layout), [layout]);
+  const dirty = json !== savedJson;
 
   useEffect(() => {
-    if (embedded) return;
+    if (embedded && !showEmbeddedPreview) return;
     const node = previewWrapRef.current;
     if (!node) return;
     const update = () => setAutoScale(Math.max(.22, Math.min(1, (node.clientWidth - 28) / spec.width)));
@@ -66,11 +71,34 @@ export default function ProPageBuilder({ pageKey, initial, action, locale, heroD
     const observer = new ResizeObserver(update);
     observer.observe(node);
     return () => observer.disconnect();
-  }, [embedded, spec.width]);
+  }, [embedded, showEmbeddedPreview, spec.width]);
+
+  // The parent Site Builder can warn before closing an editor with unsaved work.
+  useEffect(() => {
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: "fc-builder-editor-state", pageKey, dirty }, window.location.origin);
+    }
+  }, [pageKey, dirty]);
 
   useEffect(() => {
-    if (window.parent !== window) window.parent.postMessage({ type: "fc-site-builder-pro-layout", pageKey, layout }, window.location.origin);
-  }, [pageKey, layout]);
+    if (!dirty) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+
+  useEffect(() => {
+    if (!state.success) return;
+    setSavedJson(submittedJson.current ?? json);
+    if (window.parent !== window) {
+      window.parent.postMessage({
+        type: "fc-builder-editor-saved", pageKey,
+        published: state.success.toLowerCase().includes("опубликован"),
+      }, window.location.origin);
+    }
+    // The action state changes only when the server has answered a submission.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
 
   function commit(next: ProPageLayoutConfig) {
     setUndoStack((stack) => [...stack.slice(-29), layout]);
@@ -85,15 +113,16 @@ export default function ProPageBuilder({ pageKey, initial, action, locale, heroD
     patchSection(selected.key, { [field]: { ...selected[field], [breakpoint]: value } } as Partial<ProSectionConfig>);
   }
   function reorder(dragKey: string, targetKey: string) {
-    if (dragKey === targetKey) return;
-    const sections = [...layout.sections];
-    const from = sections.findIndex((item) => item.key === dragKey);
-    const to = sections.findIndex((item) => item.key === targetKey);
-    if (from < 0 || to < 0) return;
-    const [moved] = sections.splice(from, 1);
-    sections.splice(to, 0, moved);
+    const sections = dropBuilderSection(layout.sections, dragKey, targetKey);
+    if (sections.every((section, index) => section.key === layout.sections[index]?.key)) return;
     commit({ ...layout, sections });
     setSelectedKey(dragKey);
+  }
+  function moveSection(key: string, direction: -1 | 1) {
+    const sections = moveBuilderSection(layout.sections, key, direction);
+    if (sections.every((section, index) => section.key === layout.sections[index]?.key)) return;
+    commit({ ...layout, sections });
+    setSelectedKey(key);
   }
   function applyPreset(preset: ProPagePreset) {
     if (preset === layout.preset) return;
@@ -159,7 +188,8 @@ export default function ProPageBuilder({ pageKey, initial, action, locale, heroD
   const contentLink = pageKey === "media" ? "/admin/media" : pageKey === "partners" ? "/admin/partners" : null;
   const visibleCount = layout.sections.filter((section) => section.visible).length;
 
-  return <form action={formAction} className={`pb2Form${embedded ? " isEmbedded" : ""}`}>
+  return <form action={formAction} onSubmit={() => { submittedJson.current = json; }} className={`pb2Form${embedded ? " isEmbedded" : ""}`}>
+
     <input type="hidden" name="page_key" value={pageKey}/>
     <input type="hidden" name="layout_json" value={json}/>
 
@@ -171,16 +201,17 @@ export default function ProPageBuilder({ pageKey, initial, action, locale, heroD
         <button type="button" onClick={undo} disabled={!undoStack.length} title="Отменить">↶ <span>Отменить</span></button>
         <button type="button" onClick={redo} disabled={!redoStack.length} title="Повторить">↷ <span>Повторить</span></button>
       </div>
-      {!embedded && <div className="pb2Devices" aria-label="Предпросмотр устройства">
+      {(!embedded || showEmbeddedPreview) && <div className="pb2Devices" aria-label="Предпросмотр устройства">
         {(Object.keys(devices) as ProBreakpoint[]).map((key) => <button type="button" key={key} className={breakpoint === key ? "active" : ""} onClick={() => setBreakpoint(key)}><span>{key === "desktop" ? "▱" : key === "tablet" ? "▯" : "▯"}</span>{devices[key].label}</button>)}
       </div>}
       <div className="pb2TopActions">
+        {embedded && <button type="button" className="pb2PreviewToggle" aria-pressed={showEmbeddedPreview} onClick={() => setShowEmbeddedPreview((value) => !value)}>{showEmbeddedPreview ? "Вернуться к настройкам" : "Предпросмотр изменений"}</button>}
         {contentLink && <Link href={contentLink}>Контент</Link>}
         <a href={proPageRoutes[pageKey]} target="_blank" rel="noreferrer">Открыть страницу ↗</a>
       </div>
     </header>
 
-    <div className={`pb2Workspace${embedded ? " noPreview" : ""}`}>
+    <div className={`pb2Workspace${embedded ? (showEmbeddedPreview ? " embeddedPreview" : " noPreview") : ""}`}>
       <aside className="pb2Structure">
         <div className="pb2PanelTitle">
           <div><span>СТРУКТУРА</span><strong>Секции страницы</strong></div>
@@ -199,27 +230,31 @@ export default function ProPageBuilder({ pageKey, initial, action, locale, heroD
           {layout.sections.map((section) => <div
             key={section.key}
             className={`pb2SectionRow${selectedKey === section.key ? " active" : ""}${draggedKey === section.key ? " dragging" : ""}`}
-            draggable
-            onDragStart={(event) => onDragStart(event, section.key)}
+            draggable={section.key !== "hero"}
+            onDragStart={(event) => { if (section.key !== "hero") onDragStart(event, section.key); }}
             onDragEnd={() => setDraggedKey(null)}
             onDragOver={(event) => event.preventDefault()}
             onDrop={(event) => onDrop(event, section.key)}
           >
-            <button className="pb2Drag" type="button" title="Перетащи секцию">⋮⋮</button>
+            <span className="pb2Drag" aria-hidden="true" title={section.key === "hero" ? "Hero закреплён первым" : "Перетащи секцию"}>{section.key === "hero" ? "◆" : "⋮⋮"}</span>
             <button className="pb2SectionMain" type="button" onClick={() => setSelectedKey(section.key)}>
               <strong>{labels[section.key] ?? section.key}</strong>
-              <small>{proSectionVariants(pageKey, section.key).find((item) => item.value === section.variant)?.label ?? section.variant}</small>
+              <small>{!section.visible ? "Скрыто · " : ""}{proSectionVariants(pageKey, section.key).find((item) => item.value === section.variant)?.label ?? section.variant}</small>
             </button>
-            <button type="button" className={`pb2Visibility${section.visible ? " on" : ""}`} onClick={() => patchSection(section.key, { visible: !section.visible })} aria-label={section.visible ? "Скрыть секцию" : "Показать секцию"} title={section.visible ? "Скрыть" : "Показать"}><i/></button>
+            <div className="pb2MoveButtons" role="group" aria-label={`Порядок: ${labels[section.key] ?? section.key}`}>
+              <button type="button" aria-label={`Переместить ${labels[section.key] ?? section.key} вверх`} disabled={section.key === "hero" || layout.sections.indexOf(section) <= 1} onClick={() => moveSection(section.key, -1)}>↑</button>
+              <button type="button" aria-label={`Переместить ${labels[section.key] ?? section.key} вниз`} disabled={section.key === "hero" || layout.sections.indexOf(section) >= layout.sections.length - 1} onClick={() => moveSection(section.key, 1)}>↓</button>
+            </div>
+            <button type="button" className={`pb2Visibility${section.visible ? " on" : ""}`} aria-pressed={section.visible} onClick={() => patchSection(section.key, { visible: !section.visible })} aria-label={`${section.visible ? "Скрыть" : "Показать"}: ${labels[section.key] ?? section.key}`} title={section.visible ? "Скрыть" : "Показать"}><i/></button>
           </div>)}
         </div>
-        <div className="pb2StructureHint">Перетаскивай секции мышью. Выключенная секция остаётся в редакторе, но не показывается на сайте.</div>
+        <div className="pb2StructureHint">Выбери секцию для настройки. Меняй порядок стрелками или перетаскиванием. Hero закреплён первым. Скрытые секции не удаляются.</div>
       </aside>
 
-      {!embedded && <section className="pb2Preview" ref={previewWrapRef}>
+      {(!embedded || showEmbeddedPreview) && <section className="pb2Preview" ref={previewWrapRef}>
         <div className="pb2PreviewHead">
           <div><strong>Предпросмотр</strong><span>{devices[breakpoint].short} · {spec.width}px</span></div>
-          <span>Изменения видны сразу</span>
+          <span>{dirty ? "Несохранённый макет · только предпросмотр" : "Макет в редакторе"}</span>
         </div>
         <div className="pb2PreviewStage">
           <div className={`pb2Device device-${breakpoint}`} style={{ width: spec.width * autoScale, minHeight: spec.height * autoScale }}>
@@ -230,7 +265,7 @@ export default function ProPageBuilder({ pageKey, initial, action, locale, heroD
         </div>
       </section>}
 
-      {selected && <aside className="pb2Inspector">
+      {selected && (!embedded || !showEmbeddedPreview) && <aside className="pb2Inspector">
         <div className="pb2InspectorHead">
           <span>НАСТРОЙКИ СЕКЦИИ</span>
           <h2>{labels[selected.key] ?? selected.key}</h2>
@@ -288,13 +323,13 @@ export default function ProPageBuilder({ pageKey, initial, action, locale, heroD
 
     <footer className="pb2Savebar">
       <div className="pb2SaveMessage" aria-live="polite">
-        <strong>{state.error ? "Ошибка сохранения" : state.success ? state.success : "Черновик страницы"}</strong>
-        <span>{state.error || "Сохрани черновик для продолжения работы или опубликуй готовые изменения на сайте."}</span>
+        <strong>{pending ? "Сохранение…" : state.error ? "Ошибка сохранения" : dirty ? "Есть несохранённые изменения" : state.success ? state.success : "Изменений нет"}</strong>
+        <span>{state.error || (dirty ? "Изменения видны в предварительном просмотре, но пока не сохранены." : "Сохрани черновик для продолжения работы или опубликуй готовые изменения на сайте.")}</span>
       </div>
       <div className="pb2SaveActions">
         <button type="button" className="pb2ResetPage" onClick={resetPage}>Сбросить страницу</button>
         <button type="submit" name="intent" value="draft" disabled={pending}>{pending ? "Сохраняем…" : "Сохранить черновик"}</button>
-        <button className="primaryButton" type="submit" name="intent" value="publish" disabled={pending}>{pending ? "Публикуем…" : "Опубликовать"}</button>
+        <button className="primaryButton" type="submit" name="intent" value="publish" disabled={pending} onClick={(event) => { if (!window.confirm("Опубликовать изменения для всех посетителей сайта?")) event.preventDefault(); }}>{pending ? "Публикуем…" : "Опубликовать"}</button>
       </div>
     </footer>
   </form>;

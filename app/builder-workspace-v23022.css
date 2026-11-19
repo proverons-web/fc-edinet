@@ -1,0 +1,51 @@
+/* v2.30.22 — Page Builder Pro usability, scoped to the admin builder. */
+.adminAppShell .pb2Form.isEmbedded .pb2Topbar { flex-wrap: wrap; gap: 8px; }
+.adminAppShell .pb2Form.isEmbedded .pb2TopActions { flex-wrap: wrap; }
+.adminAppShell .pb2Form .pb2PreviewToggle { min-height: 37px; border: 1px solid #a9c5e4; padding: 7px 11px; background: #ebf4ff; color: #144f85; font: inherit; font-size: 11px; font-weight: 800; cursor: pointer; }
+.adminAppShell .pb2Form .pb2PreviewToggle[aria-pressed="true"] { background: #124f8e; color: white; }
+.adminAppShell .pb2Form .pb2SectionRow { grid-template-columns: 24px minmax(0,1fr) 58px 30px; min-width: 0; }
+.adminAppShell .pb2Form .pb2SectionMain { min-width: 0; padding: 10px 8px; }
+.adminAppShell .pb2Form .pb2SectionMain strong { font-size: 12px; }
+.adminAppShell .pb2Form .pb2SectionMain small { font-size: 10px; }
+.adminAppShell .pb2Form .pb2Drag { display: grid; place-items: center; font-size: 17px; }
+.adminAppShell .pb2Form .pb2MoveButtons { display: flex; gap: 2px; justify-content: center; }
+.adminAppShell .pb2Form .pb2MoveButtons button { width: 25px; height: 32px; border: 1px solid #d3e0ef; background: #f7faff; color: #1f5685; cursor: pointer; font-size: 14px; font-weight: 800; }
+.adminAppShell .pb2Form .pb2MoveButtons button:disabled { opacity: .3; cursor: not-allowed; }
+.adminAppShell .pb2Form .pb2Visibility { width: 28px; }
+.adminAppShell .pb2Form .pb2StructureHint { font-size: 11px; line-height: 1.55; }
+.adminAppShell .pb2Form .pb2PanelTitle strong { font-size: 15px; }
+.adminAppShell .pb2Form .pb2PresetBox label,
+.adminAppShell .pb2Form .pb2SettingBlock h3 { font-size: 12px; }
+.adminAppShell .pb2Form .pb2BlockHelp,
+.adminAppShell .pb2Form .pb2InspectorHead p { font-size: 11px; }
+.adminAppShell .pb2Workspace.embeddedPreview { grid-template-columns: minmax(200px,260px) minmax(0,1fr); gap: 12px; padding: 12px; }
+.adminAppShell .pb2Form.isEmbedded .pb2Workspace.embeddedPreview .pb2Structure { position: sticky; }
+.adminAppShell .pb2Workspace.embeddedPreview .pb2PreviewStage { min-height: 520px; max-height: 72vh; }
+.adminAppShell .pb2Workspace.embeddedPreview .pb2Preview { min-width: 0; }
+.adminAppShell .pb2Form .pb2PreviewHead span { font-size: 11px; }
+.adminAppShell .siteBuilderEditorFrame { min-height: 540px; }
+.adminAppShell .builderUnsavedWarning,
+.adminAppShell .builderEditorFeedback { margin: 0 0 10px; border: 1px solid #f0d59d; padding: 10px 12px; font-size: 12px; line-height: 1.5; background: #fff8e8; color: #765212; }
+.adminAppShell .builderEditorFeedback { border-color: #b7d9c4; background: #eef9f2; color: #216444; }
+.adminAppShell .pb2Form :is(button,a,input,select,textarea):focus-visible { outline: 2px solid #146ac5; outline-offset: 2px; }
+@media (max-width: 900px) {
+  .adminAppShell .pb2Workspace.embeddedPreview { grid-template-columns: minmax(0,1fr); }
+  .adminAppShell .pb2Workspace.embeddedPreview .pb2Structure { position: static; max-height: none; }
+  .adminAppShell .pb2Form.isEmbedded .pb2Topbar { position: relative; }
+  .adminAppShell .pb2Workspace.noPreview { grid-template-columns: minmax(0,1fr); }
+  .adminAppShell .pb2Form.isEmbedded .pb2Structure,
+  .adminAppShell .pb2Form.isEmbedded .pb2Inspector { position: static; max-height: none; }
+}
+.adminAppShell .pb2Form .pb2SaveMessage strong { font-size: 13px; line-height: 1.35; }
+.adminAppShell .pb2Form .pb2SaveMessage span { font-size: 11px; line-height: 1.5; }
+.adminAppShell .pb2Form .pb2SaveActions button { min-height: 41px; font-size: 11px; font-weight: 800; }
+.adminAppShell .pb2Form .pb2SettingBlock :is(select,input,textarea) { font-size: 12px; }
+.adminAppShell .pb2Form .pb2TopActions a { font-size: 11px; }
+.adminAppShell .pb2Form .pb2SectionRow.active { border-color: #1258a6; background: #f1f7ff; }
+.adminAppShell .pb2Form .pb2SectionRow .pb2SectionMain small { overflow-wrap: anywhere; }
+@media (max-width: 560px) {
+  .adminAppShell .pb2Form .pb2SaveActions { width: 100%; flex-wrap: wrap; }
+  .adminAppShell .pb2Form .pb2SaveActions button { flex: 1 1 135px; }
+  .adminAppShell .pb2Form .pb2TopActions { width: 100%; }
+  .adminAppShell .pb2Form .pb2PreviewToggle { flex: 1 1 100%; }
+}
