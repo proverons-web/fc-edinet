@@ -29,10 +29,13 @@ const activeImports = [...layout.matchAll(/import ["']\.\/([^"']+\.css)["'];/g)]
 const duplicates = activeImports.filter((name,i)=>activeImports.indexOf(name)!==i);
 const errors=[];
 if (duplicates.length) errors.push(`Duplicate CSS imports: ${duplicates.join(", ")}`);
-if (activeImports.join(",") !== "globals.css,visual-polish.css,home-v215.css,mobile.css") errors.push("Global CSS import order changed; check breakpoint/cascade effects before release.");
+if (activeImports.join(",") !== "globals.css,visual-polish.css,home-v215.css,mobile.css,mobile-ux-v23024.css") errors.push("Global CSS import order changed; check breakpoint/cascade effects before release.");
 const legacy = fs.readdirSync(path.join(root,"app")).filter((file)=>/^mobile-v2\./.test(file));
 if (legacy.length) errors.push(`Versioned mobile stylesheets still exist: ${legacy.join(", ")}`);
 const mobile = fs.readFileSync(path.join(root,"app/mobile.css"),"utf8");
+const mobileAudit = fs.readFileSync(path.join(root,"app/mobile-ux-v23024.css"),"utf8");
+if (!mobileAudit.includes("@media (max-width: 767px)")) errors.push("Scoped mobile UX stylesheet missing phone breakpoint");
+if (/@media\s*\(\s*min-width/.test(mobileAudit)) errors.push("Mobile UX patch must not target desktop with min-width query");
 if (!mobile.includes("@media (max-width:767px)")) errors.push("Mobile styles have lost the <=767px contract.");
 if (/@media\s*\(\s*min-width\s*:\s*(?:768|769|[89]\d\d|\d{4,})px/.test(mobile)) errors.push("Mobile stylesheet now includes tablet/desktop rules.");
 if (update) {

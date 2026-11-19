@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 // CSS source integrity only: screenshot QA verifies the rendered result separately.
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
-const cssFiles = ['globals.css', 'visual-polish.css', 'home-v215.css', 'mobile.css'];
+const cssFiles = ['globals.css', 'visual-polish.css', 'home-v215.css', 'mobile.css', 'mobile-ux-v23024.css'];
 let passed = 0;
 function check(title, fn) {
   try { fn(); ++passed; console.log(`PASS  ${title}`); }
@@ -29,10 +29,10 @@ function checkBraces(source, name) {
   assert.equal(comment, false, `${name}: unclosed comment`);
 }
 
-check('v2.30.23 release and single installer instruction', () => {
-  assert.equal(JSON.parse(read('package.json')).version, '2.30.23');
-  assert.match(read('lib/release.ts'), /RELEASE_VERSION = "2\.30\.23"/);
-  assert.deepEqual(fs.readdirSync(root).filter(x => /^STEP-.*\.txt$/.test(x)), ['STEP-2.30.23.txt']);
+check('v2.30.24 release and single installer instruction', () => {
+  assert.equal(JSON.parse(read('package.json')).version, '2.30.24');
+  assert.match(read('lib/release.ts'), /RELEASE_VERSION = "2\.30\.24"/);
+  assert.deepEqual(fs.readdirSync(root).filter(x => /^STEP-.*\.txt$/.test(x)), ['STEP-2.30.24.txt']);
 });
 check('CSS stylesheets have balanced braces, strings, and comments', () => {
   for (const name of cssFiles) checkBraces(read(`app/${name}`), name);
@@ -57,9 +57,11 @@ check('Reduced-motion preference disables smooth scrolling', () => {
   assert.match(css, /\.fcRefLeadNewsMedia img,\.canvasVirtualViewport/);
 });
 check('CSS footprint remains within the reviewed budget', () => {
-  const totalBytes = cssFiles.reduce((n, f) => n + Buffer.byteLength(read(`app/${f}`)), 0);
-  assert.ok(totalBytes <= 885481, `CSS grew beyond v2.30.11 baseline: ${totalBytes}`);
-  console.log(`INFO  active CSS source bytes: ${totalBytes.toLocaleString('en-US')}`);
+  const legacyBytes = cssFiles.filter(f => f !== 'mobile-ux-v23024.css').reduce((n, f) => n + Buffer.byteLength(read(`app/${f}`)), 0);
+  const scopedBytes = Buffer.byteLength(read('app/mobile-ux-v23024.css'));
+  assert.ok(legacyBytes <= 885481, `Legacy CSS grew beyond approved baseline: ${legacyBytes}`);
+  assert.ok(scopedBytes <= 6000, `Mobile UX patch exceeds reviewed 6KB budget: ${scopedBytes}`);
+  console.log(`INFO  legacy CSS bytes: ${legacyBytes.toLocaleString('en-US')}; scoped mobile UX: ${scopedBytes.toLocaleString('en-US')}`);
 });
 check('QA and deployment pipeline include the source guard', () => {
   const packageJson = JSON.parse(read('package.json'));

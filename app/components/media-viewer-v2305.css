@@ -33,3 +33,13 @@
 }
 @media(max-height:540px){.mediaViewer2305{grid-template-rows:46px minmax(0,1fr) 44px 54px}.mediaViewer2305Bar{padding-block:2px}.mediaViewer2305Filmstrip{min-height:54px;padding:4px 10px}.mediaViewer2305Filmstrip>button{height:45px;flex-basis:61px}.mediaViewer2305Footer{min-height:44px;padding-block:4px}.mediaViewer2305Stage{padding-block:4px}}
 @media(prefers-reduced-motion:reduce){.mediaViewer2305 *{transition:none!important;scroll-behavior:auto!important}}
+
+/* v2.30.24 — reliable tap targets on gallery controls. */
+@media (max-width:700px) {
+  .mediaViewer2305Close { width:44px; height:44px; flex-basis:44px; }
+  .mediaViewer2305Nav { width:44px; min-height:52px; }
+  .mediaViewer2305Nav.isPrevious { left:2px; }
+  .mediaViewer2305Nav.isNext { right:2px; }
+  .mediaViewer2305Actions :is(a,button) { min-height:44px; display:inline-flex; align-items:center; }
+  .mediaViewer2305Filmstrip>button { min-height:52px; }
+}

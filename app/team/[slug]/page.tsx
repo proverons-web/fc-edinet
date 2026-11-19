@@ -590,7 +590,7 @@ function PlayerCareerSection({
                   <h3>{text.history}</h3>
                   <span>{seasons.length}</span>
                 </div>
-                <div className="playerCompetitionStatsWrap">
+                <div className="playerCompetitionStatsWrap" role="region" aria-label={locale === "ro" ? "Statistici pe sezoane" : "Статистика по сезонам"} tabIndex={0}>
                   <table className="playerCompetitionStats playerCareerHistoryTable">
                     <thead>
                       <tr>
@@ -810,7 +810,7 @@ function PlayerStatisticsSection({
                   <h3>{text.statsCompetitions}</h3>
                   <span>{competitions.length}</span>
                 </div>
-                <div className="playerCompetitionStatsWrap">
+                <div className="playerCompetitionStatsWrap" role="region" aria-label={locale === "ro" ? "Statistici în competiții" : "Статистика по соревнованиям"} tabIndex={0}>
                   <table className="playerCompetitionStats">
                     <thead>
                       <tr>

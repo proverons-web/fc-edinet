@@ -4,6 +4,7 @@ import "./globals.css";
 import "./visual-polish.css";
 import "./home-v215.css";
 import "./mobile.css";
+import "./mobile-ux-v23024.css";
 
 import SiteHeader from "./components/SiteHeader";
 import SiteFooter from "./components/SiteFooter";

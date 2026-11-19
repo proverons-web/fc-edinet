@@ -122,8 +122,8 @@ ok("next match VS circle replaced", homeCss.includes('Modern VS separator') && h
 ok("results rail frame and rounding removed", homeCss.includes('.fcV215ResultsSection .fcV215MatchRailWide{') && homeCss.includes('.fcV215ResultsSection .fcRefRecentMatchCard,') && homeCss.includes('border:0!important;') && homeCss.includes('border-radius:0!important;'));
 ok("homepage news rounding removed", homeCss.includes('.fcRefLeadColumn,\n.fcRefLatestColumn{') && homeCss.includes('.fcRefNewsRow>div{\n  border-radius:0!important;'));
 const releaseSource = read("lib/release.ts");
-ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.30.23"'));
-ok("release version", JSON.parse(read("package.json")).version === "2.30.23");
+ok("canonical release constant", releaseSource.includes('RELEASE_VERSION = "2.30.24"'));
+ok("release version", JSON.parse(read("package.json")).version === "2.30.24");
 
 ok("v2.28.8 next-match footprint restored", homeCss.includes("FC EDINEȚ v2.28.8 — LARGE CRESTS WITHOUT TALLER MATCH CARD") && homeCss.includes("min-height:168px!important") && homeCss.includes("height:168px!important"));
 ok("v2.28.8 crests enlarge without layout growth", homeCss.includes("transform:scale(1.58) translateY(-7px)!important"));
@@ -133,7 +133,7 @@ ok("v2.28.10 recent match crest alignment fixed", homeCss.includes("FC EDINEȚ v
 ok("v2.28.11 recent match crest stage added", homepageSource.includes('className="fcRefRecentMatchCrest"') && homeCss.includes("FC EDINEȚ v2.28.11 — RECENT MATCHES HORIZONTAL CREST LINE"));
 ok("recent match crests aligned", homeCss.includes("object-position:center center!important") && homepageSource.includes('className="fcRefRecentMatchLogoBox"'));
 const legacyTxt = fs.readdirSync(root).filter((name)=>/^(STEP-|DEPLOY-|FIX-).*\.txt$/.test(name));
-ok("v2.28.24 legacy step/deploy/fix txt pruned", legacyTxt.length === 1 && legacyTxt[0] === 'STEP-2.30.23.txt', legacyTxt.join(', '));
+ok("v2.28.24 legacy step/deploy/fix txt pruned", legacyTxt.length === 1 && legacyTxt[0] === 'STEP-2.30.24.txt', legacyTxt.join(', '));
 ok("v2.28.12 recent match side padding restored", homeCss.includes("FC EDINEȚ v2.28.12 — RECENT MATCH SIDE PADDING FIX"));
 ok("v2.28.13 recent match logo boxes added", homepageSource.includes('className="fcRefRecentMatchLogoBox"') && homeCss.includes("FC EDINEȚ v2.28.13 — RECENT MATCH LOGO BOXES"));
 ok("v2.28.14 recent match card compacted", homeCss.includes("FC EDINEȚ v2.28.14 — RECENT MATCH CARD COMPACTION"));
@@ -181,7 +181,7 @@ ok("v2.28.25 dashboard voids removed", mobile25.includes(".fcV215NextMatchDashbo
 ok("v2.28.25 result cards compact mobile", mobile25.includes("grid-template-rows:max-content max-content max-content!important") && mobile25.includes("min-height:0!important"));
 ok("v2.28.25 menu uses fixed portal", read("app/components/HeaderNavClient.tsx").includes('className="mobileMenuOverlay"') && read("app/components/HeaderNavClient.tsx").includes('className="mobileMenu mobileMenuFixed"') && mobile25.includes("position:fixed!important"));
 ok("v2.28.25 footer uses 3 columns", mobile25.includes("grid-template-columns:repeat(3,minmax(0,1fr))!important"));
-ok("v2.29.0 only one mobile stylesheet imported", (read("app/layout.tsx").match(/import "\.\/mobile[^"]*\.css";/g)||[]).length === 1 && !["mobile-v2.28.22.css", "mobile-v2.28.24.css", "mobile-v2.28.25.css"].some((name) => exists(`app/${name}`)));
+ok("mobile CSS baseline and scoped UX patch only", (() => { const imports = read("app/layout.tsx").match(/import "\.\/mobile[^"]*\.css";/g)||[]; return imports.length===2 && imports.includes('import "./mobile.css";') && imports.includes('import "./mobile-ux-v23024.css";') && !["mobile-v2.28.22.css", "mobile-v2.28.24.css", "mobile-v2.28.25.css"].some((name) => exists(`app/${name}`)); })());
 ok("v2.29.0 mobile timeline still guarded by viewport", mobileStyles.includes("@media (max-width:767px){") && mobileStyles.includes(".premiumTimelinePanel .mobileMatchTimeline{display:block!important"));
 ok("v2.29.0 test fixture exists", exists("qa/fixtures/home-mobile.html") && exists("scripts/qa-responsive.mjs"));
 ok("v2.29.0 CSS guard exists", exists("scripts/qa-css-audit.mjs") && exists("qa/css-baseline.json"));
