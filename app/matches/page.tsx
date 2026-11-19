@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { getSiteUrl } from "@/lib/site-url";
 import CalendarIcon from "./CalendarIcon";
+import OnSiteEditorAction from "@/app/components/OnSiteEditorAction";
+import { canCurrentUserEdit } from "@/lib/public-editor-role";
 import PublicImage from "@/app/components/PublicImage";
 import "./fan-actions.css";
 import PageHeroShell from "@/app/components/PageHeroShell";
@@ -54,6 +56,7 @@ export default async function MatchesPage({searchParams}:{searchParams:Promise<{
  const finished=(finishedResult.data??[]) as unknown as ClubMatch[];
  let favoriteRows:{match_id:number|string}[]=[];if(userId){const {data}=await supabase.from("favorite_matches").select("match_id").eq("user_id",userId);favoriteRows=(data??[]) as {match_id:number|string}[]}
  const favoriteIds=new Set(favoriteRows.map(row=>String(row.match_id)));
+ const editorEnabled=await canCurrentUserEdit();
  const hero=resolvePageHeroText(design,locale,{eyebrow:"FC EDINEȚ",title:text.title,description:text.description});
  const subscriptionUrl = `${getSiteUrl().replace(/^https?:\/\//, "webcal://")}/api/calendar?lang=${locale}`;
  const queryHref=(kind:CompetitionType|"all",id?:string)=>{const q=new URLSearchParams();if(kind!=="all")q.set("type",kind);if(id)q.set("competition",id);return `/matches${q.size?`?${q.toString()}`:""}`};
@@ -64,12 +67,12 @@ export default async function MatchesPage({searchParams}:{searchParams:Promise<{
   </nav>
   {available.filter(c=>c.competition_type==="cup").length>0&&<nav className="cupBracketNav" aria-label={locale==="ro"?"Tablouri de cupă":"Кубковые сетки"}><strong>{locale==="ro"?"Tablouri eliminatorii":"Кубковые сетки"}</strong>{available.filter(c=>c.competition_type==="cup").map(c=><Link key={c.id} href={`/matches/cups/${encodeURIComponent(c.slug)}`}>{competitionName(c,locale)} · {c.season} ↗</Link>)}</nav>}
   {available.length>1&&<nav className="competitionEditionTabs" aria-label={locale==="ro"?"Competiții":"Выбор соревнования"}><Link href={queryHref(type)} aria-current={!selected?"page":undefined} className={!selected?"active":""}>{locale==="ro"?"Toate competițiile":"Все соревнования"}</Link>{available.map(c=><Link key={c.id} href={queryHref(type,String(c.id))} aria-current={String(selected?.id)===String(c.id)?"page":undefined} className={String(selected?.id)===String(c.id)?"active":""}>{competitionName(c,locale)} · {c.season}</Link>)}</nav>}
-  <div className="sectionHeading fanUpcomingHeading"><div><p className="eyebrow blue">{text.calendar}</p><h2>{text.upcoming}</h2></div><div className="fanFixtureTools"><a className="fanSubscribe" href={subscriptionUrl} title={locale === "ro" ? "Abonament cu actualizări pentru viitoarele meciuri" : "Подписка на обновления расписания матчей"}><CalendarIcon /> {locale === "ro" ? "Abonează-te la calendar" : "Подписаться на матчи"}</a><a className="fanDownloadFeed" href={`/api/calendar?lang=${locale}`} download="fc-edinet-fixtures.ics">↓ {locale === "ro" ? "Descarcă .ics" : "Скачать .ics"}</a></div></div>{upcoming.length?<div className="publicMatchList">{upcoming.map(m=><PublicMatchCard key={m.id} match={m} locale={locale} isAuthenticated={Boolean(userId)} isFavorite={favoriteIds.has(String(m.id))}/>)}</div>:<div className="adminEmpty">{text.upcomingEmpty}</div>}
-  {affected.length>0&&<><div className="sectionHeading matchResultsHeading"><div><p className="eyebrow blue">{locale==="ro"?"MODIFICĂRI DE PROGRAM":"ИЗМЕНЕНИЯ РАСПИСАНИЯ"}</p><h2>{locale==="ro"?"Amânate și anulate":"Перенесённые и отменённые"}</h2></div></div><div className="publicMatchList">{affected.map(m=><PublicMatchCard key={m.id} match={m} locale={locale} isAuthenticated={Boolean(userId)} isFavorite={favoriteIds.has(String(m.id))}/>)}</div></>}
-  <div className="sectionHeading matchResultsHeading"><div><p className="eyebrow blue">{text.results}</p><h2>{text.latest}</h2></div></div>{finished.length?<div className="publicMatchList">{finished.map(m=><PublicMatchCard key={m.id} match={m} locale={locale} isAuthenticated={Boolean(userId)} isFavorite={favoriteIds.has(String(m.id))}/>)}</div>:<div className="adminEmpty">{text.resultsEmpty}</div>}
+  <div className="sectionHeading fanUpcomingHeading"><div><p className="eyebrow blue">{text.calendar}</p><h2>{text.upcoming}</h2></div><div className="fanFixtureTools">{editorEnabled && <OnSiteEditorAction href="/admin/matches/new" locale={locale} kind="add" label={locale === "ro" ? "Meci nou" : "Добавить матч"} />}<a className="fanSubscribe" href={subscriptionUrl} title={locale === "ro" ? "Abonament cu actualizări pentru viitoarele meciuri" : "Подписка на обновления расписания матчей"}><CalendarIcon /> {locale === "ro" ? "Abonează-te la calendar" : "Подписаться на матчи"}</a><a className="fanDownloadFeed" href={`/api/calendar?lang=${locale}`} download="fc-edinet-fixtures.ics">↓ {locale === "ro" ? "Descarcă .ics" : "Скачать .ics"}</a></div></div>{upcoming.length?<div className="publicMatchList">{upcoming.map(m=><PublicMatchCard key={m.id} match={m} locale={locale} isAuthenticated={Boolean(userId)} isFavorite={favoriteIds.has(String(m.id))} editable={editorEnabled}/>)}</div>:<div className="adminEmpty">{text.upcomingEmpty}</div>}
+  {affected.length>0&&<><div className="sectionHeading matchResultsHeading"><div><p className="eyebrow blue">{locale==="ro"?"MODIFICĂRI DE PROGRAM":"ИЗМЕНЕНИЯ РАСПИСАНИЯ"}</p><h2>{locale==="ro"?"Amânate și anulate":"Перенесённые и отменённые"}</h2></div></div><div className="publicMatchList">{affected.map(m=><PublicMatchCard key={m.id} match={m} locale={locale} isAuthenticated={Boolean(userId)} isFavorite={favoriteIds.has(String(m.id))} editable={editorEnabled}/>)}</div></>}
+  <div className="sectionHeading matchResultsHeading"><div><p className="eyebrow blue">{text.results}</p><h2>{text.latest}</h2></div></div>{finished.length?<div className="publicMatchList">{finished.map(m=><PublicMatchCard key={m.id} match={m} locale={locale} isAuthenticated={Boolean(userId)} isFavorite={favoriteIds.has(String(m.id))} editable={editorEnabled}/>)}</div>:<div className="adminEmpty">{text.resultsEmpty}</div>}
  </div></section></main>
 }
-function PublicMatchCard({match,locale,isAuthenticated,isFavorite}:{match:ClubMatch;locale:Locale;isAuthenticated:boolean;isFavorite:boolean}) {
+function PublicMatchCard({match,locale,isAuthenticated,isFavorite,editable}:{match:ClubMatch;locale:Locale;isAuthenticated:boolean;isFavorite:boolean;editable:boolean}) {
  const text=publicText[locale].matches;
  const account=accountText[locale];
  const kickoff=new Date(match.kickoff);
@@ -113,6 +116,7 @@ function PublicMatchCard({match,locale,isAuthenticated,isFavorite}:{match:ClubMa
    <Link className="publicMatchDetailsButton" prefetch={false} href={`/matches/${match.id}`}>{locale==="ro"?"Detalii":"Протокол"} →</Link>
    {match.status==="scheduled" && kickoff.getTime()>Date.now() ? <a className="fanMatchAction fanMatchCalendar" href={`/api/calendar/${match.id}?lang=${locale}`} download={`fc-edinet-match-${match.id}.ics`}><CalendarIcon /> {locale==="ro"?"În calendar":"В календарь"}</a> : null}
    {isAuthenticated?<form action={toggleFavoriteMatch.bind(null,String(match.id),"/matches")}><button className={isFavorite?"favoriteActiveButton":"favoriteButton"} type="submit">{isFavorite?account.removeMatch:account.followMatch}</button></form>:<Link className="favoriteButton" href="/login">{account.loginToFavorite}</Link>}
+   {editable && <OnSiteEditorAction href={`/admin/matches/${match.id}/edit`} locale={locale} label={locale==="ro"?"Editează meciul":"Редактировать матч"} className="fcSiteEditMatchAction" />}
   </div>
  </article>;
 }

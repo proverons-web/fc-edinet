@@ -14,7 +14,7 @@ const notifyPage=read('app/account/notifications/page.tsx');
 const actions=read('app/account/actions.ts');
 const nav=read('app/components/AccountNav.tsx');
 const settings=read('lib/account-i18n.ts');
-check('release consistency',()=>{assert.equal(JSON.parse(read('package.json')).version,'2.30.27');assert.match(read('lib/release.ts'),/2\.30\.27/)});
+check('release consistency',()=>{assert.equal(JSON.parse(read('package.json')).version,'2.30.28');assert.match(read('lib/release.ts'),/2\.30\.28/)});
 check('installed migration, no backfill or production writes',()=>{assert.match(sql,/CREATE TABLE IF NOT EXISTS public\.fan_notifications/);assert.match(sql,/AFTER UPDATE OF kickoff, status, home_score, away_score/);assert.doesNotMatch(sql,/INSERT INTO public\.matches/);assert.doesNotMatch(sql,/INSERT INTO public\.favorite_matches/)});
 check('RLS enabled + accounts isolated in SELECT',()=>{assert.match(sql,/ALTER TABLE public\.fan_notifications ENABLE ROW LEVEL SECURITY/);assert.match(sql,/FOR SELECT TO authenticated USING \(\(SELECT auth\.uid\(\)\) = user_id\)/)});
 check('RLS restricts updates to own rows and column read_at only',()=>{assert.match(sql,/GRANT UPDATE \(read_at\) ON public\.fan_notifications TO authenticated/);assert.match(sql,/FOR UPDATE TO authenticated[\s\S]+USING \(\(SELECT auth\.uid\(\)\) = user_id\)[\s\S]+WITH CHECK \(\(SELECT auth\.uid\(\)\) = user_id\)/);assert.doesNotMatch(sql,/GRANT INSERT.*authenticated/)});
@@ -38,4 +38,4 @@ check('result score and penalties stay separate',()=>{assert.equal(fanNotificati
 check('snapshot of schedule and score stored, not taken from current match',()=>{for(const field of ['previous_kickoff','new_kickoff','home_score','away_score','reason_ru','reason_ro'])assert.match(sql,new RegExp(field));const component=read('app/account/FanNotificationsList.tsx');assert.match(component,/fanNotificationDetails\(item, locale\)/)});
 check('styles confined to account and responsive',()=>{const css=read('app/account/fan-notifications-v2325.css');assert.doesNotMatch(css,/!important/);assert.match(css,/@media\(max-width:640px\)/);assert.match(read('app/account/layout.tsx'),/import "\.\/fan-notifications-v2325\.css"/)});
 check('QA command runs on deployment and full suite',()=>{const scripts=JSON.parse(read('package.json')).scripts;assert.match(scripts['qa:all'],/qa:fan-notifications/);assert.match(scripts['deploy:check'],/qa:fan-notifications/)});
-console.log(`\nFan Notifications v2.30.27: ${pass}/${pass+fail} checks passed.`);if(fail) process.exitCode=1;
+console.log(`\nFan Notifications v2.30.28: ${pass}/${pass+fail} checks passed.`);if(fail) process.exitCode=1;

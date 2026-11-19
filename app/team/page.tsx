@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import PlayerCard from "@/app/components/PlayerCard";
+import OnSiteEditorAction from "@/app/components/OnSiteEditorAction";
+import { canCurrentUserEdit } from "@/lib/public-editor-role";
 import PageHeroShell from "@/app/components/PageHeroShell";
 import { PublicMessageState } from "@/app/components/PublicRouteState";
 import { createPublicClient } from "@/lib/supabase/public";
@@ -34,6 +36,7 @@ export default async function TeamPage({ searchParams }: { searchParams: TeamSea
   const supabase = createPublicClient();
   const design = await getPublishedSitePageDesign(supabase, "team");
   const text = publicText[locale].team;
+  const editorEnabled = await canCurrentUserEdit();
   const [{ data, error }, seasonResult] = await Promise.all([
     supabase.from("players").select("*").eq("is_active", true).order("display_order", { ascending: true }).order("shirt_number", { ascending: true }),
     supabase.from("seasons").select("id,name,slug,starts_on,ends_on,is_current,is_active").eq("is_active", true).eq("is_current", true).maybeSingle(),
@@ -78,7 +81,7 @@ export default async function TeamPage({ searchParams }: { searchParams: TeamSea
               <b>{String(rows.length).padStart(2, "0")}</b>
             </div>
             <div className="players teamPositionGrid">
-              {rows.map((player) => <PlayerCard key={player.id} player={player} locale={locale} seasonStats={seasonStatsByPlayer.get(String(player.id)) ?? null} />)}
+              {rows.map((player) => <div className="fcSiteEditableCard" key={player.id}><PlayerCard player={player} locale={locale} seasonStats={seasonStatsByPlayer.get(String(player.id)) ?? null} />{editorEnabled && <OnSiteEditorAction href={`/admin/players/${player.id}/edit`} locale={locale} label={locale === "ro" ? "Editează jucătorul" : "Редактировать игрока"} className="fcSiteEditPlayerAction" />}</div>)}
             </div>
           </section>;
         })}

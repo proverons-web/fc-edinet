@@ -1,0 +1,34 @@
+/* FC Edinet v2.30.28 — contextual on-site editing; roles are enforced server-side. */
+.fcOnSiteToolbar{position:fixed;right:16px;bottom:18px;z-index:140;display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end;max-width:min(95vw,660px)}
+.fcOnSiteAction{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:9px 13px;border:1px solid #d5ae35;background:#ffcf35;color:#071d3c;font:inherit;font-size:12px;font-weight:850;line-height:1.25;cursor:pointer;text-align:center;border-radius:2px!important;box-shadow:0 7px 20px #02193230;white-space:normal}
+.fcOnSiteAction:hover{background:#ffe07a}.fcOnSiteAction:focus-visible{outline:3px solid #1574d0;outline-offset:3px}.fcOnSiteAction-add{background:#1163ba;border-color:#0b4e94;color:#fff}.fcOnSiteAction-add:hover{background:#287bcb;color:#fff}.fcOnSiteAction-protocol{background:#fff;border-color:#acc1dc;color:#0d345e}.fcOnSiteAction-protocol:hover{background:#ecf4ff}
+.fcSiteEditorBackdrop{position:fixed;inset:0;z-index:1500;padding:clamp(8px,2vw,24px);background:rgba(2,11,27,.77);display:flex;align-items:center;justify-content:center}
+.fcSiteEditorDialog{width:min(1400px,100%);height:min(92dvh,980px);display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;background:#eef3fa;border:1px solid #a2b9d3;border-radius:3px!important;box-shadow:0 24px 95px #0008}
+.fcSiteEditorHeader{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;background:#061e3d;color:#fff;border-bottom:2px solid #ffcc26}.fcSiteEditorHeader strong{font-size:16px}.fcSiteEditorHeader small{display:block;font-size:11px;opacity:.72;margin-top:3px}.fcSiteEditorHeaderActions{display:flex;gap:10px;align-items:center}.fcSiteEditorHeaderActions a{font-size:12px;color:#d5e6ff;text-decoration:underline}.fcSiteEditorHeaderActions button{width:44px;height:44px;border:1px solid #ffffff60;background:transparent;color:#fff;font-size:27px;cursor:pointer}
+.fcSiteEditorFrame{border:0;width:100%;flex:1;min-height:0;background:#eef3fa}.fcSiteEditorFoot{flex-shrink:0;background:#f7faff;border-top:1px solid #d0deeb;color:#425b76;font-size:11px;padding:8px 14px}
+.fcSiteEditInline{position:relative;display:flex;flex-wrap:wrap;gap:8px;align-items:center}.publicMatchCard .fcSiteEditInline .fcOnSiteAction{font-size:10px;min-height:42px;box-shadow:none;padding:8px 10px}
+.fcSiteEditableCard{position:relative;min-width:0;min-height:0}.fcSiteEditableCard>.playerCard{height:100%}.fcSiteEditableCard>.fcOnSiteAction,.fcSiteEditableCard>.fcInlineEditMount>.fcOnSiteAction{position:absolute;top:10px;right:10px;z-index:5;font-size:11px;min-height:42px;padding:9px 10px}
+.fcSiteEditableCard .fcSiteEditorBackdrop{position:fixed}.fcSiteEditNewsAction{margin-top:8px;box-shadow:none}.fcSiteEditStaffAction{margin-top:12px;box-shadow:none}
+.authRegisterPage{position:relative;isolation:isolate;min-height:0!important;padding:clamp(26px,4vw,58px) 0!important;background:linear-gradient(115deg,#041226,#0a2c5a)}
+.authRegisterPage::before{content:"";position:absolute;inset:8% 10% 8% 8%;background:url('/brand/fc-edinet-crest.png') center left/contain no-repeat;opacity:.09;pointer-events:none;z-index:0}
+.authRegisterPage>.authLayout{position:relative;z-index:1}.authRegisterPage .authIntro{min-width:0}.authRegisterPage .authCard{min-width:0}
+@media(max-width:767px){.fcOnSiteToolbar{bottom:calc(12px + env(safe-area-inset-bottom));right:10px;left:10px}.fcOnSiteToolbar .fcOnSiteAction{flex:0 1 auto;min-width:44px;padding:10px}.fcOnSiteToolbar .fcOnSiteAction span{font-size:11px}.fcSiteEditorBackdrop{padding:0}.fcSiteEditorDialog{width:100%;height:100dvh;border:0}.fcSiteEditorHeader{padding:8px 12px}.fcSiteEditorFoot{font-size:10px}.authRegisterPage::before{background-position:center;background-size:70% auto;opacity:.075}}
+@media(prefers-reduced-motion:reduce){.fcOnSiteAction{transition:none!important}}
+
+/* Keep the viewport below a short registration footer in the same dark palette. */
+body:has(.authRegisterPage){background:#01152f}
+
+/* Semi-transparent FC Edinet crest behind the public fixture calendar. */
+.matchPublicSection{isolation:isolate}
+.matchPublicSection::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;background:url('/brand/fc-edinet-crest.png') center 14% / min(74vw,790px) auto no-repeat;opacity:.055}
+.matchPublicSection>.container{position:relative;z-index:1}
+@media(max-width:767px){.matchPublicSection::before{background-position:center 12%;background-size:78vw auto;opacity:.045}}
+/* Contextual controls coexist with cards, without nesting a button inside an anchor. */
+.fcSiteEditableCard>.fcOnSiteAction{max-width:calc(100% - 20px)}
+.fcSiteEditMatchAction{box-shadow:none;flex:0 1 auto}
+.fcOnSiteAction:disabled{cursor:wait;opacity:.6}
+
+/* Homepage quick actions must wrap instead of forcing horizontal overflow. */
+.fcRefPanelTitle:has(.fcOnSiteAction),.fcRefTeamHead:has(.fcOnSiteAction),.fcV215SectionHead:has(.fcOnSiteAction),.fcV215MatchRailHead:has(.fcOnSiteAction){flex-wrap:wrap;gap:10px}
+.fcRefPanelTitle .fcOnSiteAction,.fcRefTeamHead .fcOnSiteAction,.fcV215SectionHead .fcOnSiteAction,.fcV215MatchRailHead .fcOnSiteAction{min-width:44px;min-height:44px;box-shadow:none;font-size:11px}
+@media(max-width:600px){.fcOnSiteToolbar .fcOnSiteAction span{font-size:10px}.fcOnSiteToolbar{max-height:38vh;overflow-y:auto}.fcRefPanelTitle .fcOnSiteAction,.fcRefTeamHead .fcOnSiteAction{font-size:10px}}

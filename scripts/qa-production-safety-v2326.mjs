@@ -26,7 +26,7 @@ try {
   git(repo, "init", "-b", "main");
   git(repo, "config", "user.email", "qa@example.test");
   git(repo, "config", "user.name", "Production Safety QA");
-  fs.writeFileSync(path.join(repo, "package.json"), JSON.stringify({ name: "fc-edinet", version: "2.30.27" }));
+  fs.writeFileSync(path.join(repo, "package.json"), JSON.stringify({ name: "fc-edinet", version: "2.30.28" }));
   fs.writeFileSync(path.join(repo, "safe.txt"), "only public, sample data\n");
   git(repo, "add", ".");
 
@@ -140,13 +140,13 @@ test("Automated security QA is wired into deploy and CI", () => {
   assert.match(read(".github/workflows/responsive-qa.yml"), /qa:production-safety/);
 });
 test("Release documentation covers database backup separately from Git", () => {
-  assert.match(read("STEP-2.30.27.txt"), /Supabase.*(?:баз|резерв)/is);
-  assert.match(read("STEP-2.30.27.txt"), /\.bundle/);
+  assert.match(read("STEP-2.30.28.txt"), /Supabase.*(?:баз|резерв)/is);
+  assert.match(read("STEP-2.30.28.txt"), /\.bundle/);
 });
 test("Release and installer version synchronized", () => {
-  assert.equal(JSON.parse(read("package.json")).version, "2.30.27");
-  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.27"/);
+  assert.equal(JSON.parse(read("package.json")).version, "2.30.28");
+  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.28"/);
 });
 const passed = checks.filter(Boolean).length;
-console.log(`\nProduction Safety v2.30.27: ${passed}/${checks.length} passed.`);
+console.log(`\nProduction Safety v2.30.28: ${passed}/${checks.length} passed.`);
 if (passed !== checks.length) process.exitCode = 1;

@@ -1,6 +1,8 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import PublicImage from "@/app/components/PublicImage";
+import OnSiteEditorAction from "@/app/components/OnSiteEditorAction";
+import { canCurrentUserEdit } from "@/lib/public-editor-role";
 import ResponsiveHeroImage from "@/app/components/ResponsiveHeroImage";
 import StandingsTable from "@/app/components/StandingsTable";
 import RecentMatchesCarousel from "@/app/components/RecentMatchesCarousel";
@@ -43,6 +45,7 @@ const CLUB_LOGO = "/brand/fc-edinet-crest.png";
 export default async function Home() {
   const locale = await getLocale();
   const text = publicText[locale].home;
+  const editorEnabledPromise = canCurrentUserEdit();
   const supabase = createPublicClient();
   const now = new Date().toISOString();
 
@@ -206,6 +209,7 @@ export default async function Home() {
   const featuredAlbum = mediaAlbums[0] ?? null;
   const featuredVideo = mediaVideos.find((video) => Boolean(video.show_on_homepage)) ?? null;
 
+  const editorEnabled = await editorEnabledPromise;
   const heroTitleMain = localized(hero?.title_main, hero?.title_main_ro, locale) || (locale === "ro" ? "UN ORAȘ. O ECHIPĂ." : "ОДИН ГОРОД. ОДНА КОМАНДА.");
   const heroTitleAccent = localized(hero?.title_accent, hero?.title_accent_ro, locale) || (locale === "ro" ? "ȚINTE MAI MARI" : "БОЛЬШИЕ ЦЕЛИ");
   const heroDescription = localized(hero?.description, hero?.description_ro, locale) || (locale === "ro" ? "FC Edineț — forța Nordului. Împreună spre noi victorii!" : "FC Edineț — сила Севера. Вместе к новым победам!");
@@ -372,7 +376,7 @@ export default async function Home() {
           <div className="fcV215MatchRail fcV215MatchRailWide">
             <div className="fcV215MatchRailHead">
               <div><span className="fcV215CardLabel">{locale === "ro" ? "REZULTATE" : "РЕЗУЛЬТАТЫ"}</span><strong>{locale === "ro" ? "ULTIMELE MECIURI" : "ПОСЛЕДНИЕ МАТЧИ"}</strong></div>
-              <Link href="/matches">{locale === "ro" ? "TOATE MECIURILE" : "ВСЕ МАТЧИ"} →</Link>
+              <Link href="/matches">{locale === "ro" ? "TOATE MECIURILE" : "ВСЕ МАТЧИ"} →</Link>{editorEnabled && <OnSiteEditorAction href="/admin/matches/new" locale={locale} kind="add" label={locale === "ro" ? "Meci nou" : "Добавить матч"} />}
             </div>
             <RecentMatchesCarousel
               previousLabel={locale === "ro" ? "Meciul precedent" : "Предыдущий матч"}
@@ -419,7 +423,7 @@ export default async function Home() {
             </div>
 
             <div className="fcRefLatestColumn">
-              <div className="fcRefPanelTitle"><h2>{locale === "ro" ? "ULTIMELE ȘTIRI" : "ПОСЛЕДНИЕ НОВОСТИ"}</h2><Link href="/news">{locale === "ro" ? "TOATE ȘTIRILE" : "ВСЕ НОВОСТИ"} →</Link></div>
+              <div className="fcRefPanelTitle"><h2>{locale === "ro" ? "ULTIMELE ȘTIRI" : "ПОСЛЕДНИЕ НОВОСТИ"}</h2><Link href="/news">{locale === "ro" ? "TOATE ȘTIRILE" : "ВСЕ НОВОСТИ"} →</Link>{editorEnabled && <OnSiteEditorAction href="/admin/news/new" locale={locale} kind="add" label={locale === "ro" ? "Știre nouă" : "Добавить новость"} />}</div>
               <div className="fcRefNewsList">{latestNews.length ? latestNews.map((article) => <Link key={article.id} href={`/news/${article.slug}`} className="fcRefNewsRow"><div>{article.cover_image_url ? <PublicImage className="newsCoverManaged" src={article.cover_image_url} alt="" style={newsCoverStyle(article)} width={300} height={200} sizes="(max-width: 767px) 35vw, 140px" /> : <span>FCE</span>}</div><section><time>{formatNewsDate(article.published_at, locale)}</time><h3>{localized(article.title, article.title_ro, locale)}</h3></section></Link>) : <div className="fcRefEmptyCard compact">{locale === "ro" ? "Nu sunt alte știri." : "Других новостей пока нет."}</div>}</div>
             </div>
           </>}
@@ -433,7 +437,7 @@ export default async function Home() {
 
       {sectionEnabled("players") && <section className="fcRefTeamSection">
         <div className="container">
-          <div className="fcRefTeamHead"><div><h2>{locale === "ro" ? "ECHIPA NOASTRĂ" : "НАША КОМАНДА"}</h2><p>{locale === "ro" ? "TALENT. CARACTER. UNITATE." : "ТАЛАНТ. ХАРАКТЕР. ЕДИНСТВО."}</p></div><Link href="/team" className="fcOutlineButton">{locale === "ro" ? "TOT LOTUL" : "ВЕСЬ СОСТАВ"} →</Link></div>
+          <div className="fcRefTeamHead"><div><h2>{locale === "ro" ? "ECHIPA NOASTRĂ" : "НАША КОМАНДА"}</h2><p>{locale === "ro" ? "TALENT. CARACTER. UNITATE." : "ТАЛАНТ. ХАРАКТЕР. ЕДИНСТВО."}</p></div><Link href="/team" className="fcOutlineButton">{locale === "ro" ? "TOT LOTUL" : "ВЕСЬ СОСТАВ"} →</Link>{editorEnabled && <OnSiteEditorAction href="/admin/players/new" locale={locale} kind="add" label={locale === "ro" ? "Jucător nou" : "Добавить игрока"} />}</div>
           <div className="fcRefPlayers">{players.slice(0,4).map((player) => <ReferencePlayer key={player.id} player={player} locale={locale} />)}</div>
           <div className="fcRefSignature">Edineț<br/><span>{locale === "ro" ? "în inima noastră!" : "в нашем сердце!"}</span></div>
         </div>
@@ -443,7 +447,7 @@ export default async function Home() {
         <div className="container">
           <div className="fcV215SectionHead">
             <div><small>FC EDINEȚ • MEDIA</small><h2>{locale === "ro" ? "Mai aproape de echipă" : "Ближе к команде"}</h2></div>
-            <Link href="/media">{locale === "ro" ? "TOT MEDIA" : "ВСЕ МЕДИА"} →</Link>
+            <Link href="/media">{locale === "ro" ? "TOT MEDIA" : "ВСЕ МЕДИА"} →</Link>{editorEnabled && <OnSiteEditorAction href="/admin/media" locale={locale} label={locale === "ro" ? "Editează media" : "Редактировать медиа"} />}
           </div>
           <div className="fcV215MediaGrid">
             {featuredAlbum && <Link href={`/media/${featuredAlbum.slug}`} className="fcV215AlbumCard">

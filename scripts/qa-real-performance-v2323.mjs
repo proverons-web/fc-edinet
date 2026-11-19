@@ -18,9 +18,9 @@ const repeat = (metric, value, count, device="mobile",route="/") =>
   Array.from({length: count},(_,i)=>row(metric,value,device,route,i));
 
 add("release and install instructions are synchronized", () => {
-  assert.equal(JSON.parse(read("package.json")).version,"2.30.27");
-  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.27"/);
-  assert.deepEqual(fs.readdirSync(root).filter(x => /^STEP-.*\.txt$/.test(x)), ["STEP-2.30.27.txt"]);
+  assert.equal(JSON.parse(read("package.json")).version,"2.30.28");
+  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.28"/);
+  assert.deepEqual(fs.readdirSync(root).filter(x => /^STEP-.*\.txt$/.test(x)), ["STEP-2.30.28.txt"]);
 });
 add("priority groups are separated by device and route", () => {
   const input = [...repeat("LCP",3200,20,"mobile","/"),...repeat("LCP",3600,20,"desktop","/"),...repeat("CLS",.3,15,"mobile","/team/:slug")];
@@ -92,5 +92,5 @@ add("QA is integrated into local release, deployment, and CI", () => {
   assert.match(read(".github/workflows/responsive-qa.yml"),/qa-real-performance-v2323\.mjs/);
 });
 
-console.log(`\nReal performance v2.30.27: ${checks.filter(Boolean).length}/${checks.length} passed.`);
+console.log(`\nReal performance v2.30.28: ${checks.filter(Boolean).length}/${checks.length} passed.`);
 if (checks.some(x=>!x)) process.exitCode=1;

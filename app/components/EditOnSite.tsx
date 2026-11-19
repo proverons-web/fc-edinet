@@ -1,30 +1,31 @@
 "use client";
 
-import Link from "next/link";
-import "../edit-on-site-v23027.css";
 import { usePathname } from "next/navigation";
+import OnSiteEditorAction from "@/app/components/OnSiteEditorAction";
 import { canEditPublicPath } from "@/lib/admin-role-permissions";
 import type { UserRole } from "@/lib/types";
 import type { Locale } from "@/lib/i18n";
 
-/** One-click editor for trusted staff, never a public editing API. */
+/** Visible only to administrator / editor; server actions and RLS enforce real permissions. */
 export default function EditOnSite({ role, locale }: { role: UserRole; locale: Locale }) {
   const pathname = usePathname();
   if (!pathname || !canEditPublicPath(role, pathname)) return null;
-  const title = locale === "ro" ? "Editează această pagină" : "Редактировать эту страницу";
-  return (
-    <Link
-      className="fcEditOnSite"
-      href={`/admin/edit?from=${encodeURIComponent(pathname)}`}
-      title={title}
-      aria-label={title}
-      prefetch={false}
-    >
-      <svg aria-hidden="true" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 20H5a2 2 0 0 1-2-2v-2"/><path d="m16.3 4.3 3.4 3.4"/>
-        <path d="M4 20l4.6-1 11-11a2.4 2.4 0 0 0-3.4-3.4l-11 11L4 20Z"/>
-      </svg>
-      <span>{locale === "ro" ? "Editează" : "Изменить"}</span>
-    </Link>
-  );
+  const ro = locale === "ro";
+  const edit = pathname.startsWith("/matches/cups/") ? "/admin/matches/cups"
+    : `/admin/edit?from=${encodeURIComponent(pathname)}`;
+  const add = pathname === "/news" ? { href: "/admin/news/new", label: ro ? "Știre nouă" : "Новая новость" }
+    : pathname === "/team" ? { href: "/admin/players/new", label: ro ? "Jucător nou" : "Новый игрок" }
+    : pathname === "/staff" ? { href: "/admin/staff#new-staff", label: ro ? "Membru nou" : "Добавить сотрудника" }
+    : pathname === "/media" ? { href: "/admin/media", label: ro ? "Album nou" : "Добавить альбом" }
+    : null;
+  const protocol = /^\/matches\/\d+$/.test(pathname) ? `/admin/match-center/${pathname.split("/")[2]}` : null;
+  const extras = pathname === "/matches" ? { href: "/admin/matches/competitions", label: ro ? "Competiții" : "Соревнования" }
+    : pathname.startsWith("/news/") ? { href: "/admin/comments", label: ro ? "Comentarii" : "Комментарии" }
+    : null;
+  return <div className="fcOnSiteToolbar" role="group" aria-label={ro ? "Editare pe site" : "Редактирование на сайте"}>
+    <OnSiteEditorAction href={edit} locale={locale} label={ro ? "Editează" : "Редактировать"} />
+    {protocol && <OnSiteEditorAction href={protocol} locale={locale} kind="protocol" label={ro ? "Protocol" : "Протокол"} />}
+    {add && <OnSiteEditorAction href={add.href} locale={locale} kind="add" label={add.label} />}
+    {extras && <OnSiteEditorAction href={extras.href} locale={locale} label={extras.label} />}
+  </div>;
 }

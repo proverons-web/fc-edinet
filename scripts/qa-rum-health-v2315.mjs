@@ -25,11 +25,11 @@ check("one pinned Node.js major for Vercel deployments", () => {
   assert.equal(packageJson.engines.node, "22.x");
 });
 check("package and release metadata agree", () => {
-  assert.equal(packageJson.version, "2.30.27");
-  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.27"/);
+  assert.equal(packageJson.version, "2.30.28");
+  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.28"/);
 });
 check("there is one current installer STEP file", () => {
-  assert.deepEqual(fs.readdirSync(root).filter(f => /^STEP-.*\.txt$/.test(f)), ["STEP-2.30.27.txt"]);
+  assert.deepEqual(fs.readdirSync(root).filter(f => /^STEP-.*\.txt$/.test(f)), ["STEP-2.30.28.txt"]);
 });
 check("no project .npmrc injects unsupported cache-dir", () => {
   const npmrc = path.join(root, ".npmrc");
@@ -104,11 +104,11 @@ check("release runs new QA in deploy, qa:all and CI", () => {
   assert.match(packageJson.scripts["qa:all"], /qa:rum-health/);
   assert.match(ci, /qa-rum-health-v2315\.mjs/);
 });
-check("v2.30.27 retains RUM migration and adds schedule history", () => {
-  assert.match(read("STEP-2.30.27.txt"), /SQL-МИГРАЦИИ: ДА, 084_fan_notifications\.sql/);
-  assert.match(read("STEP-2.30.27.txt"), /080_match_schedule_history\.sql/);
+check("v2.30.28 retains RUM migration and adds schedule history", () => {
+  assert.match(read("STEP-2.30.28.txt"), /SQL-МИГРАЦИИ: ДА, 084_fan_notifications\.sql/);
+  assert.match(read("STEP-2.30.28.txt"), /080_match_schedule_history\.sql/);
   assert.match(read("database/080_match_schedule_history.sql"), /match_schedule_history/);
   assert.match(read("database/078_real_user_monitoring.sql"), /rum_samples/);
 });
-console.log(`\nFC Edineț v2.30.27 RUM operations: ${passed}/${passed + failed} checks passed`);
+console.log(`\nFC Edineț v2.30.28 RUM operations: ${passed}/${passed + failed} checks passed`);
 if (failed) process.exitCode = 1;

@@ -1,4 +1,6 @@
 import PageHeroShell from "@/app/components/PageHeroShell";
+import OnSiteEditorAction from "@/app/components/OnSiteEditorAction";
+import { canCurrentUserEdit } from "@/lib/public-editor-role";
 import { PublicMessageState } from "@/app/components/PublicRouteState";
 import { createPublicClient } from "@/lib/supabase/public";
 import type { TeamStaffMember } from "@/lib/types";
@@ -42,6 +44,7 @@ export default async function StaffPage() {
     supabase.from("team_staff").select("*").eq("is_active", true).eq("is_placeholder", false).order("category").order("display_order").order("id"),
   ]);
   const staff = (staffResult.data ?? []) as TeamStaffMember[];
+  const editorEnabled = await canCurrentUserEdit();
   const hero = {
     eyebrow: locale === "ro" ? "FC EDINEȚ · ECHIPĂ" : "FC EDINEȚ · КОМАНДА",
     title: locale === "ro" ? "Staff tehnic" : "Тренерский штаб",
@@ -79,6 +82,7 @@ export default async function StaffPage() {
                 <h3>{member.first_name} {member.last_name}</h3>
                 {(member.joined_year || member.left_year) && <b>{member.joined_year || "—"}{member.left_year ? ` — ${member.left_year}` : (locale === "ro" ? " — prezent" : " — н.в.")}</b>}
                 {(locale === "ro" ? member.bio_ro : member.bio) && <p>{locale === "ro" ? (member.bio_ro || member.bio) : member.bio}</p>}
+                {editorEnabled && <OnSiteEditorAction href={`/admin/staff?focus=${member.id}#staff-${member.id}`} locale={locale} label={locale === "ro" ? "Editează membrul" : "Редактировать сотрудника"} className="fcSiteEditStaffAction" />}
               </div>
             </article>)}</div>
           </div>;

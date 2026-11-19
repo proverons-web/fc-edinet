@@ -1,5 +1,7 @@
 import Link from "next/link";
 import PublicImage from "@/app/components/PublicImage";
+import OnSiteEditorAction from "@/app/components/OnSiteEditorAction";
+import { canCurrentUserEdit } from "@/lib/public-editor-role";
 import NewsCard, { formatNewsDate } from "@/app/components/NewsCard";
 import NewsArchiveSearch from "@/app/components/NewsArchiveSearch";
 import PageHeroShell from "@/app/components/PageHeroShell";
@@ -48,6 +50,7 @@ export default async function NewsPage({ searchParams }: PageProps) {
   const { data, error } = await query;
   const articles = (data ?? []) as unknown as NewsListArticle[];
   const hero = resolvePageHeroText(design, locale, { eyebrow: "FC EDINEȚ", title: text.title, description: text.description });
+  const editorEnabled = await canCurrentUserEdit();
 
   const lead = articles[0];
   const secondary = articles.slice(1, 3);
@@ -66,19 +69,19 @@ export default async function NewsPage({ searchParams }: PageProps) {
       : <>
           <div className="newsEditorialHeading"><div><span>{selectedCategory ? localized(selectedCategory.name, selectedCategory.name_ro, locale) : latestLabel}</span><h2>{selectedCategory ? localized(selectedCategory.name, selectedCategory.name_ro, locale) : text.title}</h2></div><strong>{String(articles.length).padStart(2,"0")}</strong></div>
           <div className="newsEditorialLeadGrid">
-            {lead && <LeadStory article={lead} locale={locale} />}
-            <div className="newsEditorialSecondary">{secondary.map((article) => <SecondaryStory key={article.id} article={article} locale={locale} />)}</div>
+            {lead && <LeadStory article={lead} locale={locale} editable={editorEnabled} />}
+            <div className="newsEditorialSecondary">{secondary.map((article) => <SecondaryStory key={article.id} article={article} locale={locale} editable={editorEnabled} />)}</div>
           </div>
           {rest.length > 0 && <div className="newsEditorialArchive">
             <div className="newsEditorialArchiveHead"><span>{archiveLabel}</span><i></i></div>
-            <div className="newsDbGrid newsEditorialGrid">{rest.map((article) => <NewsCard key={article.id} article={article} locale={locale} />)}</div>
+            <div className="newsDbGrid newsEditorialGrid">{rest.map((article) => <NewsCard key={article.id} article={article} locale={locale} editHref={editorEnabled ? `/admin/news/${article.id}/edit` : undefined} />)}</div>
           </div>}
         </>}
     </div></section>
   </main>;
 }
 
-function LeadStory({ article, locale }: { article: NewsListArticle; locale: Locale }) {
+function LeadStory({ article, locale, editable }: { article: NewsListArticle; locale: Locale; editable: boolean }) {
   const text = publicText[locale].news;
   const title = localized(article.title, article.title_ro, locale);
   const excerpt = localized(article.excerpt, article.excerpt_ro, locale);
@@ -94,11 +97,12 @@ function LeadStory({ article, locale }: { article: NewsListArticle; locale: Loca
       <h2><Link href={`/news/${article.slug}`}>{title}</Link></h2>
       {excerpt && <p>{excerpt}</p>}
       <Link className="newsLeadRead" href={`/news/${article.slug}`}>{text.read}</Link>
+      {editable && <OnSiteEditorAction href={`/admin/news/${article.id}/edit`} locale={locale} label={locale === "ro" ? "Editează știrea" : "Редактировать новость"} className="fcSiteEditNewsAction" />}
     </div>
   </article>;
 }
 
-function SecondaryStory({ article, locale }: { article: NewsListArticle; locale: Locale }) {
+function SecondaryStory({ article, locale, editable }: { article: NewsListArticle; locale: Locale; editable: boolean }) {
   const text = publicText[locale].news;
   const title = localized(article.title, article.title_ro, locale);
   const category = localized(article.category?.name, article.category?.name_ro, locale) || text.defaultCategory;
@@ -106,7 +110,7 @@ function SecondaryStory({ article, locale }: { article: NewsListArticle; locale:
     <Link className="newsSecondaryMedia" href={`/news/${article.slug}`}>
       {article.cover_image_url ? <PublicImage className="newsCoverManaged" src={article.cover_image_url} alt={title} style={newsCoverStyle(article)} width={1100} height={720} sizes="(max-width: 767px) 100vw, (max-width: 1100px) 55vw, 680px" /> : <span>FC EDINEȚ</span>}
     </Link>
-    <div className="newsSecondaryBody"><div className="newsSecondaryMeta"><span>{category}</span><time>{formatNewsDate(article.published_at, locale)}</time></div><h3><Link href={`/news/${article.slug}`}>{title}</Link></h3><Link className="newsSecondaryRead" href={`/news/${article.slug}`}>{text.read}</Link></div>
+    <div className="newsSecondaryBody"><div className="newsSecondaryMeta"><span>{category}</span><time>{formatNewsDate(article.published_at, locale)}</time></div><h3><Link href={`/news/${article.slug}`}>{title}</Link></h3><Link className="newsSecondaryRead" href={`/news/${article.slug}`}>{text.read}</Link>{editable && <OnSiteEditorAction href={`/admin/news/${article.id}/edit`} locale={locale} label={locale === "ro" ? "Editează știrea" : "Редактировать новость"} className="fcSiteEditNewsAction" />}</div>
   </article>;
 }
 

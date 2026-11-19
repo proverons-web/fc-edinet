@@ -15,7 +15,7 @@ const check=(label,fn)=>{try{fn();passed++;console.log('PASS',label);}catch(e){c
 const app=read('app/layout.tsx'),admin=read('app/admin/layout.tsx'),calendar=read('app/matches/page.tsx');
 const css=read('app/mobile-ux-v23024.css'),acss=read('app/admin-mobile-v23024.css'),gallery=read('app/components/media-viewer-v2305.css');
 const pkg=JSON.parse(read('package.json'));
-check('Version consistency',()=>{assert.equal(pkg.version,'2.30.27');assert.match(read('lib/release.ts'),/2\.30\.27/);});
+check('Version consistency',()=>{assert.equal(pkg.version,'2.30.28');assert.match(read('lib/release.ts'),/2\.30\.28/);});
 check('Public CSS is imported only in public shell',()=>{assert.match(app,/mobile-ux-v23024\.css/);assert.doesNotMatch(admin,/mobile-ux-v23024\.css/);});
 check('Admin CSS is scoped to admin shell',()=>{assert.match(admin,/admin-mobile-v23024\.css/);assert.doesNotMatch(app,/admin-mobile-v23024\.css/);assert.match(acss,/\.adminAppShell/);});
 check('Competition filters expose current choice',()=>{assert.match(calendar,/competitionTypeTabs/);assert.match(calendar,/aria-current=\{type===t\?"page":undefined\}/);assert.match(calendar,/aria-label=\{locale==="ro"\?"Competiții":"Выбор соревнования"\}/);});
@@ -35,7 +35,7 @@ if(!browser && process.platform==='win32'){
 }
 const skip=process.argv.includes('--skip-if-missing');
 if(!browser || typeof WebSocket!=='function'){
-  if(skip){console.log('SKIP Chromium mobile fixture checks (no browser/WebSocket)');console.log(`Mobile UX v2.30.27: ${passed} source checks passed`);process.exit(process.exitCode||0);}
+  if(skip){console.log('SKIP Chromium mobile fixture checks (no browser/WebSocket)');console.log(`Mobile UX v2.30.28: ${passed} source checks passed`);process.exit(process.exitCode||0);}
   throw Error('Chromium and Node22+ required for geometry checks.');
 }
 function freePort(){return new Promise((resolve,reject)=>{const s=net.createServer();s.once('error',reject);s.listen(0,'127.0.0.1',()=>{const x=s.address().port;s.close(()=>resolve(x));});});}
@@ -74,4 +74,4 @@ try{
    }
  }
 }finally{try{cdp?.close();}catch{}if(child&&child.exitCode===null)child.kill();if(tmp)try{fs.rmSync(tmp,{recursive:true,force:true,maxRetries:4,retryDelay:150});}catch{}}
-console.log(`Mobile UX v2.30.27: ${passed} checks passed.`);
+console.log(`Mobile UX v2.30.28: ${passed} checks passed.`);

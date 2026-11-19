@@ -1,10 +1,11 @@
 import Link from "next/link";
 import PublicImage from "@/app/components/PublicImage";
+import OnSiteEditorAction from "@/app/components/OnSiteEditorAction";
 import type { NewsListArticle } from "@/lib/types";
 import { dateLocale, localized, publicText, type Locale } from "@/lib/i18n";
 import { newsCoverStyle } from "@/lib/news-cover";
 
-export default function NewsCard({ article, locale = "ru" }: { article: NewsListArticle; locale?: Locale }) {
+export default function NewsCard({ article, locale = "ru", editHref }: { article: NewsListArticle; locale?: Locale; editHref?: string }) {
   const text = publicText[locale].news;
   const title = localized(article.title, article.title_ro, locale);
   const excerpt = localized(article.excerpt, article.excerpt_ro, locale);
@@ -29,6 +30,7 @@ export default function NewsCard({ article, locale = "ru" }: { article: NewsList
         <h2><Link href={`/news/${article.slug}`}>{title}</Link></h2>
         {excerpt && <p>{excerpt}</p>}
         <Link className="readMore" href={`/news/${article.slug}`}>{text.read}</Link>
+        {editHref && <OnSiteEditorAction href={editHref} locale={locale} label={locale === "ro" ? "Editează știrea" : "Редактировать новость"} className="fcSiteEditNewsAction" />}
       </div>
     </article>
   );
