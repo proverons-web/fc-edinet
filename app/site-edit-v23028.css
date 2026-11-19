@@ -36,3 +36,20 @@ body:has(>main.authRegisterPage)>.globalFooter,body:has(>main.authLoginPage)>.gl
 .fcRefPanelTitle:has(.fcOnSiteAction),.fcRefTeamHead:has(.fcOnSiteAction),.fcV215SectionHead:has(.fcOnSiteAction),.fcV215MatchRailHead:has(.fcOnSiteAction){flex-wrap:wrap;gap:10px}
 .fcRefPanelTitle .fcOnSiteAction,.fcRefTeamHead .fcOnSiteAction,.fcV215SectionHead .fcOnSiteAction,.fcV215MatchRailHead .fcOnSiteAction{min-width:44px;min-height:44px;box-shadow:none;font-size:11px}
 @media(max-width:600px){.fcOnSiteToolbar .fcOnSiteAction span{font-size:10px}.fcOnSiteToolbar{max-height:38vh;overflow-y:auto}.fcRefPanelTitle .fcOnSiteAction,.fcRefTeamHead .fcOnSiteAction{font-size:10px}}
+
+/* FC_EDINET_RECENT_MATCHES_RESPONSIVE_FIX_V23028 */
+@media(min-width:768px){
+.fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchCard{box-sizing:border-box!important}
+.fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchBody{display:grid!important;min-width:0!important;grid-template-columns:minmax(0,1fr) minmax(56px,.9fr) minmax(0,1fr)!important;align-items:center!important;column-gap:5px!important;padding:6px 12px 8px!important}
+.fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchTeam{width:100%!important;min-width:0!important;max-width:100%!important;justify-items:center!important;align-items:center!important;grid-template-rows:94px minmax(30px,auto)!important;min-height:0!important}
+.fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchLogoBox{width:100%!important;height:94px!important;overflow:visible!important}
+.fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchCrest{width:100%!important;height:88px!important}
+.fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchCrest :is(img,span){width:min(100%,74px)!important;max-width:100%!important;height:84px!important;transform:none!important}
+.fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchTeam strong{width:100%!important;min-width:0!important;max-width:100%!important;min-height:30px!important;padding:0 1px!important;box-sizing:border-box!important;overflow:hidden!important;overflow-wrap:anywhere!important;line-height:1.15!important}
+.fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchScore{width:100%!important;min-width:0!important;max-width:100%!important;justify-self:center!important;align-self:center!important}
+.fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchScore strong{font-size:clamp(23px,2.4vw,30px)!important}
+.fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchScore span{max-width:100%!important;padding:5px 4px!important;white-space:normal!important;overflow-wrap:anywhere!important}
+.fcV215ResultsSection .fcV215MatchRailWide :is(.fcRefRecentMatchMeta,.fcRefRecentMatchFooter){padding-left:12px!important;padding-right:12px!important}
+}
+@media(min-width:920px) and (max-width:1319px){.fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchesGrid{grid-auto-columns:calc((100% - 24px)/3)!important}}
+@media(min-width:768px) and (max-width:919px){.fcV215ResultsSection .fcV215MatchRailWide .fcRefRecentMatchesGrid{grid-auto-columns:calc((100% - 12px)/2)!important}}
