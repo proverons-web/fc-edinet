@@ -76,6 +76,11 @@ git fetch origin
 if errorlevel 1 goto :fail
 
 echo.
+echo [SAFETY] Backing up the current remote main branch...
+node scripts/backup-remote-main.mjs
+if errorlevel 1 goto :fail
+
+echo.
 echo [6/8] Preparing local main branch...
 git show-ref --verify --quiet refs/heads/main
 if errorlevel 1 (
@@ -111,6 +116,11 @@ git rm -r --cached --ignore-unmatch node_modules .next .vercel >nul 2>&1
 
 git status
 git add -A
+if errorlevel 1 goto :fail
+
+echo.
+echo [SAFETY] Scanning Git staging for sensitive files and credentials...
+node scripts/guard-staged-secrets.mjs
 if errorlevel 1 goto :fail
 
 echo Checking staged files for GitHub 100 MB limit...

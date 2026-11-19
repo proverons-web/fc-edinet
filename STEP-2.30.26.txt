@@ -1,0 +1,66 @@
+FC EDINET — v2.30.26 FULL | PRODUCTION QUALITY & SECURITY
+
+НОВОЕ
+1) Перед заменой GitHub main установщик создает и проверяет Git bundle предыдущего origin/main.
+   Папка по умолчанию: рядом с проектом, FC_Edinet_DeployBackups.
+   Файл .bundle — архив исходного Git-репозитория, а НЕ резервная копия Supabase.
+2) Перед коммитом установщик проверяет Git staging: ключи, файлы .env.production,
+   закрытые ключи, GitHub/OpenAI/Supabase-токены и npm authentication.
+   При подозрении отправка в GitHub блокируется; значения секретов не печатаются.
+3) Добавлены HSTS и явный запрет публичных production source maps.
+4) Дополнительный QA в установщике и GitHub Actions проверяет откат и секреты.
+
+ПОРЯДОК УСТАНОВКИ
+1. Убедиться, что v2.30.25 работает. Скопировать существующую папку проекта отдельно.
+2. Supabase: сделать реальную резервную копию БАЗЫ (Supabase Dashboard -> Database -> Backups,
+   если функция доступна на текущем тарифе). Если Backups недоступен — выполнить
+   логический экспорт поддерживаемым инструментом pg_dump из защищенной среды.
+   Отдельно сохранить объекты Supabase Storage — резервная копия SQL их не содержит.
+   Проверить доступность восстановительной копии. НЕ отправлять дамп в GitHub/чат.
+3. Распаковать fc-edinet-v2.30.26-FULL.zip в новую папку.
+4. Перенести .env.local из прошлой версии; НЕ публиковать его и НЕ прикладывать к заявкам.
+5. Запустить DEPLOY_FC_EDINET.bat. Сначала npm install, QA, TypeScript и Next.js build.
+   Если build / guard / Git backup не прошел, push НЕ выполняется.
+6. После git fetch установщик сохраняет предыдущий origin/main в *.bundle
+   рядом с проектом (FC_Edinet_DeployBackups), проверяет архив, затем обновляет Git.
+7. Перед git commit выполняется guard-staged-secrets.mjs. Если обнаружена проблема,
+   удалить секреты из Git index и повторить установку. При реальной утечке сменить ключ.
+8. Проверить на https://fc-edinet.vercel.app/api/version версию 2.30.26,
+   только ПОСЛЕ того, как Vercel покажет READY.
+9. Пройти вручную: вход в админку, создание черновика, календарь, избранное,
+   уведомления, статистика и /admin/diagnostics/performance.
+
+КАК ВОССТАНОВИТЬ ПРЕДЫДУЩИЙ КОД
+- Архив .bundle содержит коммит предыдущей main. Хранится ЛОКАЛЬНО, вне проекта.
+- Пример: git clone <полный-путь-к-файлу.bundle> restored-fc-edinet
+- Проверить содержимое восстановленной папки и версию до публикации.
+- Вернуть ветку в Production можно только отдельно, после проверки, не делая
+  принудительный push автоматически. Восстановление Supabase БД/Storage — отдельный процесс.
+
+ПОЧЕМУ НЕТ SQL-МИГРАЦИИ В ЭТОЙ ВЕРСИИ
+SQL-МИГРАЦИИ v2.30.26: НЕТ. Скрипт базы данных не меняется.
+Историческая заметка: SQL-МИГРАЦИИ: ДА, 084_fan_notifications.sql — это ТОЛЬКО предыдущая v2.30.25.
+Не повторять выполненные миграции: database/078_real_user_monitoring.sql,
+database/079_multi_competitions.sql, database/080_match_schedule_history.sql,
+database/081_cup_results.sql, database/082_cup_bracket.sql,
+database/083_cup_two_leg_ties.sql, database/084_fan_notifications.sql.
+
+ПРОВЕРКИ
+- npm run qa:production-safety
+- npm run qa:security
+- npm run qa:all
+- npm run deploy:check (при наличии настроенной локальной среды и npm-пакетов)
+- Production Build необходимо подтвердить на ПК до Git push.
+
+NODE.JS
+- В package.json указан Node 22.x. Node 24 может выводить EBADENGINE.
+- Такое предупреждение само по себе НЕ является ошибкой; результат typecheck/build важнее.
+- Для совпадения с Vercel использовать Node 22 LTS.
+
+ОСТАЮЩИЕСЯ РИСКИ
+- Supabase Security Advisors: действующие warnings приведены в SECURITY-AUDIT-v2.30.26.md.
+- Включить Leaked Password Protection в Supabase Auth вручную, если доступно.
+- Права на SECURITY DEFINER RPC нужно проверять по назначениям; не отзывать без анализа.
+- Защита staged files не заменяет отдельного аудита истории Git и хранения секретов.
+
+Production, Supabase и GitHub не изменялись при подготовке ZIP.

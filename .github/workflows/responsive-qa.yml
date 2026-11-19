@@ -108,6 +108,8 @@ jobs:
         run: node scripts/qa-fan-layout.mjs
         env:
           CHROME_PATH: /usr/bin/google-chrome
+      - name: Pre-deploy Git rollback and secret leak prevention
+        run: npm run qa:production-safety
       - name: Favorite match in-account notifications and RLS safeguards
         run: node --experimental-strip-types scripts/qa-fan-notifications-v2325.mjs
       - name: Personalized fan dashboard logic and privacy contracts
