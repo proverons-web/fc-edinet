@@ -1,0 +1,10 @@
+/* v2.30.23 — actionable, readable performance triage for administrators. */
+.performancePriorityList{display:grid;gap:0;border:1px solid #dfe7f0;background:#fff}
+.performancePriorityRow{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid #e6ecf3}
+.performancePriorityRow:last-child{border-bottom:0}
+.performancePriorityNumber{display:grid;place-items:center;width:30px;height:30px;background:#eaf2fd;color:#16457e;font-size:13px;font-weight:800}
+.performancePriorityDetails{display:grid;gap:4px;min-width:0}
+.performancePriorityDetails strong{overflow-wrap:anywhere;color:#0d2a4d;font-size:14px}
+.performancePriorityDetails small{color:#576b83;font-size:12px;line-height:1.45}
+.performancePriorityRow>b{font-size:16px;color:#0d2a4d;font-variant-numeric:tabular-nums;white-space:nowrap}
+@media(max-width:580px){.performancePriorityRow{grid-template-columns:24px minmax(0,1fr);gap:10px;padding:12px}.performancePriorityNumber{width:24px;height:24px}.performancePriorityRow>b{grid-column:2;justify-self:start}.performancePriorityDetails strong{font-size:13px}}

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/editorial";
 import { createAdminClient, isSupabaseAdminConfigured } from "@/lib/supabase/admin";
-import { filterRumByDevice, summarizeRum, type RumDeviceFilter, type RumSample } from "@/lib/rum-report";
+import { filterRumByDevice, performancePriorities, summarizeRum, type RumDeviceFilter, type RumSample } from "@/lib/rum-report";
 
 export const metadata = { title: "Реальная скорость и ошибки — FC Edineț" };
 export const dynamic = "force-dynamic";
@@ -58,7 +58,9 @@ export default async function PerformanceMonitoringPage({
     } catch { issue = "Не удалось получить данные. Проверь подключение к Supabase."; }
   }
   // Filter only after the database query, keeping the same anonymized dataset.
-  const report = summarizeRum(filterRumByDevice(rows, device));
+  const filteredRows = filterRumByDevice(rows, device);
+  const report = summarizeRum(filteredRows);
+  const priorities = performancePriorities(filteredRows);
   const latestRecordedAt = rows[0]?.recorded_at ?? null;
   const latestLabel = latestRecordedAt
     ? new Intl.DateTimeFormat("ru-RU", {
@@ -114,6 +116,29 @@ export default async function PerformanceMonitoringPage({
                   </div>
                 ))}
               </div>
+            </div>
+          </section>
+          <section className="diagnosticsPanel wide" aria-label="Приоритеты оптимизации">
+            <header><p className="eyebrow">ПО РЕАЛЬНЫМ ИЗМЕРЕНИЯМ</p><h2>Что стоит ускорить первым</h2></header>
+            <div className="diagnosticsPanelBody">
+              <p>Только страницы и типы устройств с минимум 10 измерениями одного показателя. Выше показаны реальные p75, а не результаты лабораторного теста. После выпуска новой версии сравни периоды 7 и 30 дней.</p>
+              {priorities.length === 0 ? (
+                <p>Сейчас нет подтверждённых отклонений с достаточным количеством измерений для выбранного устройства и периода.</p>
+              ) : (
+                <div className="performancePriorityList">
+                  {priorities.map((item, index) => (
+                    <div className="performancePriorityRow" key={`${item.route}:${item.device}:${item.metric}`}>
+                      <span className="performancePriorityNumber">{index + 1}</span>
+                      <div className="performancePriorityDetails">
+                        <strong>{item.route} · {DEVICE[item.device] || item.device}</strong>
+                        <small>{TITLES[item.metric]} · {item.count} измерений · {item.severity === "poor" ? "сильное отклонение" : "есть отклонения"}</small>
+                        <small>{item.metric === "LCP" ? "Проверь главный экран, изображение Hero и время ответа." : item.metric === "CLS" ? "Проверь закреплённые размеры изображений, блоков и шрифтов." : "Проверь тяжёлые обработчики и нагрузку основного потока."}</small>
+                      </div>
+                      <b>{item.metric === "CLS" ? item.p75.toFixed(3) : Math.round(item.p75)}{item.unit ? ` ${item.unit}` : ""}</b>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </section>
           <div className="diagnosticsGrid">

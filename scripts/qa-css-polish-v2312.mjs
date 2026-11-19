@@ -29,10 +29,10 @@ function checkBraces(source, name) {
   assert.equal(comment, false, `${name}: unclosed comment`);
 }
 
-check('v2.30.22 release and single installer instruction', () => {
-  assert.equal(JSON.parse(read('package.json')).version, '2.30.22');
-  assert.match(read('lib/release.ts'), /RELEASE_VERSION = "2\.30\.22"/);
-  assert.deepEqual(fs.readdirSync(root).filter(x => /^STEP-.*\.txt$/.test(x)), ['STEP-2.30.22.txt']);
+check('v2.30.23 release and single installer instruction', () => {
+  assert.equal(JSON.parse(read('package.json')).version, '2.30.23');
+  assert.match(read('lib/release.ts'), /RELEASE_VERSION = "2\.30\.23"/);
+  assert.deepEqual(fs.readdirSync(root).filter(x => /^STEP-.*\.txt$/.test(x)), ['STEP-2.30.23.txt']);
 });
 check('CSS stylesheets have balanced braces, strings, and comments', () => {
   for (const name of cssFiles) checkBraces(read(`app/${name}`), name);

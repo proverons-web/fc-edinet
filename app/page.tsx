@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import PublicImage from "@/app/components/PublicImage";
+import ResponsiveHeroImage from "@/app/components/ResponsiveHeroImage";
 import StandingsTable from "@/app/components/StandingsTable";
 import RecentMatchesCarousel from "@/app/components/RecentMatchesCarousel";
 import YouTubePlayer from "@/app/components/YouTubePlayer";
@@ -92,7 +93,7 @@ export default async function Home() {
       .lte("published_at", now)
       .order("is_featured", { ascending: false })
       .order("published_at", { ascending: false })
-      .limit(8),
+      .limit(5),
     supabase
       .from("matches")
       .select(matchSelect())
@@ -264,11 +265,11 @@ export default async function Home() {
       <section className="fcRefHero" style={heroStyle}>
         <div className="fcRefHeroMedia" aria-hidden="true" style={{ display: showHeroBackground ? undefined : "none" }}>
           {heroBaseImage ? (
-            <picture>
-              {hero?.mobile_background_image_url && <source media="(max-width: 680px)" srcSet={hero.mobile_background_image_url} />}
-              {hero?.tablet_background_image_url && <source media="(max-width: 980px)" srcSet={hero.tablet_background_image_url} />}
-              <img src={heroBaseImage} alt="" width={1920} height={1080} loading="eager" decoding="async" fetchPriority="high" />
-            </picture>
+            <ResponsiveHeroImage
+              desktop={heroBaseImage}
+              tablet={hero?.tablet_background_image_url}
+              mobile={hero?.mobile_background_image_url}
+            />
           ) : (
             <div className="fcRefHeroFallback"><img src={CLUB_LOGO} alt="" decoding="async" fetchPriority="high" /></div>
           )}

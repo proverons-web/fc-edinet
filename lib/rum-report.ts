@@ -71,3 +71,45 @@ export function summarizeRum(rows: RumSample[]) {
       ? row.recorded_at : latest, null);
   return { vitals, devices, routes, errors: errors.length, samples: rows.length, latestRecordedAt };
 }
+
+/** A per-device, per-route p75 list. Never combine mobile and desktop into
+ * one score; never rank tiny samples or JS-error counts as speed regressions.
+ */
+export function performancePriorities(rows: RumSample[], minSamples = 10, maxItems = 8) {
+  const metrics = ["LCP", "INP", "CLS"] as const;
+  type Metric = typeof metrics[number];
+  const allowedRoutes = new Set([
+    "/", "/news", "/news/:slug", "/matches", "/matches/:id", "/team", "/team/:slug",
+    "/standings", "/statistics", "/club", "/club/history", "/club/history/:slug",
+    "/club/seasons", "/club/seasons/:slug", "/club/archive", "/club/hall-of-fame",
+    "/media", "/media/:slug", "/academy", "/partners",
+  ]);
+  const groups = new Map<string, { route: string; device: string; metric: Metric; values: number[] }>();
+  for (const row of rows) {
+    if (!metrics.includes(row.metric as Metric)) continue;
+    const value = Number(row.value);
+    if (!Number.isFinite(value) || value < 0) continue;
+    if (!["mobile", "tablet", "desktop"].includes(row.device_type)) continue;
+    // The ingest API stores route templates, not slug values. Do not expose
+    // unexpected path data in the administrator's diagnosis table.
+    if (!allowedRoutes.has(row.route_key)) continue;
+    const key = `${row.metric}|${row.device_type}|${row.route_key}`;
+    const group = groups.get(key) || {
+      route: row.route_key, device: row.device_type, metric: row.metric as Metric, values: [],
+    };
+    group.values.push(value);
+    groups.set(key, group);
+  }
+  return [...groups.values()].flatMap(({ route, device, metric, values }) => {
+    if (values.length < minSamples) return [];
+    const p75 = percentile75(values);
+    if (p75 === null || p75 <= thresholds[metric].good) return [];
+    return [{
+      route, device, metric, p75, count: values.length,
+      goodThreshold: thresholds[metric].good,
+      unit: thresholds[metric].unit,
+      severity: p75 > thresholds[metric].poor ? "poor" as const : "needs-improvement" as const,
+      ratio: p75 / thresholds[metric].good,
+    }];
+  }).sort((a, b) => b.ratio - a.ratio || b.count - a.count).slice(0, Math.max(0, maxItems));
+}
