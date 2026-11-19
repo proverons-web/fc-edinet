@@ -40,7 +40,8 @@ const errorMessages: Record<string, string> = {
   self_role: "Нельзя снять роль администратора у собственного аккаунта.",
   self_block: "Нельзя заблокировать собственный аккаунт.",
   update_failed: "Не удалось изменить роль. Проверь миграцию 015_admin_users.sql.",
-  create_invalid: "Проверь email, имя, пароль (минимум 10 символов) и выбранную роль.",
+  create_invalid: "Проверь email, имя, длину пароля (10–128 символов) и выбранную роль.",
+  password_policy: "Пароль не соответствует требованиям Supabase: минимум 10 символов, строчные и заглавные латинские буквы и цифры. При необходимости добавь специальный символ.",
   email_exists: "Пользователь с таким email уже существует.",
   create_failed: "Не удалось создать пользователя. Проверь настройки Supabase Auth.",
   create_profile_failed: "Аккаунт создан не полностью: не удалось назначить профиль/роль.",
@@ -203,10 +204,13 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                   type="password"
                   name="password"
                   minLength={10}
+                  maxLength={128}
                   required
                   autoComplete="new-password"
-                  placeholder="Минимум 10 символов"
+                  aria-describedby="new-user-password-requirements"
+                  placeholder="10+ символов: Aa1"
                 />
+                <small id="new-user-password-requirements">Не менее 10 символов: строчные и заглавные латинские буквы, цифра. Специальный символ рекомендуется.</small>
               </label>
 
               <label>

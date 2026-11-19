@@ -33,6 +33,11 @@ export async function createAdminUser(formData: FormData) {
   if (!/^\S+@\S+\.\S+$/.test(email) || password.length < 10 || password.length > 128 || fullName.length > 120 || !allowedRoles.has(requestedRole)) {
     redirect("/admin/users?error=create_invalid#new-user");
   }
+  // Match the minimum required character groups configured in Supabase Auth.
+  // The Supabase API remains the authority if its policy becomes stricter.
+  if (!/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+    redirect("/admin/users?error=password_policy#new-user");
+  }
   const admin = createAdminClient();
   const { data, error } = await admin.auth.admin.createUser({
     email, password, email_confirm: true,
@@ -40,7 +45,10 @@ export async function createAdminUser(formData: FormData) {
   });
   if (error || !data.user) {
     console.error("admin createUser failed", error?.message || "no user returned");
-    redirect(`/admin/users?error=${/already|registered|exists/i.test(error?.message ?? "") ? "email_exists" : "create_failed"}#new-user`);
+    const authCode = (error as { code?: string } | null)?.code;
+    const weakPassword = authCode === "weak_password" || /password.*(?:contain|weak|strength|character)/i.test(error?.message ?? "");
+    const emailExists = authCode === "email_exists" || authCode === "user_already_exists" || /already|registered|exists/i.test(error?.message ?? "");
+    redirect(`/admin/users?error=${weakPassword ? "password_policy" : emailExists ? "email_exists" : "create_failed"}#new-user`);
   }
   const newUserId = data.user.id;
   const { error: profileError } = await admin.from("profiles").upsert({

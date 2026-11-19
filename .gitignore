@@ -70,3 +70,6 @@ service_account.json
 
 # Upgrade kit must not enter GitHub when deploying
 /UPDATE_FC_EDINET_v2.30.27/
+
+# Local user-creation hotfix kit must not enter GitHub
+/FC_Edinet_v2.30.27_PASSWORD_POLICY_HOTFIX/
