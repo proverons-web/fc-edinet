@@ -108,6 +108,8 @@ jobs:
         run: node scripts/qa-fan-layout.mjs
         env:
           CHROME_PATH: /usr/bin/google-chrome
+      - name: Favorite match in-account notifications and RLS safeguards
+        run: node --experimental-strip-types scripts/qa-fan-notifications-v2325.mjs
       - name: Personalized fan dashboard logic and privacy contracts
         run: node --experimental-strip-types scripts/qa-fan-dashboard.mjs
       - name: Fan dashboard mobile geometry

@@ -1,7 +1,7 @@
 import type { Locale } from "@/lib/i18n";
 
 export const accountText: Record<Locale, {
-  eyebrow: string; title: string; dashboard: string; profile: string; favorites: string; settings: string;
+  eyebrow: string; title: string; dashboard: string; profile: string; favorites: string; settings: string; notificationsNav: string;
   logout: string; memberSince: string; role: string; city: string; notSet: string; favoritePlayers: string;
   favoriteMatches: string; editProfile: string; manageSettings: string; openFavorites: string; profileTitle: string;
   profileDescription: string; fullName: string; displayName: string; displayNameHint: string; avatar: string;
@@ -16,15 +16,15 @@ export const accountText: Record<Locale, {
 }> = {
   ru: {
     eyebrow: "ЛИЧНЫЙ КАБИНЕТ", title: "Мой FC Edineț", dashboard: "Обзор", profile: "Профиль",
-    favorites: "Избранное", settings: "Настройки", logout: "Выйти", memberSince: "С клубом на сайте с",
+    favorites: "Избранное", settings: "Настройки", notificationsNav: "Уведомления", logout: "Выйти", memberSince: "С клубом на сайте с",
     role: "Роль", city: "Город", notSet: "Не указано", favoritePlayers: "Любимые игроки",
     favoriteMatches: "Сохранённые матчи", editProfile: "Редактировать профиль", manageSettings: "Настройки аккаунта",
     openFavorites: "Открыть избранное", profileTitle: "Мой профиль", profileDescription: "Имя, отображаемое имя, город и фотография профиля.",
     fullName: "Имя и фамилия", displayName: "Отображаемое имя", displayNameHint: "Так тебя будем показывать в будущих комментариях и функциях сообщества.",
     avatar: "Фото профиля", avatarHint: "JPG, PNG или WebP до 3 МБ. Новое фото заменит текущее.", cityHint: "Например: Edineț",
     save: "Сохранить", saving: "Сохраняем...", removeAvatar: "Удалить фото", settingsTitle: "Настройки",
-    settingsDescription: "Язык аккаунта и будущие уведомления клуба.", language: "Предпочитаемый язык", languageHint: "После сохранения интерфейс переключится на выбранный язык.",
-    notifications: "Уведомления клуба", notificationsHint: "Сохраняем предпочтение уже сейчас. Email/push-уведомления подключим на следующем этапе.",
+    settingsDescription: "Язык аккаунта и уведомления о сохранённых матчах.", language: "Предпочитаемый язык", languageHint: "После сохранения интерфейс переключится на выбранный язык.",
+    notifications: "Уведомления клуба", notificationsHint: "Уведомления внутри кабинета при переносе, отмене, изменении времени и публикации результата избранного матча. Email/push пока нет.",
     ru: "Русский", ro: "Română", favoritesTitle: "Моё избранное", favoritesDescription: "Игроки и матчи, за которыми ты хочешь следить.",
     players: "Игроки", matches: "Матчи", noPlayers: "Ты ещё не добавил игроков в избранное.", noMatches: "Ты ещё не сохранил ни одного матча.",
     browsePlayers: "Открыть состав", browseMatches: "Открыть календарь", addPlayer: "♡ Добавить в избранное", removePlayer: "♥ В избранном",
@@ -38,15 +38,15 @@ export const accountText: Record<Locale, {
   },
   ro: {
     eyebrow: "CONT PERSONAL", title: "FC Edineț al meu", dashboard: "Prezentare", profile: "Profil",
-    favorites: "Favorite", settings: "Setări", logout: "Deconectare", memberSince: "Pe site-ul clubului din",
+    favorites: "Favorite", settings: "Setări", notificationsNav: "Notificări", logout: "Deconectare", memberSince: "Pe site-ul clubului din",
     role: "Rol", city: "Oraș", notSet: "Nespecificat", favoritePlayers: "Jucători favoriți",
     favoriteMatches: "Meciuri salvate", editProfile: "Editează profilul", manageSettings: "Setările contului",
     openFavorites: "Deschide favoritele", profileTitle: "Profilul meu", profileDescription: "Nume, nume afișat, oraș și fotografia de profil.",
     fullName: "Nume și prenume", displayName: "Nume afișat", displayNameHint: "Așa vei apărea în viitoarele comentarii și funcții ale comunității.",
     avatar: "Fotografie de profil", avatarHint: "JPG, PNG sau WebP până la 3 MB. O fotografie nouă o va înlocui pe cea actuală.", cityHint: "De exemplu: Edineț",
     save: "Salvează", saving: "Se salvează...", removeAvatar: "Șterge fotografia", settingsTitle: "Setări",
-    settingsDescription: "Limba contului și viitoarele notificări ale clubului.", language: "Limba preferată", languageHint: "După salvare, interfața va trece la limba selectată.",
-    notifications: "Notificările clubului", notificationsHint: "Preferința este salvată acum. Notificările email/push vor fi conectate într-o etapă viitoare.",
+    settingsDescription: "Limba contului și notificări despre meciurile salvate.", language: "Limba preferată", languageHint: "După salvare, interfața va trece la limba selectată.",
+    notifications: "Notificările clubului", notificationsHint: "Notificări în cont la amânarea, anularea, schimbarea orei sau publicarea rezultatului meciurilor favorite. Fără email/push deocamdată.",
     ru: "Rusă", ro: "Română", favoritesTitle: "Favoritele mele", favoritesDescription: "Jucătorii și meciurile pe care vrei să le urmărești.",
     players: "Jucători", matches: "Meciuri", noPlayers: "Nu ai adăugat încă jucători la favorite.", noMatches: "Nu ai salvat încă niciun meci.",
     browsePlayers: "Deschide lotul", browseMatches: "Deschide calendarul", addPlayer: "♡ Adaugă la favorite", removePlayer: "♥ În favorite",

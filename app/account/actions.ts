@@ -172,6 +172,28 @@ export async function toggleFavoriteMatch(matchId: string, returnPath: string) {
   revalidatePath("/account/favorites");
 }
 
+/** Clients can update only read_at, never notification content or recipients (SQL column grants + RLS). */
+export async function markFanNotificationRead(notificationId: string) {
+  if (!/^[1-9]\d{0,15}$/.test(notificationId)) return;
+  const { supabase, userId } = await requireUser();
+  const { error } = await supabase.from("fan_notifications")
+    .update({ read_at: new Date().toISOString() })
+    .eq("user_id", userId).eq("id", notificationId).is("read_at", null);
+  if (error) throw new Error("Unable to mark notification as read");
+  revalidatePath("/account");
+  revalidatePath("/account/notifications");
+}
+
+export async function markAllFanNotificationsRead() {
+  const { supabase, userId } = await requireUser();
+  const { error } = await supabase.from("fan_notifications")
+    .update({ read_at: new Date().toISOString() })
+    .eq("user_id", userId).is("read_at", null);
+  if (error) throw new Error("Unable to mark notifications as read");
+  revalidatePath("/account");
+  revalidatePath("/account/notifications");
+}
+
 export async function logout() {
   const supabase = await createClient();
   await supabase.auth.signOut();

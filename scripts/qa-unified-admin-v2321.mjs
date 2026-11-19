@@ -21,9 +21,9 @@ const page = read("app/admin/site-builder/page.tsx");
 const css = read("app/admin-unified-v23021.css");
 
 check("release is synchronized", () => {
-  assert.equal(pkg.version, "2.30.24");
-  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.24"/);
-  assert.equal(fs.readdirSync(root).filter((item) => /^STEP-.*\.txt$/.test(item)).join(","), "STEP-2.30.24.txt");
+  assert.equal(pkg.version, "2.30.25");
+  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.25"/);
+  assert.equal(fs.readdirSync(root).filter((item) => /^STEP-.*\.txt$/.test(item)).join(","), "STEP-2.30.25.txt");
 });
 check("one entry point for all page management", () => {
   assert.match(adminShell, /href: "\/admin\/site-builder"/);
@@ -99,5 +99,5 @@ check("admin CSS is isolated and responsive", () => {
   assert.ok((css.match(/{/g) ?? []).length === (css.match(/}/g) ?? []).length);
 });
 
-console.log(`\nUnified Admin v2.30.24: ${passed}/${passed + failed} checks passed.`);
+console.log(`\nUnified Admin v2.30.25: ${passed}/${passed + failed} checks passed.`);
 if (failed) process.exitCode = 1;

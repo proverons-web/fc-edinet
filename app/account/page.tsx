@@ -8,6 +8,9 @@ import { dateLocale, roleLabelsI18n } from "@/lib/i18n";
 import { staffRoles } from "@/lib/types";
 import { FAN_MATCH_SELECT, FAN_PLAYER_SELECT, fanDashboardText, groupFanMatches, type FanFavoritePlayer, type FanFavoriteMatch } from "@/lib/fan-favorites";
 import FanMatchItem from "@/app/account/FanMatchItem";
+import FanNotificationsList from "@/app/account/FanNotificationsList";
+import { getLatestFanNotifications } from "@/lib/fan-notification-queries";
+import { notificationText } from "@/lib/fan-notifications";
 import "./fan-dashboard-v2301.css";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +26,8 @@ export default async function AccountPage() {
     supabase.from("favorite_matches").select(FAN_MATCH_SELECT, { count: "exact" })
       .eq("user_id", userId).order("created_at", { ascending: false }).limit(250),
   ]);
+  const notifications = await getLatestFanNotifications(supabase, userId);
+  const nt = notificationText[locale];
   const players = (playersResult.data ?? []) as unknown as FanFavoritePlayer[];
   const savedMatches = (matchesResult.data ?? []) as unknown as FanFavoriteMatch[];
   const { upcoming, results } = groupFanMatches(savedMatches);
@@ -76,6 +81,11 @@ export default async function AccountPage() {
         <div><p>{fan.personalFeed}</p><h2>{fan.personalFeedTitle}</h2></div>
         <Link href="/account/favorites">{text.openFavorites} →</Link>
       </div>
+      <section className="fanNotificationDashboard" aria-labelledby="fan-notification-dashboard">
+        <div className="fanNotificationDashboardHead"><h3 id="fan-notification-dashboard">{nt.title}</h3><Link href="/account/notifications">{nt.all} →</Link></div>
+        {notifications.failed ? <p role="alert">{nt.error}</p> : notifications.rows.length ?
+          <FanNotificationsList rows={notifications.rows} locale={locale}/> : <p>{nt.none}</p>}
+      </section>
       <div className="fanV2301Layout">
         <div className="fanV2301Column">
           <section className="fanV2301Card" aria-labelledby="fan-v2301-next"><h3 id="fan-v2301-next">{fan.nextMatch}</h3>
