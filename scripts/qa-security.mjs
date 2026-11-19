@@ -13,9 +13,10 @@ const packageJson = JSON.parse(read("package.json"));
 const api = read("app/api/analytics/visit/route.ts");
 const db = read("database/067_restrict_trigger_helper_execute.sql");
 
-run("Next.js pinned to patched 16.4.4", () => {
-  assert.equal(packageJson.dependencies.next, "16.4.4");
-  assert.match(packageJson.dependencies.next, /^16\.4\.4$/);
+run("Next.js pinned to patched 16.4.6+ security release", () => {
+  const next = packageJson.dependencies.next;
+  assert.match(next, /^16\.4\.\d+$/, "Next.js must use an exact 16.4.x version");
+  assert.ok(Number(next.split(".")[2]) >= 6, "Next.js 16.4.6 or newer 16.4.x patch is required");
 });
 run("Server-side credential never published as NEXT_PUBLIC", () => {
   for (const name of ["SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SECRET_KEY", "ANALYTICS_IP_SALT"]) {

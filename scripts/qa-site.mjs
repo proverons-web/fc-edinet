@@ -191,7 +191,7 @@ ok("v2.29.0 screenshot reference and CI present", exists("qa/baselines/mobile.cs
 ok("v2.29.1 performance QA wired into deploy and CI", read("package.json").includes("scripts/qa-performance.mjs") && exists("scripts/qa-performance.mjs") && read(".github/workflows/responsive-qa.yml").includes("scripts/qa-performance.mjs"));
 ok("v2.29.1 optimized media with safe external fallback", read("app/components/PublicImage.tsx").includes("isOptimizablePublicImage") && read("next.config.ts").includes("trustedSupabaseImageHost"));
 ok("v2.29.1 public global design cache invalidated on publish", read("lib/site-global-designs.ts").includes("fce-public-global-designs") && read("app/admin/design/global-actions.ts").includes('updateTag("fce-public-global-designs")'));
-ok("v2.29.2 patched Next version pinned", JSON.parse(read("package.json")).dependencies.next === "16.4.4");
+ok("v2.29.2 patched Next version pinned (16.4.6+ security patch)", (() => { const version = JSON.parse(read("package.json")).dependencies.next; const match = typeof version === "string" ? /^16\.4\.(\d+)$/.exec(version) : null; return Boolean(match && Number(match[1]) >= 6); })());
 ok("v2.29.2 security QA and migration added", exists("scripts/qa-security.mjs") && exists("database/067_restrict_trigger_helper_execute.sql"));
 ok("v2.29.3 admin news local preview added", exists("app/components/NewsWorkflowPanel.tsx") && read("app/components/NewsEditorForm.tsx").includes("<NewsWorkflowPanel"));
 ok("v2.29.3 admin publishing guards active", read("app/admin/news/actions.ts").includes('.eq("updated_at", originalUpdatedAt)') && read("app/admin/news/actions.ts").includes('.eq("is_active", true)'));

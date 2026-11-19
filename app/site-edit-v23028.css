@@ -9,14 +9,18 @@
 .fcSiteEditInline{position:relative;display:flex;flex-wrap:wrap;gap:8px;align-items:center}.publicMatchCard .fcSiteEditInline .fcOnSiteAction{font-size:10px;min-height:42px;box-shadow:none;padding:8px 10px}
 .fcSiteEditableCard{position:relative;min-width:0;min-height:0}.fcSiteEditableCard>.playerCard{height:100%}.fcSiteEditableCard>.fcOnSiteAction,.fcSiteEditableCard>.fcInlineEditMount>.fcOnSiteAction{position:absolute;top:10px;right:10px;z-index:5;font-size:11px;min-height:42px;padding:9px 10px}
 .fcSiteEditableCard .fcSiteEditorBackdrop{position:fixed}.fcSiteEditNewsAction{margin-top:8px;box-shadow:none}.fcSiteEditStaffAction{margin-top:12px;box-shadow:none}
-.authRegisterPage{position:relative;isolation:isolate;min-height:0!important;padding:clamp(26px,4vw,58px) 0!important;background:linear-gradient(115deg,#041226,#0a2c5a)}
-.authRegisterPage::before{content:"";position:absolute;inset:8% 10% 8% 8%;background:url('/brand/fc-edinet-crest.png') center left/contain no-repeat;opacity:.09;pointer-events:none;z-index:0}
-.authRegisterPage>.authLayout{position:relative;z-index:1}.authRegisterPage .authIntro{min-width:0}.authRegisterPage .authCard{min-width:0}
-@media(max-width:767px){.fcOnSiteToolbar{bottom:calc(12px + env(safe-area-inset-bottom));right:10px;left:10px}.fcOnSiteToolbar .fcOnSiteAction{flex:0 1 auto;min-width:44px;padding:10px}.fcOnSiteToolbar .fcOnSiteAction span{font-size:11px}.fcSiteEditorBackdrop{padding:0}.fcSiteEditorDialog{width:100%;height:100dvh;border:0}.fcSiteEditorHeader{padding:8px 12px}.fcSiteEditorFoot{font-size:10px}.authRegisterPage::before{background-position:center;background-size:70% auto;opacity:.075}}
+/* FC EDINET AUTH WATERMARK FIX v2.30.28: login and register share the same quiet identity. */
+.authRegisterPage,.authLoginPage{position:relative;isolation:isolate;min-height:0!important;padding:clamp(26px,4vw,58px) 0!important;background:linear-gradient(115deg,#041226,#0a2c5a);overflow:hidden}
+.authRegisterPage::before,.authLoginPage::before{content:"";position:absolute;inset:0 auto 0 0;width:55%;background:url('/brand/fc-edinet-crest.png') center center / clamp(360px,48vw,780px) auto no-repeat;opacity:.03;pointer-events:none;z-index:0}
+.authRegisterPage>.authLayout,.authLoginPage>.authLayout{position:relative;z-index:1}
+.authRegisterPage .authIntro,.authLoginPage .authIntro,.authRegisterPage .authCard,.authLoginPage .authCard{min-width:0}
+@media(max-width:767px){.fcOnSiteToolbar{bottom:calc(12px + env(safe-area-inset-bottom));right:10px;left:10px}.fcOnSiteToolbar .fcOnSiteAction{flex:0 1 auto;min-width:44px;padding:10px}.fcOnSiteToolbar .fcOnSiteAction span{font-size:11px}.fcSiteEditorBackdrop{padding:0}.fcSiteEditorDialog{width:100%;height:100dvh;border:0}.fcSiteEditorHeader{padding:8px 12px}.fcSiteEditorFoot{font-size:10px}.authRegisterPage::before,.authLoginPage::before{inset:0 0 auto;width:100%;height:50%;background-position:center 35%;background-size:min(78vw,420px) auto;opacity:.028}}
 @media(prefers-reduced-motion:reduce){.fcOnSiteAction{transition:none!important}}
 
-/* Keep the viewport below a short registration footer in the same dark palette. */
-body:has(.authRegisterPage){background:#01152f}
+/* Auth layout keeps its natural height; footer absorbs any extra viewport height.
+   Do not show the separate body background as a dark strip below the footer. */
+body:has(>main.authRegisterPage),body:has(>main.authLoginPage){display:flex;flex-direction:column;min-height:100vh;min-height:100svh;background:#01152f}
+body:has(>main.authRegisterPage)>.globalFooter,body:has(>main.authLoginPage)>.globalFooter{flex:1 0 auto}
 
 /* Semi-transparent FC Edinet crest behind the public fixture calendar. */
 .matchPublicSection{isolation:isolate}
