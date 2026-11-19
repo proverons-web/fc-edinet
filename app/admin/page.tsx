@@ -12,6 +12,29 @@ export default async function AdminPage() {
   const profile = staffProfile as Pick<Profile, "id" | "email" | "full_name" | "display_name" | "role">;
   const canEdit = profile.role === "editor" || profile.role === "admin";
   const isAdmin = profile.role === "admin";
+  if (!isAdmin) {
+    const allowed = profile.role === "editor"
+      ? [
+          ["Новости", "/admin/news"], ["Медиа", "/admin/media"],
+          ["Комментарии", "/admin/comments"], ["Игроки", "/admin/players"],
+          ["Штаб команды", "/admin/staff"], ["Календарь", "/admin/matches"],
+          ["Соревнования", "/admin/matches/competitions"],
+          ["Протокол матча", "/admin/match-center"], ["Турнирная таблица", "/admin/standings"],
+        ]
+      : [["Мои новости", "/admin/news"]];
+    return <main className="adminPage adminDashboardV2">
+      <section className="adminDashboardIntro"><div>
+        <p className="eyebrow blue">FC EDINEȚ • РАБОЧИЕ РАЗДЕЛЫ</p>
+        <h1>{profile.role === "editor" ? "Редактор" : "Автор"}</h1>
+        <p>Только разрешённые функции. Администратор управляет настройками и пользователями отдельно.</p>
+      </div></section>
+      <nav className="adminRoleQuickGrid" aria-label="Доступные разделы">
+        {allowed.map(([label, href]) => <Link key={href} href={href}>{label}<span aria-hidden="true">→</span></Link>)}
+      </nav>
+      <p className="adminRoleNotice">Для быстрого редактирования открой нужную страницу сайта и нажми на карандаш.</p>
+    </main>;
+  }
+
 
   const [playersResult, publishedResult, draftsResult, reviewResult, photoResult, finishedResult, reportsResult] = await Promise.all([
     supabase.from("players").select("id", { count: "exact", head: true }).eq("is_active", true),

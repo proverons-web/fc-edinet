@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireEditor } from "@/lib/editorial";
+import { requireAdmin } from "@/lib/editorial";
 import type { HomepageSectionKey } from "@/lib/types";
 import { resolveRomanianTranslation } from "@/lib/auto-translation";
 
@@ -42,7 +42,7 @@ export async function saveHomepageHero(
   _previousState: HomepageHeroState,
   formData: FormData
 ): Promise<HomepageHeroState> {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
 
   const eyebrow = text(formData.get("eyebrow")) || "ЕДИНЕЦ • МОЛДОВА";
   const titleMain = text(formData.get("title_main")) || "ВМЕСТЕ";
@@ -216,7 +216,7 @@ export async function saveHomepageLayout(
   _previousState: HomepageLayoutState,
   formData: FormData
 ): Promise<HomepageLayoutState> {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
 
   const rawOrder = text(formData.get("section_order"))
     .split(",")

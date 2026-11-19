@@ -1,0 +1,7 @@
+/* Restricted staff dashboards; admin chrome and accessible controls. */
+.adminRoleQuickGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:12px;margin:20px 0}
+.adminRoleQuickGrid a{display:flex;flex-direction:column;justify-content:space-between;gap:12px;min-height:100px;background:#fff;border:1px solid #d7e3ed;padding:16px;color:#183959;text-decoration:none;font-weight:850;font-size:14px}
+.adminRoleQuickGrid a:hover{border-color:#246ca9;background:#f3f8fd}
+.adminRoleNotice{padding:13px 16px;background:#eaf3fb;color:#325373;border-left:3px solid #327bc1;font-size:13px;line-height:1.6}
+.adminRoleQuickGrid a:focus-visible{outline:3px solid #2177ce;outline-offset:2px}
+@media(max-width:600px){.adminRoleQuickGrid{grid-template-columns:1fr 1fr;gap:8px}.adminRoleQuickGrid a{min-width:0;min-height:85px;padding:12px;font-size:12px}}

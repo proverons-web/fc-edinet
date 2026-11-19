@@ -21,19 +21,19 @@ const page = read("app/admin/site-builder/page.tsx");
 const css = read("app/admin-unified-v23021.css");
 
 check("release is synchronized", () => {
-  assert.equal(pkg.version, "2.30.26");
-  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.26"/);
-  assert.equal(fs.readdirSync(root).filter((item) => /^STEP-.*\.txt$/.test(item)).join(","), "STEP-2.30.26.txt");
+  assert.equal(pkg.version, "2.30.27");
+  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.27"/);
+  assert.equal(fs.readdirSync(root).filter((item) => /^STEP-.*\.txt$/.test(item)).join(","), "STEP-2.30.27.txt");
 });
 check("one entry point for all page management", () => {
   assert.match(adminShell, /href: "\/admin\/site-builder"/);
   assert.match(dashboard, /href="\/admin\/site-builder"/);
   assert.match(read("app/admin/page-builder/page.tsx"), /redirect\("\/admin\/site-builder"\)/);
-  assert.match(page, /requireEditor\(\)/);
+  assert.match(page, /requireAdmin\(\)/);
 });
 check("author cannot open the visual editor", () => {
-  assert.match(adminShell, /href: "\/admin\/site-builder"[^\n]*minRole: "editor"/);
-  assert.match(read("app/admin/site-builder/actions.ts"), /await requireEditor\(\)/);
+  assert.match(adminShell, /href: "\/admin\/site-builder"[^\n]*minRole: "admin"/);
+  assert.match(read("app/admin/site-builder/actions.ts"), /await requireAdmin\(\)/);
 });
 check("dashboard retains existing football, media and publishing tools", () => {
   for (const link of ["/admin/news/new", "/admin/matches/new", "/admin/media", "/admin/match-center", "/admin/standings"]) assert.ok(dashboard.includes(link), link);
@@ -91,7 +91,7 @@ check("editor actions and RLS logic are unchanged", () => {
   for (const file of ["app/admin/site-builder/actions.ts", "app/admin/design/actions.ts", "app/admin/page-builder/club/actions.ts"]) {
     assert.ok(fs.existsSync(path.join(root, file)), file);
   }
-  assert.match(read("app/admin/site-builder/actions.ts"), /requireEditor/);
+  assert.match(read("app/admin/site-builder/actions.ts"), /requireAdmin/);
 });
 check("admin CSS is isolated and responsive", () => {
   assert.match(read("app/admin/layout.tsx"), /admin-unified-v23021\.css/);
@@ -99,5 +99,5 @@ check("admin CSS is isolated and responsive", () => {
   assert.ok((css.match(/{/g) ?? []).length === (css.match(/}/g) ?? []).length);
 });
 
-console.log(`\nUnified Admin v2.30.26: ${passed}/${passed + failed} checks passed.`);
+console.log(`\nUnified Admin v2.30.27: ${passed}/${passed + failed} checks passed.`);
 if (failed) process.exitCode = 1;

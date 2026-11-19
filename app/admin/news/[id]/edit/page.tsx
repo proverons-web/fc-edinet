@@ -48,6 +48,7 @@ export default async function EditNewsPage({
   if (!articleData) notFound();
 
   const article = articleData as unknown as NewsArticle;
+  if (profile.role === "author" && article.created_by !== userId) notFound();
   const categories = (categoryData ?? []) as NewsCategory[];
   const editor = isEditor(profile);
 

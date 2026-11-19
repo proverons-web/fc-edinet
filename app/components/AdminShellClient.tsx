@@ -14,7 +14,7 @@ const groups: NavGroup[] = [
     label: "ГЛАВНОЕ",
     items: [
       { href: "/admin", label: "Главная админки", icon: "⌂", minRole: "author" },
-      { href: "/admin/site-builder", label: "Редактор сайта", icon: "✎", minRole: "editor", keywords: "визуальный редактор страницы дизайн hero конструктор site builder меню" },
+      { href: "/admin/site-builder", label: "Редактор сайта", icon: "✎", minRole: "admin", keywords: "визуальный редактор страницы дизайн hero конструктор site builder меню" },
     ],
   },
   {
@@ -24,7 +24,7 @@ const groups: NavGroup[] = [
       { href: "/admin/news", label: "Новости", icon: "N", minRole: "author", keywords: "статьи публикации черновики" },
       { href: "/admin/media", label: "Медиа", icon: "◎", minRole: "editor", keywords: "фото видео альбомы youtube" },
       { href: "/admin/comments", label: "Комментарии", icon: "#", minRole: "editor", keywords: "модерация жалобы" },
-      { href: "/admin/translations", label: "Переводы RU → RO", icon: "RO", minRole: "editor", keywords: "румынский локализация" },
+      { href: "/admin/translations", label: "Переводы RU → RO", icon: "RO", minRole: "admin", keywords: "румынский локализация" },
     ],
   },
   {
@@ -43,21 +43,21 @@ const groups: NavGroup[] = [
       { href: "/admin/matches/competitions", label: "Соревнования", icon: "C", minRole: "editor", keywords: "лига кубок товарищеские турниры" },
       { href: "/admin/match-center", label: "Протокол матча", icon: "MC", minRole: "editor", keywords: "события составы статистика матч центр" },
       { href: "/admin/standings", label: "Таблица", icon: "T", minRole: "editor", keywords: "турнир очки положение" },
-      { href: "/admin/statistics", label: "Статистика", icon: "S", minRole: "editor", keywords: "игроки сезоны матчи данные" },
+      { href: "/admin/statistics", label: "Статистика", icon: "S", minRole: "admin", keywords: "игроки сезоны матчи данные" },
     ],
   },
   {
     id: "club",
     label: "КЛУБ И ПАРТНЁРЫ",
     items: [
-      { href: "/admin/club", label: "Клуб", icon: "C", minRole: "editor", keywords: "история стадион руководство достижения архив зал славы" },
-      { href: "/admin/partners", label: "Партнёры", icon: "◇", minRole: "editor", keywords: "спонсоры логотипы" },
+      { href: "/admin/club", label: "Клуб", icon: "C", minRole: "admin", keywords: "история стадион руководство достижения архив зал славы" },
+      { href: "/admin/partners", label: "Партнёры", icon: "◇", minRole: "admin", keywords: "спонсоры логотипы" },
     ],
   },
   {
     id: "analytics",
     label: "АНАЛИТИКА",
-    items: [{ href: "/admin/site-analytics", label: "Статистика сайта", icon: "AN", minRole: "editor", keywords: "посетители просмотры трафик" }],
+    items: [{ href: "/admin/site-analytics", label: "Статистика сайта", icon: "AN", minRole: "admin", keywords: "посетители просмотры трафик" }],
   },
   {
     id: "system",

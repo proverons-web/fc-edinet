@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import HeaderNavClient from "@/app/components/HeaderNavClient";
+import EditOnSite from "@/app/components/EditOnSite";
 import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 import { createClient } from "@/lib/supabase/server";
 import type { Profile } from "@/lib/types";
@@ -91,6 +92,7 @@ export default async function SiteHeader() {
           />
         </div>
       </header>
+      <EditOnSite role={profile?.role ?? "fan"} locale={locale} />
     </>
   );
 }

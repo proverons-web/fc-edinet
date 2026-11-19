@@ -2,7 +2,7 @@
 
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
-import { requireAdmin, requireEditor } from "@/lib/editorial";
+import { requireAdmin } from "@/lib/editorial";
 import { parseHistoryEventPayload } from "@/lib/club-history";
 
 export type HistoryFormState = { error?: string; success?: string };
@@ -20,7 +20,7 @@ function refresh() {
 }
 
 export async function saveHistoryEvent(_state: HistoryFormState, fd: FormData): Promise<HistoryFormState> {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
   const validated = parseHistoryEventPayload(fd);
   if ("error" in validated) return { error: validated.error };
   const input = validated.data;

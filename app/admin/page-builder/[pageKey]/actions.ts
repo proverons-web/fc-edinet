@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireEditor } from "@/lib/editorial";
+import { requireAdmin } from "@/lib/editorial";
 import { normalizeProPageLayout, proPageRoutes, type ProPageKey } from "@/lib/pro-page-builder";
 import type { ProPageBuilderState } from "@/app/components/ProPageBuilder";
 
@@ -15,7 +15,7 @@ export async function saveProPageLayout(_state: ProPageBuilderState, formData: F
   let parsed: unknown;
   try { parsed = JSON.parse(raw); } catch { return { error: "Не удалось прочитать конфигурацию страницы." }; }
   const config = normalizeProPageLayout(pageKey, parsed);
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
   const now = new Date().toISOString();
   const { data: current } = await supabase.from("content_page_layouts").select("published_config").eq("page_key", pageKey).maybeSingle();
 

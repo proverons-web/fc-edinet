@@ -67,3 +67,6 @@ id_ed25519
 credentials.json
 service-account.json
 service_account.json
+
+# Upgrade kit must not enter GitHub when deploying
+/UPDATE_FC_EDINET_v2.30.27/

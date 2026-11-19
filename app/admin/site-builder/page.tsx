@@ -1,4 +1,4 @@
-import { requireEditor } from "@/lib/editorial";
+import { requireAdmin } from "@/lib/editorial";
 import UnifiedSiteBuilderClient from "@/app/components/UnifiedSiteBuilderClient";
 import type { CustomSitePage, SiteMenuItem } from "@/lib/site-builder";
 import { normalizeCanonicalMenuRoutes } from "@/lib/site-navigation";
@@ -22,7 +22,7 @@ const systemPages=[
 ];
 function first(v:string|string[]|undefined){return Array.isArray(v)?v[0]:v}
 export default async function UnifiedSiteBuilder({searchParams}:Props){
- const {supabase}=await requireEditor();
+ const {supabase}=await requireAdmin();
  const q=searchParams?await searchParams:{};
  const [{data:customData,error:pagesError},{data:menuData,error:menuError}]=await Promise.all([
    supabase.from("site_custom_pages").select("*").order("updated_at",{ascending:false}),

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireEditor } from "@/lib/editorial";
+import { requireAdmin } from "@/lib/editorial";
 import { resolveRomanianTranslation } from "@/lib/auto-translation";
 import { clubRichContentToPlainText, normalizeClubRichContent } from "@/lib/club-rich-content";
 
@@ -22,7 +22,7 @@ export async function saveClubProfile(
   _previousState: ClubFormState,
   formData: FormData
 ): Promise<ClubFormState> {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
 
   const clubName = text(formData.get("club_name")) || "FC Edineț";
   const city = text(formData.get("city")) || "Edineț";
@@ -213,7 +213,7 @@ export async function saveClubProfile(
 
 
 export async function saveClubAbout(_previousState: ClubFormState, formData: FormData): Promise<ClubFormState> {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
   const { data: current } = await supabase.from("club_profile").select("*").eq("id", 1).maybeSingle();
   const clubName = text(formData.get("club_name")) || current?.club_name || "FC Edineț";
   const officialName = nullableText(formData.get("official_name"));
@@ -261,7 +261,7 @@ export async function saveClubAbout(_previousState: ClubFormState, formData: For
 }
 
 export async function saveClubHistory(_previousState: ClubFormState, formData: FormData): Promise<ClubFormState> {
-  const { supabase } = await requireEditor();
+  const { supabase } = await requireAdmin();
   const { data: current } = await supabase.from("club_profile").select("*").eq("id",1).maybeSingle();
   const rich=normalizeClubRichContent(formData.get("history_rich_content")); const richRo=normalizeClubRichContent(formData.get("history_rich_content_ro"));
   const plain=clubRichContentToPlainText(rich); const plainRo=clubRichContentToPlainText(richRo); const locked=formData.get("ro_translation_locked")==="on";
@@ -271,7 +271,7 @@ export async function saveClubHistory(_previousState: ClubFormState, formData: F
 }
 
 export async function saveClubStadium(_previousState: ClubFormState, formData: FormData): Promise<ClubFormState> {
-  const { supabase, userId } = await requireEditor(); const {data:current}=await supabase.from("club_profile").select("*").eq("id",1).maybeSingle();
+  const { supabase, userId } = await requireAdmin(); const {data:current}=await supabase.from("club_profile").select("*").eq("id",1).maybeSingle();
   const name=nullableText(formData.get("stadium_name")); const capRaw=text(formData.get("stadium_capacity")); const capacity=capRaw?Number(capRaw):null; if(capacity!==null&&(!Number.isInteger(capacity)||capacity<0))return {error:"Вместимость должна быть целым числом."};
   const address=nullableText(formData.get("stadium_address")); const rich=normalizeClubRichContent(formData.get("stadium_rich_content")); const richRo=normalizeClubRichContent(formData.get("stadium_rich_content_ro")); const plain=clubRichContentToPlainText(rich); const plainRo=clubRichContentToPlainText(richRo); const locked=formData.get("ro_translation_locked")==="on";
   const tr=await resolveRomanianTranslation({source:{stadium_name:name,stadium_address:address,stadium_description:plain},manual:{stadium_name:nullableText(formData.get("stadium_name_ro")),stadium_address:nullableText(formData.get("stadium_address_ro")),stadium_description:plainRo},context:"FC Edinet stadium page",locked,previousHash:current?.ro_translation_source_hash??null});
@@ -284,7 +284,7 @@ export async function addLeader(
   _previousState: ClubFormState,
   formData: FormData
 ): Promise<ClubFormState> {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
 
   const name = text(formData.get("name"));
   const role = text(formData.get("role"));
@@ -350,7 +350,7 @@ export async function addLeader(
 }
 
 export async function updateLeader(formData: FormData) {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
   const id = text(formData.get("leader_id")); if (!id) return;
   const name = text(formData.get("name")); const role = text(formData.get("role")); if(!name || !role) return;
   const roleRo = nullableText(formData.get("role_ro")); const bioRich = normalizeClubRichContent(formData.get("bio_rich_content")); const bioRichRo = normalizeClubRichContent(formData.get("bio_rich_content_ro")); const bio = clubRichContentToPlainText(bioRich); const bioRo = clubRichContentToPlainText(bioRichRo);
@@ -363,7 +363,7 @@ export async function updateLeader(formData: FormData) {
 }
 
 export async function deleteLeader(formData: FormData) {
-  const { supabase, profile } = await requireEditor();
+  const { supabase, profile } = await requireAdmin();
   if (profile.role !== "admin") return;
 
   const id = text(formData.get("leader_id"));
@@ -380,7 +380,7 @@ export async function addAchievement(
   _previousState: ClubFormState,
   formData: FormData
 ): Promise<ClubFormState> {
-  const { supabase } = await requireEditor();
+  const { supabase } = await requireAdmin();
 
   const year = nullableText(formData.get("year"));
   const title = text(formData.get("title"));
@@ -432,7 +432,7 @@ export async function addAchievement(
 }
 
 export async function updateAchievement(formData: FormData) {
-  const { supabase } = await requireEditor();
+  const { supabase } = await requireAdmin();
 
   const id = text(formData.get("achievement_id"));
   if (!id) return;
@@ -487,7 +487,7 @@ export async function updateAchievement(formData: FormData) {
 }
 
 export async function deleteAchievement(formData: FormData) {
-  const { supabase, profile } = await requireEditor();
+  const { supabase, profile } = await requireAdmin();
   if (profile.role !== "admin") return;
 
   const id = text(formData.get("achievement_id"));
@@ -501,7 +501,7 @@ export async function deleteAchievement(formData: FormData) {
 }
 
 async function uploadClubImage(
-  supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"],
+  supabase: Awaited<ReturnType<typeof requireAdmin>>["supabase"],
   userId: string,
   folder: string,
   file: File

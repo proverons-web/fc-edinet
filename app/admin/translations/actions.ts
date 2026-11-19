@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireEditor } from "@/lib/editorial";
+import { requireAdmin } from "@/lib/editorial";
 import {
   resolveRomanianTranslation,
   sourceHash,
@@ -24,7 +24,7 @@ type Job = {
 };
 
 export async function testTranslationConnection() {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
   if (!translationConfigured()) redirect("/admin/translations?error=missing_key");
 
   const result = await translateRuToRo(
@@ -54,7 +54,7 @@ export async function testTranslationConnection() {
 }
 
 export async function translateExistingContent(formData: FormData) {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
 
   if (!translationConfigured()) redirect("/admin/translations?error=missing_key");
 

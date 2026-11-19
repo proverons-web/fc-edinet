@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireEditor } from "@/lib/editorial";
+import { requireAdmin } from "@/lib/editorial";
 
 const validAppearances = new Set(["starter", "substitute"]);
 const validPositions = new Set(["goalkeeper", "defender", "midfielder", "forward"]);
@@ -43,7 +43,7 @@ function parsePlayerIds(raw: string) {
 }
 
 export async function saveMatchStatistics(formData: FormData) {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
   const matchId = text(formData, "match_id");
   const intent = text(formData, "intent") === "complete" ? "complete" : "draft";
 

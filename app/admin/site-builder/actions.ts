@@ -2,14 +2,14 @@
 
 import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireEditor } from "@/lib/editorial";
+import { requireAdmin } from "@/lib/editorial";
 import { cleanSiteSlug, isReservedSiteSlug, normalizeSiteMenuHref } from "@/lib/site-builder";
 
 function text(fd: FormData, key: string) { return String(fd.get(key) ?? "").trim(); }
 function builderHref(query: string) { return `/admin/site-builder?${query}`; }
 
 export async function createCustomPage(fd: FormData) {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
   const titleRu = text(fd, "title_ru") || "Новая страница";
   const titleRo = text(fd, "title_ro");
   const slug = cleanSiteSlug(text(fd, "slug") || titleRu);
@@ -36,7 +36,7 @@ export async function createCustomPage(fd: FormData) {
 }
 
 export async function saveCustomPage(fd: FormData) {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
   const id = Number(fd.get("id"));
   if (!Number.isFinite(id)) redirect(builderHref("error=invalid_page"));
 
@@ -80,7 +80,7 @@ export async function saveCustomPage(fd: FormData) {
 }
 
 export async function deleteCustomPage(fd: FormData) {
-  const { supabase } = await requireEditor();
+  const { supabase } = await requireAdmin();
   const id = Number(fd.get("id"));
   if (!Number.isFinite(id)) return;
   const { data: existing } = await supabase.from("site_custom_pages").select("slug").eq("id", id).maybeSingle();
@@ -93,7 +93,7 @@ export async function deleteCustomPage(fd: FormData) {
 }
 
 export async function saveMenuItem(fd: FormData) {
-  const { supabase } = await requireEditor();
+  const { supabase } = await requireAdmin();
   const id = Number(fd.get("id"));
   if (!Number.isFinite(id)) redirect(builderHref("error=invalid_menu_item"));
   const parentRaw = text(fd, "parent_id");
@@ -114,7 +114,7 @@ export async function saveMenuItem(fd: FormData) {
 }
 
 export async function createMenuItem(fd: FormData) {
-  const { supabase } = await requireEditor();
+  const { supabase } = await requireAdmin();
   const href = normalizeSiteMenuHref(text(fd, "href") || "/");
   if (!href) redirect(builderHref("error=invalid_href"));
   const { data: maxRow } = await supabase.from("site_menu_items").select("display_order").order("display_order", { ascending: false }).limit(1).maybeSingle();
@@ -134,7 +134,7 @@ export async function createMenuItem(fd: FormData) {
 }
 
 export async function reorderMenuItems(ids: number[]) {
-  const { supabase } = await requireEditor();
+  const { supabase } = await requireAdmin();
   const cleanIds = ids.filter((id) => Number.isSafeInteger(id) && id > 0);
   if (!cleanIds.length || cleanIds.length !== ids.length || new Set(cleanIds).size !== cleanIds.length) {
     throw new Error("Некорректный порядок меню.");
@@ -155,7 +155,7 @@ export async function reorderMenuItems(ids: number[]) {
 }
 
 export async function deleteMenuItem(id: number) {
-  const { supabase } = await requireEditor();
+  const { supabase } = await requireAdmin();
   if (!Number.isFinite(id)) return;
   const { data } = await supabase.from("site_menu_items").select("system_key").eq("id", id).maybeSingle();
   if (data?.system_key) return;

@@ -47,9 +47,9 @@ test("detail validates numeric ID and returns 404", () => {assert.match(detail,/
 test("source URL is sanitized before rendering", () => {assert.match(detail,/safeHistorySource\(event\.source_url\)/);assert.match(card,/safeHistorySource\(event\.source_url\)/)});
 test("external sources use noreferrer", () => {assert.match(detail,/noopener noreferrer/);assert.match(card,/noopener noreferrer/)});
 test("admin history text editor remains", () => assert.match(admin,/ClubHistoryAdminForm/));
-test("admin timeline uses editor gate", () => assert.match(admin,/requireEditor\(\)/));
+test("history management route requires admin", () => assert.match(read("app/admin/club/layout.tsx"),/await requireAdmin\(\)/));
 test("delete requires admin", () => assert.match(action,/deleteHistoryEvent[\s\S]*requireAdmin\(\)/));
-test("save requires editor", () => assert.match(action,/saveHistoryEvent[\s\S]*requireEditor\(\)/));
+test("save requires admin", () => { const save = action.split("export async function saveHistoryEvent")[1]?.split("export async function deleteHistoryEvent")[0]; assert.ok(save); assert.match(save,/await requireAdmin\(\)/); assert.doesNotMatch(save,/requireEditor\(\)/); });
 const validForm = (changes = {}) => {
   const form = new FormData();
   const values = {event_year:"2026",event_kind:"milestone",title:"Тестовое событие", ...changes};
@@ -74,8 +74,8 @@ test("new entry default unpublished", () => assert.match(form,/defaultChecked=\{
 test("season and hall are crosslinked", () => {assert.match(read("app/club/seasons/[slug]/page.tsx"),/\.eq\("season_id", season\.id\)\.eq\("is_published", true\)/);assert.match(read("app/club/hall-of-fame/[id]/page.tsx"),/\.eq\("hall_entry_id", entry\.id\)\.eq\("is_published", true\)/)});
 test("events in sitemap are published only", () => assert.match(read("app/sitemap.ts"),/from\("club_history_events"\)\.select\("id,updated_at"\)\.eq\("is_published", true\)/));
 test("responsive timeline CSS and reduced-motion styles", () => {assert.match(css,/@media\(max-width:610px\)/);assert.match(css,/prefers-reduced-motion/);assert.doesNotMatch(css,/!important/)});
-test("release version consistent", () => {assert.equal(JSON.parse(read("package.json")).version,"2.30.26");assert.match(read("lib/release.ts"),/RELEASE_VERSION = "2\.30\.26"/);assert.match(read("scripts/qa-site.mjs"),/STEP-2\.30\.26\.txt/)});
+test("release version consistent", () => {assert.equal(JSON.parse(read("package.json")).version,"2.30.27");assert.match(read("lib/release.ts"),/RELEASE_VERSION = "2\.30\.27"/);assert.match(read("scripts/qa-site.mjs"),/STEP-2\.30\.27\.txt/)});
 test("new QA included in deploy gate", () => {const scripts=JSON.parse(read("package.json")).scripts;assert.match(scripts["deploy:check"],/qa-club-history-v2307\.mjs/);assert.match(scripts["qa:all"],/qa:club-history/)});
 const failed=results.filter(result=>!result).length;
-console.log(`\nClub History Pro v2.30.26: ${results.length-failed}/${results.length} checks passed.`);
+console.log(`\nClub History Pro v2.30.27: ${results.length-failed}/${results.length} checks passed.`);
 if(failed)process.exitCode=1;

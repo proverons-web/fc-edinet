@@ -45,6 +45,7 @@ export default async function AdminNewsPage({
     query = query.eq("status", status);
   }
 
+  if (profile.role === "author") query = query.eq("created_by", userId);
   const { data, error } = await query;
   const articles = ((data ?? []) as unknown as NewsArticle[]).filter((article) =>
     adminTextMatches(search, article.title, article.slug, article.author_name, article.category?.name)

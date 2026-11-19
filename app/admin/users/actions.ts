@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/editorial";
 import {
   createAdminClient,
-  createIsolatedSignupClient,
   isSupabaseAdminConfigured,
 } from "@/lib/supabase/admin";
 import type { UserRole } from "@/lib/types";
@@ -24,94 +23,37 @@ function refreshUsers() {
 }
 
 export async function createAdminUser(formData: FormData) {
+  // Protect the action itself, not just the page or the browser form.
+  await requireAdmin();
+  if (!isSupabaseAdminConfigured()) redirect("/admin/users?error=admin_secret_required#new-user");
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const fullName = String(formData.get("full_name") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const requestedRole = String(formData.get("role") ?? "fan").trim() as UserRole;
-
-  if (
-    !email ||
-    !/^\S+@\S+\.\S+$/.test(email) ||
-    password.length < 10 ||
-    fullName.length > 120 ||
-    !allowedRoles.has(requestedRole)
-  ) {
+  if (!/^\S+@\S+\.\S+$/.test(email) || password.length < 10 || password.length > 128 || fullName.length > 120 || !allowedRoles.has(requestedRole)) {
     redirect("/admin/users?error=create_invalid#new-user");
   }
-
-  const { supabase } = await requireAdmin();
-  let newUserId = "";
-  let needsConfirmation = false;
-
-  if (isSupabaseAdminConfigured()) {
-    const admin = createAdminClient();
-    const { data, error } = await admin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: fullName ? { full_name: fullName } : undefined,
-    });
-
-    if (error || !data.user) {
-      console.error("admin createUser failed", error);
-      const duplicate = /already|registered|exists/i.test(error?.message ?? "");
-      redirect(`/admin/users?error=${duplicate ? "email_exists" : "create_failed"}#new-user`);
-    }
-
-    newUserId = data.user.id;
-
-    const { error: profileError } = await admin
-      .from("profiles")
-      .upsert(
-        {
-          id: newUserId,
-          email,
-          full_name: fullName || null,
-          role: requestedRole,
-        },
-        { onConflict: "id" }
-      );
-
-    if (profileError) {
-      console.error("new user profile setup failed", profileError);
-      await admin.auth.admin.deleteUser(newUserId).catch(() => undefined);
-      redirect("/admin/users?error=create_profile_failed#new-user");
-    }
-  } else {
-    // Safe fallback for projects where the server-only Supabase secret has not
-    // been added yet. This uses an isolated, non-persistent public auth client,
-    // so the current administrator session/cookies are never replaced.
-    const signup = createIsolatedSignupClient();
-    const { data, error } = await signup.auth.signUp({
-      email,
-      password,
-      options: {
-        data: fullName ? { full_name: fullName } : undefined,
-      },
-    });
-
-    if (error || !data.user) {
-      console.error("isolated admin signup failed", error);
-      const duplicate = /already|registered|exists/i.test(error?.message ?? "");
-      redirect(`/admin/users?error=${duplicate ? "email_exists" : "create_failed"}#new-user`);
-    }
-
-    newUserId = data.user.id;
-    needsConfirmation = !data.user.email_confirmed_at;
-
-    const { error: roleError } = await supabase.rpc("admin_set_user_role", {
-      target_user_id: newUserId,
-      new_role: requestedRole,
-    });
-
-    if (roleError) {
-      console.error("setting role for fallback signup failed", roleError);
-      redirect("/admin/users?error=create_profile_failed#new-user");
-    }
+  const admin = createAdminClient();
+  const { data, error } = await admin.auth.admin.createUser({
+    email, password, email_confirm: true,
+    user_metadata: fullName ? { full_name: fullName } : undefined,
+  });
+  if (error || !data.user) {
+    console.error("admin createUser failed", error?.message || "no user returned");
+    redirect(`/admin/users?error=${/already|registered|exists/i.test(error?.message ?? "") ? "email_exists" : "create_failed"}#new-user`);
   }
-
+  const newUserId = data.user.id;
+  const { error: profileError } = await admin.from("profiles").upsert({
+    id: newUserId, email, full_name: fullName || null, role: requestedRole,
+  }, { onConflict: "id" });
+  if (profileError) {
+    console.error("new user profile setup failed", profileError.message);
+    const rollback = await admin.auth.admin.deleteUser(newUserId);
+    if (rollback.error) console.error("user creation rollback failed", rollback.error.message);
+    redirect("/admin/users?error=create_profile_failed#new-user");
+  }
   refreshUsers();
-  redirect(`/admin/users?created=1${needsConfirmation ? "&confirm=1" : ""}`);
+  redirect("/admin/users?created=1");
 }
 
 export async function updateUserRole(formData: FormData) {

@@ -1,0 +1,6 @@
+/* Role-aware site shortcut. CSS is public; the shortcut itself is rendered only for staff. */
+.fcEditOnSite{position:fixed;right:18px;bottom:20px;z-index:140;display:inline-flex;align-items:center;gap:9px;min-height:46px;padding:10px 14px;background:#ffd22e;color:#072448;border:1px solid #d5a719;border-radius:3px!important;box-shadow:0 5px 18px #031a3850;font-size:12px;font-weight:850;text-decoration:none;line-height:1}
+.fcEditOnSite:hover{background:#ffe17e;color:#072448;transform:translateY(-1px)}
+.fcEditOnSite:focus-visible{outline:3px solid #176fcd;outline-offset:3px}
+@media(max-width:600px){.fcEditOnSite{right:12px;bottom:calc(12px + env(safe-area-inset-bottom));min-width:46px;min-height:46px;padding:10px}.fcEditOnSite span{display:none}}
+@media(prefers-reduced-motion:reduce){.fcEditOnSite{transition:none!important;transform:none!important}}

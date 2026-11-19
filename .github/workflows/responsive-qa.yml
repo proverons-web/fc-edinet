@@ -108,6 +108,8 @@ jobs:
         run: node scripts/qa-fan-layout.mjs
         env:
           CHROME_PATH: /usr/bin/google-chrome
+      - name: Role enforcement, account provisioning and public edit links
+        run: npm run qa:user-roles
       - name: Pre-deploy Git rollback and secret leak prevention
         run: npm run qa:production-safety
       - name: Favorite match in-account notifications and RLS safeguards

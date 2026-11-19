@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireEditor } from "@/lib/editorial";
+import { requireAdmin } from "@/lib/editorial";
 
 function text(value: FormDataEntryValue | null) {
   return String(value ?? "").trim();
@@ -29,7 +29,7 @@ function go(params: Record<string, string>): never {
 }
 
 export async function createSeason(formData: FormData) {
-  const { supabase } = await requireEditor();
+  const { supabase } = await requireAdmin();
 
   const name = text(formData.get("name"));
   const startsOn = optionalDate(formData.get("starts_on"));
@@ -94,7 +94,7 @@ export async function createSeason(formData: FormData) {
 }
 
 export async function setCurrentSeason(formData: FormData) {
-  const { supabase } = await requireEditor();
+  const { supabase } = await requireAdmin();
   const seasonId = text(formData.get("season_id"));
 
   if (!seasonId) {
@@ -124,7 +124,7 @@ export async function setCurrentSeason(formData: FormData) {
 }
 
 export async function assignCompetitionSeason(formData: FormData) {
-  const { supabase } = await requireEditor();
+  const { supabase } = await requireAdmin();
   const competitionId = text(formData.get("competition_id"));
   const seasonId = text(formData.get("season_id"));
 

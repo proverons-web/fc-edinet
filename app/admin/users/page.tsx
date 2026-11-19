@@ -66,13 +66,20 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
   const unblocked = first(params.unblocked) === "1";
   const errorCode = first(params.error);
   const adminAuthConfigured = isSupabaseAdminConfigured();
+  let adminAuthReady = false;
+  if (adminAuthConfigured) {
+    try {
+      const { error: adminProbeError } = await createAdminClient().auth.admin.listUsers({ page: 1, perPage: 1 });
+      adminAuthReady = !adminProbeError;
+    } catch { adminAuthReady = false; }
+  }
 
   const { data, error } = await supabase.rpc("admin_list_users");
   let users = ((data ?? []) as UserRow[]).sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
 
-  if (adminAuthConfigured && users.length > 0) {
+  if (adminAuthReady && users.length > 0) {
     try {
       const admin = createAdminClient();
       const { data: authData } = await admin.auth.admin.listUsers({
@@ -139,8 +146,8 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
             <Stat label="Сотрудники" value={staffCount} />
             <Stat label="Администраторы" value={adminCount} />
             <Stat
-              label={adminAuthConfigured ? "Заблокировано" : "Email не подтверждён"}
-              value={adminAuthConfigured ? blockedCount : unconfirmedCount}
+              label={adminAuthReady ? "Заблокировано" : "Email не подтверждён"}
+              value={adminAuthReady ? blockedCount : unconfirmedCount}
             />
           </div>
 
@@ -154,20 +161,20 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                   сохраняется и после отправки формы больше не показывается.
                 </p>
               </div>
-              <span className={`adminAuthMode ${adminAuthConfigured ? "ready" : "fallback"}`}>
-                {adminAuthConfigured ? "Admin API подключён" : "Режим с подтверждением email"}
+              <span className={`adminAuthMode ${adminAuthReady ? "ready" : "fallback"}`}>
+                {adminAuthReady ? "Admin API подключён" : "Admin API не настроен"}
               </span>
             </div>
 
-            {!adminAuthConfigured && (
+            {!adminAuthReady && (
               <div className="adminNotice warningNotice compactNotice">
-                <strong>Рекомендуется добавить SUPABASE_SECRET_KEY.</strong>{" "}
-                Без server-only secret аккаунт всё равно можно создать, но Supabase может
-                потребовать подтверждение email. Блокировка/разблокировка будет недоступна.
+                <strong>Для создания аккаунтов нужен действующий SUPABASE_SECRET_KEY.</strong>{" "}
+                Создание пользователей и блокировка требуют server-only ключа. Добавь SUPABASE_SECRET_KEY в Production Vercel и локальный .env.local, затем выполни новый деплой.
               </div>
             )}
 
-            <form action={createAdminUser} className="adminCreateUserForm">
+            {adminAuthReady && (
+<form action={createAdminUser} className="adminCreateUserForm">
               <label>
                 <span>Email *</span>
                 <input
@@ -217,6 +224,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                 Создать аккаунт
               </button>
             </form>
+            )}
           </section>
 
           <section className="usersPermissionGuide">
@@ -373,7 +381,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                           </ConfirmSubmitButton>
                         </form>
 
-                        {adminAuthConfigured ? (
+                        {adminAuthReady ? (
                           <form action={toggleUserBlock} className="userBlockForm">
                             <input type="hidden" name="user_id" value={user.id} />
                             <ConfirmSubmitButton

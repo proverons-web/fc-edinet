@@ -1,13 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireEditor } from "@/lib/editorial";
+import { requireAdmin } from "@/lib/editorial";
 import { normalizeClubPageLayout } from "@/lib/content-page-builder";
 
 export type PageBuilderState = { error?: string; success?: string };
 
 export async function saveClubPageLayout(_state: PageBuilderState, formData: FormData): Promise<PageBuilderState> {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
   const raw = String(formData.get("layout_json") ?? "");
   const intent = String(formData.get("intent") ?? "draft");
   let parsed: unknown;

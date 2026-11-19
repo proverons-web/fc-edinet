@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireEditor } from "@/lib/editorial";
+import { requireAdmin } from "@/lib/editorial";
 import type { PartnerLevel } from "@/lib/types";
 import { resolveRomanianTranslation } from "@/lib/auto-translation";
 
@@ -23,7 +23,7 @@ const allowedLogoMime = new Set([
 const maxLogoBytes = 5 * 1024 * 1024;
 
 export async function createPartner(formData: FormData) {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
 
   const name = String(formData.get("name") ?? "").trim();
   const slug = slugify(String(formData.get("slug") ?? name));
@@ -107,7 +107,7 @@ export async function createPartner(formData: FormData) {
 }
 
 export async function updatePartner(formData: FormData) {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
 
   const partnerId = String(formData.get("partner_id") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim();
@@ -225,7 +225,7 @@ export async function updatePartner(formData: FormData) {
 }
 
 export async function deletePartner(formData: FormData) {
-  const { supabase, profile } = await requireEditor();
+  const { supabase, profile } = await requireAdmin();
 
   if (profile.role !== "admin") {
     redirect("/admin/partners?error=admin_only");
@@ -262,7 +262,7 @@ export async function deletePartner(formData: FormData) {
 }
 
 async function uploadPartnerLogo(
-  supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"],
+  supabase: Awaited<ReturnType<typeof requireAdmin>>["supabase"],
   userId: string,
   slug: string,
   file: File

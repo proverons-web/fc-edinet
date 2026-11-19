@@ -2,7 +2,7 @@
 
 import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireEditor } from "@/lib/editorial";
+import { requireAdmin } from "@/lib/editorial";
 import {
   defaultFooterDesign,
   defaultHeaderDesign,
@@ -18,7 +18,7 @@ type State = { success?: string; error?: string };
 export type GlobalComponentKey = "header" | "footer" | "design_system";
 
 export async function saveGlobalDesign(_prev: State, formData: FormData): Promise<State> {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
   const key = String(formData.get("component_key") || "") as GlobalComponentKey;
   if (!isGlobalKey(key)) return { error: "Неизвестный глобальный компонент." };
   const intent = String(formData.get("intent") || "draft") === "publish" ? "publish" : "draft";
@@ -94,7 +94,7 @@ export async function saveGlobalDesign(_prev: State, formData: FormData): Promis
 }
 
 export async function autosaveGlobalDesign(key: GlobalComponentKey, rawConfig: unknown) {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
   if (!isGlobalKey(key)) return { ok: false, error: "Неизвестный глобальный компонент." };
   const { data: currentRow } = await supabase.from("site_global_designs").select("config").eq("component_key", key).maybeSingle();
   const currentConfig = normalizeForKey(key, currentRow?.config);
@@ -108,7 +108,7 @@ export async function autosaveGlobalDesign(key: GlobalComponentKey, rawConfig: u
 }
 
 export async function resetGlobalDesignDraft(formData: FormData) {
-  const { supabase } = await requireEditor();
+  const { supabase } = await requireAdmin();
   const key = String(formData.get("component_key") || "") as GlobalComponentKey;
   if (!isGlobalKey(key)) redirect("/admin/design");
   await supabase.from("site_global_design_drafts").delete().eq("component_key", key);
@@ -117,7 +117,7 @@ export async function resetGlobalDesignDraft(formData: FormData) {
 }
 
 export async function restoreGlobalDesignVersion(formData: FormData) {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
   const key = String(formData.get("component_key") || "") as GlobalComponentKey;
   const versionId = String(formData.get("version_id") || "");
   if (!isGlobalKey(key) || !/^\d+$/.test(versionId)) redirect("/admin/design");

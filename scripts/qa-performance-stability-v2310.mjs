@@ -18,10 +18,10 @@ function check(label, fn) {
   try { fn(); checks.push(true); console.log("PASS", label); }
   catch (err) { checks.push(false); console.error("FAIL", label, err.message); }
 }
-check("v2.30.26 release and canonical version agree", () => {
-  assert.equal(pkg.version, "2.30.26");
-  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.26"/);
-  assert.deepEqual(fs.readdirSync(root).filter(n => /^STEP-.*\.txt$/.test(n)), ["STEP-2.30.26.txt"]);
+check("v2.30.27 release and canonical version agree", () => {
+  assert.equal(pkg.version, "2.30.27");
+  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.27"/);
+  assert.deepEqual(fs.readdirSync(root).filter(n => /^STEP-.*\.txt$/.test(n)), ["STEP-2.30.27.txt"]);
 });
 check("Public menu comes from cookie-free public client", () => {
   assert.match(menu, /createPublicClient\(\)/);
@@ -64,8 +64,8 @@ check("Every menu-changing server action invalidates the public menu tag", () =>
   assert.equal(tagCalls, layoutCalls);
   assert.match(actions, /import \{ revalidatePath, updateTag \} from "next\/cache"/);
 });
-check("Menu mutations are editor-protected before tag invalidation", () => {
-  assert.equal((actions.match(/await requireEditor\(\)/g) || []).length, 7);
+check("Menu mutations are admin-protected before tag invalidation", () => {
+  assert.equal((actions.match(/await requireAdmin\(\)/g) || []).length, 7);
 });
 check("Footer counters are cached for 60 seconds", () => {
   assert.match(footer, /unstable_cache\(async \(\): Promise<VisitCounts \| null>/);
@@ -124,9 +124,9 @@ check("Homepage preserves safe hero and section fallbacks", () => {
   assert.match(home, /const heroCanvas = repairHomepageCanvas/);
 });
 check("Stability contracts survive new monitoring migration", () => {
-  assert.match(read("STEP-2.30.26.txt"), /SQL-МИГРАЦИИ: ДА, 084_fan_notifications\.sql/);
+  assert.match(read("STEP-2.30.27.txt"), /SQL-МИГРАЦИИ: ДА, 084_fan_notifications\.sql/);
   assert.equal(fs.readdirSync(path.join(root,"database")).filter(n => /^078_/.test(n)).length, 1);
 });
 const passed = checks.filter(Boolean).length;
-console.log(`\nPerformance & Stability v2.30.26: ${passed}/${checks.length} source contracts passed (not a speed benchmark).`);
+console.log(`\nPerformance & Stability v2.30.27: ${passed}/${checks.length} source contracts passed (not a speed benchmark).`);
 if (passed !== checks.length) process.exitCode = 1;

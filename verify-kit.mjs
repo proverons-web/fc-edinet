@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {canEditPublicPath,safePublicEditPath} from './files/lib/admin-role-permissions.ts';
+const root=path.dirname(fileURLToPath(import.meta.url));
+const read=n=>fs.readFileSync(path.join(root,n),'utf8');
+let successes=0;function check(label,fn){fn();successes++;console.log('PASS '+label)}
+check('Admin-only SQL migration is present',()=>assert.match(read('files/database/085_admin_editor_role_boundaries.sql'),/AS RESTRICTIVE FOR UPDATE TO authenticated/));
+check('Last admin cannot be deleted',()=>assert.match(read('files/database/085_admin_editor_role_boundaries.sql'),/BEFORE UPDATE OF role OR DELETE ON public\.profiles/));
+check('Fan and author cannot use public edit buttons',()=>{for(let role of ['fan','author'])assert.equal(canEditPublicPath(role,'/news/foo'),false)});
+check('Editor can edit allowed match and news pages',()=>{assert.equal(canEditPublicPath('editor','/matches/17'),true);assert.equal(canEditPublicPath('editor','/news/slug'),true)});
+check('Editor cannot edit system pages',()=>{assert.equal(canEditPublicPath('editor','/club/about'),false);assert.equal(canEditPublicPath('editor','/'),false)});
+check('Admin can edit global pages',()=>{assert.equal(canEditPublicPath('admin','/'),true);assert.equal(canEditPublicPath('admin','/partners'),true)});
+check('Safe routing rejects external destinations and traversal',()=>{for(let v of ['//evil.test','https://evil.test','/news/../roles','/news/%2E%2E','/news/%2f'])assert.equal(safePublicEditPath(v),null)});
+check('Source installer checks exact previous version',()=>{assert.match(read('apply.mjs'),/originalVersion = '2\.30\.26'/);assert.match(read('apply.mjs'),/if\(getVersion\(\)!==originalVersion\)/)});
+check('Source installer creates backups outside Git repo',()=>assert.match(read('apply.mjs'),/path\.join\(path\.dirname\(root\),'FC_Edinet_UpdateBackups_v2\.30\.27'\)/));
+check('Source installer does not perform a live deploy',()=>{assert.doesNotMatch(read('apply.mjs'),/execFileSync|spawnSync|fetch\(/);assert.doesNotMatch(read('apply.mjs'),/supabase\.from/)});
+check('Reviewed Git commit is pinned for optional full-source setup',()=>assert.match(read('BUILD_FULL_FROM_GITHUB.bat'),/f8e30f0ad90c62bc9fc97363b55827cde7a71e16/));
+check('User SQL migration is not run automatically',()=>assert.doesNotMatch(read('APPLY_FC_EDINET_2.30.27.bat'),/supabase db push|psql |npm run deploy/));
+console.log(`\nUPDATE KIT v2.30.27: ${successes}/${successes} checks passed.`);

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireEditor } from "@/lib/editorial";
+import { requireAdmin } from "@/lib/editorial";
 import type {
   HomepageDesignSnapshot,
   HomepageHero,
@@ -41,7 +41,7 @@ export async function saveVisualEditor(
   _previousState: VisualEditorState,
   formData: FormData
 ): Promise<VisualEditorState> {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
   const intent = text(formData.get("intent")) === "publish" ? "publish" : "draft";
 
   const [{ data: heroData }, { data: sectionsData }, { data: blocksData }, { data: draftData }] =
@@ -278,7 +278,7 @@ export async function saveVisualEditor(
 }
 
 export async function autosaveHomepageDesign(payload: HomepageDesignSnapshot) {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
   const [{ data: heroData }, { data: sectionsData }, { data: blocksData }, { data: draftData }] = await Promise.all([
     supabase.from("homepage_hero").select("*").eq("id", 1).maybeSingle(),
     supabase.from("homepage_sections").select("*").order("display_order", { ascending: true }),
@@ -299,7 +299,7 @@ export async function autosaveHomepageDesign(payload: HomepageDesignSnapshot) {
 }
 
 export async function restoreVisualVersion(formData: FormData) {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
   const versionId = text(formData.get("version_id"));
   if (!/^\d+$/.test(versionId)) redirect("/admin/design");
 
@@ -328,13 +328,13 @@ export async function restoreVisualVersion(formData: FormData) {
 }
 
 export async function resetVisualDraft() {
-  const { supabase } = await requireEditor();
+  const { supabase } = await requireAdmin();
   await supabase.from("homepage_design_draft").delete().eq("id", 1);
   revalidatePath("/admin/design");
   redirect("/admin/design?draft=reset");
 }
 
-async function getPublishedSnapshot(supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"]) {
+async function getPublishedSnapshot(supabase: Awaited<ReturnType<typeof requireAdmin>>["supabase"]) {
   const [{ data: hero }, { data: sections }, { data: blocks }] = await Promise.all([
     supabase.from("homepage_hero").select("*").eq("id", 1).maybeSingle(),
     supabase.from("homepage_sections").select("*").order("display_order"),
@@ -492,7 +492,7 @@ async function uploadVisualImage(
   file: File,
   variant: "desktop" | "tablet" | "mobile",
   userId: string,
-  supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"],
+  supabase: Awaited<ReturnType<typeof requireAdmin>>["supabase"],
   width: number,
   height: number
 ) {
@@ -553,7 +553,7 @@ export async function saveSitePageVisualEditor(
   _previousState: VisualEditorState,
   formData: FormData
 ): Promise<VisualEditorState> {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
   const pageKey = parseSitePageKey(text(formData.get("page_key")));
   if (!pageKey) return { error: "Неизвестная страница Visual Editor." };
   const item = sitePageDesignCatalog.find((entry) => entry.key === pageKey)!;
@@ -700,7 +700,7 @@ export async function saveSitePageVisualEditor(
 }
 
 export async function autosaveSitePageDesign(pageKey: SitePageDesignKey, payload: SitePageDesignSnapshot) {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
   if (!sitePageKeys.has(pageKey)) return { ok: false, error: "Неизвестная страница." };
   const [{ data: publishedData }, { data: draftData }] = await Promise.all([
     supabase.from("site_page_designs").select("*").eq("page_key", pageKey).maybeSingle(),
@@ -721,7 +721,7 @@ export async function autosaveSitePageDesign(pageKey: SitePageDesignKey, payload
 }
 
 export async function restoreSitePageVisualVersion(formData: FormData) {
-  const { supabase, userId } = await requireEditor();
+  const { supabase, userId } = await requireAdmin();
   const pageKey = parseSitePageKey(text(formData.get("page_key")));
   const versionId = text(formData.get("version_id"));
   if (!pageKey || !/^\d+$/.test(versionId)) { redirect("/admin/design"); throw new Error("redirect"); }
@@ -744,7 +744,7 @@ export async function restoreSitePageVisualVersion(formData: FormData) {
 }
 
 export async function resetSitePageVisualDraft(formData: FormData) {
-  const { supabase } = await requireEditor();
+  const { supabase } = await requireAdmin();
   const pageKey = parseSitePageKey(text(formData.get("page_key")));
   if (!pageKey) { redirect("/admin/design"); throw new Error("redirect"); }
   await supabase.from("site_page_design_drafts").delete().eq("page_key", pageKey);
@@ -757,7 +757,7 @@ async function uploadSitePageImage(
   pageKey: SitePageDesignKey,
   variant: "desktop" | "tablet" | "mobile",
   userId: string,
-  supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"],
+  supabase: Awaited<ReturnType<typeof requireAdmin>>["supabase"],
   width: number,
   height: number
 ) {
@@ -775,7 +775,7 @@ async function resolveAssetSelection(
   formData: FormData,
   field: string,
   fallback: string | null,
-  supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"]
+  supabase: Awaited<ReturnType<typeof requireAdmin>>["supabase"]
 ) {
   const id = text(formData.get(field));
   if (!id) return fallback;
@@ -784,7 +784,7 @@ async function resolveAssetSelection(
 }
 
 async function registerDesignMediaAsset({ supabase, path, url, file, userId, variant, width, height }: {
-  supabase: Awaited<ReturnType<typeof requireEditor>>["supabase"]; path: string; url: string; file: File; userId: string; variant: "desktop" | "tablet" | "mobile"; width: number; height: number;
+  supabase: Awaited<ReturnType<typeof requireAdmin>>["supabase"]; path: string; url: string; file: File; userId: string; variant: "desktop" | "tablet" | "mobile"; width: number; height: number;
 }) {
   await supabase.from("design_media_assets").upsert({
     storage_path: path, public_url: url, file_name: file.name || `${variant}.webp`, mime_type: file.type || "image/webp", file_size: file.size, width, height, variant, uploaded_by: userId, is_active: true,
