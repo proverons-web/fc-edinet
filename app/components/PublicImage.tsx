@@ -34,10 +34,20 @@ export function isOptimizablePublicImage(src: string): boolean {
   }
 }
 
+/** Already resized by AlbumPhotoUploader; do not create more Vercel derivatives. */
+export function isPreparedAlbumThumbnail(src: string): boolean {
+  if (!isOptimizablePublicImage(src) || src.startsWith("/brand/")) return false;
+  try {
+    const url = new URL(src);
+    return url.pathname.startsWith("/storage/v1/object/public/media/")
+      && /\/albums\/[^/]+\/\d+-\d+-[a-z0-9]+-thumb\.webp$/.test(url.pathname);
+  } catch { return false; }
+}
+
 export default function PublicImage({
   src, alt, width, height, sizes, className, style, eager = false,
 }: Props) {
-  if (isOptimizablePublicImage(src)) {
+  if (isOptimizablePublicImage(src) && !isPreparedAlbumThumbnail(src)) {
     return <Image
       src={src}
       alt={alt}

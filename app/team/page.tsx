@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { unstable_cache } from "next/cache";
 import PlayerCard from "@/app/components/PlayerCard";
 import OnSiteEditorAction from "@/app/components/OnSiteEditorAction";
 import { canCurrentUserEdit } from "@/lib/public-editor-role";
@@ -12,7 +13,22 @@ import { positionPluralLabelsI18n, publicText } from "@/lib/i18n";
 import { getPublishedSitePageDesign, resolvePageHeroText } from "@/lib/page-design";
 import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
 
-export const dynamic = "force-dynamic";
+// Root layout still reads locale/auth cookies; only public query data is cached.
+export const dynamic = "auto";
+
+// Public, cookie-free data only. Failed upstream requests are never cached.
+async function readPublicRoster() {
+  const supabase = createPublicClient();
+  return Promise.all([
+    supabase.from("players").select("*").eq("is_active", true).order("display_order", { ascending: true }).order("shirt_number", { ascending: true }),
+    supabase.from("seasons").select("id,name,slug,starts_on,ends_on,is_current,is_active").eq("is_active", true).eq("is_current", true).maybeSingle(),
+  ]);
+}
+const cachedPublicRoster = unstable_cache(async () => {
+  const result = await readPublicRoster();
+  if (result.some((item) => item.error)) throw new Error("Public roster unavailable");
+  return result;
+}, ["fce-public-roster-cost-v1"], { revalidate: 120, tags: ["fce-public-roster"] });
 
 const positionOrder = ["goalkeeper", "defender", "midfielder", "forward"] as const;
 type TeamSearchParams = Promise<{ view?: string | string[] }>;
@@ -37,10 +53,9 @@ export default async function TeamPage({ searchParams }: { searchParams: TeamSea
   const design = await getPublishedSitePageDesign(supabase, "team");
   const text = publicText[locale].team;
   const editorEnabled = await canCurrentUserEdit();
-  const [{ data, error }, seasonResult] = await Promise.all([
-    supabase.from("players").select("*").eq("is_active", true).order("display_order", { ascending: true }).order("shirt_number", { ascending: true }),
-    supabase.from("seasons").select("id,name,slug,starts_on,ends_on,is_current,is_active").eq("is_active", true).eq("is_current", true).maybeSingle(),
-  ]);
+  const [{ data, error }, seasonResult] = await (editorEnabled
+    ? readPublicRoster()
+    : cachedPublicRoster().catch(() => readPublicRoster()));
 
   const players = (data ?? []) as Player[];
   const currentSeason = (seasonResult.data as Season | null) ?? null;

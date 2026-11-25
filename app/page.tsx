@@ -388,7 +388,7 @@ export default async function Home() {
                 const clubWin = decision === (clubIsHome ? "home" : "away");
                 const draw = decision === "draw";
                 return (
-                  <Link key={match.id} href={`/matches/${match.id}`} className={`fcRefRecentMatchCard${clubWin ? " is-win" : draw ? " is-draw" : " is-loss"}`}>
+                  <Link key={match.id} href={`/matches/${match.id}`} prefetch={false} className={`fcRefRecentMatchCard${clubWin ? " is-win" : draw ? " is-draw" : " is-loss"}`}>
                     <div className="fcRefRecentMatchMeta">
                       <span>{competitionName(match.competition,locale) || competitionName(competition,locale) || "Liga 2"}</span>
                       {match.round ? <b>{match.round}</b> : null}
@@ -424,7 +424,7 @@ export default async function Home() {
 
             <div className="fcRefLatestColumn">
               <div className="fcRefPanelTitle"><h2>{locale === "ro" ? "ULTIMELE ȘTIRI" : "ПОСЛЕДНИЕ НОВОСТИ"}</h2><Link href="/news">{locale === "ro" ? "TOATE ȘTIRILE" : "ВСЕ НОВОСТИ"} →</Link>{editorEnabled && <OnSiteEditorAction href="/admin/news/new" locale={locale} kind="add" label={locale === "ro" ? "Știre nouă" : "Добавить новость"} />}</div>
-              <div className="fcRefNewsList">{latestNews.length ? latestNews.map((article) => <Link key={article.id} href={`/news/${article.slug}`} className="fcRefNewsRow"><div>{article.cover_image_url ? <PublicImage className="newsCoverManaged" src={article.cover_image_url} alt="" style={newsCoverStyle(article)} width={300} height={200} sizes="(max-width: 767px) 35vw, 140px" /> : <span>FCE</span>}</div><section><time>{formatNewsDate(article.published_at, locale)}</time><h3>{localized(article.title, article.title_ro, locale)}</h3></section></Link>) : <div className="fcRefEmptyCard compact">{locale === "ro" ? "Nu sunt alte știri." : "Других новостей пока нет."}</div>}</div>
+              <div className="fcRefNewsList">{latestNews.length ? latestNews.map((article) => <Link key={article.id} href={`/news/${article.slug}`} prefetch={false} className="fcRefNewsRow"><div>{article.cover_image_url ? <PublicImage className="newsCoverManaged" src={article.cover_image_url} alt="" style={newsCoverStyle(article)} width={300} height={200} sizes="(max-width: 767px) 35vw, 140px" /> : <span>FCE</span>}</div><section><time>{formatNewsDate(article.published_at, locale)}</time><h3>{localized(article.title, article.title_ro, locale)}</h3></section></Link>) : <div className="fcRefEmptyCard compact">{locale === "ro" ? "Nu sunt alte știri." : "Других новостей пока нет."}</div>}</div>
             </div>
           </>}
 
@@ -450,7 +450,7 @@ export default async function Home() {
             <Link href="/media">{locale === "ro" ? "TOT MEDIA" : "ВСЕ МЕДИА"} →</Link>{editorEnabled && <OnSiteEditorAction href="/admin/media" locale={locale} label={locale === "ro" ? "Editează media" : "Редактировать медиа"} />}
           </div>
           <div className="fcV215MediaGrid">
-            {featuredAlbum && <Link href={`/media/${featuredAlbum.slug}`} className="fcV215AlbumCard">
+            {featuredAlbum && <Link href={`/media/${featuredAlbum.slug}`} prefetch={false} className="fcV215AlbumCard">
               <div className="fcV215MediaImage">{featuredAlbum.cover_image_url ? <PublicImage src={featuredAlbum.cover_image_url} alt={featuredAlbum.title} width={900} height={600} sizes="(max-width: 767px) 100vw, 50vw" /> : <span>FC EDINEȚ</span>}<i>{locale === "ro" ? "FOTO" : "ФОТО"}</i></div>
               <div><small>{featuredAlbum.event_date ? formatMediaDate(featuredAlbum.event_date, locale) : (locale === "ro" ? "GALERIE" : "ГАЛЕРЕЯ")}</small><h3>{featuredAlbum.title}</h3>{featuredAlbum.location && <p>{featuredAlbum.location}</p>}<b>{locale === "ro" ? "DESCHIDE GALERIA" : "ОТКРЫТЬ АЛЬБОМ"} →</b></div>
             </Link>}
@@ -492,7 +492,7 @@ function ReferencePlayer({ player, locale }: { player: Pick<Player, "id" | "firs
   const positionMap = locale === "ro"
     ? { goalkeeper: "PORTAR", defender: "FUNDAȘ", midfielder: "MIJLOCAȘ", forward: "ATACANT" }
     : { goalkeeper: "ВРАТАРЬ", defender: "ЗАЩИТНИК", midfielder: "ПОЛУЗАЩИТНИК", forward: "НАПАДАЮЩИЙ" };
-  return <Link href={`/team/${player.slug}`} className="fcRefPlayerCard">
+  return <Link href={`/team/${player.slug}`} prefetch={false} className="fcRefPlayerCard">
     <div className="fcRefPlayerPhoto">{player.photo_url ? <PublicImage src={player.photo_url} alt={fullName} width={600} height={760} sizes="(max-width: 767px) 90vw, (max-width: 1200px) 38vw, 300px" /> : <span>FC EDINEȚ</span>}</div>
     <div className="fcRefPlayerShade"/>
     <div className="fcRefPlayerNumber">{player.shirt_number ?? "—"}</div>

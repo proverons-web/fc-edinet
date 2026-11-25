@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { requireEditor } from "@/lib/editorial";
 
 export type StandingsState = {
@@ -122,6 +122,7 @@ export async function saveStandings(
 
   revalidatePath("/");
   revalidatePath("/matches");
+  updateTag("fce-public-standings");
   revalidatePath("/standings");
   revalidatePath("/admin");
   revalidatePath("/admin/standings");

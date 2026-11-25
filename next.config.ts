@@ -28,8 +28,8 @@ const nextConfig: NextConfig = {
   compress: true,
   images: {
     formats: ["image/webp"],
-    deviceSizes: [360, 430, 640, 768, 1024, 1280, 1600, 1920],
-    imageSizes: [48, 64, 96, 128, 256, 320],
+    deviceSizes: [360, 640, 1024, 1600, 1920],
+    imageSizes: [64, 128, 256, 320],
     qualities: [75],
     remotePatterns: trustedSupabaseImageHost
       ? [{ protocol: "https" as const, hostname: trustedSupabaseImageHost, pathname: "/storage/v1/object/public/**" }]

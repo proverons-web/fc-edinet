@@ -110,6 +110,8 @@ jobs:
           CHROME_PATH: /usr/bin/google-chrome
       - name: Contextual on-site editing and register layout
         run: npm run qa:on-site-editor
+      - name: Cost and responsive result badge contracts
+        run: npm run qa:cost
       - name: Role enforcement, account provisioning and public edit links
         run: npm run qa:user-roles
       - name: Pre-deploy Git rollback and secret leak prevention

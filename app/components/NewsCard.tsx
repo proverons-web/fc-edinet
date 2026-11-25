@@ -13,7 +13,7 @@ export default function NewsCard({ article, locale = "ru", editHref }: { article
 
   return (
     <article className="newsDbCard">
-      <Link href={`/news/${article.slug}`} className="newsDbMedia">
+      <Link href={`/news/${article.slug}`} prefetch={false} className="newsDbMedia">
         {article.cover_image_url ? (
           <PublicImage className="newsCoverManaged" src={article.cover_image_url} alt={title} style={newsCoverStyle(article)} width={700} height={460} sizes="(max-width: 767px) 100vw, (max-width: 1200px) 45vw, 360px" />
         ) : (
@@ -27,9 +27,9 @@ export default function NewsCard({ article, locale = "ru", editHref }: { article
           <span>{category}</span>
           <time>{formatNewsDate(article.published_at, locale)}</time>
         </div>
-        <h2><Link href={`/news/${article.slug}`}>{title}</Link></h2>
+        <h2><Link href={`/news/${article.slug}`} prefetch={false}>{title}</Link></h2>
         {excerpt && <p>{excerpt}</p>}
-        <Link className="readMore" href={`/news/${article.slug}`}>{text.read}</Link>
+        <Link className="readMore" href={`/news/${article.slug}`} prefetch={false}>{text.read}</Link>
         {editHref && <OnSiteEditorAction href={editHref} locale={locale} label={locale === "ro" ? "Editează știrea" : "Редактировать новость"} className="fcSiteEditNewsAction" />}
       </div>
     </article>

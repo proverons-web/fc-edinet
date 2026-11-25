@@ -87,16 +87,16 @@ function LeadStory({ article, locale, editable }: { article: NewsListArticle; lo
   const excerpt = localized(article.excerpt, article.excerpt_ro, locale);
   const category = localized(article.category?.name, article.category?.name_ro, locale) || text.defaultCategory;
   return <article className="newsLeadStory">
-    <Link className="newsLeadMedia" href={`/news/${article.slug}`}>
+    <Link className="newsLeadMedia" href={`/news/${article.slug}`} prefetch={false}>
       {article.cover_image_url ? <PublicImage className="newsCoverManaged" src={article.cover_image_url} alt={title} style={newsCoverStyle(article)} width={1100} height={720} sizes="(max-width: 767px) 100vw, (max-width: 1100px) 55vw, 680px" /> : <span>FC EDINEȚ</span>}
       <div className="newsLeadShade"></div>
       {article.is_featured && <b className="newsLeadFlag">{text.featured}</b>}
     </Link>
     <div className="newsLeadBody">
       <div className="newsLeadMeta"><span>{category}</span><time>{formatNewsDate(article.published_at, locale)}</time></div>
-      <h2><Link href={`/news/${article.slug}`}>{title}</Link></h2>
+      <h2><Link href={`/news/${article.slug}`} prefetch={false}>{title}</Link></h2>
       {excerpt && <p>{excerpt}</p>}
-      <Link className="newsLeadRead" href={`/news/${article.slug}`}>{text.read}</Link>
+      <Link className="newsLeadRead" href={`/news/${article.slug}`} prefetch={false}>{text.read}</Link>
       {editable && <OnSiteEditorAction href={`/admin/news/${article.id}/edit`} locale={locale} label={locale === "ro" ? "Editează știrea" : "Редактировать новость"} className="fcSiteEditNewsAction" />}
     </div>
   </article>;
@@ -107,10 +107,10 @@ function SecondaryStory({ article, locale, editable }: { article: NewsListArticl
   const title = localized(article.title, article.title_ro, locale);
   const category = localized(article.category?.name, article.category?.name_ro, locale) || text.defaultCategory;
   return <article className="newsSecondaryStory">
-    <Link className="newsSecondaryMedia" href={`/news/${article.slug}`}>
+    <Link className="newsSecondaryMedia" href={`/news/${article.slug}`} prefetch={false}>
       {article.cover_image_url ? <PublicImage className="newsCoverManaged" src={article.cover_image_url} alt={title} style={newsCoverStyle(article)} width={1100} height={720} sizes="(max-width: 767px) 100vw, (max-width: 1100px) 55vw, 680px" /> : <span>FC EDINEȚ</span>}
     </Link>
-    <div className="newsSecondaryBody"><div className="newsSecondaryMeta"><span>{category}</span><time>{formatNewsDate(article.published_at, locale)}</time></div><h3><Link href={`/news/${article.slug}`}>{title}</Link></h3><Link className="newsSecondaryRead" href={`/news/${article.slug}`}>{text.read}</Link>{editable && <OnSiteEditorAction href={`/admin/news/${article.id}/edit`} locale={locale} label={locale === "ro" ? "Editează știrea" : "Редактировать новость"} className="fcSiteEditNewsAction" />}</div>
+    <div className="newsSecondaryBody"><div className="newsSecondaryMeta"><span>{category}</span><time>{formatNewsDate(article.published_at, locale)}</time></div><h3><Link href={`/news/${article.slug}`} prefetch={false}>{title}</Link></h3><Link className="newsSecondaryRead" href={`/news/${article.slug}`} prefetch={false}>{text.read}</Link>{editable && <OnSiteEditorAction href={`/admin/news/${article.id}/edit`} locale={locale} label={locale === "ro" ? "Editează știrea" : "Редактировать новость"} className="fcSiteEditNewsAction" />}</div>
   </article>;
 }
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import StandingsTable from "@/app/components/StandingsTable";
 import PageHeroShell from "@/app/components/PageHeroShell";
 import { createPublicClient } from "@/lib/supabase/public";
@@ -10,7 +11,19 @@ import { getPublishedSitePageDesign, resolvePageHeroText } from "@/lib/page-desi
 import { heroLayerStyle, heroLayerVisible } from "@/lib/hero-builder";
 import { sortStandings } from "@/lib/standings";
 
-export const dynamic = "force-dynamic";
+// Root layout remains request-specific; only public standings data is cached.
+export const dynamic = "auto";
+
+// Competition ID is selected from the published competition list before caching.
+async function readPublicStandings(competitionId: Competition["id"]) {
+  const supabase = createPublicClient();
+  return supabase.from("standings").select(`id,competition_id,team_id,wins,draws,losses,goals_for,goals_against,points_adjustment,played,goal_difference,points,created_at,updated_at,team:teams!standings_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active)`).eq("competition_id", competitionId).order("points", { ascending: false }).order("goal_difference", { ascending: false }).order("goals_for", { ascending: false });
+}
+const cachedPublicStandings = unstable_cache(async (competitionId: Competition["id"]) => {
+  const result = await readPublicStandings(competitionId);
+  if (result.error) throw new Error("Public standings unavailable");
+  return result;
+}, ["fce-public-standings-cost-v1"], { revalidate: 120, tags: ["fce-public-standings"] });
 
 export async function generateMetadata() {
   const locale = await getLocale();
@@ -33,7 +46,7 @@ export default async function StandingsPage({ searchParams }: PageProps) {
   const competition = competitions.find((item) => String(item.id) === String(requested ?? "")) ?? competitions[0];
   let standings: StandingEntry[] = [];
   if (competition) {
-    const { data } = await supabase.from("standings").select(`id,competition_id,team_id,wins,draws,losses,goals_for,goals_against,points_adjustment,played,goal_difference,points,created_at,updated_at,team:teams!standings_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active)`).eq("competition_id", competition.id).order("points", { ascending: false }).order("goal_difference", { ascending: false }).order("goals_for", { ascending: false });
+    const { data } = await cachedPublicStandings(competition.id).catch(() => readPublicStandings(competition.id));
     standings = (data ?? []) as unknown as StandingEntry[];
   }
   const sortedStandings = sortStandings(standings);

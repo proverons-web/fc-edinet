@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireEditor } from "@/lib/editorial";
 import type { Player } from "@/lib/types";
@@ -243,6 +243,7 @@ export async function savePlayer(
   }
 
   revalidatePath("/");
+  updateTag("fce-public-roster");
   revalidatePath("/team");
   revalidatePath(`/team/${slug}`);
   revalidatePath("/admin");
@@ -287,6 +288,7 @@ export async function deletePlayer(formData: FormData) {
   }
 
   revalidatePath("/");
+  updateTag("fce-public-roster");
   revalidatePath("/team");
   revalidatePath(`/team/${player.slug}`);
   revalidatePath("/admin");
