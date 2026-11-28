@@ -18,10 +18,10 @@ const style = read("app/builder-workspace-v23022.css");
 const sample = [{ key: "hero" }, { key: "albums" }, { key: "videos" }, { key: "contact" }];
 const keys = (items) => items.map((item) => item.key);
 
-check("release 2.30.29 synchronized", () => {
-  assert.equal(JSON.parse(read("package.json")).version, "2.30.29");
-  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.29"/);
-  assert.deepEqual(fs.readdirSync(root).filter(x => /^STEP-.*\.txt$/.test(x)), ["STEP-2.30.29.txt"]);
+check("release 2.30.30 synchronized", () => {
+  assert.equal(JSON.parse(read("package.json")).version, "2.30.30");
+  assert.match(read("lib/release.ts"), /RELEASE_VERSION = "2\.30\.30"/);
+  assert.deepEqual(fs.readdirSync(root).filter(x => /^STEP-.*\.txt$/.test(x)), ["STEP-2.30.30.txt"]);
 });
 check("up arrow changes neighbor sections, not original", () => {
   const copy = moveBuilderSection(sample, "videos", -1);
@@ -122,9 +122,9 @@ check("styling remains scoped and responsive", () => {
   assert.equal((style.match(/{/g) ?? []).length, (style.match(/}/g) ?? []).length);
 });
 check("install instructions do not require SQL migration", () => {
-  assert.match(read("STEP-2.30.29.txt"), /SQL-МИГРАЦИИ: ДА, 084_fan_notifications\.sql/);
-  assert.match(read("STEP-2.30.29.txt"), /DEPLOY_FC_EDINET\.bat/);
+  assert.match(read("STEP-2.30.30.txt"), /SQL-МИГРАЦИИ: ДА, 084_fan_notifications\.sql/);
+  assert.match(read("STEP-2.30.30.txt"), /DEPLOY_FC_EDINET\.bat/);
 });
 
-console.log(`\nVisual Editor v2.30.29: ${passed}/${passed + failed} passed.`);
+console.log(`\nVisual Editor v2.30.30: ${passed}/${passed + failed} passed.`);
 if (failed) process.exitCode = 1;

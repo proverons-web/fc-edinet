@@ -101,7 +101,7 @@ export default function NewsWorkflowPanel({
             <div className="newsWorkflowPreviewLabel">FC EDINEȚ · {categoryName || "Без категории"}</div>
             <h3>{previewTitle}</h3>
             {previewExcerpt && <p className="newsWorkflowPreviewExcerpt">{previewExcerpt}</p>}
-            <div className="newsWorkflowPreviewCover">
+            <div className="newsWorkflowPreviewCover newsFramePreview" data-frame="article" data-device={device}>
               {coverUrl ? (
                 <img src={coverUrl} alt="Предпросмотр обложки" style={{ objectPosition: `${coverX}% ${coverY}%`, transform: `scale(${coverZoom / 100})`, transformOrigin: `${coverX}% ${coverY}%` }} />
               ) : <span>FC EDINEȚ · Без обложки</span>}

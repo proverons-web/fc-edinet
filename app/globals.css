@@ -2561,10 +2561,6 @@ h1,h2,h3{font-family:var(--ds-font-heading);font-weight:var(--ds-heading-weight)
 .newsDbCard:hover .newsDbMedia .newsCoverManaged{filter:saturate(1.04) contrast(1.02)}
 .newsCoverEditorPreview{position:relative;isolation:isolate;height:220px;aspect-ratio:auto}
 .newsCoverEditorPreview img{position:absolute;inset:0;z-index:1}
-.newsCoverSafeZone{position:absolute;z-index:3;left:12%;right:12%;top:14%;bottom:14%;border:2px dashed #ffd328;box-shadow:0 0 0 999px rgba(2,20,48,.16);pointer-events:none}
-.newsCoverSafeZone:before,.newsCoverSafeZone:after{content:"";position:absolute;background:rgba(255,211,40,.55)}
-.newsCoverSafeZone:before{left:50%;top:0;bottom:0;width:1px}.newsCoverSafeZone:after{top:50%;left:0;right:0;height:1px}
-.newsCoverSafeZone span{position:absolute;left:8px;top:8px;padding:5px 7px;background:#ffd328;color:#06224a;font-size:8px;font-weight:950;letter-spacing:.08em}
 .newsCoverControls{display:grid;gap:10px;padding:13px 0 2px}.newsCoverControls label{display:grid;gap:5px}.newsCoverControls label span{display:flex;justify-content:space-between;color:#50627a;font-size:10px;font-weight:850}.newsCoverControls input[type=range]{width:100%;accent-color:#0d58ad}.newsCoverControls small{color:#7e8da0;font-size:10px;line-height:1.45}
 
 /* Home compact standings: no horizontal scroll */

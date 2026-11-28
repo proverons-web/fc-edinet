@@ -29,7 +29,7 @@ const activeImports = [...layout.matchAll(/import ["']\.\/([^"']+\.css)["'];/g)]
 const duplicates = activeImports.filter((name,i)=>activeImports.indexOf(name)!==i);
 const errors=[];
 if (duplicates.length) errors.push(`Duplicate CSS imports: ${duplicates.join(", ")}`);
-if (activeImports.join(",") !== "globals.css,visual-polish.css,home-v215.css,mobile.css,mobile-ux-v23024.css,site-edit-v23028.css") errors.push("Global CSS import order changed; check breakpoint/cascade effects before release.");
+if (activeImports.join(",") !== "globals.css,visual-polish.css,home-v215.css,mobile.css,mobile-ux-v23024.css,site-edit-v23028.css,news-frame-ratios.css") errors.push("Global CSS import order changed; check breakpoint/cascade effects before release.");
 const legacy = fs.readdirSync(path.join(root,"app")).filter((file)=>/^mobile-v2\./.test(file));
 if (legacy.length) errors.push(`Versioned mobile stylesheets still exist: ${legacy.join(", ")}`);
 const mobile = fs.readFileSync(path.join(root,"app/mobile.css"),"utf8");

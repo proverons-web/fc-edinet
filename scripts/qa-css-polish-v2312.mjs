@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 // CSS source integrity only: screenshot QA verifies the rendered result separately.
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
-const cssFiles = ['globals.css', 'visual-polish.css', 'home-v215.css', 'mobile.css', 'mobile-ux-v23024.css', 'site-edit-v23028.css'];
+const cssFiles = ['globals.css', 'visual-polish.css', 'home-v215.css', 'mobile.css', 'mobile-ux-v23024.css', 'site-edit-v23028.css', 'news-frame-ratios.css'];
 let passed = 0;
 function check(title, fn) {
   try { fn(); ++passed; console.log(`PASS  ${title}`); }
@@ -29,10 +29,10 @@ function checkBraces(source, name) {
   assert.equal(comment, false, `${name}: unclosed comment`);
 }
 
-check('v2.30.29 release and single installer instruction', () => {
-  assert.equal(JSON.parse(read('package.json')).version, '2.30.29');
-  assert.match(read('lib/release.ts'), /RELEASE_VERSION = "2\.30\.29"/);
-  assert.deepEqual(fs.readdirSync(root).filter(x => /^STEP-.*\.txt$/.test(x)), ['STEP-2.30.29.txt']);
+check('v2.30.30 release and single installer instruction', () => {
+  assert.equal(JSON.parse(read('package.json')).version, '2.30.30');
+  assert.match(read('lib/release.ts'), /RELEASE_VERSION = "2\.30\.30"/);
+  assert.deepEqual(fs.readdirSync(root).filter(x => /^STEP-.*\.txt$/.test(x)), ['STEP-2.30.30.txt']);
 });
 check('CSS stylesheets have balanced braces, strings, and comments', () => {
   for (const name of cssFiles) checkBraces(read(`app/${name}`), name);
@@ -57,7 +57,8 @@ check('Reduced-motion preference disables smooth scrolling', () => {
   assert.match(css, /\.fcRefLeadNewsMedia img,\.canvasVirtualViewport/);
 });
 check('CSS footprint remains within the reviewed budget', () => {
-  const legacyBytes = cssFiles.filter(f => f !== 'mobile-ux-v23024.css' && f !== 'site-edit-v23028.css').reduce((n, f) => n + Buffer.byteLength(read(`app/${f}`)), 0);
+  const legacyBytes = cssFiles.slice(0,4).reduce((n, f) => n + Buffer.byteLength(read(`app/${f}`)), 0);
+  assert.ok(Buffer.byteLength(read('app/news-frame-ratios.css')) <= 6000, 'News frame CSS exceeds 6KB');
   const scopedBytes = Buffer.byteLength(read('app/mobile-ux-v23024.css'));
   assert.ok(legacyBytes <= 885481, `Legacy CSS grew beyond approved baseline: ${legacyBytes}`);
   assert.ok(scopedBytes <= 6000, `Mobile UX patch exceeds reviewed 6KB budget: ${scopedBytes}`);

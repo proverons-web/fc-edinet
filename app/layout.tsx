@@ -6,6 +6,7 @@ import "./home-v215.css";
 import "./mobile.css";
 import "./mobile-ux-v23024.css";
 import "./site-edit-v23028.css";
+import "./news-frame-ratios.css";
 
 import SiteHeader from "./components/SiteHeader";
 import SiteFooter from "./components/SiteFooter";

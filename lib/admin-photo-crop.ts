@@ -1,3 +1,5 @@
+import { paintFrame } from "./photo-framing";
+
 /** Browser-only export: replaces selected raster upload with the approved crop. */
 export type AdminPhotoPixels = { x: number; y: number; width: number; height: number };
 
@@ -23,7 +25,7 @@ export async function exportAdminPhotoCrop(file: File, crop: AdminPhotoPixels): 
     if (!ctx) throw new Error("Не удалось открыть графический редактор браузера.");
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
-    ctx.drawImage(image, crop.x, crop.y, crop.width, crop.height, 0, 0, width, height);
+    paintFrame(ctx, image, crop, width, height);
     const blob = await new Promise<Blob>((resolve, reject) => {
       canvas.toBlob((output) => output ? resolve(output) : reject(new Error("Не удалось создать готовое фото.")), "image/webp", 0.92);
     });

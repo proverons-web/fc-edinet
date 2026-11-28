@@ -1,7 +1,8 @@
-FC EDINEȚ v2.30.29 — Image Recovery, Match Video and Schedule Hotfix
+FC EDINEȚ v2.30.30 — Photo Editor: Fit / Fill and Real News Safe Zones
 
-1. Обновление применяется к v2.30.28. Перед установкой сохрани .env.local и сделай резервную копию проекта.
-2. Новая SQL-МИГРАЦИЯ: database/086_confirm_rescheduled_fixtures.sql. Выполни один раз через Supabase SQL Editor после резервного копирования. Миграцию 085_admin_editor_role_boundaries.sql из v2.30.27 НЕ выполнять повторно.
+1. Обновление применяется к v2.30.29. Перед установкой сохрани .env.local и сделай резервную копию проекта.
+2. Новых SQL-миграций нет. database/086_confirm_rescheduled_fixtures.sql относится к v2.30.29 и выполняется только если ещё не была применена. Миграцию 085_admin_editor_role_boundaries.sql из v2.30.27 НЕ выполнять повторно.
+Фоторедактор: Оригинал показывает весь кадр, Вписать сохраняет фото целиком с белыми полями при несовпадении пропорций, Заполнить убирает поля. Масштаб от 10 до 300% (для экстремальных пропорций возможно меньше). Реальные кадры сайта показаны в предпросмотре ПК/телефон и совпадают с общим CSS-контрактом карточек. Новая обложка сбрасывает фокус на центр и 100%.
 Исторический контроль QA: SQL-МИГРАЦИИ: ДА, 084_fan_notifications.sql — только выпуск v2.30.25, повторно не запускать.
 Исторические миграции: 078_real_user_monitoring.sql, 079_multi_competitions.sql, 080_match_schedule_history.sql, 081_cup_results.sql, 082_cup_bracket.sql, 083_cup_two_leg_ties.sql.
 3. Страница /register: большой полупрозрачный герб и компактная высота контента без обязательного пустого блока перед футером.
@@ -17,6 +18,6 @@ FC EDINEȚ v2.30.29 — Image Recovery, Match Video and Schedule Hotfix
 УСТАНОВКА: обнови исходники из GitHub; проверь .env.local. Выполни npm ci и npm run deploy:check.
 Резервная копия Git .bundle сохраняет код, НЕ базу Supabase. Перед Production релизом проверь резервную копию базы и Storage в Supabase.
 Затем в корне: npm run qa:on-site-editor, npm run qa:user-roles, npm run typecheck, npm run build; при успешном результате DEPLOY_FC_EDINET.bat.
-После релиза проверь /api/version -> 2.30.29, две новости от 27–28 ноября, матч FC Edineț — CS Atletic 6 декабря и видео в нижней части протокола. Production здесь не изменялся.
+После релиза проверь /api/version -> 2.30.30, две новости от 27–28 ноября, матч FC Edineț — CS Atletic 6 декабря и видео в нижней части протокола. Production здесь не изменялся.
 
 ОГРАНИЧЕНИЕ: внутри публичной страницы показывается существующая защищённая форма в панели, а не прямое редактирование DOM по клику.

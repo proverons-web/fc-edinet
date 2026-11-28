@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import NewsWorkflowPanel from "@/app/components/NewsWorkflowPanel";
+import NewsFramePreviews from "@/app/components/NewsFramePreviews";
 import {
   saveNews,
   type NewsFormState,
@@ -113,6 +114,7 @@ export default function NewsEditorForm({
     }
 
     setSelectedFile(true);
+    setCoverX(50); setCoverY(50); setCoverZoom(100);
     const url = URL.createObjectURL(file);
     objectUrlRef.current = url;
     setPreview(url);
@@ -342,20 +344,21 @@ export default function NewsEditorForm({
               ) : (
                 <span>ОБЛОЖКА НОВОСТИ</span>
               )}
-              <div className="newsCoverSafeZone" aria-hidden="true"><span>SAFE ZONE ГЛАВНОЙ</span></div>
             </div>
             <div className="newsCoverControls">
               <label><span>Фокус X <b>{coverX}%</b></span><input name="cover_position_x" type="range" min="0" max="100" value={coverX} onChange={(e)=>setCoverX(Number(e.target.value))}/></label>
               <label><span>Фокус Y <b>{coverY}%</b></span><input name="cover_position_y" type="range" min="0" max="100" value={coverY} onChange={(e)=>setCoverY(Number(e.target.value))}/></label>
               <label><span>Zoom <b>{coverZoom}%</b></span><input name="cover_zoom" type="range" min="100" max="200" value={coverZoom} onChange={(e)=>setCoverZoom(Number(e.target.value))}/></label>
-              <small>Внутренняя рамка показывает безопасную область карточки на Главной. Держи лицо, герб и важный объект внутри неё.</small>
+              <small>Проверь реальные области обрезки ниже.</small>
             </div>
+            <NewsFramePreviews src={visibleCover} x={coverX} y={coverY} zoom={coverZoom}/>
 
             <div className="fieldGroup">
               <label htmlFor="cover_file">Новое изображение</label>
               <input
                 id="cover_file"
                 name="cover_file"
+                data-news-cover="true"
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
                 onChange={(event) =>

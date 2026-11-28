@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import Cropper, { type Area } from "react-easy-crop";
-import { exportAdminPhotoCrop, preferredAdminPhotoAspect, shouldUseAdminPhotoEditor, type AdminPhotoAspect, type AdminPhotoPixels } from "@/lib/admin-photo-crop";
+import { exportAdminPhotoCrop, preferredAdminPhotoAspect, shouldUseAdminPhotoEditor, type AdminPhotoAspect } from "@/lib/admin-photo-crop";
+import { fitFrame, frameGeometry, paintFrame, zoomToFit } from "@/lib/photo-framing";
+import NewsFramePreviews from "./NewsFramePreviews";
 import "./admin-universal-photo-editor.css";
 
 type Selection = {
@@ -26,16 +27,27 @@ export default function AdminUniversalPhotoEditor() {
   const [selection, setSelection] = useState<Selection | null>(null);
   const [sourceUrl, setSourceUrl] = useState("");
   const [aspect, setAspect] = useState<AdminPhotoAspect>("original");
-  const [naturalRatio, setNaturalRatio] = useState(1);
+  const [image, setImage] = useState<HTMLImageElement | null>(null);
+  const [stageSize, setStageSize] = useState({width: 1, height: 1});
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [pixels, setPixels] = useState<AdminPhotoPixels | null>(null);
+  const [sitePreview, setSitePreview] = useState("");
+  const [safeRatio, setSafeRatio] = useState<number | null>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const drag = useRef<{x:number;y:number;startX:number;startY:number}|null>(null);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
   const bypass = useRef(new WeakSet<HTMLInputElement>());
   const previousFocus = useRef<HTMLElement | null>(null);
   const currentFile = selection?.original[selection.position] ?? null;
   const isRaster = currentFile ? ["image/jpeg", "image/png", "image/webp"].includes(currentFile.type) : false;
+  const isNews = selection?.input.dataset.newsCover === "true";
+  const naturalSize = image ? {width:image.naturalWidth,height:image.naturalHeight} : null;
+  const computedAspect = aspects.find((item) => item.key === aspect)?.value ?? (naturalSize ? naturalSize.width / naturalSize.height : 1);
+  const frame = fitFrame(stageSize, computedAspect);
+  const safeFrame = safeRatio ? fitFrame(frame,safeRatio) : null;
+  const geometry = naturalSize ? frameGeometry(naturalSize, frame, zoom, {x:crop.x * frame.width,y:crop.y * frame.height}) : null;
+  const minZoom = naturalSize ? Math.min(.1, zoomToFit(naturalSize, frame)) : .1;
 
   const finish = useCallback((input: HTMLInputElement, finalFiles: File[]) => {
     setSelection(null);
@@ -67,7 +79,7 @@ export default function AdminUniversalPhotoEditor() {
       event.stopPropagation();
       input.value = "";
       previousFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-      setAspect(preferredAdminPhotoAspect(input));
+      setAspect(input.dataset.newsCover === "true" ? "original" : preferredAdminPhotoAspect(input));
       setSelection({ input, original: files, edited: [], position: 0 });
     };
     document.addEventListener("change", capture, true);
@@ -77,16 +89,43 @@ export default function AdminUniversalPhotoEditor() {
   useEffect(() => { setSelection(null); }, [pathname]);
 
   useEffect(() => {
-    if (!currentFile) { setSourceUrl(""); return; }
+    if (!currentFile) { setSourceUrl(""); setImage(null); setSitePreview(""); return; }
     const url = URL.createObjectURL(currentFile);
     setSourceUrl(url);
     setCrop({ x: 0, y: 0 });
     setZoom(1);
-    setNaturalRatio(1);
-    setPixels(null);
+    setImage(null);
+    setSitePreview("");
+    setSafeRatio(null);
+    drag.current=null;
     setError("");
-    return () => URL.revokeObjectURL(url);
+    const decoded = new Image();
+    let active = true;
+    decoded.onload = () => { if (active) setImage(decoded); };
+    decoded.onerror = () => { if (active && isRaster) setError("Не удалось прочитать фотографию."); };
+    decoded.src = url;
+    return () => { active = false; URL.revokeObjectURL(url); };
   }, [currentFile]);
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const update = () => setStageSize({width:Math.max(1,stage.clientWidth - 16),height:Math.max(1,stage.clientHeight - 16)});
+    update(); const observer = new ResizeObserver(update); observer.observe(stage);
+    return () => observer.disconnect();
+  }, [currentFile, isRaster]);
+
+  useEffect(() => {
+    if (!isNews || !image || !geometry) return;
+    const canvas = document.createElement("canvas");
+    const scale = 600 / Math.max(geometry.crop.width,geometry.crop.height);
+    canvas.width = Math.max(1,Math.round(geometry.crop.width*scale));
+    canvas.height = Math.max(1,Math.round(geometry.crop.height*scale));
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    paintFrame(ctx,image,geometry.crop,canvas.width,canvas.height);
+    setSitePreview(canvas.toDataURL("image/jpeg",.82));
+  }, [isNews,image,zoom,crop,aspect,stageSize]);
 
   useEffect(() => {
     if (!selection) return;
@@ -113,17 +152,17 @@ export default function AdminUniversalPhotoEditor() {
     if (selection.position + 1 >= selection.original.length) {
       finish(selection.input, next);
     } else {
-      setAspect(preferredAdminPhotoAspect(selection.input));
+      setAspect(isNews ? "original" : preferredAdminPhotoAspect(selection.input));
       setSelection({ ...selection, edited: next, position: selection.position + 1 });
     }
   }
 
   async function applyCrop() {
-    if (!currentFile || !pixels || processing) return;
+    if (!currentFile || !geometry || processing) return;
     setError("");
     setProcessing(true);
     try {
-      const output = await exportAdminPhotoCrop(currentFile, pixels);
+      const output = await exportAdminPhotoCrop(currentFile, geometry.crop);
       advance(output);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Не удалось обработать фотографию.");
@@ -137,7 +176,8 @@ export default function AdminUniversalPhotoEditor() {
   };
 
   if (!selection || !currentFile) return null;
-  const computedAspect = aspects.find((item) => item.key === aspect)?.value ?? naturalRatio;
+  const reset = () => {setZoom(1);setCrop({x:0,y:0});};
+  const nudge = (x:number,y:number) => { if (!geometry) return;const next=frameGeometry(naturalSize!,frame,zoom,{x:geometry.x+x,y:geometry.y+y});setCrop({x:next.x/frame.width,y:next.y/frame.height}); };
 
   return <div className="adminPhotoBackdrop" role="presentation" onMouseDown={(event) => {
     if (event.target === event.currentTarget) cancel();
@@ -155,29 +195,31 @@ export default function AdminUniversalPhotoEditor() {
       {isRaster ? <>
         <div className="adminPhotoAspectOptions" role="group" aria-label="Формат кадра">
           {aspects.map((option) => <button type="button" key={option.key} disabled={processing}
-            className={aspect === option.key ? "active" : ""} onClick={() => { setAspect(option.key); setCrop({ x: 0, y: 0 }); setZoom(1); }}>{option.label}</button>)}
+            className={aspect === option.key ? "active" : ""} onClick={() => { setAspect(option.key); reset(); }}>{option.label}</button>)}
+          <button type="button" disabled={!naturalSize || processing} onClick={()=>{setZoom(zoomToFit(naturalSize!,frame));setCrop({x:0,y:0});}}>Вписать</button>
+          <button type="button" disabled={processing} onClick={reset}>Заполнить</button>
         </div>
-        <div className="adminPhotoStage" aria-label="Перетащи фотографию для выбора кадра">
-          {sourceUrl && <Cropper image={sourceUrl} crop={crop} zoom={zoom} aspect={computedAspect}
-            showGrid objectFit="cover" minZoom={1} maxZoom={3}
-            onCropChange={setCrop} onZoomChange={setZoom}
-            onMediaLoaded={(media) => { if (media.naturalHeight > 0) setNaturalRatio(media.naturalWidth / media.naturalHeight); }}
-            onCropComplete={(_area: Area, pixelArea: Area) => setPixels({
-              x: Math.round(pixelArea.x), y: Math.round(pixelArea.y),
-              width: Math.round(pixelArea.width), height: Math.round(pixelArea.height),
-            })} />}
+        <div ref={stageRef} className="adminPhotoStage" aria-label="Перетащи фотографию для выбора кадра">
+          {sourceUrl && geometry && <div className="adminPhotoFrame" style={{width:frame.width,height:frame.height}}
+            onPointerDown={e=>{if(processing)return;e.currentTarget.setPointerCapture(e.pointerId);drag.current={x:e.clientX,y:e.clientY,startX:geometry.x,startY:geometry.y};}}
+            onPointerMove={e=>{if(!drag.current || processing)return;const next=frameGeometry(naturalSize!,frame,zoom,{x:drag.current.startX+e.clientX-drag.current.x,y:drag.current.startY+e.clientY-drag.current.y});setCrop({x:next.x/frame.width,y:next.y/frame.height});}}
+            onPointerUp={()=>{drag.current=null;}} onPointerCancel={()=>{drag.current=null;}}>
+            <img src={sourceUrl} alt="" draggable={false} style={{left:geometry.left,top:geometry.top,width:geometry.width,height:geometry.height}}/>
+            {isNews && safeFrame && <div className="adminPhotoActualSafeZone" aria-hidden="true" style={{width:safeFrame.width,height:safeFrame.height}}><span>ВИДНО НА САЙТЕ</span></div>}
+          </div>}
         </div>
         <div className="adminPhotoControls">
-          <label className="adminPhotoZoom"><span>Масштаб <strong>{Math.round(zoom * 100)}%</strong></span><input type="range" min="1" max="3" step="0.01" value={zoom} disabled={processing} onChange={(event) => setZoom(Number(event.target.value))}/></label>
+          <label className="adminPhotoZoom"><span>Масштаб <strong>{Math.round(zoom * 100)}%</strong></span><input type="range" min={minZoom} max="3" step="any" value={zoom} disabled={processing} onChange={(event) => setZoom(Number(event.target.value))}/></label>
           <div className="adminPhotoNudges" aria-label="Переместить фото">
             <span>Позиция</span>
-            <button type="button" aria-label="Влево" title="Сдвинуть влево" disabled={processing} onClick={() => setCrop((v) => ({ ...v, x: v.x - 12 }))}>←</button>
-            <button type="button" aria-label="Вверх" title="Сдвинуть вверх" disabled={processing} onClick={() => setCrop((v) => ({ ...v, y: v.y - 12 }))}>↑</button>
-            <button type="button" aria-label="Вниз" title="Сдвинуть вниз" disabled={processing} onClick={() => setCrop((v) => ({ ...v, y: v.y + 12 }))}>↓</button>
-            <button type="button" aria-label="Вправо" title="Сдвинуть вправо" disabled={processing} onClick={() => setCrop((v) => ({ ...v, x: v.x + 12 }))}>→</button>
-            <button type="button" title="Восстановить кадр" disabled={processing} onClick={() => { setZoom(1); setCrop({ x: 0, y: 0 }); }}>Сброс</button>
+            <button type="button" aria-label="Влево" title="Сдвинуть влево" disabled={processing} onClick={() => nudge(-12,0)}>←</button>
+            <button type="button" aria-label="Вверх" title="Сдвинуть вверх" disabled={processing} onClick={() => nudge(0,-12)}>↑</button>
+            <button type="button" aria-label="Вниз" title="Сдвинуть вниз" disabled={processing} onClick={() => nudge(0,12)}>↓</button>
+            <button type="button" aria-label="Вправо" title="Сдвинуть вправо" disabled={processing} onClick={() => nudge(12,0)}>→</button>
+            <button type="button" title="Восстановить кадр" disabled={processing} onClick={reset}>Сброс</button>
           </div>
         </div>
+        {isNews && <div className="adminPhotoNewsPreviews"><NewsFramePreviews src={sitePreview} onFrameRatio={setSafeRatio}/></div>}
       </> : <p className="adminPhotoVectorMessage">Это векторный файл. Он будет загружен без кадрирования, чтобы сохранить качество.</p>}
       {error && <div className="adminPhotoError" role="alert">{error}</div>}
       <footer className="adminPhotoFooter">
@@ -189,7 +231,7 @@ export default function AdminUniversalPhotoEditor() {
             finish(selection.input, [...selection.edited, ...selection.original.slice(selection.position)]);
           }} disabled={processing} className="adminPhotoUseOriginal" title="Оставить остальные фотографии без обработки">Остальные без изменений</button>}
           <button type="button" onClick={() => advance(currentFile)} disabled={processing} className="adminPhotoUseOriginal">Без изменений</button>
-          {isRaster && <button type="button" onClick={() => void applyCrop()} disabled={processing || !pixels} className="adminPhotoApply">
+          {isRaster && <button type="button" onClick={() => void applyCrop()} disabled={processing || !geometry} className="adminPhotoApply">
             {processing ? "Обрабатываем…" : selection.position + 1 < selection.original.length ? "Применить и далее" : "Применить кадр"}
           </button>}
         </div>

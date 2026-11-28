@@ -35,13 +35,14 @@ test('Supports per-file queue and preserve-original action',()=>{
  assert.match(editor,/\.\.\.selection\.original\.slice\(selection\.position\)/);
 });
 test('Crops through browser canvas to a real WebP file',()=>{
- assert.match(helper,/ctx\.drawImage\(/);
+ assert.match(read('lib/photo-framing.ts'),/ctx\.drawImage\(/);
+ assert.match(helper,/paintFrame\(ctx, image, crop, width, height\)/);
  assert.match(helper,/canvas\.toBlob/);
  assert.match(helper,/new File\(\[blob\]/);
  assert.match(helper,/2400 \/ Math\.max\(crop\.width, crop\.height\)/);
 });
 test('Offers zoom, drag, horizontal and vertical positioning',()=>{
- for(const pattern of [/react-easy-crop/,/onCropChange=\{setCrop\}/,/onZoomChange=\{setZoom\}/,/Влево/,/Вправо/,/Вверх/,/Вниз/,/Масштаб/])assert.match(editor,pattern);
+ for(const pattern of [/onPointerMove/,/setZoom\(Number/,/Вписать/,/Заполнить/,/Влево/,/Вправо/,/Вверх/,/Вниз/,/Масштаб/])assert.match(editor,pattern);
 });
 test('Allows original and three crop aspect presets',()=>{
  for(const token of ['original','portrait','landscape','square'])assert.ok(editor.includes(token));
