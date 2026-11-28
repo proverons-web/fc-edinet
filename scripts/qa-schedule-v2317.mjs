@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
-import {scheduleDateLabel, scheduleReason, isRescheduled, scheduleChangeLabel, resolvePostponedKickoff, hasAnnouncedReplacementDate, appearsInDatedCalendar, orderFixturesByKickoff} from "../lib/match-schedule.ts";
+import {scheduleDateLabel, scheduleReason, isRescheduled, scheduleChangeLabel, resolvePostponedKickoff, hasAnnouncedReplacementDate, appearsInDatedCalendar, orderFixturesByKickoff, publicFixture} from "../lib/match-schedule.ts";
 import {createMatchCalendar, isCalendarEligible} from "../lib/match-calendar.ts";
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
 const read=(p)=>fs.readFileSync(path.join(root,p),"utf8");
@@ -11,7 +11,7 @@ function check(label,fn){try{fn();passed++;console.log("PASS",label)}catch(e){fa
 const f={id:20,kickoff:"2026-12-05T13:00:00Z",updated_at:"2026-11-07T19:22:00Z",status:"scheduled",home:{name:"FC Edineț"},away:{name:"Côte d'Azur"}};
 const old={...f,status:"postponed",original_kickoff:"2026-12-05T13:00:00Z",schedule_reason_ru:"Плохая погода",schedule_reason_ro:"Vreme rea"};
 const rescheduled={...old,kickoff:"2026-12-12T13:00:00Z"};
-check("release version",()=>assert.equal(JSON.parse(read("package.json")).version,"2.30.28"));
+check("release version",()=>assert.equal(JSON.parse(read("package.json")).version,"2.30.29"));
 check("original date preserved",()=>assert.ok(isRescheduled(rescheduled)));
 check("nonrescheduled fixture",()=>assert.equal(isRescheduled(f),false));
 check("status hides unconfirmed date RU",()=>assert.equal(scheduleDateLabel(old,"ru"),"Новая дата не назначена"));
@@ -60,6 +60,20 @@ const calendarNow = new Date("2026-11-07T18:00:00Z");
 const fixture21 = {...f, id:21, kickoff:"2026-11-21T10:00:00Z"};
 const fixture24 = {...old, id:18, kickoff:"2026-11-24T11:00:00Z", original_kickoff:"2026-11-07T10:00:00Z"};
 const fixture28 = {...f, id:28, kickoff:"2026-11-28T10:00:00Z"};
+check("confirmed replacement behaves like scheduled without losing original date",()=>{
+  const normalized=publicFixture(fixture24,calendarNow);
+  assert.equal(normalized.status,"scheduled");assert.equal(normalized.original_kickoff,fixture24.original_kickoff);
+  assert.equal(isCalendarEligible(normalized,calendarNow),true);
+  assert.equal(publicFixture(old,calendarNow).status,"postponed");
+  assert.equal(publicFixture({...fixture24,status:"cancelled"},calendarNow).status,"cancelled");
+  assert.equal(publicFixture(fixture24,new Date("2026-12-01T00:00:00Z")).status,"postponed");
+});
+check("homepage accepts confirmed legacy fixture and migration preserves history",()=>{
+  assert.match(read("app/page.tsx"),/status\.in\.\(scheduled,postponed\)/);
+  assert.match(read("app/page.tsx"),/publicFixture\(m, new Date\(now\)\)/);
+  assert.match(read("database/086_confirm_rescheduled_fixtures.sql"),/kickoff <> original_kickoff[\s\S]*kickoff > now\(\)/);
+  assert.match(read("app/matches/[id]/MatchScheduleNotice.tsx"),/if \(!interrupted\) return null/);
+});
 check("FIX2 moved match with announced date counts as dated fixture",()=>assert.equal(hasAnnouncedReplacementDate(fixture24),true));
 check("FIX2 postponed without new date stays in separate group",()=>assert.equal(hasAnnouncedReplacementDate(old),false));
 check("FIX2 postponed known date belongs in calendar",()=>assert.equal(appearsInDatedCalendar(fixture24,calendarNow),true));
@@ -88,4 +102,4 @@ check("FIX2 postponed card is highlighted on mobile and desktop",()=>{
   assert.match(css,/\.matchPostponedChip/);
   assert.match(css,/@media\(max-width:700px\)/);
 });
-console.log(`v2.30.28 scheduling: ${passed}/${passed+failed}`);if(failed)process.exitCode=1;
+console.log(`v2.30.29 scheduling: ${passed}/${passed+failed}`);if(failed)process.exitCode=1;

@@ -53,7 +53,7 @@ export default function MatchEditorForm({
   const [kickoffValue, setKickoffValue] = useState(currentKickoffLocal);
   const [originalDraftKickoff, setOriginalDraftKickoff] = useState(originalKickoffLocal || currentKickoffLocal);
   const [replacementKickoff, setReplacementKickoff] = useState(() =>
-    originalKickoffLocal && currentKickoffLocal !== originalKickoffLocal
+    match?.status === "postponed" && originalKickoffLocal && currentKickoffLocal !== originalKickoffLocal
       ? currentKickoffLocal : ""
   );
 
@@ -65,7 +65,7 @@ export default function MatchEditorForm({
     }
     if (next === "postponed" && match && !replacementKickoff) {
       // Treat a date edited immediately before choosing postponement as the new date.
-      if (kickoffValue !== originalDraftKickoff) setReplacementKickoff(kickoffValue);
+      if (kickoffValue !== currentKickoffLocal) setReplacementKickoff(kickoffValue);
     }
     setMatchStatus(next);
   }
@@ -288,8 +288,7 @@ export default function MatchEditorForm({
               </div>
               <p className="fieldHint">
                 Если новая дата известна, укажи её в отдельном поле ниже. Если неизвестна — оставь его пустым.
-                Изначальная дата сохранится в истории. Пока статус «Перенесён», матч не считается подтверждённым
-                в календаре ближайших игр. После окончательного подтверждения переключи статус на «Предстоящий».
+                Изначальная дата сохранится в истории. При сохранении новой будущей даты матч автоматически станет предстоящим.
               </p>
               {match?.original_kickoff ? <p className="fieldHint">Первоначальная дата: {new Intl.DateTimeFormat("ru-RU", {dateStyle:"medium",timeStyle:"short",timeZone:"Europe/Chisinau"}).format(new Date(match.original_kickoff))}</p> : null}
               {matchStatus === "postponed" && (
@@ -297,9 +296,7 @@ export default function MatchEditorForm({
                   <label htmlFor="rescheduled_kickoff">Новая дата и время матча (если известны)</label>
                   <input id="rescheduled_kickoff" name="rescheduled_kickoff" type="datetime-local"
                     value={replacementKickoff} onChange={(event) => setReplacementKickoff(event.target.value)} />
-                  <small className="fieldHint">Можно указать новую дату сразу, не меняя статус «Перенесён».
-                    Болельщики увидят обе даты и причину. Если новая дата окончательно утверждена,
-                    выбери статус «Предстоящий» — дата автоматически перенесётся в основное поле.</small>
+                  <small className="fieldHint">Новая дата заменит старую в публичном календаре и на главной. История останется в админке.</small>
                   {replacementKickoff && <button type="button" className="scheduleClearNewDate"
                     onClick={() => setReplacementKickoff("")}>Очистить новую дату</button>}
                 </div>

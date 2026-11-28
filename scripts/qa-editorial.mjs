@@ -19,7 +19,7 @@ ok("publish and review buttons enforce required-field readiness", form.includes(
 ok("news editor warns on unsaved refresh", form.includes("beforeunload") && form.includes("setDirty(true)"));
 ok("publish and live save require explicit confirmation", form.includes('intent === "publish"') && form.includes('article?.status === "published"') && form.includes("window.confirm(message)"));
 ok("client sends original update timestamp", form.includes('name="article_updated_at"') && actions.includes('formData.get("article_updated_at")'));
-ok("server detects outdated drafts before uploads", actions.includes("originalUpdatedAt !== existing.updated_at") && actions.indexOf("originalUpdatedAt !== existing.updated_at") < actions.indexOf(".upload(path, fileValue"));
+ok("server detects outdated drafts before uploads", actions.includes("originalUpdatedAt !== existing.updated_at") && actions.indexOf("originalUpdatedAt !== existing.updated_at") < actions.indexOf(".upload(path, prepared"));
 ok("update protects against concurrent edits atomically", actions.includes('.eq("updated_at", originalUpdatedAt)') && actions.includes(".maybeSingle()") && actions.includes("изменена в другой вкладке"));
 ok("server verifies active category", actions.includes('.from("news_categories")') && actions.includes('.eq("is_active", true)') && actions.includes("Категория недоступна"));
 ok("server never accepts forged existing-cover URL", !actions.includes('formData.get("existing_cover_url")') && actions.includes("existing?.cover_image_url ?? null"));

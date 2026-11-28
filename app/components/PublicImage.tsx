@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { CSSProperties } from "react";
+import NewsCoverImage from "./NewsCoverImage";
 
 /**
  * Responsive images for media served from the club's public Supabase Storage.
@@ -47,6 +48,9 @@ export function isPreparedAlbumThumbnail(src: string): boolean {
 export default function PublicImage({
   src, alt, width, height, sizes, className, style, eager = false,
 }: Props) {
+  if (className?.includes("newsCoverManaged")) {
+    return <NewsCoverImage src={src} alt={alt} width={width} height={height} className={className} style={style} eager={eager} />;
+  }
   if (isOptimizablePublicImage(src) && !isPreparedAlbumThumbnail(src)) {
     return <Image
       src={src}

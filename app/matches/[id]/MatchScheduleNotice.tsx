@@ -13,6 +13,7 @@ export default function MatchScheduleNotice({match,history,locale}: {
   match:ClubMatch; history:ScheduleHistoryItem[]; locale:Locale;
 }) {
   const interrupted = match.status === "postponed" || match.status === "cancelled";
+  if (!interrupted) return null;
   const changed = isRescheduled(match);
   if (!interrupted && !changed && history.length === 0) return null;
   const reason = scheduleReason(match,locale);

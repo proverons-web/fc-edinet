@@ -17,7 +17,7 @@ const policies = read("database/085_admin_editor_role_boundaries.sql");
 const nav = read("app/components/AdminShellClient.tsx");
 const editRoute = read("app/admin/edit/page.tsx");
 
-check("Version is 2.30.28", () => assert.equal(JSON.parse(read("package.json")).version, "2.30.28"));
+check("Version is 2.30.29", () => assert.equal(JSON.parse(read("package.json")).version, "2.30.29"));
 check("Admin account creation requires a verified administrator", () => {
   const section = source.slice(source.indexOf("export async function createAdminUser"), source.indexOf("export async function updateUserRole"));
   assert.match(section, /await requireAdmin\(\)/);
@@ -117,5 +117,5 @@ check("CI and installer run new role checks", () => {
   assert.match(scripts["deploy:check"], /qa:user-roles/);
   assert.match(read(".github/workflows/responsive-qa.yml"), /qa:user-roles/);
 });
-console.log(`\nFC Edinet Role Access v2.30.28: ${passed}/${passed+failed} checks passed.`);
+console.log(`\nFC Edinet Role Access v2.30.29: ${passed}/${passed+failed} checks passed.`);
 if (failed) process.exitCode=1;

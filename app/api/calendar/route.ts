@@ -1,6 +1,7 @@
 import { createPublicClient } from "@/lib/supabase/public";
 import { createMatchCalendar, type CalendarFixture } from "@/lib/match-calendar";
 import { getSiteUrl } from "@/lib/site-url";
+import { publicFixture } from "@/lib/match-schedule";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,7 @@ export async function GET(request: Request) {
     .order("kickoff", { ascending: true }).limit(100);
   if (error) return new Response("Calendar temporarily unavailable", { status: 503, headers: { "Cache-Control": "no-store" } });
   const locale = new URL(request.url).searchParams.get("lang") === "ro" ? "ro" : "ru";
-  const calendar = createMatchCalendar((data ?? []) as unknown as CalendarFixture[], getSiteUrl(), { locale, includeStatusChanges:true });
+  const calendar = createMatchCalendar(((data ?? []) as unknown as CalendarFixture[]).map(match => publicFixture(match)), getSiteUrl(), { locale, includeStatusChanges:true });
   return new Response(calendar, {
     status: 200,
     headers: {

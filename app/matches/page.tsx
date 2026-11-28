@@ -10,7 +10,7 @@ import { toggleFavoriteMatch } from "@/app/account/actions";
 import { createClient } from "@/lib/supabase/server";
 import type { ClubMatch, Competition, CompetitionType } from "@/lib/types";
 import {competitionTypes,competitionName,competitionTypeLabel} from "@/lib/competition";
-import { scheduleDateLabel, scheduleReason, isRescheduled, hasAnnouncedReplacementDate, appearsInDatedCalendar, orderFixturesByKickoff } from "@/lib/match-schedule";
+import { scheduleDateLabel, scheduleReason, hasAnnouncedReplacementDate, appearsInDatedCalendar, orderFixturesByKickoff, publicFixture } from "@/lib/match-schedule";
 import "./competition-filters.css";
 import { clubMatchResultClass, matchScoreText, matchVenue } from "@/lib/public-match-integrity";
 import { cupResultDetail } from "@/lib/cup-results";
@@ -45,7 +45,7 @@ export default async function MatchesPage({searchParams}:{searchParams:Promise<{
  let cancelledQuery=supabase.from("matches").select(matchSelect()).eq("status","cancelled").order("kickoff",{ascending:false}).limit(50);
  if(ids){upcomingQuery=upcomingQuery.in("competition_id",ids);finishedQuery=finishedQuery.in("competition_id",ids);cancelledQuery=cancelledQuery.in("competition_id",ids)}
  const [upcomingResult,finishedResult,cancelledResult]=await Promise.all([upcomingQuery,finishedQuery,cancelledQuery]);
- const allUpcoming=(upcomingResult.data??[]) as unknown as ClubMatch[];
+ const allUpcoming=((upcomingResult.data??[]) as unknown as ClubMatch[]).map(m=>publicFixture(m));
  // Keep a postponed fixture with a NEW known date between the other dated matches.
  // Undated postponements and cancellations stay in the separate status section.
  const currentDate = new Date(now);
@@ -100,7 +100,6 @@ function PublicMatchCard({match,locale,isAuthenticated,isFavorite,editable}:{mat
    <strong>{postponed||match.status==="cancelled"?scheduleDateLabel(match,locale):`${date} · ${time}`}</strong>
    {originalDate?<small className="matchScheduleOriginalDate">{locale==="ro"?"Data inițială":"Было запланировано"}: {originalDate}</small>:null}
    {(postponed||match.status==="cancelled") && scheduleReason(match,locale) ? <small className="matchScheduleReasonInline">{scheduleReason(match,locale)}</small> : null}
-   {match.status==="scheduled" && isRescheduled(match) ? <small className="matchScheduleRescheduledInline">{locale==="ro"?"Dată actualizată":"Дата изменена"}</small> : null}
    <small>{match.round||"—"} · {matchVenue(match) || text.stadiumTbd}</small>
   </div>
   <div className="publicTeams">

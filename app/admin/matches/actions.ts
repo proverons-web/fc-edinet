@@ -64,7 +64,7 @@ export async function saveMatch(
   const timezoneOffset = Number(formData.get("timezone_offset") ?? 0);
   const stadium = nullableString(formData.get("stadium"));
   const round = nullableString(formData.get("round"));
-  const status = String(formData.get("status") ?? "scheduled") as MatchStatus;
+  let status = String(formData.get("status") ?? "scheduled") as MatchStatus;
   const homeScoreRaw = String(formData.get("home_score") ?? "").trim();
   const awayScoreRaw = String(formData.get("away_score") ?? "").trim();
   const notes = nullableString(formData.get("notes"));
@@ -112,6 +112,11 @@ export async function saveMatch(
     isNew: !matchId,
   });
   const kickoff = schedule.kickoff;
+  // Entering a future replacement date confirms the fixture automatically.
+  if (status === "postponed" && replacementKickoff) {
+    if (Date.parse(replacementKickoff) <= Date.now()) return { error: "Назначь новую будущую дату перед возвращением перенесённого матча в календарь." };
+    status = "scheduled";
+  }
 
   // A postponed/cancelled match must not become an apparent upcoming game
   // at its now-expired original kickoff. Its persistent match ID is retained.

@@ -19,7 +19,7 @@ import "./match-media-v2302.css";
 import "./match-schedule-v2317.css";
 import "./match-cup-two-leg-v2320.css";
 import MatchScheduleNotice from "./MatchScheduleNotice";
-import { scheduleHistorySelect, scheduleDateLabel, type ScheduleHistoryItem } from "@/lib/match-schedule";
+import { scheduleHistorySelect, scheduleDateLabel, publicFixture, type ScheduleHistoryItem } from "@/lib/match-schedule";
 import JsonLd from "@/app/components/JsonLd";
 import { notFound } from "next/navigation";
 import { createPublicClient } from "@/lib/supabase/public";
@@ -219,7 +219,7 @@ const getMatch = cache(async (id: string): Promise<ClubMatch | null> => {
     .eq("id", id)
     .maybeSingle();
   if (error || !data) return null;
-  return data as unknown as ClubMatch;
+  return publicFixture(data as unknown as ClubMatch);
 });
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -314,7 +314,7 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
   const { data: matchVideosData } = await supabase.from("media_videos")
     .select("id,title,youtube_id,video_kind,description,published_at,match_id")
     .eq("match_id", id).eq("is_published", true)
-    .order("display_order").order("published_at", { ascending: false }).limit(6);
+    .order("display_order").order("published_at", { ascending: false, nullsFirst: false }).order("id");
   const matchVideos = (matchVideosData ?? []) as MediaVideo[];
 
   const { data: reportData } = await supabase
@@ -536,6 +536,15 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
             )}
           </div>
         </section>
+        {matchAlbums.length > 0 ? <section id="match-gallery" className="section matchMediaSection">
+          <div className="container">
+            <div className="publicMatchSectionHead premiumSectionHead"><p className="eyebrow blue">FC EDINEȚ MEDIA</p><h2>{locale === "ro" ? "Fotografii de la meci" : "Фотографии матча"}</h2></div>
+            <div className="matchMediaGrid">{matchAlbums.map((album) => <Link href={`/media/${album.slug}`} className="matchMediaAlbum" key={String(album.id)}>
+              {album.cover_image_url ? <img src={album.cover_image_url} alt="" loading="lazy" decoding="async" /> : <span className="matchMediaNoCover">FC EDINEȚ</span>}
+              <span className="matchMediaAlbumTitle">{album.title}<small>{locale === "ro" ? "Deschide albumul →" : "Открыть альбом →"}</small></span>
+            </Link>)}</div>
+          </div>
+        </section> : null}
         {matchVideos.length > 0 ? <section id="match-videos" className="section matchVideoSection">
           <div className="container">
             <div className="publicMatchSectionHead premiumSectionHead"><p className="eyebrow blue">FC EDINEȚ TV</p>
@@ -548,15 +557,6 @@ export default async function PublicMatchPage({ params }: { params: Promise<{ id
                 </div>
               </article>)}
             </div>
-          </div>
-        </section> : null}
-        {matchAlbums.length > 0 ? <section id="match-gallery" className="section matchMediaSection">
-          <div className="container">
-            <div className="publicMatchSectionHead premiumSectionHead"><p className="eyebrow blue">FC EDINEȚ MEDIA</p><h2>{locale === "ro" ? "Fotografii de la meci" : "Фотографии матча"}</h2></div>
-            <div className="matchMediaGrid">{matchAlbums.map((album) => <Link href={`/media/${album.slug}`} className="matchMediaAlbum" key={String(album.id)}>
-              {album.cover_image_url ? <img src={album.cover_image_url} alt="" loading="lazy" decoding="async" /> : <span className="matchMediaNoCover">FC EDINEȚ</span>}
-              <span className="matchMediaAlbumTitle">{album.title}<small>{locale === "ro" ? "Deschide albumul →" : "Открыть альбом →"}</small></span>
-            </Link>)}</div>
           </div>
         </section> : null}
       </main>

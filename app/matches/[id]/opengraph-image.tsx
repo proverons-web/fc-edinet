@@ -5,6 +5,7 @@ import path from "node:path";
 import { matchScoreText } from "@/lib/public-match-integrity";
 import { cupResultDetail } from "@/lib/cup-results";
 import { socialTeamLogoDataUrl, socialTeamNameFont } from "@/lib/social-preview";
+import { publicFixture } from "@/lib/match-schedule";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -27,13 +28,13 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   if (supabase && /^\d+$/.test(id)) {
     const { data } = await supabase
       .from("matches")
-      .select(`id,kickoff,status,home_score,away_score,extra_time_played,home_penalties,away_penalties,round,stadium,
+      .select(`id,kickoff,status,original_kickoff,home_score,away_score,extra_time_played,home_penalties,away_penalties,round,stadium,
         home:teams!matches_home_team_id_fkey(name,short_name,logo_url,is_club),
         away:teams!matches_away_team_id_fkey(name,short_name,logo_url,is_club),
         competition:competitions!matches_competition_id_fkey(name)`)
       .eq("id", id)
       .maybeSingle();
-    match = data;
+    match = data ? publicFixture(data) : null;
   }
 
   const home = Array.isArray(match?.home) ? match.home[0] : match?.home;

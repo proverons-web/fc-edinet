@@ -27,6 +27,8 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
   compress: true,
   images: {
+    // Serve original public assets; Vercel image transformations can return 402.
+    unoptimized: true,
     formats: ["image/webp"],
     deviceSizes: [360, 640, 1024, 1600, 1920],
     imageSizes: [64, 128, 256, 320],

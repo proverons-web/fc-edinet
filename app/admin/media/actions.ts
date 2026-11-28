@@ -482,7 +482,10 @@ export async function deleteVideo(formData: FormData) {
   const id = text(formData.get("video_id"));
   if (!id) return;
 
-  await supabase.from("media_videos").delete().eq("id", id);
+  const { data: video } = await supabase.from("media_videos").select("match_id").eq("id", id).maybeSingle();
+  const { error } = await supabase.from("media_videos").delete().eq("id", id);
+  if (error) return;
+  if (video?.match_id) revalidatePath(`/matches/${video.match_id}`);
 
   revalidatePath("/");
   revalidatePath("/media");

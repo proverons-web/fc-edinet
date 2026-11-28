@@ -20,10 +20,12 @@ const checks = [
   ["Unknown category safely handled", () => !isVideoKind("hack") && videoKindLabel("hack", "ru") === "Видео"],
   ["Public query filters unpublished videos", () => read("app/matches/[id]/page.tsx").includes('.eq("match_id", id).eq("is_published", true)')],
   ["Public match has video section", () => read("app/matches/[id]/page.tsx").includes('id="match-videos"')],
+  ["Video section follows photo gallery and protocol", () => {const page=read("app/matches/[id]/page.tsx");return page.indexOf('id="match-videos"')>page.indexOf('id="match-gallery"') && page.indexOf('id="match-videos"')>page.indexOf('premiumProtocolContainer');}],
+  ["Video query does not truncate attached videos", () => !read("app/matches/[id]/page.tsx").split('const { data: matchVideosData }')[1].split('const matchVideos =')[0].includes('.limit(')],
   ["Media index links to edit route", () => read("app/admin/media/page.tsx").includes('/admin/media/videos/${video.id}/edit')],
   ["Media page links to match", () => read("app/components/ManagedPageCanvas.tsx").includes('href={`/matches/${video.match_id}`}')],
-  ["Version constant updated", () => read("lib/release.ts").includes('RELEASE_VERSION = "2.30.28"')],
-  ["Package updated", () => JSON.parse(read("package.json")).version === "2.30.28"],
+  ["Version constant updated", () => read("lib/release.ts").includes('RELEASE_VERSION = "2.30.29"')],
+  ["Package updated", () => JSON.parse(read("package.json")).version === "2.30.29"],
 ];
 let pass=0;
 for(const [name, fn] of checks) { const ok = fn(); assert.ok(ok,name); console.log(`PASS ${name}`); pass++; }

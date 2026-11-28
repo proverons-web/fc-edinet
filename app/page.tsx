@@ -15,6 +15,7 @@ import {competitionName} from "@/lib/competition";
 import { matchWinner, cupResultDetail } from "@/lib/cup-results";
 import { dateLocale, localized, publicText, type Locale } from "@/lib/i18n";
 import { newsCoverStyle } from "@/lib/news-cover";
+import { publicFixture, appearsInDatedCalendar } from "@/lib/match-schedule";
 import { defaultHomepageCanvas, normalizeHomepageCanvas } from "@/lib/homepage-canvas";
 import { repairHomepageCanvas } from "@/lib/homepage-safe-zone";
 import { defaultHeroLayerConfig, heroLayerState, heroLayerStyle, heroLayerVisible, homeHeroLayerDefinitions, normalizeHeroLayerConfig } from "@/lib/hero-builder";
@@ -100,10 +101,9 @@ export default async function Home() {
     supabase
       .from("matches")
       .select(matchSelect())
-      .or(`status.eq.live,and(status.eq.scheduled,kickoff.gte.${now})`)
+      .or(`status.eq.live,and(status.in.(scheduled,postponed),kickoff.gte.${now})`)
       .order("kickoff", { ascending: true })
-      .limit(1)
-      .maybeSingle(),
+      .limit(150),
     supabase
       .from("matches")
       .select(matchSelect())
@@ -153,7 +153,7 @@ export default async function Home() {
   const players = (playersResult.data ?? []) as Pick<Player, "id" | "first_name" | "last_name" | "slug" | "shirt_number" | "position" | "photo_url">[];
   const allNews = (newsResult.data ?? []) as unknown as NewsListArticle[];
   const pinnedNews = pinnedNewsResult as unknown as NewsListArticle | null;
-  const nextMatch = nextMatchResult.data as unknown as ClubMatch | null;
+  const nextMatch = ((nextMatchResult.data ?? []) as unknown as ClubMatch[]).map(m => publicFixture(m, new Date(now))).find(m => m.status === "live" || (m.status === "scheduled" && appearsInDatedCalendar(m, new Date(now)))) ?? null;
   // The first row of the finished-match feed is also the last match; avoid a duplicate request.
   const lastMatch = (recentMatchesResult.data?.[0] ?? null) as unknown as ClubMatch | null;
   // Cup or friendly next match cannot determine the Liga 2 standings.
@@ -532,7 +532,7 @@ function legacyHeroCoordinates(position?: HomepageHero["background_position"] | 
 function matchSelect() {
   return `
     id,competition_id,home_team_id,away_team_id,kickoff,stadium,round,status,
-    home_score,away_score,extra_time_played,home_penalties,away_penalties,notes,
+    home_score,away_score,extra_time_played,home_penalties,away_penalties,notes,original_kickoff,
     home:teams!matches_home_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
     away:teams!matches_away_team_id_fkey(id,name,short_name,slug,city,home_stadium,logo_url,is_club,is_active),
     competition:competitions!matches_competition_id_fkey(id,name,name_ro,slug,season,competition_type,is_active)

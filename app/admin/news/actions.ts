@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireStaff, isEditor } from "@/lib/editorial";
 import type { NewsArticle } from "@/lib/types";
 import { resolveRomanianTranslation } from "@/lib/auto-translation";
+import sharp from "sharp";
 
 export type NewsFormState = {
   error?: string;
@@ -159,15 +160,22 @@ export async function saveNews(
       return { error: "Максимальный размер обложки — 8 МБ." };
     }
 
-    const ext = extensionForFile(fileValue);
-    const path = `${userId}/${Date.now()}-${slug}.${ext}`;
+    let prepared: Buffer;
+    try {
+      prepared = await sharp(Buffer.from(await fileValue.arrayBuffer()), { limitInputPixels: 40_000_000 })
+        .rotate().resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true })
+        .webp({ quality: 85 }).toBuffer();
+    } catch {
+      return { error: "Не удалось обработать изображение. Выбери корректный JPG, PNG или WEBP." };
+    }
+    const path = `${userId}/${Date.now()}-${slug}.webp`;
 
     const { error: uploadError } = await supabase.storage
       .from("news")
-      .upload(path, fileValue, {
-        cacheControl: "3600",
+      .upload(path, prepared, {
+        cacheControl: "31536000",
         upsert: false,
-        contentType: fileValue.type,
+        contentType: "image/webp",
       });
 
     if (uploadError) {
@@ -376,12 +384,6 @@ function normalizeSlug(value: string) {
     .replace(/[^a-z0-9-]+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
-}
-
-function extensionForFile(file: File) {
-  if (file.type === "image/png") return "png";
-  if (file.type === "image/webp") return "webp";
-  return "jpg";
 }
 
 function humanizeDatabaseError(message?: string) {

@@ -15,7 +15,7 @@ const team=read('app/team/page.tsx');
 const staff=read('app/staff/page.tsx');
 const css=read('app/site-edit-v23028.css');
 const role=read('lib/public-editor-role.ts');
-check('Release 2.30.28',()=>{assert.equal(JSON.parse(read('package.json')).version,'2.30.28');assert.match(read('lib/release.ts'),/2\.30\.28/)});
+check('Release 2.30.29',()=>{assert.equal(JSON.parse(read('package.json')).version,'2.30.29');assert.match(read('lib/release.ts'),/2\.30\.29/)});
 check('Existing permission whitelist is used by global editor',()=>{assert.match(edit,/canEditPublicPath\(role, pathname\)/);assert.match(read('lib/admin-role-permissions.ts'),/role !== "admin" && role !== "editor"/)});
 check('Fresh server role is checked for inline cards',()=>{assert.match(role,/auth\.getClaims\(\)/);assert.match(role,/\.from\("profiles"\)/);assert.match(role,/data\?\.role === "admin" \|\| data\?\.role === "editor"/);assert.doesNotMatch(role,/user_metadata/)});
 check('Editor modal validates internal admin URLs',()=>{assert.match(action,/href\.startsWith\("\/admin\/"\)/);assert.match(action,/url\.origin !== "https:\/\/fc-edinet\.example"/);assert.match(action,/role=\"dialog\" aria-modal=\"true\"/);assert.match(action,/embedded", "1"/);assert.match(action,/createPortal/)});
@@ -45,6 +45,6 @@ check('Fixture calendar has a subtle crest that does not block interactions',()=
   assert.match(css,/fc-edinet-crest\.png/);
   assert.match(css,/\.matchPublicSection>\.container/);
 });
-check('No new SQL migration included',()=>{assert.match(read('STEP-2.30.28.txt'),/SQL-МИГРАЦИИ: НЕТ/);assert.match(read('STEP-2.30.28.txt'),/085_admin_editor_role_boundaries\.sql/)});
-console.log(`\nFC Edinet On-site Editor v2.30.28: ${ok}/${ok+failed} checks passed.`);
+check('New schedule SQL migration documented',()=>{assert.match(read('STEP-2.30.29.txt'),/086_confirm_rescheduled_fixtures\.sql/);assert.match(read('STEP-2.30.29.txt'),/085_admin_editor_role_boundaries\.sql/)});
+console.log(`\nFC Edinet On-site Editor v2.30.29: ${ok}/${ok+failed} checks passed.`);
 if(failed)process.exitCode=1;

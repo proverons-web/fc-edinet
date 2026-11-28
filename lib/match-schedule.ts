@@ -26,7 +26,7 @@ export function scheduleReason(entry: {schedule_reason_ru?: string | null; sched
 export function historyReason(entry: ScheduleHistoryItem, locale: Locale): string {
   return scheduleReason({schedule_reason_ru:entry.reason_ru,schedule_reason_ro:entry.reason_ro},locale);
 }
-export function isRescheduled(fixture: ScheduleFixture): boolean {
+export function isRescheduled(fixture: Pick<ScheduleFixture, "kickoff" | "original_kickoff">): boolean {
   if (!fixture.original_kickoff) return false;
   const original = Date.parse(fixture.original_kickoff);
   const current = Date.parse(fixture.kickoff);
@@ -38,6 +38,12 @@ export function isRescheduled(fixture: ScheduleFixture): boolean {
 export function hasAnnouncedReplacementDate(fixture: ScheduleFixture): boolean {
   return fixture.status === "postponed" && isRescheduled(fixture)
     && Number.isFinite(Date.parse(fixture.kickoff));
+}
+
+/** Legacy postponed rows with an announced future date are confirmed publicly. */
+export function publicFixture<T extends Pick<ScheduleFixture, "kickoff" | "original_kickoff"> & { status: string }>(fixture: T, now = new Date()): T {
+  return fixture.status === "postponed" && isRescheduled(fixture) && Date.parse(fixture.kickoff) >= now.getTime()
+    ? { ...fixture, status: "scheduled" } : fixture;
 }
 
 /** The dated fixture list includes postponed matches with a future announced date.
